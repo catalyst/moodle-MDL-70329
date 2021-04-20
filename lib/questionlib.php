@@ -717,8 +717,9 @@ function question_move_questions_to_category($questionids, $newcategoryid) {
  * @param integer $categoryid the id of the category being moved.
  * @param integer $oldcontextid the old context id.
  * @param integer $newcontextid the new context id.
+ * @param bool $purgecache if calling this function will purge question from the cache or not.
  */
-function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid) {
+function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid, $purgecache = true) {
     global $DB;
 
     $questions = [];
@@ -727,9 +728,10 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     foreach ($questionids as $questionid => $qtype) {
         question_bank::get_qtype($qtype)->move_files(
                 $questionid, $oldcontextid, $newcontextid);
-        // Purge this question from the cache.
-        question_bank::notify_question_edited($questionid);
-
+        if ($purgecache) {
+            // Purge this question from the cache.
+            question_bank::notify_question_edited($questionid);
+        }
         $questions[] = (object) [
             'id' => $questionid,
             'contextid' => $oldcontextid
@@ -1799,6 +1801,28 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
 
     return $questionnode;
+}
+
+/**
+ * Adds question banks index page link to the given navigation node if capability is met.
+ *
+ * @param navigation_node $navigationnode The navigation node to add the question bank index page to
+ * @param context $context Context
+ * @return navigation_node Returns the question bank node that was added
+ * @throws moodle_exception
+ */
+function qbank_add_navigation(navigation_node $navigationnode, context $context): navigation_node {
+
+    $qbanknode = $navigationnode->add(get_string('modulenameplural', 'mod_qbank'),
+        null, navigation_node::TYPE_CONTAINER, null, 'questionbank');
+
+    if (has_capability('mod/qbank:view', $context)) {
+        $qbanknode->add(get_string('modulenameplural', 'mod_qbank'),
+            new moodle_url('/mod/qbank/index.php', ['id' => $context->instanceid]),
+            navigation_node::TYPE_SETTING, null, 'questions');
+    }
+
+    return $qbanknode;
 }
 
 /**
