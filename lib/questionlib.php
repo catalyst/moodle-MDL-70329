@@ -136,7 +136,7 @@ function questions_in_use($questionids): bool {
     $legacycallbacks = get_plugin_list_with_function('mod', 'question_list_instances');
     foreach ($legacycallbacks as $plugin => $function) {
         debugging($plugin . ' implements deprecated method ' . $function .
-                '. ' . $plugin . '_questions_in_use should be implemented instead.', DEBUG_DEVELOPER);
+            '. ' . $plugin . '_questions_in_use should be implemented instead.', DEBUG_DEVELOPER);
 
         if (isset($callbacksbytype['mod'][substr($plugin, 4)])) {
             continue; // Already done.
@@ -216,7 +216,7 @@ function match_grade_options($gradeoptionsfull, $grade, $matchgrades = 'error') 
     } else {
         // Unknow option passed.
         throw new coding_exception('Unknown $matchgrades ' . $matchgrades .
-                ' passed to match_grade_options');
+            ' passed to match_grade_options');
     }
 }
 
@@ -239,7 +239,7 @@ function question_category_delete_safe($category): void {
 
         foreach ($questionentries as $questionentry) {
             $questionids = $DB->get_records('question_versions',
-                                                ['questionbankentryid' => $questionentry->id], '', 'questionid');
+                ['questionbankentryid' => $questionentry->id], '', 'questionid');
 
             // Try to delete each question.
             foreach ($questionids as $questionid) {
@@ -300,7 +300,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
 
     // Look under child categories recursively.
     if ($children = $DB->get_records('question_categories',
-            ['parent' => $categoryid], '', 'id, 1')) {
+        ['parent' => $categoryid], '', 'id, 1')) {
         foreach ($children as $child) {
             if (question_category_in_use($child->id, $recursive)) {
                 return true;
@@ -385,7 +385,7 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
 
     // Now recursively delete all child questions
     if ($children = $DB->get_records('question',
-            array('parent' => $questionid), '', 'id, qtype')) {
+        array('parent' => $questionid), '', 'id, qtype')) {
         foreach ($children as $child) {
             if ($child->id != $questionid) {
                 question_delete_question($child->id);
@@ -395,7 +395,7 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
 
     // Delete question comments.
     $DB->delete_records('comments', ['itemid' => $questionid, 'component' => 'qbank_comment',
-                                            'commentarea' => 'question']);
+        'commentarea' => 'question']);
     // Finally delete the question record itself
     $DB->delete_records('question', array('id' => $questionid));
     question_bank::notify_question_edited($questionid);
@@ -717,7 +717,7 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
     foreach ($questions as $question) {
         if ($newcategorydata->contextid != $question->contextid) {
             question_bank::get_qtype($question->qtype)->move_files(
-                    $question->id, $question->contextid, $newcategorydata->contextid);
+                $question->id, $question->contextid, $newcategorydata->contextid);
         }
         // Move set_reference records to new category.
         move_question_set_references($question->category, $newcategoryid,
@@ -749,7 +749,7 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
 
         // Log this question move.
         $event = \core\event\question_moved::create_from_question_instance($question, context::instance_by_id($question->contextid),
-                ['oldcategoryid' => $question->category, 'newcategoryid' => $newcategorydata->id]);
+            ['oldcategoryid' => $question->category, 'newcategoryid' => $newcategorydata->id]);
         $event->trigger();
     }
 
@@ -777,7 +777,7 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
  * @throws dml_exception
  */
 function move_question_set_references(int $oldcategoryid, int $newcatgoryid,
-                                      int $oldcontextid, int $newcontextid, bool $delete = false): void {
+    int $oldcontextid, int $newcontextid, bool $delete = false): void {
     global $DB;
 
     if ($delete || $oldcontextid !== $newcontextid) {
@@ -806,8 +806,9 @@ function move_question_set_references(int $oldcategoryid, int $newcatgoryid,
  * @param integer $categoryid the id of the category being moved.
  * @param integer $oldcontextid the old context id.
  * @param integer $newcontextid the new context id.
+ * @param bool $purgecache if calling this function will purge question from the cache or not.
  */
-function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid): void {
+function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid, $purgecache = true): void {
     global $DB;
 
     $questions = [];
@@ -820,8 +821,10 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     $questionids = $DB->get_records_sql_menu($sql, [$categoryid]);
     foreach ($questionids as $questionid => $qtype) {
         question_bank::get_qtype($qtype)->move_files($questionid, $oldcontextid, $newcontextid);
-        // Purge this question from the cache.
-        question_bank::notify_question_edited($questionid);
+        if ($purgecache) {
+            // Purge this question from the cache.
+            question_bank::notify_question_edited($questionid);
+        }
 
         $questions[] = (object) [
             'id' => $questionid,
@@ -1172,7 +1175,7 @@ function sort_categories_by_tree(&$categories, $id = 0, $level = 1): array {
             // If not processed and it's a good candidate to start (because its parent doesn't exist in the course).
             if (!isset($categories[$key]->processed) && !$DB->record_exists('question_categories',
                     array('contextid' => $categories[$key]->contextid,
-                            'id' => $categories[$key]->parent))) {
+                        'id' => $categories[$key]->parent))) {
                 $children[$key] = $categories[$key];
                 $categories[$key]->processed = true;
                 $children = $children + sort_categories_by_tree(
@@ -1192,7 +1195,7 @@ function sort_categories_by_tree(&$categories, $id = 0, $level = 1): array {
 function question_get_default_category($contextid) {
     global $DB;
     $category = $DB->get_records_select('question_categories', 'contextid = ? AND parent <> 0',
-                                        [$contextid], 'id', '*', 0, 1);
+        [$contextid], 'id', '*', 0, 1);
     if (!empty($category)) {
         return reset($category);
     } else {
@@ -1270,7 +1273,7 @@ function question_make_default_categories($contexts): object {
     foreach ($contexts as $key => $context) {
         $topcategory = question_get_top_category($context->id, true);
         if (!$exists = $DB->record_exists("question_categories",
-                array('contextid' => $context->id, 'parent' => $topcategory->id))) {
+            array('contextid' => $context->id, 'parent' => $topcategory->id))) {
             // Otherwise, we need to make one.
             $category = new stdClass();
             $contextname = $context->get_context_name(false, true);
@@ -1329,7 +1332,7 @@ function question_categorylist($categoryid): array {
         list ($in, $params) = $DB->get_in_or_equal($subcategories);
 
         $subcategories = $DB->get_records_select_menu('question_categories', "parent $in", $params,
-                                                    null, 'id,id AS id2');
+            null, 'id,id AS id2');
     }
 
     return $categorylist;
@@ -1561,16 +1564,16 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
 
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
-            new moodle_url($baseurl, $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
+        new moodle_url($baseurl, $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
     $corenavigations = [
-            'questions' => [
-                    'title' => get_string('questions', 'question'),
-                    'url' => new moodle_url($baseurl)
-            ],
-            'categories' => [],
-            'import' => [],
-            'export' => []
+        'questions' => [
+            'title' => get_string('questions', 'question'),
+            'url' => new moodle_url($baseurl)
+        ],
+        'categories' => [],
+        'import' => [],
+        'export' => []
     ];
 
     $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
@@ -1625,7 +1628,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     foreach ($corenavigations as $key => $corenavigation) {
         if ($contexts->have_one_edit_tab_cap($key)) {
             $questionnode->add($corenavigation['title'], new moodle_url(
-                    $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
+                $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
         }
     }
 
@@ -1636,7 +1639,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
             }
         }
         $questionnode->add($pluginnavigation['title'], new moodle_url(
-                $pluginnavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
+            $pluginnavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
     }
 
     return $questionnode;
@@ -1693,7 +1696,7 @@ function question_get_all_capabilities(): array {
  * @return string
  */
 function question_rewrite_question_urls($text, $file, $contextid, $component, $filearea,
-                                        array $ids, $itemid, array $options=null): string {
+    array $ids, $itemid, array $options=null): string {
 
     $idsstr = '';
     if (!empty($ids)) {
@@ -1703,7 +1706,7 @@ function question_rewrite_question_urls($text, $file, $contextid, $component, $f
         $idsstr .= '/' . $itemid;
     }
     return file_rewrite_pluginfile_urls($text, $file, $contextid, $component,
-            $filearea, $idsstr, $options);
+        $filearea, $idsstr, $options);
 }
 
 /**
@@ -1723,7 +1726,7 @@ function question_rewrite_question_urls($text, $file, $contextid, $component, $f
  * @return string $questiontext with URLs rewritten.
  */
 function question_rewrite_question_preview_urls($text, $questionid, $filecontextid, $filecomponent, $filearea, $itemid,
-                                                $previewcontextid, $previewcomponent, $options = null): string {
+    $previewcontextid, $previewcomponent, $options = null): string {
 
     $path = "preview/$previewcontextid/$previewcomponent/$questionid";
     if ($itemid) {
@@ -1731,7 +1734,7 @@ function question_rewrite_question_preview_urls($text, $questionid, $filecontext
     }
 
     return file_rewrite_pluginfile_urls($text, 'pluginfile.php', $filecontextid,
-            $filecomponent, $filearea, $path, $options);
+        $filecomponent, $filearea, $path, $options);
 }
 
 /**
@@ -1831,14 +1834,14 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
         $previewcontext = context_helper::instance_by_id($previewcontextid);
 
         $result = component_callback($previewcomponent, 'question_preview_pluginfile', array(
-                $previewcontext, $questionid,
-                $context, $component, $filearea, $args,
-                $forcedownload, $options), 'callbackmissing');
+            $previewcontext, $questionid,
+            $context, $component, $filearea, $args,
+            $forcedownload, $options), 'callbackmissing');
 
         if ($result === 'callbackmissing') {
             throw new coding_exception("Component {$previewcomponent} does not define the callback " .
-                    "{$previewcomponent}_question_preview_pluginfile callback. " .
-                    "Which is required if you are using question_rewrite_question_preview_urls.", DEBUG_DEVELOPER);
+                "{$previewcomponent}_question_preview_pluginfile callback. " .
+                "Which is required if you are using question_rewrite_question_preview_urls.", DEBUG_DEVELOPER);
         }
 
         send_file_not_found();
@@ -1849,14 +1852,14 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
     $slot = (int)array_shift($args);
 
     $module = $DB->get_field('question_usages', 'component',
-            array('id' => $qubaid));
+        array('id' => $qubaid));
     if (!$module) {
         send_file_not_found();
     }
 
     if ($module === 'core_question_preview') {
         return qbank_previewquestion\helper::question_preview_question_pluginfile($course, $context,
-                $component, $filearea, $qubaid, $slot, $args, $forcedownload, $options);
+            $component, $filearea, $qubaid, $slot, $args, $forcedownload, $options);
 
     } else {
         $dir = core_component::get_component_directory($module);
@@ -1897,7 +1900,7 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
  * @param array $options additional options affecting the file serving.
  */
 function core_question_question_preview_pluginfile($previewcontext, $questionid, $filecontext, $filecomponent,
-                                                    $filearea, $args, $forcedownload, $options = []): void {
+    $filearea, $args, $forcedownload, $options = []): void {
     global $DB;
     $sql = 'SELECT q.*,
                    qc.contextid
@@ -1994,7 +1997,7 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
 
     // Find all used idnumbers in one DB query.
     $usedidnumbers = $DB->get_records_select_menu('question_bank_entries', 'questioncategoryid = ? AND idnumber IS NOT NULL',
-            [$categoryid], '', 'idnumber, 1');
+        [$categoryid], '', 'idnumber, 1');
 
     // Find the next unused idnumber.
     $numberbit = 'X' . $matches[0]; // Need a string here so PHP does not do '0001' + 1 = 2.
@@ -2094,6 +2097,28 @@ function is_latest(string $version, string $questionbankentryid) : bool {
     return false;
 }
 
+/**
+ * Adds question banks index page link to the given navigation node if capability is met.
+ *
+ * @param navigation_node $navigationnode The navigation node to add the question bank index page to
+ * @param context $context Context
+ * @return navigation_node Returns the question bank node that was added
+ * @throws moodle_exception
+ */
+function qbank_add_navigation(navigation_node $navigationnode, context $context): navigation_node {
+
+    $qbanknode = $navigationnode->add(get_string('modulenameplural', 'mod_qbank'),
+        null, navigation_node::TYPE_CONTAINER, null, 'questionbank');
+
+    if (has_capability('mod/qbank:view', $context)) {
+        $qbanknode->add(get_string('modulenameplural', 'mod_qbank'),
+            new moodle_url('/mod/qbank/index.php', ['id' => $context->instanceid]),
+            navigation_node::TYPE_SETTING, null, 'questions');
+    }
+
+    return $qbanknode;
+}
+
 // Deprecated functions from Moodle 4.0.
 
 /**
@@ -2112,7 +2137,7 @@ function is_latest(string $version, string $questionbankentryid) : bool {
  * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
-                              $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
+    $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
     debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin,
     Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
 
@@ -2164,7 +2189,7 @@ function question_hash($question) {
  * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_make_export_url($contextid, $categoryid, $format, $withcategories,
-                                  $withcontexts, $filename) {
+    $withcontexts, $filename) {
     debugging('Function question_make_export_url() has been deprecated and moved to qbank_exportquestions plugin,
     Please use qbank_exportquestions\exportquestions_helper::question_make_export_url() instead.', DEBUG_DEVELOPER);
 
@@ -2271,7 +2296,7 @@ function add_indented_names($categories, $nochildrenof = -1) {
  * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_category_select_menu($contexts, $top = false, $currentcat = 0,
-                                       $selected = "", $nochildrenof = -1) {
+    $selected = "", $nochildrenof = -1) {
     debugging('Function question_category_select_menu() has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\helper::question_category_select_menu() instead.', DEBUG_DEVELOPER);
     \qbank_managecategories\helper::question_category_select_menu($contexts, $top, $currentcat, $selected, $nochildrenof);
@@ -2310,7 +2335,7 @@ function get_categories_for_contexts($contexts, $sortorder = 'parent, sortorder,
  * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_category_options($contexts, $top = false, $currentcat = 0,
-                                   $popupform = false, $nochildrenof = -1, $escapecontextnames = true) {
+    $popupform = false, $nochildrenof = -1, $escapecontextnames = true) {
     debugging('Function question_category_options() has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\helper::question_category_options() instead.', DEBUG_DEVELOPER);
     return \qbank_managecategories\helper::question_category_options($contexts, $top, $currentcat,
