@@ -15,11 +15,10 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Code to be executed after the plugin's database scheme has been installed is defined here.
+ * Question bank installation.
  *
  * @package     mod_qbank
- * @category    upgrade
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
