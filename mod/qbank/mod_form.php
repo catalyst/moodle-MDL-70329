@@ -18,7 +18,7 @@
  * The main mod_qbank configuration form.
  *
  * @package     mod_qbank
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
  * Module instance settings form.
  *
  * @package     mod_qbank
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_qbank_mod_form extends moodleform_mod {
@@ -59,17 +59,7 @@ class mod_qbank_mod_form extends moodleform_mod {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         $mform->addHelpButton('name', 'qbankname', 'mod_qbank');
 
-        // Adding the standard "intro" and "introformat" fields.
-        if ($CFG->branch >= 29) {
-            $this->standard_intro_elements();
-        } else {
-            $this->add_intro_editor();
-        }
-
-        // Adding the rest of mod_qbank settings, spreading all them into this fieldset
-        // ... or adding more fieldsets ('header' elements) if needed for better logic.
-        $mform->addElement('static', 'label1', 'qbanksettings', get_string('qbanksettings', 'mod_qbank'));
-        $mform->addElement('header', 'qbankfieldset', get_string('qbankfieldset', 'mod_qbank'));
+        $this->standard_intro_elements();
 
         // Add standard elements.
         $this->standard_coursemodule_elements();

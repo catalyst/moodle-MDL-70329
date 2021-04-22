@@ -18,7 +18,7 @@
  * Prints an instance of mod_qbank.
  *
  * @package     mod_qbank
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -19,10 +19,13 @@
  *
  * @package     mod_qbank
  * @category    string
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Question Bank';
+$string['modulename'] = 'Question Bank';
+$string['modulenameplural'] = 'Question Banks';
+$string['qbankname'] = 'Question Bank';
