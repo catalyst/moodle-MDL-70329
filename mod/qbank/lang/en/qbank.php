@@ -28,4 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Question Bank';
 $string['modulename'] = 'Question Bank';
 $string['modulenameplural'] = 'Question Banks';
+$string['pluginadministration'] = 'Question Bank administration';
 $string['qbankname'] = 'Question Bank';
+$string['qbankname_help'] = 'Enter the Question Bank name';

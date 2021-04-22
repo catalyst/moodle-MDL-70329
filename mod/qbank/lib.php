@@ -35,6 +35,10 @@ function qbank_supports($feature) {
         case FEATURE_MOD_INTRO:
         case FEATURE_USES_QUESTIONS:
             return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+        case FEATURE_GRADE_HAS_GRADE:
+        case FEATURE_COMPLETION_HAS_RULES:
+            return false;
         default:
             return null;
     }
