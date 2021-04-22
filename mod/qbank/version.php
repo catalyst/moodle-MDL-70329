@@ -18,7 +18,7 @@
  * Plugin version and other meta-data are defined here.
  *
  * @package     mod_qbank
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,3 +29,4 @@ $plugin->release = '2021042000';
 $plugin->version = 2021042000;
 $plugin->requires = 2020110900;
 $plugin->maturity = MATURITY_ALPHA;
+
