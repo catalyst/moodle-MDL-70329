@@ -18,7 +18,7 @@
  * Library of interface functions and constants.
  *
  * @package     mod_qbank
- * @copyright   2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 function qbank_supports($feature) {
     switch ($feature) {
         case FEATURE_MOD_INTRO:
+        case FEATURE_USES_QUESTIONS:
             return true;
         default:
             return null;
