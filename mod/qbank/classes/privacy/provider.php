@@ -15,20 +15,32 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here.
+ * Privacy Subsystem implementation for mod_qbank.
  *
  * @package     mod_qbank
- * @category    string
  * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_qbank\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Question Bank';
-$string['modulename'] = 'Question Bank';
-$string['modulenameplural'] = 'Question Banks';
-$string['pluginadministration'] = 'Question Bank administration';
-$string['privacy:metadata'] = 'The Question bank plugin does not store any personal data, for now.';
-$string['qbankname'] = 'Question Bank';
-$string['qbankname_help'] = 'Enter the Question Bank name';
+/**
+ * Privacy Subsystem for mod_qbank implementing null_provider.
+ *
+ * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
