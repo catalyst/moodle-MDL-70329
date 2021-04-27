@@ -19,6 +19,7 @@
  *
  * @package     mod_qbank
  * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @author      2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -61,10 +62,57 @@ class mod_qbank_mod_form extends moodleform_mod {
 
         $this->standard_intro_elements();
 
-        // Add standard elements.
+        // Add standard elements using the overridden method for this module.
         $this->standard_coursemodule_elements();
 
         // Add standard buttons.
         $this->add_action_buttons();
+    }
+
+    /**
+     * custom standard_coursemodule_elements function as an overridden method from the parent class to remove
+     * all the unnecessary elements for qbank module.
+     */
+    protected function standard_coursemodule_elements() {
+        global $COURSE, $CFG;
+        $mform =& $this->_form;
+
+        $mform->addElement('header', 'modstandardelshdr', get_string('modstandardels', 'form'));
+
+        $mform->addElement('hidden', 'visible', 1);
+
+        if ($this->_features->idnumber) {
+            $mform->addElement('text', 'cmidnumber', get_string('idnumbermod'));
+            $mform->setType('cmidnumber', PARAM_RAW);
+            $mform->addHelpButton('cmidnumber', 'idnumbermod');
+        }
+
+        if (!empty($CFG->enableavailability)) {
+            //to make it work with core_availability\frontend
+            $mform->addElement('hidden', 'availabilityconditionsjson', null);
+        }
+
+        // Conditional activities: completion tracking section
+        if(!isset($completion)) {
+            $completion = new completion_info($COURSE);
+        }
+        if ($completion->is_enabled()) {
+            $mform->addElement('hidden', 'completionunlocked', 0);
+            $mform->setType('completionunlocked', PARAM_INT);
+        }
+
+        // Populate module tags.
+        if (core_tag_tag::is_enabled('core', 'course_modules')) {
+            $mform->addElement('header', 'tagshdr', get_string('tags', 'tag'));
+            $mform->addElement('tags', 'tags', get_string('tags'), array('itemtype' => 'course_modules', 'component' => 'core'));
+            if ($this->_cm) {
+                $tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $this->_cm->id);
+                $mform->setDefault('tags', $tags);
+            }
+        }
+
+        $this->standard_hidden_coursemodule_elements();
+
+        $this->plugin_extend_coursemodule_standard_elements();
     }
 }

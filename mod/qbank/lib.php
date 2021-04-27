@@ -19,6 +19,7 @@
  *
  * @package     mod_qbank
  * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @author      2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,6 +37,7 @@ function qbank_supports($feature) {
         case FEATURE_USES_QUESTIONS:
             return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return false;
         case FEATURE_GRADE_HAS_GRADE:
         case FEATURE_COMPLETION_HAS_RULES:
             return false;
