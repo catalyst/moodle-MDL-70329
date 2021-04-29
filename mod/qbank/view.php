@@ -19,6 +19,7 @@
  *
  * @package     mod_qbank
  * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @author      2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +41,7 @@ if ($id) {
     $course = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('qbank', $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
-    print_error(get_string('missingidandcmid', 'mod_qbank'));
+    new moodle_exception(get_string('missingidandcmid', 'mod_qbank'));
 }
 
 require_login($course, true, $cm);
