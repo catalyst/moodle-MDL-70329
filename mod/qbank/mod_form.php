@@ -80,7 +80,7 @@ class mod_qbank_mod_form extends moodleform_mod {
         $mform->addElement('header', 'modstandardelshdr', get_string('modstandardels', 'form'));
 
         $mform->addElement('hidden', 'visible', 1);
-        $mform->setType('visible', PARAM_RAW);
+        $mform->setType('visible', PARAM_INT);
 
         if ($this->_features->idnumber) {
             $mform->addElement('text', 'cmidnumber', get_string('idnumbermod'));
