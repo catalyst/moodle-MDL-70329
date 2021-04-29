@@ -70,8 +70,8 @@ class mod_qbank_mod_form extends moodleform_mod {
     }
 
     /**
-     * custom standard_coursemodule_elements function as an overridden method from the parent class to remove
-     * all the unnecessary elements for qbank module.
+     * Overridden standard_coursemodule_elements method from the parent class
+     * It will remove all the unnecessary elements for qbank module
      */
     protected function standard_coursemodule_elements() {
         global $COURSE, $CFG;
@@ -80,6 +80,7 @@ class mod_qbank_mod_form extends moodleform_mod {
         $mform->addElement('header', 'modstandardelshdr', get_string('modstandardels', 'form'));
 
         $mform->addElement('hidden', 'visible', 1);
+        $mform->setType('visible', PARAM_RAW);
 
         if ($this->_features->idnumber) {
             $mform->addElement('text', 'cmidnumber', get_string('idnumbermod'));
@@ -88,12 +89,13 @@ class mod_qbank_mod_form extends moodleform_mod {
         }
 
         if (!empty($CFG->enableavailability)) {
-            //to make it work with core_availability\frontend
+            // To make it work with core_availability\frontend.
             $mform->addElement('hidden', 'availabilityconditionsjson', null);
+            $mform->setType('availabilityconditionsjson', PARAM_RAW);
         }
 
-        // Conditional activities: completion tracking section
-        if(!isset($completion)) {
+        // Conditional activities: completion tracking section.
+        if (!isset($completion)) {
             $completion = new completion_info($COURSE);
         }
         if ($completion->is_enabled()) {
@@ -112,7 +114,5 @@ class mod_qbank_mod_form extends moodleform_mod {
         }
 
         $this->standard_hidden_coursemodule_elements();
-
-        $this->plugin_extend_coursemodule_standard_elements();
     }
 }
