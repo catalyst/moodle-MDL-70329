@@ -406,6 +406,10 @@ if ($hassiteconfig) {
 // Question type settings
 if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) {
 
+    // Question bank settings
+    $ADMIN->add('modules', new admin_category('qbanksettings', new lang_string('questionbanks', 'admin')));
+    $ADMIN->add('qbanksettings', new admin_page_manageqbanks());
+
     // Question behaviour settings.
     $ADMIN->add('modules', new admin_category('qbehavioursettings', new lang_string('questionbehaviours', 'admin')));
     $ADMIN->add('qbehavioursettings', new admin_page_manageqbehaviours());

@@ -30,6 +30,7 @@
         "search": "search\/engine",
         "qbehaviour": "question\/behaviour",
         "qformat": "question\/format",
+        "qbank": "question\/bank",
         "plagiarism": "plagiarism",
         "tool": "admin\/tool",
         "cachestore": "cache\/stores",
