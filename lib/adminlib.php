@@ -6746,6 +6746,25 @@ class admin_page_managemessageoutputs extends admin_externalpage {
 }
 
 /**
+ * Manage question banks page
+ *
+ * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class admin_page_manageqbanks extends admin_externalpage {
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        global $CFG;
+        parent::__construct('manageqbanks', get_string('manageqbanks', 'admin'),
+                new moodle_url('/admin/qbankplugins.php'));
+    }
+
+    // Search will be implemented later.
+}
+
+/**
  * Manage question behaviours page
  *
  * @copyright  2011 The Open University
