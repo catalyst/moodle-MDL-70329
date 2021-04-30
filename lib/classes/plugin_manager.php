@@ -23,6 +23,7 @@
  *
  * @package    core
  * @copyright  2011 David Mudrak <david@moodle.com>
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -1951,6 +1952,10 @@ class core_plugin_manager {
                 'xhtml', 'xml'
             ),
 
+            'qbank' => array(
+                 'add_question'
+            ),
+
             'qtype' => array(
                 'calculated', 'calculatedmulti', 'calculatedsimple',
                 'ddimageortext', 'ddmarker', 'ddwtos', 'description',
@@ -2243,6 +2248,7 @@ class core_plugin_manager {
         $fix['qtype']      = $types['qtype'];
         $fix['qbehaviour'] = $types['qbehaviour'];
         $fix['qformat']    = $types['qformat'];
+        $fix['qbank']      = $types['qbank'];
         $fix['filter']     = $types['filter'];
 
         $fix['editor']     = $types['editor'];
