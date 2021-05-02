@@ -78,3 +78,4 @@ foreach ($plugins as $plugin => $name) {
 $table->print_html();
 
 echo $OUTPUT->footer();
+
