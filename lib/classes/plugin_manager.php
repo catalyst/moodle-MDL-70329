@@ -1953,7 +1953,7 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-                 'add_question'
+                 ''
             ),
 
             'qtype' => array(
