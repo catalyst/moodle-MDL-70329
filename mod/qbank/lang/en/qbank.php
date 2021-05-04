@@ -25,10 +25,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Question Bank';
-$string['modulename'] = 'Question Bank';
-$string['modulenameplural'] = 'Question Banks';
-$string['pluginadministration'] = 'Question Bank administration';
+$string['pluginname'] = 'Question bank';
+$string['modulename'] = 'Question bank';
+$string['modulename_help'] = 'This activity allows a teacher to create, preview, and edit questions in a database of question categories.
+
+These questions are then used by the quiz activity, or by other plugins.
+
+Questions are given version control and statistics once they have been used, and other parameters.';
+$string['modulename_link'] = 'mod/qbank/view';
+$string['modulenameplural'] = 'Question banks';
+$string['pluginadministration'] = 'Question bank administration';
 $string['privacy:metadata'] = 'The Question bank plugin does not store any personal data, for now.';
-$string['qbankname'] = 'Question Bank';
-$string['qbankname_help'] = 'Enter the Question Bank name';
+$string['qbankname'] = 'Question bank name';
+$string['qbankname_help'] = 'Enter the Question bank name';
