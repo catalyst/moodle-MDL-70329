@@ -15,34 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Question bank column for the duplicate action icon.
+ * Question bank column export the question in Moodle XML format.
  *
  * @package   core_question
- * @copyright 2013 The Open University
+ * @copyright 2019 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Question bank column for the duplicate action icon.
+ * Question bank column export the question in Moodle XML format.
  *
- * @copyright 2013 The Open University
+ * @copyright 2019 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class copy_action_column extends menu_action_column_base {
+class export_xml_action_column extends menu_action_column_base {
     /** @var string avoids repeated calls to get_string('duplicate'). */
-    protected $strcopy;
+    protected $strexportasxml;
 
     public function init() {
         parent::init();
-        $this->strcopy = get_string('duplicate');
+        $this->strexportasxml = get_string('exportasxml', 'question');
     }
 
     public function get_name() {
-        return 'copyaction';
+        return 'exportasxmlaction';
     }
 
     protected function get_url_icon_and_label(\stdClass $question): array {
@@ -53,13 +54,11 @@ class copy_action_column extends menu_action_column_base {
             return [null, null, null];
         }
 
-        // To copy a question, you need permission to add a question in the same
-        // category as the existing question, and ability to access the details of
-        // the question being copied.
-        if (question_has_capability_on($question, 'add') &&
-                (question_has_capability_on($question, 'edit') || question_has_capability_on($question, 'view'))) {
-            return [$this->qbank->copy_question_moodle_url($question->id), 't/copy', $this->strcopy];
+        if (!question_has_capability_on($question, 'view')) {
+            return [null, null, null];
         }
-        return [null, null, null];
+
+        return [question_get_export_single_question_url($question),
+                't/download', $this->strexportasxml];
     }
 }

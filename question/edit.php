@@ -20,6 +20,7 @@
  * @package    moodlecore
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,7 +37,7 @@ if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
 }
 $PAGE->set_url($url);
 
-$questionbank = new core_question\bank\view($contexts, $thispageurl, $COURSE, $cm);
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
 $questionbank->process_actions();
 
 $context = $contexts->lowest();

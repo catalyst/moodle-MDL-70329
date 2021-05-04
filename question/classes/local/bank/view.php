@@ -20,10 +20,11 @@
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
@@ -190,8 +191,8 @@ class view {
 
         foreach ($questionbankcolumns as $fullname) {
             if (! class_exists($fullname)) {
-                if (class_exists('core_question\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\bank\\' . $fullname;
+                if (class_exists('core_question\\local\\bank\\' . $fullname)) {
+                    $fullname = 'core_question\\local\\bank\\' . $fullname;
                 } else {
                     throw new \coding_exception("No such class exists: $fullname");
                 }
@@ -206,12 +207,12 @@ class view {
      * Get a column object from its name.
      *
      * @param string $columnname.
-     * @return \core_question\bank\column_base.
+     * @return \core_question\local\bank\column_base.
      */
     protected function get_column_type($columnname) {
         if (! class_exists($columnname)) {
-            if (class_exists('core_question\\bank\\' . $columnname)) {
-                $columnname = 'core_question\\bank\\' . $columnname;
+            if (class_exists('core_question\\local\\bank\\' . $columnname)) {
+                $columnname = 'core_question\\local\\bank\\' . $columnname;
             } else {
                 throw new \coding_exception("No such class exists: $columnname");
             }
@@ -358,8 +359,8 @@ class view {
 
     protected function default_sort() {
         return array(
-            'core_question\bank\question_type_column' => 1,
-            'core_question\bank\question_name_idnumber_tags_column-name' => 1
+            'core_question\local\bank\question_type_column' => 1,
+            'core_question\local\bank\question_name_idnumber_tags_column-name' => 1
         );
     }
 

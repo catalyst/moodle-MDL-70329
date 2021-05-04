@@ -20,6 +20,7 @@
  * @package    moodlecore
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas and others {@link http://moodle.com}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -143,131 +144,145 @@ function question_can_delete_cat($todelete) {
  * Base class for representing a column in a {@link question_bank_view}.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\column_base', 'question_bank_column_base', true);
+class_alias('core_question\local\bank\column_base', 'question_bank_column_base', true);
 
 /**
  * A column with a checkbox for each question with name q{questionid}.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\checkbox_column', 'question_bank_checkbox_column', true);
+class_alias('core_question\local\bank\checkbox_column', 'question_bank_checkbox_column', true);
 
 /**
  * A column type for the name of the question type.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\question_type_column', 'question_bank_question_type_column', true);
+class_alias('core_question\local\bank\question_type_column', 'question_bank_question_type_column', true);
 
 
 /**
  * A column type for the name of the question name.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\question_name_column', 'question_bank_question_name_column', true);
+class_alias('core_question\local\bank\question_name_column', 'question_bank_question_name_column', true);
 
 
 /**
  * A column type for the name of the question creator.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\creator_name_column', 'question_bank_creator_name_column', true);
+class_alias('core_question\local\bank\creator_name_column', 'question_bank_creator_name_column', true);
 
 
 /**
  * A column type for the name of the question last modifier.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\modifier_name_column', 'question_bank_modifier_name_column', true);
+class_alias('core_question\local\bank\modifier_name_column', 'question_bank_modifier_name_column', true);
 
 
 /**
  * A base class for actions that are an icon that lets you manipulate the question in some way.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\action_column_base', 'question_bank_action_column_base', true);
+class_alias('core_question\local\bank\action_column_base', 'question_bank_action_column_base', true);
 
 
 /**
  * Base class for question bank columns that just contain an action icon.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\edit_action_column', 'question_bank_edit_action_column', true);
+class_alias('core_question\local\bank\edit_action_column', 'question_bank_edit_action_column', true);
 
 /**
  * Question bank column for the duplicate action icon.
  *
  * @copyright  2013 The Open University
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\copy_action_column', 'question_bank_copy_action_column', true);
+class_alias('core_question\local\bank\copy_action_column', 'question_bank_copy_action_column', true);
 
 /**
  * Question bank columns for the preview action icon.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\preview_action_column', 'question_bank_preview_action_column', true);
+class_alias('core_question\local\bank\preview_action_column', 'question_bank_preview_action_column', true);
 
 
 /**
  * action to delete (or hide) a question, or restore a previously hidden question.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\delete_action_column', 'question_bank_delete_action_column', true);
+class_alias('core_question\local\bank\delete_action_column', 'question_bank_delete_action_column', true);
 
 /**
  * Base class for 'columns' that are actually displayed as a row following the main question row.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\row_base', 'question_bank_row_base', true);
+class_alias('core_question\local\bank\row_base', 'question_bank_row_base', true);
 
 /**
  * A column type for the name of the question name.
  *
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\question_text_row', 'question_bank_question_text_row', true);
+class_alias('core_question\local\bank\question_text_row', 'question_bank_question_text_row', true);
 
 /**
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\view', 'question_bank_view', true);
+class_alias('core_question\local\bank\view', 'question_bank_view', true);
 
 /**
  * Common setup for all pages for editing questions.
