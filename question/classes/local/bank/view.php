@@ -177,6 +177,7 @@ class view {
     protected function wanted_columns() {
         global $CFG;
         $this->requiredcolumns = array();
+        $questionbankcolumns = array();
         // Changes in this method, instead of static columns, it will consider the columns from the available plugins.
         if (empty($CFG->questionbankcolumns)) {
             //$questionbankcolumns = array('checkbox_column', 'question_type_column',
@@ -186,7 +187,10 @@ class view {
             //        'creator_name_column', 'modifier_name_column');
 
             // Making default to nothing as a boilerplate to accept plugins.
-            $questionbankcolumns = array();
+            $questionbankclasses = \core_component::get_plugin_list_with_class('qbank', '', 'bank.php');
+            foreach ($questionbankclasses as $key => $questionbankclasse) {
+                $questionbankcolumns[] = $questionbankclasse;
+            }
         } else {
              $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
         }
@@ -195,13 +199,14 @@ class view {
         }
 
         foreach ($questionbankcolumns as $fullname) {
-            if (! class_exists($fullname)) {
-                if (class_exists('core_question\\local\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\local\\bank\\' . $fullname;
-                } else {
-                    throw new \coding_exception("No such class exists: $fullname");
-                }
-            }
+            //if (! class_exists($fullname)) {
+            //    if (class_exists('core_question\\local\\bank\\' . $fullname)) {
+            //        $fullname = 'core_question\\local\\bank\\' . $fullname;
+            //    } else {
+            //        throw new \coding_exception("No such class exists: $fullname");
+            //    }
+            //}
+            $fullname = '\\'. $fullname;
             $this->requiredcolumns[$fullname] = new $fullname($this);
         }
         return $this->requiredcolumns;
@@ -212,18 +217,19 @@ class view {
      * Get a column object from its name.
      *
      * @param string $columnname.
-     * @return \core_question\local\bank\column_base.
+     * @return column_base.
      */
-    protected function get_column_type($columnname) {
-        if (! class_exists($columnname)) {
-            if (class_exists('core_question\\local\\bank\\' . $columnname)) {
-                $columnname = 'core_question\\local\\bank\\' . $columnname;
-            } else {
-                throw new \coding_exception("No such class exists: $columnname");
-            }
-        }
+    protected function get_column_type(string $columnname) {
+        //if (! class_exists($columnname)) {
+        //    if (class_exists('core_question\\local\\bank\\' . $columnname)) {
+        //        $columnname = 'core_question\\local\\bank\\' . $columnname;
+        //    } else {
+        //        throw new \coding_exception("No such class exists: $columnname");
+        //    }
+        //}
         if (empty($this->requiredcolumns[$columnname])) {
-            $this->requiredcolumns[$columnname] = new $columnname($this);
+            $columnnameclass = '\\' . $columnname;
+            $this->requiredcolumns[$columnname] = new $columnnameclass($this);
         }
         return $this->requiredcolumns[$columnname];
     }
