@@ -27,7 +27,7 @@
 namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
-use core_question\bank\search\condition;
+use core_question\local\bank\search\condition;
 
 
 /**
@@ -154,6 +154,7 @@ class view {
 
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
+        // Possibly the heading part can be removed.
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
         $this->init_search_conditions();
@@ -162,7 +163,7 @@ class view {
     /**
      * Initialize search conditions from plugins
      * local_*_get_question_bank_search_conditions() must return an array of
-     * \core_question\bank\search\condition objects.
+     * \core_question\local\bank\search\condition objects.
      */
     protected function init_search_conditions() {
         $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
@@ -175,7 +176,7 @@ class view {
 
     protected function wanted_columns() {
         global $CFG;
-
+        // Possible changes here, instead of static columns, it will consider the columns from the available plugins.
         if (empty($CFG->questionbankcolumns)) {
             $questionbankcolumns = array('checkbox_column', 'question_type_column',
                     'question_name_idnumber_tags_column', 'edit_menu_column',
@@ -229,6 +230,7 @@ class view {
      * @return string Column name for the heading
      */
     protected function heading_column() {
+        // Possibly can be deprecated.
         return 'question_bank_question_name_column';
     }
 
@@ -257,6 +259,7 @@ class view {
                 $this->visiblecolumns[get_class($column)] = $column;
             }
         }
+        // Possibly can be removed.
         if (array_key_exists($heading, $this->requiredcolumns)) {
             $this->requiredcolumns[$heading]->set_as_heading();
         }
@@ -357,7 +360,9 @@ class view {
         return $params;
     }
 
+
     protected function default_sort() {
+        // Change required after implementing as plugins.
         return array(
             'core_question\local\bank\question_type_column' => 1,
             'core_question\local\bank\question_name_idnumber_tags_column-name' => 1
@@ -493,6 +498,7 @@ class view {
         return $this->baseurl;
     }
 
+    // Need to remove these methods for urls and implement it inside the plugin.
     /**
      * Get the URL for editing a question as a {@link \moodle_url}.
      *
@@ -551,7 +557,7 @@ class view {
     }
 
     /**
-     * Shows the question bank editing interface.
+     * Shows the question bank interface.
      *
      * The function also processes a number of actions:
      *
@@ -587,12 +593,12 @@ class view {
         // Display tag filter if usetags setting is enabled.
         if ($CFG->usetags) {
             array_unshift($this->searchconditions,
-                    new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
+                    new \core_question\local\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
             $PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);
         }
 
-        array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-        array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
+        array_unshift($this->searchconditions, new \core_question\local\bank\search\hidden_condition(!$showhidden));
+        array_unshift($this->searchconditions, new \core_question\local\bank\search\category_condition(
                 $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
         $this->display_options_form($showquestiontext);
 

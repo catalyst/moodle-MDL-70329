@@ -19,10 +19,11 @@
  *
  * @package   core_question
  * @copyright 2018 Ryan Wyllie <ryan@moodle.com>
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank\search;
+namespace core_question\local\bank\search;
 defined('MOODLE_INTERNAL') || die();
 
 /**
