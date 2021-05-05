@@ -25,7 +25,7 @@
  */
 
 
-use core_question\bank\search\category_condition;
+use core_question\local\bank\search\category_condition;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -139,7 +139,7 @@ function question_can_delete_cat($todelete) {
     }
 }
 
-
+// Possibly the aliases can be removed accordingly.
 /**
  * Base class for representing a column in a {@link question_bank_view}.
  *
