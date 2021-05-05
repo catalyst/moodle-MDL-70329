@@ -176,13 +176,17 @@ class view {
 
     protected function wanted_columns() {
         global $CFG;
-        // Possible changes here, instead of static columns, it will consider the columns from the available plugins.
+        $this->requiredcolumns = array();
+        // Changes in this method, instead of static columns, it will consider the columns from the available plugins.
         if (empty($CFG->questionbankcolumns)) {
-            $questionbankcolumns = array('checkbox_column', 'question_type_column',
-                    'question_name_idnumber_tags_column', 'edit_menu_column',
-                    'edit_action_column', 'copy_action_column', 'tags_action_column',
-                    'preview_action_column', 'delete_action_column', 'export_xml_action_column',
-                    'creator_name_column', 'modifier_name_column');
+            //$questionbankcolumns = array('checkbox_column', 'question_type_column',
+            //        'question_name_idnumber_tags_column', 'edit_menu_column',
+            //        'edit_action_column', 'copy_action_column', 'tags_action_column',
+            //        'preview_action_column', 'delete_action_column', 'export_xml_action_column',
+            //        'creator_name_column', 'modifier_name_column');
+
+            // Making default to nothing as a boilerplate to accept plugins.
+            $questionbankcolumns = array();
         } else {
              $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
         }
@@ -434,15 +438,17 @@ class view {
         // Get the required tables and fields.
         $joins = array();
         $fields = array('q.hidden', 'q.category');
-        foreach ($this->requiredcolumns as $column) {
-            $extrajoins = $column->get_extra_joins();
-            foreach ($extrajoins as $prefix => $join) {
-                if (isset($joins[$prefix]) && $joins[$prefix] != $join) {
-                    throw new \coding_exception('Join ' . $join . ' conflicts with previous join ' . $joins[$prefix]);
+        if (!empty($this->requiredcolumns)) {
+            foreach ($this->requiredcolumns as $column) {
+                $extrajoins = $column->get_extra_joins();
+                foreach ($extrajoins as $prefix => $join) {
+                    if (isset($joins[$prefix]) && $joins[$prefix] != $join) {
+                        throw new \coding_exception('Join ' . $join . ' conflicts with previous join ' . $joins[$prefix]);
+                    }
+                    $joins[$prefix] = $join;
                 }
-                $joins[$prefix] = $join;
+                $fields = array_merge($fields, $column->get_required_fields());
             }
-            $fields = array_merge($fields, $column->get_required_fields());
         }
         $fields = array_unique($fields);
 
@@ -833,7 +839,9 @@ class view {
         $questionsrs = $this->load_page_questions($page, $perpage);
         $questions = [];
         foreach ($questionsrs as $question) {
-            $questions[$question->id] = $question;
+            if (!empty($question->id)) {
+                $questions[$question->id] = $question;
+            }
         }
         $questionsrs->close();
         foreach ($this->requiredcolumns as $name => $column) {
