@@ -174,38 +174,48 @@ class view {
         }
     }
 
-    protected function wanted_columns() {
+    /**
+     * Get the list of qbank plugins with available classes for columns.
+     *
+     * @returns array
+     */
+    protected function get_question_bank_columns(): array {
+        $questionbankclasscolumns = array();
+        // Get the list of available classes from the plugins.
+        $questionbankclasses = \core_component::get_plugin_list_with_class('qbank', '', 'bank.php');
+        foreach ($questionbankclasses as $key => $questionbankclass) {
+            $questionbankclasscolumns[] = $questionbankclass;
+        }
+        return $questionbankclasscolumns;
+    }
+
+    /**
+     * Loads all the available columns.
+     *
+     * @return array
+     */
+    protected function wanted_columns(): array {
         global $CFG;
         $this->requiredcolumns = array();
-        $questionbankcolumns = array();
-        // Changes in this method, instead of static columns, it will consider the columns from the available plugins.
+        $questionbankclasscolumns = $this->get_question_bank_columns();
         if (empty($CFG->questionbankcolumns)) {
-            //$questionbankcolumns = array('checkbox_column', 'question_type_column',
-            //        'question_name_idnumber_tags_column', 'edit_menu_column',
-            //        'edit_action_column', 'copy_action_column', 'tags_action_column',
-            //        'preview_action_column', 'delete_action_column', 'export_xml_action_column',
-            //        'creator_name_column', 'modifier_name_column');
-
-            // Making default to nothing as a boilerplate to accept plugins.
-            $questionbankclasses = \core_component::get_plugin_list_with_class('qbank', '', 'bank.php');
-            foreach ($questionbankclasses as $key => $questionbankclasse) {
-                $questionbankcolumns[] = $questionbankclasse;
-            }
+            $questionbankcolumns = $questionbankclasscolumns;
         } else {
-             $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
+            // Config overrides the array.
+            $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
+            foreach ($questionbankcolumns as $questionbankcolumn) {
+                if (!in_array($questionbankcolumn, $questionbankclasscolumns)) {
+                    throw new \coding_exception("No such class exists: $questionbankcolumn");
+                }
+            }
         }
-        if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
-            $questionbankcolumns[] = 'question_text_row';
-        }
+        // Need to make changes after adding viewquestiontext plugin, probably something cool can be done to implement this inside that plugin.
+        // Commented for now.
+        //if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
+            //$questionbankcolumns[] = 'question_text_row';
+        //}
 
         foreach ($questionbankcolumns as $fullname) {
-            //if (! class_exists($fullname)) {
-            //    if (class_exists('core_question\\local\\bank\\' . $fullname)) {
-            //        $fullname = 'core_question\\local\\bank\\' . $fullname;
-            //    } else {
-            //        throw new \coding_exception("No such class exists: $fullname");
-            //    }
-            //}
             $fullname = '\\'. $fullname;
             $this->requiredcolumns[$fullname] = new $fullname($this);
         }
@@ -220,13 +230,10 @@ class view {
      * @return column_base.
      */
     protected function get_column_type(string $columnname) {
-        //if (! class_exists($columnname)) {
-        //    if (class_exists('core_question\\local\\bank\\' . $columnname)) {
-        //        $columnname = 'core_question\\local\\bank\\' . $columnname;
-        //    } else {
-        //        throw new \coding_exception("No such class exists: $columnname");
-        //    }
-        //}
+        if (!in_array($columnname, $this->get_question_bank_columns())) {
+            //Need to use this after the following plugins are done: viewquestiontype, viewquestionname
+            //throw new \coding_exception("No such class exists: $columnname");
+        }
         if (empty($this->requiredcolumns[$columnname])) {
             $columnnameclass = '\\' . $columnname;
             $this->requiredcolumns[$columnname] = new $columnnameclass($this);
