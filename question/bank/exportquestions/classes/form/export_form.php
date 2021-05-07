@@ -17,12 +17,14 @@
 /**
  * Defines the export questions form.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_exportquestions
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_exportquestions\form;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,15 +36,10 @@ require_once($CFG->libdir . '/formslib.php');
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71573
- * @see qbank_exportquestions\form\export_form
  */
 class question_export_form extends moodleform {
 
     protected function definition() {
-        debugging('Class question_export_form in \core_question\export_form is deprecated,
-        please use core_question\bank\exportquestions\export_form instead.', DEBUG_DEVELOPER);
-
         global $OUTPUT;
 
         $mform = $this->_form;
@@ -87,7 +84,7 @@ class question_export_form extends moodleform {
         $mform->setDefault('cattofile', 1);
         $mform->setDefault('contexttofile', 1);
 
-        // Set a template for the format select elements
+        // Set a template for the format select elements.
         $renderer = $mform->defaultRenderer();
         $template = "{help} {element}\n";
         $renderer->setGroupElementTemplate($template, 'format');
