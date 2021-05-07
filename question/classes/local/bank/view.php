@@ -184,7 +184,7 @@ class view {
         // Get the list of available classes from the plugins.
         $questionbankclasses = \core_component::get_plugin_list_with_class('qbank', '', 'bank.php');
         foreach ($questionbankclasses as $key => $questionbankclass) {
-            $questionbankclasscolumns[] = $questionbankclass;
+            $questionbankclasscolumns[] = '\\' . $questionbankclass;
         }
         return $questionbankclasscolumns;
     }
@@ -204,7 +204,7 @@ class view {
             // Config overrides the array.
             $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
             foreach ($questionbankcolumns as $questionbankcolumn) {
-                if (!in_array($questionbankcolumn, $questionbankclasscolumns)) {
+                if (!in_array('\\' . $questionbankcolumn, $questionbankclasscolumns)) {
                     throw new \coding_exception("No such class exists: $questionbankcolumn");
                 }
             }
@@ -216,7 +216,6 @@ class view {
         //}
 
         foreach ($questionbankcolumns as $fullname) {
-            $fullname = '\\'. $fullname;
             $this->requiredcolumns[$fullname] = new $fullname($this);
         }
         return $this->requiredcolumns;
@@ -230,10 +229,6 @@ class view {
      * @return column_base.
      */
     protected function get_column_type(string $columnname) {
-        if (!in_array($columnname, $this->get_question_bank_columns())) {
-            //Need to use this after the following plugins are done: viewquestiontype, viewquestionname
-            //throw new \coding_exception("No such class exists: $columnname");
-        }
         if (empty($this->requiredcolumns[$columnname])) {
             $columnnameclass = '\\' . $columnname;
             $this->requiredcolumns[$columnname] = new $columnnameclass($this);
@@ -381,6 +376,7 @@ class view {
     protected function default_sort() {
         // Change required after implementing as plugins.
         return array(
+                //'\qbank_viewquestiontype' => 1
             'core_question\local\bank\question_type_column' => 1,
             'core_question\local\bank\question_name_idnumber_tags_column-name' => 1
         );
@@ -445,7 +441,7 @@ class view {
 
     /**
      * Create the SQL query to retrieve the indicated questions, based on
-     * \core_question\bank\search\condition filters.
+     * \core_question\local\bank\search\condition filters.
      */
     protected function build_query() {
         // Get the required tables and fields.
