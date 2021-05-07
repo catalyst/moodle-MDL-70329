@@ -24,13 +24,14 @@
  */
 
 
-require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/export_form.php');
+require_once($CFG->dirroot . '/question/bank/export/export_form.php');
 require_once($CFG->dirroot . '/question/format.php');
+require_once($CFG->dirroot . '/question/renderer.php');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-        question_edit_setup('export', '/question/export.php');
+        question_edit_setup('export', '/question/bank/export/export.php');
 
 // get display strings
 $strexportquestions = get_string('exportquestions', 'question');
@@ -54,7 +55,7 @@ $export_form = new question_export_form($thispageurl,
 
 if ($from_form = $export_form->get_data()) {
     $thiscontext = $contexts->lowest();
-    if (!is_readable("format/{$from_form->format}/format.php")) {
+    if (!is_readable($CFG->dirroot . "/question/format/{$from_form->format}/format.php")) {
         print_error('unknowformat', '', '', $from_form->format);
     }
     $withcategories = 'nocategories';
