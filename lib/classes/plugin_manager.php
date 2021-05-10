@@ -1952,10 +1952,6 @@ class core_plugin_manager {
                 'xhtml', 'xml'
             ),
 
-            'qbank' => array(
-                 ''
-            ),
-
             'qtype' => array(
                 'calculated', 'calculatedmulti', 'calculatedsimple',
                 'ddimageortext', 'ddmarker', 'ddwtos', 'description',
@@ -2248,9 +2244,7 @@ class core_plugin_manager {
         $fix['qtype']      = $types['qtype'];
         $fix['qbehaviour'] = $types['qbehaviour'];
         $fix['qformat']    = $types['qformat'];
-        $fix['qbank']      = $types['qbank'];
         $fix['filter']     = $types['filter'];
-
         $fix['editor']     = $types['editor'];
         foreach (core_component::get_plugin_list('editor') as $plugin => $fulldir) {
             if (!$subtypes = core_component::get_subplugins('editor_'.$plugin)) {
