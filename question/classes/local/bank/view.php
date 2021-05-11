@@ -377,8 +377,8 @@ class view {
     protected function default_sort() {
         // Change required after implementing as plugins.
         return array(
-                //'core_question\bank\question_type_column' => 1,
-                //'core_question\bank\question_name_idnumber_tags_column-name' => 1
+                'core_question\local\bank\question_type_column' => 1,
+                //'core_question\local\bank\question_name_idnumber_tags_column-name' => 1
         );
     }
 
