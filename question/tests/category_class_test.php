@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/category_class.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/category_class.php');
 
 class core_question_category_class_testcase extends advanced_testcase {
 
@@ -54,7 +54,7 @@ class core_question_category_class_testcase extends advanced_testcase {
         $contexts = new question_edit_contexts($this->context);
         $this->topcat = question_get_top_category($this->context->id, true);
         $this->qcobject = new question_category_object(null,
-                new moodle_url('/question/category.php', ['courseid' => SITEID]),
+                new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
                 $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
                 $contexts->having_cap('moodle/question:add'));
     }
