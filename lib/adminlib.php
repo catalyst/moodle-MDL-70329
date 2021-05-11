@@ -6747,6 +6747,146 @@ class admin_page_managemessageoutputs extends admin_externalpage {
 }
 
 /**
+ * Manage question banks page.
+ *
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class admin_page_manageqbanks extends admin_setting {
+
+    /**
+     * Class admin_page_manageqbanks constructor.
+     */
+    public function __construct() {
+        $this->nosave = true;
+        parent::__construct('manageqbanks',
+                new lang_string('manageqbanks', 'admin'), '', '');
+    }
+
+    /**
+     * Always returns true.
+     *
+     * @return true
+     */
+    public function get_setting(): bool {
+        return true;
+    }
+
+    /**
+     * Always returns true.
+     *
+     * @return true
+     */
+    public function get_defaultsetting(): bool {
+        return true;
+    }
+
+    /**
+     * Always returns '' and doesn't write anything.
+     *
+     * @param mixed $data string or array, must not be NULL
+     * @return string Always returns ''
+     */
+    public function write_setting($data): string {
+        // Do not write any setting.
+        return '';
+    }
+
+    /**
+     * Search to find if Query is related to content bank plugin.
+     *
+     * @param string $query The string to search for
+     * @return bool true for related false for not
+     */
+    public function is_related($query): bool {
+        if (parent::is_related($query)) {
+            return true;
+        }
+        $types = core_plugin_manager::instance()->get_plugins_of_type('qbank');
+        foreach ($types as $type) {
+            if (strpos($type->component, $query) !== false ||
+                    strpos(core_text::strtolower($type->displayname), $query) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return XHTML to display control.
+     *
+     * @param mixed $data Unused
+     * @param string $query
+     * @return string highlight
+     */
+    public function output_html($data, $query = ''): string {
+        global $CFG, $OUTPUT;
+        $return = '';
+
+        $pluginmanager = core_plugin_manager::instance();
+        $types = $pluginmanager->get_plugins_of_type('qbank');
+        $txt = get_strings(array('settings', 'name', 'enable', 'disable', 'default'));
+        $txt->uninstall = get_string('uninstallplugin', 'core_admin');
+
+        $table = new html_table();
+        $table->head  = array($txt->name, $txt->enable, $txt->settings, $txt->uninstall);
+        $table->align = array('left', 'center', 'center', 'center', 'center');
+        $table->attributes['class'] = 'manageqbanktable generaltable admintable';
+        $table->data  = array();
+
+        $totalenabled = 0;
+        $count = 0;
+        foreach ($types as $type) {
+            if ($type->is_enabled() && $type->is_installed_and_upgraded()) {
+                $totalenabled++;
+            }
+        }
+
+        foreach ($types as $type) {
+            $url = new moodle_url('/admin/qbankplugins.php',
+                    array('sesskey' => sesskey(), 'name' => $type->name));
+
+            $class = '';
+            if ($pluginmanager->get_plugin_info('qbank_'.$type->name)->get_status() ===
+                    core_plugin_manager::PLUGIN_STATUS_MISSING) {
+                $strtypename = $type->displayname.' ('.get_string('missingfromdisk').')';
+            } else {
+                $strtypename = $type->displayname;
+            }
+
+            if ($type->is_enabled()) {
+                $hideshow = html_writer::link($url->out(false, array('action' => 'disable')),
+                        $OUTPUT->pix_icon('t/hide', $txt->disable, 'moodle', array('class' => 'iconsmall')));
+            } else {
+                $class = 'dimmed_text';
+                $hideshow = html_writer::link($url->out(false, array('action' => 'enable')),
+                        $OUTPUT->pix_icon('t/show', $txt->enable, 'moodle', array('class' => 'iconsmall')));
+            }
+
+            $settings = '';
+            if ($type->get_settings_url()) {
+                $settings = html_writer::link($type->get_settings_url(), $txt->settings);
+            }
+
+            $uninstall = '';
+            if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url('qbank_'.$type->name, 'manage')) {
+                $uninstall = html_writer::link($uninstallurl, $txt->uninstall);
+            }
+
+            $row = new html_table_row(array($strtypename, $hideshow, $settings, $uninstall));
+            if ($class) {
+                $row->attributes['class'] = $class;
+            }
+            $table->data[] = $row;
+            $count++;
+        }
+        $return .= html_writer::table($table);
+        return highlight($query, $return);
+    }
+}
+
+/**
  * Manage question behaviours page
  *
  * @copyright  2011 The Open University

@@ -1938,6 +1938,10 @@ class core_plugin_manager {
                 'checkbox', 'datetime', 'menu', 'social', 'text', 'textarea'
             ),
 
+            'qbank' => array(
+                ''
+            ),
+
             'qbehaviour' => array(
                 'adaptive', 'adaptivenopenalty', 'deferredcbm',
                 'deferredfeedback', 'immediatecbm', 'immediatefeedback',
@@ -2241,10 +2245,10 @@ class core_plugin_manager {
         $fix['mod']        = $types['mod'];
         $fix['block']      = $types['block'];
         $fix['qtype']      = $types['qtype'];
+        $fix['qbank']      = $types['qbank'];
         $fix['qbehaviour'] = $types['qbehaviour'];
         $fix['qformat']    = $types['qformat'];
         $fix['filter']     = $types['filter'];
-
         $fix['editor']     = $types['editor'];
         foreach (core_component::get_plugin_list('editor') as $plugin => $fulldir) {
             if (!$subtypes = core_component::get_subplugins('editor_'.$plugin)) {
