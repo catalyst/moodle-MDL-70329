@@ -26,7 +26,7 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/bank/exportquestions/export_form.php');
+require_once($CFG->dirroot . '/question/bank/exportquestions/classes/form/export_form.php');
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
