@@ -22,9 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
-defined('MOODLE_INTERNAL') || die();
+namespace core_question\local\bank;
 
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Interface to indicate that a question bank column can go in the action menu.
@@ -43,8 +43,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2019 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \core_question\local\bank\menuable_action
  */
 interface menuable_action {
 
