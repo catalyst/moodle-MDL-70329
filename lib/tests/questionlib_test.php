@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use core_tag\output\tag;
+use qbank_managecategories\managecategories_helper;
 
 
 defined('MOODLE_INTERNAL') || die();
@@ -558,19 +559,19 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
 
         // Non-existing category, nothing will happen.
-        question_remove_stale_questions_from_category(0);
+        managecategories_helper::question_remove_stale_questions_from_category(0);
         $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
 
         // First category, should be empty afterwards.
-        question_remove_stale_questions_from_category($qcat1->id);
+        managecategories_helper::question_remove_stale_questions_from_category($qcat1->id);
         $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1a->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1b->id]));
 
         // Second category, used questions should be left untouched.
-        question_remove_stale_questions_from_category($qcat2->id);
+        managecategories_helper::question_remove_stale_questions_from_category($qcat2->id);
         $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q2a->id]));
