@@ -19,10 +19,11 @@
  *
  * @package   core_question
  * @copyright 2015 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace core_question\local\bank;
 
 
 /**
@@ -41,8 +42,6 @@ namespace core_question\bank;
  *
  * @copyright 2015 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \core_question\local\bank\random_question_loader
  */
 class random_question_loader {
     /** @var \qubaid_condition which usages to consider previous attempts from. */
@@ -67,8 +66,6 @@ class random_question_loader {
      *      further existing uses of a question in addition to the ones in $qubaids.
      */
     public function __construct(\qubaid_condition $qubaids, array $usedquestions = array()) {
-        debugging('Class random_question_loader in \core_question\bank\random_question_loader is deprecated, 
-        please use \core_question\local\bank\random_question_loader instead.', DEBUG_DEVELOPER);
         $this->qubaids = $qubaids;
         $this->recentlyusedquestions = $usedquestions;
 
