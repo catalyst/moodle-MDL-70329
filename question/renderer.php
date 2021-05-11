@@ -17,8 +17,7 @@
 /**
  * Renderers for outputting parts of the question bank.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    core_question
  * @copyright  2011 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -66,6 +65,26 @@ class core_question_bank_renderer extends plugin_renderer_base {
         $namestr = $qtype->local_name();
 
         return $this->image_icon('icon', $namestr, $qtype->plugin_name(), array('title' => $namestr));
+    }
+
+    /**
+     * Render the column headers.
+     *
+     * @param array $qbankheaderdata
+     * @return bool|string
+     */
+    public function render_column_header($qbankheaderdata) {
+        return $this->render_from_template('core_question/column_header', $qbankheaderdata);
+    }
+
+    /**
+     * Render the column sort elements.
+     *
+     * @param array $sortdata
+     * @return bool|string
+     */
+    public function render_column_sort($sortdata) {
+        return $this->render_from_template('core_question/column_sort', $sortdata);
     }
 
     /**
@@ -131,4 +150,5 @@ class core_question_bank_renderer extends plugin_renderer_base {
             'see core_question_bank_renderer::render_qbank_chooser().', DEBUG_DEVELOPER);
         return '';
     }
+
 }
