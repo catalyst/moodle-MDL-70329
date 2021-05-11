@@ -36,7 +36,9 @@ if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
 }
 $PAGE->set_url($url);
 
-$questionbank = new core_question\bank\view($contexts, $thispageurl, $COURSE, $cm);
+// View locked prevent other devs to see exceptions, uncomment if working on base classes.
+
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
 $questionbank->process_actions();
 
 $context = $contexts->lowest();
@@ -50,6 +52,9 @@ $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
 echo '<div class="questionbankwindow boxwidthwide boxaligncenter">';
+//echo "This view is locked for the base build class as it will throw exceptions.";
+// View locked prevent other devs to see exceptions, uncomment if working on base classes.
+
 $questionbank->display('questions', $pagevars['qpage'], $pagevars['qperpage'],
         $pagevars['cat'], $pagevars['recurse'], $pagevars['showhidden'],
         $pagevars['qbshowtext'], $pagevars['qtagids']);
