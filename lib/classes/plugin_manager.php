@@ -1939,7 +1939,6 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-                'comment',
             ),
 
             'qbehaviour' => array(
