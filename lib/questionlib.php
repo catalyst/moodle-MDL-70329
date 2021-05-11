@@ -1795,7 +1795,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
     if ($contexts->have_one_edit_tab_cap('export')) {
         $questionnode->add(get_string('export', 'question'), new moodle_url(
-                '/question/bank/export/export.php', $params), navigation_node::TYPE_SETTING, null, 'export');
+                '/question/bank/exportquestions/export.php', $params), navigation_node::TYPE_SETTING, null, 'export');
     }
 
     return $questionnode;

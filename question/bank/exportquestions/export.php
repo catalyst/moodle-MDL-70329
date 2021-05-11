@@ -26,12 +26,12 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/bank/export/export_form.php');
+require_once($CFG->dirroot . '/question/bank/exportquestions/export_form.php');
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-        question_edit_setup('export', '/question/bank/export/export.php');
+        question_edit_setup('export', '/question/bank/exportquestions/export.php');
 
 // get display strings
 $strexportquestions = get_string('exportquestions', 'question');
