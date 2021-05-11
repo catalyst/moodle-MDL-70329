@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'h5p', language 'en', branch 'master'
+ * Strings for component 'qbank_exportquestions', language 'en'
  *
- * @package   qbank_export
+ * @package   qbank_exportquestions
  * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -17,15 +17,14 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package   qbank_export
+ * @package   qbank_exportquestions
  * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_export';
-$plugin->release = '2021050700';
+$plugin->component = 'qbank_exportquestions';
 $plugin->version = 2021050700;
 $plugin->requires = 2021052500;
 $plugin->maturity = MATURITY_ALPHA;
