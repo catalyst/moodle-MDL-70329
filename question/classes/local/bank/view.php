@@ -181,10 +181,14 @@ class view {
      */
     protected function get_question_bank_columns(): array {
         $questionbankclasscolumns = array();
-        // Get the list of available classes from the plugins.
-        $questionbankclasses = \core_component::get_plugin_list_with_class('qbank', '', 'bank.php');
-        foreach ($questionbankclasses as $key => $questionbankclass) {
-            $questionbankclasscolumns[] = '\\' . $questionbankclass;
+        $plugintype = 'qbank';
+        $plugins = \core_component::get_plugin_list($plugintype);
+        foreach ($plugins as $plugin => $notusing) {
+            $questionbankclasses = \core_component::get_plugin_list_with_class('qbank',
+                    $plugin . '_column', $plugin . '_column.php');
+            foreach ($questionbankclasses as $key => $questionbankclass) {
+                $questionbankclasscolumns[] = $questionbankclass;
+            }
         }
         return $questionbankclasscolumns;
     }
@@ -201,10 +205,10 @@ class view {
         if (empty($CFG->questionbankcolumns)) {
             $questionbankcolumns = $questionbankclasscolumns;
         } else {
-            // Config overrides the array.
+            // Config overrides the array, need to discuss this.
             $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
             foreach ($questionbankcolumns as $questionbankcolumn) {
-                if (!in_array('\\' . $questionbankcolumn, $questionbankclasscolumns)) {
+                if (!in_array($questionbankcolumn, $questionbankclasscolumns)) {
                     throw new \coding_exception("No such class exists: $questionbankcolumn");
                 }
             }
