@@ -17,11 +17,12 @@
 /**
  * Load all plugins into the admin tree.
  *
-* Please note that is file is always loaded last - it means that you can inject entries into other categories too.
-*
-* @package    core
-* @copyright  2007 Petr Skoda {@link http://skodak.org}
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Please note that is file is always loaded last - it means that you can inject entries into other categories too.
+ *
+ * @package    core
+ * @copyright  2007 Petr Skoda {@link http://skodak.org}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
 if ($hassiteconfig) {
@@ -405,6 +406,10 @@ if ($hassiteconfig) {
 
 // Question type settings
 if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) {
+
+    // Question bank settings
+    $ADMIN->add('modules', new admin_category('qbanksettings', new lang_string('questionbanks', 'admin')));
+    $ADMIN->add('qbanksettings', new admin_page_manageqbanks());
 
     // Question behaviour settings.
     $ADMIN->add('modules', new admin_category('qbehavioursettings', new lang_string('questionbehaviours', 'admin')));
