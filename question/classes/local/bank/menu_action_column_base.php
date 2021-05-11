@@ -22,9 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
-defined('MOODLE_INTERNAL') || die();
+namespace core_question\local\bank;
 
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Base class to make it easier to implement actions that are menuable_actions.
@@ -35,9 +35,8 @@ defined('MOODLE_INTERNAL') || die();
  * interface yourself.
  *
  * @copyright 2019 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \core_question\local\bank\menu_action_column_base
  */
 abstract class menu_action_column_base extends action_column_base implements menuable_action {
 
@@ -53,15 +52,26 @@ abstract class menu_action_column_base extends action_column_base implements men
      *      $icon - the icon for this action. E.g. 't/delete'.
      *      $label - text label to display in the UI (either in the menu, or as a tool-tip on the icon)
      */
-    abstract protected function get_url_icon_and_label(\stdClass $question): array;
+    abstract protected function get_url_icon_and_label(\stdClass $question);
 
-    protected function display_content($question, $rowclasses) {
+    /**
+     * Output the contents of this column.
+     * @param object $question the row from the $question table, augmented with extra information.
+     * @param string $rowclasses CSS class names that should be applied to this row of output.
+     */
+    protected function display_content($question, $rowclasses): void {
         [$url, $icon, $label] = $this->get_url_icon_and_label($question);
         if ($url) {
             $this->print_icon($icon, $label, $url);
         }
     }
 
+    /**
+     * Return the appropriate action menu link, or null if it does not apply to this question.
+     *
+     * @param \stdClass $question data about the question being displayed in this row.
+     * @return \action_menu_link|null the action, if applicable to this question.
+     */
     public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
         [$url, $icon, $label] = $this->get_url_icon_and_label($question);
         if (!$url) {

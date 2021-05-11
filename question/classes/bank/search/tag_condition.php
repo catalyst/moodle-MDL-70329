@@ -118,6 +118,6 @@ class tag_condition extends condition {
             'tagoptions' => $tagoptions
         ];
 
-        echo $OUTPUT->render_from_template('core_question/tag_condition', $context);
+        return $OUTPUT->render_from_template('core_question/tag_condition', $context);
     }
 }
