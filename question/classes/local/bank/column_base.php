@@ -19,10 +19,11 @@
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 
@@ -31,8 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \core_question\local\bank\column_base
  */
 abstract class column_base {
     /**
@@ -48,8 +47,6 @@ abstract class column_base {
      * @param view $qbank the question bank view we are helping to render.
      */
     public function __construct(view $qbank) {
-        debugging('Class column_base in \core_question\bank\column_base is deprecated, 
-        please use \core_question\local\bank\column_base instead.', DEBUG_DEVELOPER);
         $this->qbank = $qbank;
         $this->init();
     }
@@ -68,7 +65,31 @@ abstract class column_base {
         $this->isheading = true;
     }
 
+    /**
+     * Check if the column is an extra row of not.
+     */
     public function is_extra_row() {
+        return false;
+    }
+
+    /**
+     * Check if the row has an extra preference to view/hide.
+     */
+    public function has_preference() {
+        return false;
+    }
+
+    /**
+     * Get if the preference key of the row.
+     */
+    public function get_preference_key() {
+        return false;
+    }
+
+    /**
+     * Get if the preference of the row.
+     */
+    public function get_preference() {
         return false;
     }
 
