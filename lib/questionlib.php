@@ -1780,22 +1780,62 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
             new moodle_url('/question/edit.php', $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
+    $corenavigations = array(
+            'questions' => array(
+                    'title' => get_string('questions', 'question'),
+                    'url' => new moodle_url('/question/edit.php')
+            ),
+            'categories' => array(
+                    'title' => get_string('categories', 'question'),
+                    'url' => new moodle_url('/question/category.php')
+            ),
+            'import' => array(
+                    'title' => get_string('import', 'question'),
+                    'url' => new moodle_url('/question/import.php')
+            ),
+            'export' => array(
+                    'title' => get_string('export', 'question'),
+                    'url' => new moodle_url('/question/export.php')
+            )
+    );
+
+    $pluginnavigations = array();
+
+    $plugins = \core_component::get_plugin_list_with_class('qbank', 'navigation', 'navigation.php');
+    foreach ($plugins as $componentname => $plugin) {
+        $pluginentrypointobject = new $plugin();
+        foreach ($corenavigations as $key => $corenavigation) {
+            if ($pluginentrypointobject->get_navigation_key() === $key) {
+                if (!\core\plugininfo\qbank::check_qbank_status($componentname)) {
+                    unset($corenavigations[$key]);
+                    break;
+                }
+                $corenavigations[$key] = array (
+                        'title' => $pluginentrypointobject->get_title(),
+                        'url'   => $pluginentrypointobject->get_url()
+                );
+            } else {
+                $pluginnavigations[$pluginentrypointobject->get_navigation_key()] = array(
+                        'title' => $pluginentrypointobject->get_title(),
+                        'url'   => $pluginentrypointobject->get_url()
+                );
+            }
+        }
+
+    }
+
+    // Add community or additional navigation after the core ones.
+    foreach ($pluginnavigations as $key => $pluginnavigation) {
+        $corenavigations[$key] = $pluginnavigation;
+    }
+
     $contexts = new question_edit_contexts($context);
-    if ($contexts->have_one_edit_tab_cap('questions')) {
-        $questionnode->add(get_string('questions', 'question'), new moodle_url(
-                '/question/edit.php', $params), navigation_node::TYPE_SETTING, null, 'questions');
-    }
-    if ($contexts->have_one_edit_tab_cap('categories')) {
-        $questionnode->add(get_string('categories', 'question'), new moodle_url(
-                '/question/category.php', $params), navigation_node::TYPE_SETTING, null, 'categories');
-    }
-    if ($contexts->have_one_edit_tab_cap('import')) {
-        $questionnode->add(get_string('import', 'question'), new moodle_url(
-                '/question/import.php', $params), navigation_node::TYPE_SETTING, null, 'import');
-    }
-    if ($contexts->have_one_edit_tab_cap('export')) {
-        $questionnode->add(get_string('export', 'question'), new moodle_url(
-                '/question/export.php', $params), navigation_node::TYPE_SETTING, null, 'export');
+
+    foreach ($corenavigations as $key => $corenavigation) {
+        if ($contexts->have_one_edit_tab_cap($key)) {
+            $questionnode->add($corenavigation['title'], new moodle_url(
+                    $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
+        }
     }
 
     return $questionnode;
