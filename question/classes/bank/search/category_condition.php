@@ -25,6 +25,8 @@
 
 namespace core_question\bank\search;
 
+use qbank_managecategories\helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -118,7 +120,7 @@ class category_condition extends condition {
     public function display_options() {
         global $PAGE;
         $displaydata = array();
-        $catmenu = question_category_options($this->contexts, true, 0,
+        $catmenu = helper::question_category_options($this->contexts, true, 0,
                 true, -1, false);
         $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, array(),
                 array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));

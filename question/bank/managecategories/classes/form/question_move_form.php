@@ -17,12 +17,14 @@
 /**
  * Form for moving questions between categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories\form;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,14 +36,16 @@ require_once($CFG->libdir . '/formslib.php');
  *
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see qbank_managecategories\form\question_move_form
  */
 class question_move_form extends moodleform {
-    protected function definition() {
-        debugging('Class question_move_form in \core_question\move_form is deprecated,
-        please use qbank_managecategories\form\question_move_form instead.', DEBUG_DEVELOPER);
 
+    /**
+     * Build the form definition.
+     *
+     * This adds all the form fields that the question move feature needs.
+     * @throws \coding_exception
+     */
+    protected function definition() {
         $mform = $this->_form;
 
         $currentcat = $this->_customdata['currentcat'];

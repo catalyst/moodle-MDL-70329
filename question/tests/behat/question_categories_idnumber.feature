@@ -35,7 +35,10 @@ Feature: A teacher can put questions with idnumbers in categories with idnumbers
     # Correction to a unique idnumber for the context.
     And I set the field "ID number" to "c1unused"
     And I press "Add category"
-    Then I should see "Sub used category ID number c1unused (0)"
+    Then I should see "Sub used category"
+    And I should see "ID number"
+    And I should see "c1unused"
+    And I should see "(0)"
     And I should see "Created as a test" in the "Sub used category" "list_item"
 
   Scenario: A question category can be edited and saved without changing the idnumber
