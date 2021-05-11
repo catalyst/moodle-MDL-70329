@@ -20,6 +20,7 @@
  * @package    moodlecore
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,8 +37,6 @@ if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
 }
 $PAGE->set_url($url);
 
-// View locked prevent other devs to see exceptions, uncomment if working on base classes.
-
 $questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
 $questionbank->process_actions();
 
@@ -52,9 +51,6 @@ $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
 echo '<div class="questionbankwindow boxwidthwide boxaligncenter">';
-//echo "This view is locked for the base build class as it will throw exceptions.";
-// View locked prevent other devs to see exceptions, uncomment if working on base classes.
-
 $questionbank->display('questions', $pagevars['qpage'], $pagevars['qperpage'],
         $pagevars['cat'], $pagevars['recurse'], $pagevars['showhidden'],
         $pagevars['qbshowtext'], $pagevars['qtagids']);
