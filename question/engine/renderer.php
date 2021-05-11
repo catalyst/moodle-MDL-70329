@@ -23,9 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 defined('MOODLE_INTERNAL') || die();
-
 
 /**
  * This renderer controls the overall output of questions. It works with a
@@ -36,7 +34,13 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class core_question_renderer extends plugin_renderer_base {
-    public function get_page() {
+
+    /**
+     * Get the page.
+     *
+     * @return moodle_page
+     */
+    public function get_page(): moodle_page {
         return $this->page;
     }
 
@@ -136,7 +140,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param question_display_options $options controls what should and should not be displayed.
      * @param string|null $number The question number to display. 'i' is a special
      *      value that gets displayed as Information. Null means no number is displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function info(question_attempt $qa, qbehaviour_renderer $behaviouroutput,
             qtype_renderer $qtoutput, question_display_options $options, $number) {
@@ -153,7 +157,7 @@ class core_question_renderer extends plugin_renderer_base {
      * Generate the display of the question number.
      * @param string|null $number The question number to display. 'i' is a special
      *      value that gets displayed as Information. Null means no number is displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function number($number) {
         if (trim($number) === '') {
@@ -190,7 +194,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param qbehaviour_renderer $behaviouroutput the renderer to output the behaviour
      *      specific parts.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function status(question_attempt $qa, qbehaviour_renderer $behaviouroutput,
             question_display_options $options) {
@@ -203,7 +207,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param question_attempt $qa the question attempt to display.
      * @param qbehaviour_renderer $behaviouroutput the behaviour renderer, which can generate a custom display.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function mark_summary(question_attempt $qa, qbehaviour_renderer $behaviouroutput, question_display_options $options) {
         return html_writer::nonempty_tag('div',
@@ -215,7 +219,7 @@ class core_question_renderer extends plugin_renderer_base {
      * Generate the display of the marks for this question.
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string
      */
     public function standard_mark_summary(question_attempt $qa, qbehaviour_renderer $behaviouroutput, question_display_options $options) {
         if (!$options->marks) {
@@ -237,7 +241,7 @@ class core_question_renderer extends plugin_renderer_base {
      * Generate the display of the available marks for this question.
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string
      */
     public function standard_marked_out_of_max(question_attempt $qa, question_display_options $options) {
         return get_string('markedoutofmax', 'question', $qa->format_max_mark($options->markdp));
@@ -247,7 +251,7 @@ class core_question_renderer extends plugin_renderer_base {
      * Generate the display of the marks for this question out of the available marks.
      * @param question_attempt $qa the question attempt to display.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string
      */
     public function standard_mark_out_of_max(question_attempt $qa, question_display_options $options) {
         $a = new stdClass();
@@ -376,7 +380,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param qtype_renderer $qtoutput the renderer to output the question type
      *      specific parts.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function formulation(question_attempt $qa, qbehaviour_renderer $behaviouroutput,
             qtype_renderer $qtoutput, question_display_options $options) {
@@ -404,7 +408,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param qtype_renderer $qtoutput the renderer to output the question type
      *      specific parts.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function outcome(question_attempt $qa, qbehaviour_renderer $behaviouroutput,
             qtype_renderer $qtoutput, question_display_options $options) {
@@ -434,7 +438,7 @@ class core_question_renderer extends plugin_renderer_base {
      * @param qtype_renderer $qtoutput the renderer to output the question type
      *      specific parts.
      * @param question_display_options $options controls what should and should not be displayed.
-     * @return HTML fragment.
+     * @return string HTML fragment.
      */
     protected function response_history(question_attempt $qa, qbehaviour_renderer $behaviouroutput,
             qtype_renderer $qtoutput, question_display_options $options) {
@@ -507,4 +511,5 @@ class core_question_renderer extends plugin_renderer_base {
             return '';
         }
     }
+
 }
