@@ -277,8 +277,17 @@ print_collapsible_region_end();
 
 // Output a link to export this single question.
 if (question_has_capability_on($question, 'view')) {
-    echo html_writer::link(question_get_export_single_question_url($question),
-            get_string('exportonequestion', 'question'));
+    if (class_exists('qbank_exporttoxml\\exporttoxml_helper')) {
+        if (\core\plugininfo\qbank::check_qbank_status('qbank_exporttoxml')) {
+            $exportfunction = '\\qbank_exporttoxml\\exporttoxml_helper::question_get_export_single_question_url';
+            echo html_writer::link($exportfunction($question),
+                    get_string('exportonequestion', 'question'));
+        }
+    } else {
+        $exportfunction = 'question_get_export_single_question_url';
+        echo html_writer::link($exportfunction($question),
+                get_string('exportonequestion', 'question'));
+    }
 }
 
 // Log the preview of this question.
