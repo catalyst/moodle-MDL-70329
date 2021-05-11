@@ -25,6 +25,7 @@
 namespace core_question\local\bank;
 
 use core_question\bank\search\condition;
+use qbank_managecategories\helper;
 
 /**
  * This class prints a view of the question bank.
@@ -1065,7 +1066,7 @@ class view {
                         'data-toggle' => 'action',
                         'disabled' => true,
                 ]);
-                question_category_select_menu($addcontexts, false, 0, "{$category->id},{$category->contextid}");
+                helper::question_category_select_menu($addcontexts, false, 0, "{$category->id},{$category->contextid}");
             }
         }
 
