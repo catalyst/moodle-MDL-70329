@@ -15,177 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A class for representing question categories.
+ * Class for performing operations on question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories;
 
 defined('MOODLE_INTERNAL') || die();
 
-// number of categories to display on page
+// Number of categories to display on page.
 define('QUESTION_PAGE_LENGTH', 25);
 
-require_once($CFG->libdir . '/listlib.php');
-require_once($CFG->dirroot . '/question/category_form.php');
-require_once($CFG->dirroot . '/question/move_form.php');
-
-
-/**
- * Class representing a list of question categories
- *
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \qbank_managecategories\question_category_list
- */
-class question_category_list extends moodle_list {
-    public $table = "question_categories";
-    public $listitemclassname = 'question_category_list_item';
-    /**
-     * @var reference to list displayed below this one.
-     */
-    public $nextlist = null;
-    /**
-     * @var reference to list displayed above this one.
-     */
-    public $lastlist = null;
-
-    public $context = null;
-    public $sortby = 'parent, sortorder, name';
-
-    public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null, $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null){
-        debugging('Class question_category_list in \core_question\category_class is deprecated,
-        please use core_question\bank\managecategories\category_class instead.', DEBUG_DEVELOPER);
-
-        parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
-        $this->context = $context;
-    }
-
-    public function get_records() {
-        $this->records = get_categories_for_contexts($this->context->id, $this->sortby);
-    }
-
-    /**
-     * Returns the highest category id that the $item can have as its parent.
-     * Note: question categories cannot go higher than the TOP category.
-     *
-     * @param list_item $item The item which its top level parent is going to be returned.
-     * @return int
-     */
-    public function get_top_level_parent_id($item) {
-        // Put the item at the highest level it can go.
-        $topcategory = question_get_top_category($item->item->contextid, true);
-        return $topcategory->id;
-    }
-
-    /**
-     * process any actions.
-     *
-     * @param integer $left id of item to move left
-     * @param integer $right id of item to move right
-     * @param integer $moveup id of item to move up
-     * @param integer $movedown id of item to move down
-     * @return void
-     * @throws coding_exception
-     */
-    public function process_actions($left, $right, $moveup, $movedown) {
-        $category = new stdClass();
-        if (!empty($left)) {
-            // Moved Left (In to another category).
-            $category->id = $left;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
-        } else if (!empty($right)) {
-            // Moved Right (Out of the current category).
-            $category->id = $right;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
-        }
-        parent::process_actions($left, $right, $moveup, $movedown);
-    }
-}
-
-/**
- * An item in a list of question categories.
- *
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \qbank_managecategories\question_category_list_item
- */
-class question_category_list_item extends list_item {
-    public function set_icon_html($first, $last, $lastitem){
-        debugging('Function set_icon_html() in \core_question\category_class is deprecated,
-        please use qbank_managecategories\question_category_list_item::set_icon_html() instead.', DEBUG_DEVELOPER);
-        global $CFG;
-        $category = $this->item;
-        $url = new moodle_url('/question/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
-        $this->icons['edit']= $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
-        parent::set_icon_html($first, $last, $lastitem);
-        $toplevel = ($this->parentlist->parentitem === null);//this is a top level item
-        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('movedowncontext'=>$this->id, 'tocontext'=>$this->parentlist->nextlist->context->id, 'sesskey'=>sesskey()));
-            $this->icons['down'] = $this->image_icon(
-                get_string('shareincontext', 'question', $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
-        }
-        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('moveupcontext'=>$this->id, 'tocontext'=>$this->parentlist->lastlist->context->id, 'sesskey'=>sesskey()));
-            $this->icons['up'] = $this->image_icon(
-                get_string('shareincontext', 'question', $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
-        }
-    }
-
-    public function item_html($extraargs = array()){
-        debugging('Function item_html() in \core_question\category_class is deprecated,
-        please use qbank_managecategories\question_category_list_item::item_html() instead.', DEBUG_DEVELOPER);
-        global $CFG, $OUTPUT;
-        $str = $extraargs['str'];
-        $category = $this->item;
-
-        $editqestions = get_string('editquestions', 'question');
-
-        // Each section adds html to be displayed as part of this list item.
-        $questionbankurl = new moodle_url('/question/edit.php', $this->parentlist->pageurl->params());
-        $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
-        $item = '';
-        $text = format_string($category->name, true, ['context' => $this->parentlist->context]);
-        if ($category->idnumber !== null && $category->idnumber !== '') {
-            $text .= ' ' . html_writer::span(
-                    html_writer::span(get_string('idnumber', 'question'), 'accesshide') .
-                    ' ' . $category->idnumber, 'badge badge-primary');
-        }
-        $text .= ' (' . $category->questioncount . ')';
-        $item .= html_writer::tag('b', html_writer::link($questionbankurl, $text,
-                        ['title' => $editqestions]) . ' ');
-        $item .= format_text($category->info, $category->infoformat,
-                array('context' => $this->parentlist->context, 'noclean' => true));
-
-        // Don't allow delete if this is the top category, or the last editable category in this context.
-        if ($category->parent && !question_is_only_child_of_top_category_in_context($category->id)) {
-            $deleteurl = new moodle_url($this->parentlist->pageurl, array('delete' => $this->id, 'sesskey' => sesskey()));
-            $item .= html_writer::link($deleteurl,
-                    $OUTPUT->pix_icon('t/delete', $str->delete),
-                    array('title' => $str->delete));
-        }
-
-        return $item;
-    }
-}
-
+use context;
+use moodle_exception;
+use moodle_url;
+use qbank_managecategories\form\question_category_edit_form;
+use question_bank;
+use stdClass;
 
 /**
  * Class for performing operations on question categories.
  *
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \qbank_managecategories\question_category_object
  */
 class question_category_object {
 
@@ -198,7 +53,15 @@ class question_category_object {
      * @var array nested lists to display categories.
      */
     public $editlists = array();
+
+    /**
+     * @var string tab.
+     */
     public $tab;
+
+    /**
+     * @var int tab size.
+     */
     public $tabsize = 3;
 
     /**
@@ -214,7 +77,7 @@ class question_category_object {
     /**
      * Constructor.
      *
-     * @param int $page page number
+     * @param int $page page number.
      * @param moodle_url $pageurl base URL of the display categories page. Used for redirects.
      * @param context[] $contexts contexts where the current user can edit categories.
      * @param int $currentcat id of the category to be edited. 0 if none.
@@ -223,8 +86,6 @@ class question_category_object {
      * @param context[] $addcontexts contexts where the current user can add questions.
      */
     public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
-        debugging('Class question_category_list in \core_question\category_class is deprecated,
-        please use core_question\bank\managecategories\category_class instead.', DEBUG_DEVELOPER);
 
         $this->tab = str_repeat('&nbsp;', $this->tabsize);
 
@@ -267,13 +128,21 @@ class question_category_object {
 
     /**
      * Initializes this classes general category-related variables
+     *
+     * @param int $page page number.
+     * @param context[] $contexts contexts where the current user can edit categories.
+     * @param int $currentcat id of the category to be edited. 0 if none.
+     * @param int|null $defaultcategory id of the current category. null if none.
+     * @param int $todelete id of the category to delete. 0 if none.
+     * @param context[] $addcontexts contexts where the current user can add questions.
      */
-    public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
+    public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) : void {
         $lastlist = null;
-        foreach ($contexts as $context){
-            $this->editlists[$context->id] = new question_category_list('ul', '', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
+        foreach ($contexts as $context) {
+            $this->editlists[$context->id] =
+                new question_category_list('ul', '', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
             $this->editlists[$context->id]->lastlist =& $lastlist;
-            if ($lastlist!== null){
+            if ($lastlist !== null) {
                 $lastlist->nextlist =& $this->editlists[$context->id];
             }
             $lastlist =& $this->editlists[$context->id];
@@ -281,27 +150,26 @@ class question_category_object {
 
         $count = 1;
         $paged = false;
-        foreach ($this->editlists as $key => $list){
+        foreach ($this->editlists as $key => $list) {
             list($paged, $count) = $this->editlists[$key]->list_from_records($paged, $count);
         }
         $this->catform = new question_category_edit_form($this->pageurl, compact('contexts', 'currentcat'));
-        if (!$currentcat){
-            $this->catform->set_data(array('parent'=>$defaultcategory));
+        if (!$currentcat) {
+            $this->catform->set_data(array('parent' => $defaultcategory));
         }
     }
 
     /**
-     * Displays the user interface
+     * Displays the user interface.
      *
      */
-    public function display_user_interface() {
+    public function display_user_interface() : void {
 
-        /// Interface for editing existing categories
+        // Interface for editing existing categories.
         $this->output_edit_lists();
 
-
         echo '<br />';
-        /// Interface for adding a new category:
+        // Interface for adding a new category.
         $this->output_new_table();
         echo '<br />';
 
@@ -310,25 +178,26 @@ class question_category_object {
     /**
      * Outputs a table to allow entry of a new category
      */
-    public function output_new_table() {
+    public function output_new_table() : void {
         $this->catform->display();
     }
 
     /**
-     * Outputs a list to allow editing/rearranging of existing categories
+     * Outputs a list to allow editing/rearranging of existing categories.
      *
      * $this->initialize() must have already been called
      *
      */
-    public function output_edit_lists() {
+    public function output_edit_lists() : void {
         global $OUTPUT;
 
         echo $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
 
-        foreach ($this->editlists as $context => $list){
-            $listhtml = $list->to_html(0, array('str'=>$this->str));
-            if ($listhtml){
-                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' . $list->context->contextlevel);
+        foreach ($this->editlists as $context => $list) {
+            $listhtml = $list->to_html(0, array('str' => $this->str));
+            if ($listhtml) {
+                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
+                    $list->context->contextlevel);
                 $fullcontext = context::instance_by_id($context);
                 echo $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
                 echo $listhtml;
@@ -336,17 +205,17 @@ class question_category_object {
             }
         }
         echo $list->display_page_numbers();
-     }
+    }
 
     /**
-     * gets all the courseids for the given categories
+     * Gets all the courseids for the given categories.
      *
      * @param array categories contains category objects in  a tree representation
      * @return array courseids flat array in form categoryid=>courseid
      */
-    public function get_course_ids($categories) {
+    public function get_course_ids(array $categories) : array {
         $courseids = array();
-        foreach ($categories as $key=>$cat) {
+        foreach ($categories as $key => $cat) {
             $courseids[$key] = $cat->course;
             if (!empty($cat->children)) {
                 $courseids = array_merge($courseids, $this->get_course_ids($cat->children));
@@ -355,15 +224,20 @@ class question_category_object {
         return $courseids;
     }
 
-    public function edit_single_category($categoryid) {
-    /// Interface for adding a new category
+    /**
+     * Edit a category.
+     *
+     * @param int $categoryid Category id.
+     */
+    public function edit_single_category(int $categoryid) : void {
+        // Interface for adding a new category.
         global $DB;
-        /// Interface for editing existing categories
+        // Interface for editing existing categories.
         $category = $DB->get_record("question_categories", array("id" => $categoryid));
         if (empty($category)) {
-            print_error('invalidcategory', '', '', $categoryid);
+            throw new moodle_exception('invalidcategory', '', '', $categoryid);
         } else if ($category->parent == 0) {
-            print_error('cannotedittopcat', 'question', '', $categoryid);
+            throw new moodle_exception('cannotedittopcat', 'question', '', $categoryid);
         } else {
             $category->parent = "{$category->parent},{$category->contextid}";
             $category->submitbutton = get_string('savechanges');
@@ -374,15 +248,15 @@ class question_category_object {
     }
 
     /**
-     * Sets the viable parents
+     * Sets the viable parents.
      *
      *  Viable parents are any except for the category itself, or any of it's descendants
      *  The parentstrings parameter is passed by reference and changed by this function.
      *
-     * @param    array parentstrings a list of parentstrings
-     * @param   object category
+     * @param array $parentstrings a list of parentstrings
+     * @param object $category Category object
      */
-    public function set_viable_parents(&$parentstrings, $category) {
+    public function set_viable_parents(array &$parentstrings, object $category) : void {
 
         unset($parentstrings[$category->id]);
         if (isset($category->children)) {
@@ -393,13 +267,13 @@ class question_category_object {
     }
 
     /**
-     * Gets question categories
+     * Gets question categories.
      *
-     * @param    int parent - if given, restrict records to those with this parent id.
-     * @param    string sort - [[sortfield [,sortfield]] {ASC|DESC}]
-     * @return   array categories
+     * @param int|null $parent - if given, restrict records to those with this parent id.
+     * @param string $sort - [[sortfield [,sortfield]] {ASC|DESC}].
+     * @return array categories.
      */
-    public function get_question_categories($parent=null, $sort="sortorder ASC") {
+    public function get_question_categories(int $parent = null, string $sort = "sortorder ASC") : array {
         global $COURSE, $DB;
         if (is_null($parent)) {
             $categories = $DB->get_records('question_categories', array('course' => $COURSE->id), $sort);
@@ -411,20 +285,20 @@ class question_category_object {
     }
 
     /**
-     * Deletes an existing question category
+     * Deletes an existing question category.
      *
-     * @param int deletecat id of category to delete
+     * @param int deletecat id of category to delete.
      */
-    public function delete_category($categoryid) {
+    public function delete_category(int $categoryid) : void {
         global $CFG, $DB;
         question_can_delete_cat($categoryid);
-        if (!$category = $DB->get_record("question_categories", array("id" => $categoryid))) {  // security
-            print_error('unknowcategory');
+        if (!$category = $DB->get_record("question_categories", array("id" => $categoryid))) {  // Security.
+            throw new moodle_exception('unknowcategory');
         }
-        /// Send the children categories to live with their grandparent
+        // Send the children categories to live with their grandparent.
         $DB->set_field("question_categories", "parent", $category->parent, array("parent" => $category->id));
 
-        /// Finally delete the category itself
+        // Finally delete the category itself.
         $DB->delete_records("question_categories", array("id" => $category->id));
 
         // Log the deletion of this category.
@@ -434,13 +308,23 @@ class question_category_object {
 
     }
 
-    public function move_questions_and_delete_category($oldcat, $newcat){
+    /**
+     * Move questions and then delete the category.
+     *
+     * @param int $oldcat id of the old category.
+     * @param int $newcat id of the new category.
+     */
+    public function move_questions_and_delete_category(int $oldcat, int $newcat) : void {
         question_can_delete_cat($oldcat);
         $this->move_questions($oldcat, $newcat);
         $this->delete_category($oldcat);
     }
 
-    public function display_move_form($questionsincategory, $category){
+    /**
+     * Display the form to move a category.
+     *
+     */
+    public function display_move_form($questionsincategory, $category) : void {
         global $OUTPUT;
         $vars = new stdClass();
         $vars->name = $category->name;
@@ -449,7 +333,14 @@ class question_category_object {
         $this->moveform->display();
     }
 
-    public function move_questions($oldcat, $newcat){
+    /**
+     * Move questions to another category.
+     *
+     * @param int $oldcat id of the old category.
+     * @param int $newcat id of the new category.
+     * @throws \dml_exception
+     */
+    public function move_questions(int $oldcat, int $newcat) : void {
         global $DB;
         $questionids = $DB->get_records_select_menu('question',
                 'category = ? AND (parent = 0 OR parent = id)', array($oldcat), '', 'id,1');
@@ -472,18 +363,19 @@ class question_category_object {
      * @return bool|int New category id if successful, else false.
      */
     public function add_category($newparent, $newcategory, $newinfo, $return = false, $newinfoformat = FORMAT_HTML,
-            $idnumber = null) {
+            $idnumber = null) : int {
         global $DB;
         if (empty($newcategory)) {
-            print_error('categorynamecantbeblank', 'question');
+            throw new moodle_exception('categorynamecantbeblank', 'question');
         }
         list($parentid, $contextid) = explode(',', $newparent);
-        //moodle_form makes sure select element output is legal no need for further cleaning
+        // ...moodle_form makes sure select element output is legal no need for further cleaning.
         require_capability('moodle/question:managecategory', context::instance_by_id($contextid));
 
         if ($parentid) {
-            if(!($DB->get_field('question_categories', 'contextid', array('id' => $parentid)) == $contextid)) {
-                print_error('cannotinsertquestioncatecontext', 'question', '', array('cat'=>$newcategory, 'ctx'=>$contextid));
+            if (!($DB->get_field('question_categories', 'contextid', array('id' => $parentid)) == $contextid)) {
+                throw new moodle_exception('cannotinsertquestioncatecontext', 'question', '',
+                    ['cat' => $newcategory, 'ctx' => $contextid]);
             }
         }
 
@@ -518,7 +410,8 @@ class question_category_object {
         if ($return) {
             return $categoryid;
         } else {
-            redirect($this->pageurl);//always redirect after successful action
+            // Always redirect after successful action.
+            redirect($this->pageurl);
         }
     }
 
@@ -536,10 +429,10 @@ class question_category_object {
      * @param bool $redirect if true, will redirect once the DB is updated (default).
      */
     public function update_category($updateid, $newparent, $newname, $newinfo, $newinfoformat = FORMAT_HTML,
-            $idnumber = null, $redirect = true) {
+            $idnumber = null, $redirect = true) : void {
         global $CFG, $DB;
         if (empty($newname)) {
-            print_error('categorynamecantbeblank', 'question');
+            throw new moodle_exception('categorynamecantbeblank', 'question');
         }
 
         // Get the record we are updating.
@@ -618,7 +511,8 @@ class question_category_object {
         // Cat param depends on the context id, so update it.
         $this->pageurl->param('cat', $updateid . ',' . $tocontextid);
         if ($redirect) {
-            redirect($this->pageurl); // Always redirect after successful action.
+            // Always redirect after successful action.
+            redirect($this->pageurl);
         }
     }
 }

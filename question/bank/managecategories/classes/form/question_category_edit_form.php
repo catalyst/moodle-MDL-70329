@@ -17,12 +17,14 @@
 /**
  * Defines the form for editing question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories\form;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,15 +36,10 @@ require_once($CFG->libdir.'/formslib.php');
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see qbank_managecategories\form\category_form
  */
 class question_category_edit_form extends moodleform {
 
     protected function definition() {
-        debugging('Class question_export_form in \core_question\category_form is deprecated,
-        please use core_question\bank\managecategories\form\category_form instead.', DEBUG_DEVELOPER);
-
         $mform    = $this->_form;
 
         $contexts   = $this->_customdata['contexts'];
@@ -58,7 +55,7 @@ class question_category_edit_form extends moodleform {
         }
         $mform->addHelpButton('parent', 'parentcategory', 'question');
 
-        $mform->addElement('text', 'name', get_string('name'),'maxlength="254" size="50"');
+        $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
         $mform->addRule('name', get_string('categorynamecantbeblank', 'question'), 'required', null, 'client');
         $mform->setType('name', PARAM_TEXT);

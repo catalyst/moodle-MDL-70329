@@ -15,21 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Events tests.
+ * Question category object tests.
  *
  * @package core_question
  * @copyright 2019 the Open University
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace qbank_managecategories;
 
 global $CFG;
-
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/category_class.php');
 
-class core_question_category_class_testcase extends advanced_testcase {
+use context;
+use context_course;
+use moodle_url;
+use question_edit_contexts;
+use stdClass;
+
+/**
+ * Unit tests for qbank_managecategories\question_category_object.
+ *
+ * @package    qbank_managecategories
+ * @copyright  2019 the Open University
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class question_category_object_test extends \advanced_testcase {
 
     /**
      * @var question_category_object used in the tests.
@@ -54,9 +65,9 @@ class core_question_category_class_testcase extends advanced_testcase {
         $contexts = new question_edit_contexts($this->context);
         $this->topcat = question_get_top_category($this->context->id, true);
         $this->qcobject = new question_category_object(null,
-                new moodle_url('/question/category.php', ['courseid' => SITEID]),
-                $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
-                $contexts->having_cap('moodle/question:add'));
+            new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
+            $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
+            $contexts->having_cap('moodle/question:add'));
     }
 
     /**
@@ -66,7 +77,7 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'New category', '', true, FORMAT_HTML, ''); // No idnumber passed as '' to match form data.
+            'New category', '', true, FORMAT_HTML, ''); // No idnumber passed as '' to match form data.
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New category', $newcat->name);
@@ -80,7 +91,7 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'New category', '', true, FORMAT_HTML, '0');
+            'New category', '', true, FORMAT_HTML, '0');
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New category', $newcat->name);
@@ -95,10 +106,10 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'Existing category', '', true, FORMAT_HTML, 'frog');
+            'Existing category', '', true, FORMAT_HTML, 'frog');
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'New category', '', true, FORMAT_HTML, 'frog');
+            'New category', '', true, FORMAT_HTML, 'frog');
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New category', $newcat->name);
@@ -112,10 +123,10 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'Old name', 'Description', true, FORMAT_HTML, 'frog');
+            'Old name', 'Description', true, FORMAT_HTML, 'frog');
 
         $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-                'New name', 'New description', FORMAT_HTML, '0', false);
+            'New name', 'New description', FORMAT_HTML, '0', false);
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New name', $newcat->name);
@@ -129,10 +140,10 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'Old name', 'Description', true, FORMAT_HTML, 'frog');
+            'Old name', 'Description', true, FORMAT_HTML, 'frog');
 
         $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-                'New name', 'New description', FORMAT_HTML, '', false);
+            'New name', 'New description', FORMAT_HTML, '', false);
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New name', $newcat->name);
@@ -146,10 +157,10 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'Old name', 'Description', true, FORMAT_HTML, 'frog');
+            'Old name', 'Description', true, FORMAT_HTML, 'frog');
 
         $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-                'New name', 'New description', FORMAT_HTML, 'frog', false);
+            'New name', 'New description', FORMAT_HTML, 'frog', false);
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New name', $newcat->name);
@@ -164,12 +175,12 @@ class core_question_category_class_testcase extends advanced_testcase {
         global $DB;
 
         $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'Existing category', '', true, FORMAT_HTML, 'toad');
+            'Existing category', '', true, FORMAT_HTML, 'toad');
         $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-                'old name', '', true, FORMAT_HTML, 'frog');
+            'old name', '', true, FORMAT_HTML, 'frog');
 
         $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-                'New name', '', FORMAT_HTML, 'toad', false);
+            'New name', '', FORMAT_HTML, 'toad', false);
 
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New name', $newcat->name);
