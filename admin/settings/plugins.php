@@ -17,11 +17,11 @@
 /**
  * Load all plugins into the admin tree.
  *
-* Please note that is file is always loaded last - it means that you can inject entries into other categories too.
-*
-* @package    core
-* @copyright  2007 Petr Skoda {@link http://skodak.org}
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Please note that is file is always loaded last - it means that you can inject entries into other categories too.
+ *
+ * @package    core
+ * @copyright  2007 Petr Skoda {@link http://skodak.org}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
 if ($hassiteconfig) {
@@ -400,6 +400,19 @@ if ($hassiteconfig) {
     foreach ($plugins as $plugin) {
         /** @var \core\plugininfo\repository $plugin */
         $plugin->load_settings($ADMIN, 'repositorysettings', $hassiteconfig);
+    }
+}
+
+// Question bank settings.
+if ($hassiteconfig) {
+    $ADMIN->add('modules', new admin_category('qbanksettings', new lang_string('questionbanks', 'admin')));
+    $temp = new admin_settingpage('manageqbanks', new lang_string('manageqbanks', 'admin'));
+    $temp->add(new admin_page_manageqbanks());
+    $ADMIN->add('qbanksettings', $temp);
+    $plugins = core_plugin_manager::instance()->get_plugins_of_type('qbank');
+    foreach ($plugins as $plugin) {
+        /** @var \core\plugininfo\qbank $plugin */
+        $plugin->load_settings($ADMIN, 'qbanksettings', $hassiteconfig);
     }
 }
 
