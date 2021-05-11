@@ -17,12 +17,15 @@
 /**
  * Defines the form for editing question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories\form;
+
+use moodleform;
+use qbank_managecategories\helper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,37 +37,38 @@ require_once($CFG->libdir.'/formslib.php');
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see qbank_managecategories\form\category_form
  */
 class question_category_edit_form extends moodleform {
 
+    /**
+     * Build the form definition.
+     *
+     * This adds all the form fields that the manage categories feature needs.
+     * @throws \coding_exception
+     */
     protected function definition() {
-        debugging('Class question_export_form in \core_question\category_form is deprecated,
-        please use core_question\bank\managecategories\form\category_form instead.', DEBUG_DEVELOPER);
+        $mform = $this->_form;
 
-        $mform    = $this->_form;
-
-        $contexts   = $this->_customdata['contexts'];
-        $currentcat   = $this->_customdata['currentcat'];
+        $contexts = $this->_customdata['contexts'];
+        $currentcat = $this->_customdata['currentcat'];
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
         $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
-                array('contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat));
+                ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
         $mform->setType('parent', PARAM_SEQUENCE);
-        if (question_is_only_child_of_top_category_in_context($currentcat)) {
+        if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
             $mform->hardFreeze('parent');
         }
         $mform->addHelpButton('parent', 'parentcategory', 'question');
 
-        $mform->addElement('text', 'name', get_string('name'),'maxlength="254" size="50"');
+        $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
         $mform->addRule('name', get_string('categorynamecantbeblank', 'question'), 'required', null, 'client');
         $mform->setType('name', PARAM_TEXT);
 
         $mform->addElement('editor', 'info', get_string('categoryinfo', 'question'),
-                array('rows' => 10), array('noclean' => 1));
+                ['rows' => 10], ['noclean' => 1]);
         $mform->setDefault('info', '');
         $mform->setType('info', PARAM_RAW);
 
@@ -78,15 +82,20 @@ class question_category_edit_form extends moodleform {
         $mform->setType('id', PARAM_INT);
     }
 
+    /**
+     * Set data method.
+     *
+     * Add additional information to current data.
+     * @param \stdClass|array $current Object or array of default current data.
+     */
     public function set_data($current) {
         if (is_object($current)) {
             $current = (array) $current;
         }
         if (!empty($current['info'])) {
-            $current['info'] = array('text' => $current['info'],
-                    'infoformat' => $current['infoformat']);
+            $current['info'] = ['text' => $current['info'], 'infoformat' => $current['infoformat']];
         } else {
-            $current['info'] = array('text' => '', 'infoformat' => FORMAT_HTML);
+            $current['info'] = ['text' => '', 'infoformat' => FORMAT_HTML];
         }
         parent::set_data($current);
     }
@@ -97,6 +106,7 @@ class question_category_edit_form extends moodleform {
      * @param array $data
      * @param array $files
      * @return array the errors that were found
+     * @throws \dml_exception|\coding_exception
      */
     public function validation($data, $files) {
         global $DB;
