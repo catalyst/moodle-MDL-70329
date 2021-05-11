@@ -6795,54 +6795,6 @@ class admin_page_manageqbanks extends admin_externalpage {
 }
 
 /**
- * Manage question banks page
- *
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class admin_page_manageqbanks extends admin_externalpage {
-    /**
-     * Constructor
-     */
-    public function __construct() {
-        global $CFG;
-        parent::__construct('manageqbanks', get_string('manageqbanks', 'admin'),
-                new moodle_url('/admin/qbankplugins.php'));
-    }
-
-    /**
-     * Search question banks for the specified string
-     *
-     * @param string $query The string to search for in question banks
-     * @return array
-     */
-    public function search($query) {
-        global $CFG;
-        if ($result = parent::search($query)) {
-            return $result;
-        }
-
-        $found = false;
-        require_once($CFG->dirroot . '/question/engine/lib.php');
-        foreach (core_component::get_plugin_list('qbank') as $bank => $notused) {
-            if (strpos(core_text::strtolower(question_engine::get_bank_name($bank)),
-                            $query) !== false) {
-                $found = true;
-                break;
-            }
-        }
-        if ($found) {
-            $result = new stdClass();
-            $result->page     = $this;
-            $result->settings = array();
-            return array($this->name => $result);
-        } else {
-            return array();
-        }
-    }
-}
-
-/**
  * Manage question behaviours page
  *
  * @copyright  2011 The Open University
