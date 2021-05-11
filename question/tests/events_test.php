@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/category_class.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/category_class.php');
 
 class core_question_events_testcase extends advanced_testcase {
 

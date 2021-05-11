@@ -1787,7 +1787,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
     if ($contexts->have_one_edit_tab_cap('categories')) {
         $questionnode->add(get_string('categories', 'question'), new moodle_url(
-                '/question/category.php', $params), navigation_node::TYPE_SETTING, null, 'categories');
+                '/question/bank/managecategories/category.php', $params), navigation_node::TYPE_SETTING, null, 'categories');
     }
     if ($contexts->have_one_edit_tab_cap('import')) {
         $questionnode->add(get_string('import', 'question'), new moodle_url(

@@ -30,8 +30,8 @@ defined('MOODLE_INTERNAL') || die();
 define('QUESTION_PAGE_LENGTH', 25);
 
 require_once($CFG->libdir . '/listlib.php');
-require_once($CFG->dirroot . '/question/category_form.php');
-require_once($CFG->dirroot . '/question/move_form.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/category_form.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/move_form.php');
 
 
 /**
@@ -39,8 +39,6 @@ require_once($CFG->dirroot . '/question/move_form.php');
  *
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \core_question\bank\managecategories\category_class
  */
 class question_category_list extends moodle_list {
     public $table = "question_categories";
@@ -58,9 +56,6 @@ class question_category_list extends moodle_list {
     public $sortby = 'parent, sortorder, name';
 
     public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null, $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null){
-        debugging('Class question_category_list in \core_question\category_class is deprecated,
-        please use core_question\bank\managecategories\category_class', DEBUG_DEVELOPER);
-
         parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
         $this->context = $context;
     }
@@ -121,7 +116,7 @@ class question_category_list_item extends list_item {
     public function set_icon_html($first, $last, $lastitem){
         global $CFG;
         $category = $this->item;
-        $url = new moodle_url('/question/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
+        $url = new moodle_url('/question/bank/managecategories/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
         $this->icons['edit']= $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
         parent::set_icon_html($first, $last, $lastitem);
         $toplevel = ($this->parentlist->parentitem === null);//this is a top level item
