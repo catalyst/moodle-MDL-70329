@@ -1939,6 +1939,10 @@ class core_plugin_manager {
                 'checkbox', 'datetime', 'menu', 'social', 'text', 'textarea'
             ),
 
+            'qbank' => array(
+                'exportquestions'
+            ),
+
             'qbehaviour' => array(
                 'adaptive', 'adaptivenopenalty', 'deferredcbm',
                 'deferredfeedback', 'immediatecbm', 'immediatefeedback',
