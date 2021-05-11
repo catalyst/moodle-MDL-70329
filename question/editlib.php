@@ -267,7 +267,7 @@ class_alias('core_question\bank\question_text_row', 'question_bank_question_text
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\view', 'question_bank_view', true);
+class_alias('core_question\local\bank\view', 'question_bank_view', true);
 
 /**
  * Common setup for all pages for editing questions.

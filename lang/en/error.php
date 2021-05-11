@@ -627,3 +627,4 @@ $string['xmldberror'] = 'XMLDB error!';
 $string['alreadyloggedin'] = 'You are already logged in as {$a}, you need to log out before logging in as different user.';
 $string['youcannotdeletecategory'] = 'You cannot delete category \'{$a}\' because you can neither delete the contents, nor move them elsewhere.';
 $string['protected_cc_not_supported'] = 'Protected cartridges not supported.';
+$string['qbanknotfound'] = 'The \'{$a}\' question bank doesn\'t exist or is not recognised.';
