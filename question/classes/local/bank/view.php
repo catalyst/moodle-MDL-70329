@@ -147,15 +147,6 @@ class view {
         $this->cm = $cm;
 
         $this->returnurl = $pageurl->out_as_local_url(false);
-        // These lines will be removed in editquestion plugin, this is here to for line 844 for editurl params.
-        $this->editquestionurl = new \moodle_url('/question/question.php',
-                array('returnurl' => $this->returnurl));
-        if ($this->cm !== null) {
-            $this->editquestionurl->param('cmid', $this->cm->id);
-        } else {
-            $this->editquestionurl->param('courseid', $this->course->id);
-        }
-
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
         // Possibly the heading part can be removed.
