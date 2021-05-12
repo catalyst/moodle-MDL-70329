@@ -17,9 +17,15 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package   qbank_importquestion
+ * @package   qbank_importquestions
  * @copyright 2021, Marc-Alexandre Ghaly <marc-alexandreghaly@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Import question bank';
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->component = 'qbank_importquestions';
+$plugin->release = '2021051000';
+$plugin->version = 2021051000;
+$plugin->requires = 2021052500;
+$plugin->maturity = MATURITY_ALPHA;

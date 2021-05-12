@@ -17,18 +17,18 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package   qbank_importquestion
+ * @package   qbank_importquestions
  * @copyright 2021, Marc-Alexandre Ghaly <marc-alexandreghaly@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-require_once($CFG->dirroot . '/question/bank/importquestion/import_form.php');
+require_once($CFG->dirroot . '/question/bank/importquestions/import_form.php');
 require_once($CFG->dirroot . '/question/format.php');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-        question_edit_setup('import', '/question/bank/importquestion/import.php');
+        question_edit_setup('import', '/question/bank/importquestions/import.php');
 
 // get display strings
 $txt = new stdClass();
@@ -135,7 +135,7 @@ if ($form = $import_form->get_data()) {
 
     $params = $thispageurl->params() + array(
         'category' => $qformat->category->id . ',' . $qformat->category->contextid);
-    echo $OUTPUT->continue_button(new moodle_url('/question/edit.php', $params));
+    echo $OUTPUT->continue_button(new moodle_url('edit.php', $params));
     echo $OUTPUT->footer();
     exit;
 }

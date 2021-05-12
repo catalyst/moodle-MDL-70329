@@ -1791,7 +1791,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
     if ($contexts->have_one_edit_tab_cap('import')) {
         $questionnode->add(get_string('import', 'question'), new moodle_url(
-                '/question/bank/importquestion/import.php', $params), navigation_node::TYPE_SETTING, null, 'import');
+                '/question/bank/importquestions/import.php', $params), navigation_node::TYPE_SETTING, null, 'import');
     }
     if ($contexts->have_one_edit_tab_cap('export')) {
         $questionnode->add(get_string('export', 'question'), new moodle_url(
