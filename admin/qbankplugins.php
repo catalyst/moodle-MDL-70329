@@ -24,10 +24,9 @@
  *
  * @package    core
  * @subpackage questionbank
- * @copyright 2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 require_once(__DIR__ . '/../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -35,46 +34,119 @@ require_once($CFG->libdir.'/tablelib.php');
 
 admin_externalpage_setup('manageqbanks');
 
+$url = new moodle_url('/admin/qbankplugins.php');
+$qbankplugings = core_component::get_plugin_list('qbank');
+
+// Disable qbank plugin.
+if (($disable = optional_param('disable', '', PARAM_PLUGIN)) && confirm_sesskey()) {
+    if (!isset($qbankplugings[$disable])) {
+        print_error('unknownquestiontype', 'question', $url, $disable);
+    }
+
+    set_config('disabled', 1, 'qbank_' . $disable);
+    redirect($url);
+}
+
+// Enable qbank plugin.
+if (($enable = optional_param('enable', '', PARAM_PLUGIN)) && confirm_sesskey()) {
+    if (!isset($qbankplugings[$enable])) {
+        print_error('unknownquestiontype', 'question', $url, $enable);
+    }
+
+    unset_config('disabled', 'qbank_' . $enable);
+    redirect($url);
+}
+
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('questionbanks', 'admin'));
 
 // Print the table of all installed qbank plugins.
-
 $table = new flexible_table('manageqbanks_administration_table');
-$table->define_columns(array('name', 'version', 'uninstall'));
-$table->define_headers(array(get_string('plugin'), get_string('version'), get_string('uninstallplugin', 'core_admin')));
-$table->define_baseurl($PAGE->url);
+$table->define_columns(
+    [
+        'name',
+        'version',
+        'available',
+        'uninstall'
+    ]
+);
+$table->define_headers(
+    [
+        get_string('plugin'),
+        get_string('version'),
+        get_string('availableq', 'question'),
+        get_string('uninstallplugin', 'core_admin')
+    ]
+);
+$table->define_baseurl($url);
 $table->set_attribute('id', 'manageqbanks');
 $table->set_attribute('class', 'admintable generaltable');
 $table->setup();
 
-$plugins = array();
-foreach (core_component::get_plugin_list('qbank') as $plugin => $plugindir) {
-    if (get_string_manager()->string_exists('pluginname', 'qbank_' . $plugin)) {
-        $strpluginname = get_string('pluginname', 'qbank_' . $plugin);
+$plugins = [];
+foreach ($qbankplugings as $qbankplugin => $plugindir) {
+    if (get_string_manager()->string_exists('pluginname', 'qbank_' . $qbankplugin)) {
+        $strpluginname = get_string('pluginname', 'qbank_' . $qbankplugin);
     } else {
-        $strpluginname = $plugin;
+        $strpluginname = $qbankplugin;
     }
-    $plugins[$plugin] = $strpluginname;
+    $plugins[$qbankplugin] = $strpluginname;
 }
 core_collator::asort($plugins);
 
-foreach ($plugins as $plugin => $name) {
-    $uninstall = '';
-    if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url('qbank_'.$plugin, 'manage')) {
-        $uninstall = html_writer::link($uninstallurl, get_string('uninstallplugin', 'core_admin'));
-    }
+foreach ($plugins as $qbankplugin => $name) {
+    $row = [];
 
-    $version = get_config('qbank_' . $plugin);
-    if (!empty($version->version)) {
-        $version = $version->version;
+    // Add plugin name to row.
+    $row[] = $name;
+
+    // Get qbank plugin version.
+    $version = get_config('qbank_' . $qbankplugin, 'version');
+    if ($version) {
+        $row[] = $version;
     } else {
-        $version = '?';
+        $row[] = html_writer::tag('span', get_string('nodatabase', 'admin'), array('class' => 'text-muted'));
     }
 
-    $table->add_data(array($name, $version, $uninstall));
+    // Get qbank plugin status and add icon to row.
+    $rowclass = '';
+    $disabled = get_config('qbank_' . $qbankplugin, 'disabled');
+    if (!$disabled) {
+        $row[] = qbank_plugins_enable_disable_icons($qbankplugin, true);
+    } else {
+        $row[] = qbank_plugins_enable_disable_icons($qbankplugin, false);
+        $rowclass = 'dimmed_text';
+    }
+
+    // Uninstall plugin.
+    if ($uninstallurl = core_plugin_manager::instance()->get_uninstall_url('qbank_'.$qbankplugin, 'manage')) {
+        $row[] = html_writer::link($uninstallurl, get_string('uninstallplugin', 'core_admin'));
+    }
+
+    $table->add_data($row, $rowclass);
 }
 
-$table->print_html();
+$table->finish_output();
 
 echo $OUTPUT->footer();
+
+function qbank_plugins_enable_disable_icons($qbankplugin, $enabled) {
+    if ($enabled) {
+        return qbank_plugins_icon_html('disable', $qbankplugin, 't/hide',
+            get_string('enabled', 'question'), get_string('disable'));
+    } else {
+        return qbank_plugins_icon_html('enable', $qbankplugin, 't/show',
+            get_string('disabled', 'question'), get_string('enable'));
+    }
+}
+
+function qbank_plugins_icon_html($action, $qbankplugin, $icon, $alt, $tip) {
+    global $OUTPUT;
+    return $OUTPUT->action_icon(
+        new moodle_url('/admin/qbankplugins.php',
+            array($action => $qbankplugin, 'sesskey' => sesskey())),
+        new pix_icon($icon, $alt, 'moodle', array('title' => '', 'class' => 'iconsmall')),
+        null,
+        array('title' => $tip)
+    );
+}
