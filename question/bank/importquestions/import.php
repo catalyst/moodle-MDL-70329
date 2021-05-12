@@ -26,6 +26,7 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 require_once($CFG->dirroot . '/question/bank/importquestions/classes/form/import_form.php');
 require_once($CFG->dirroot . '/question/format.php');
+require_once($CFG->dirroot . '/question/renderer.php');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
