@@ -80,7 +80,7 @@ class duplicatequestion_column extends menu_action_column_base {
      * @param int $questionid the question id.
      * @return \moodle_url the URL.
      */
-    public function copy_question_moodle_url($questionid) {
+    public function duplicate_question_moodle_url($questionid) {
         return new \moodle_url($this->duplicatequestionurl, ['id' => $questionid, 'makecopy' => 1]);
     }
 
@@ -109,7 +109,7 @@ class duplicatequestion_column extends menu_action_column_base {
         // the question being copied.
         if (question_has_capability_on($question, 'add') &&
                 (question_has_capability_on($question, 'edit') || question_has_capability_on($question, 'view'))) {
-            return [$this->copy_question_moodle_url($question->id), 't/copy', $this->strcopy];
+            return [$this->duplicate_question_moodle_url($question->id), 't/copy', $this->strcopy];
         }
         return [null, null, null];
     }
