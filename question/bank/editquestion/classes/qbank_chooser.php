@@ -22,15 +22,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\output;
+namespace qbank_editquestion;
+
 defined('MOODLE_INTERNAL') || die();
 
+use context;
 use context_course;
 use core\output\chooser_section;
 use lang_string;
 use moodle_url;
 use question_bank;
-
+use stdClass;
 
 /**
  * The qbank_chooser renderable class.
@@ -38,8 +40,6 @@ use question_bank;
  * @package    core_question
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see /question/bank/editquestion
  */
 class qbank_chooser extends \core\output\chooser {
 
@@ -53,8 +53,6 @@ class qbank_chooser extends \core\output\chooser {
      * @param context $context The relevant context.
      */
     public function __construct($real, $fake, $course, $hiddenparams, $context) {
-        debugging('Class qbank_chooser has been deprecated and moved to bank/editquestion, 
-        please use editquestion plugin instead', DEBUG_DEVELOPER);
         $sections = [];
         $sections[] = new chooser_section('questions', new lang_string('questions', 'question'),
                 array_map(function($qtype) use ($context) {
@@ -68,7 +66,7 @@ class qbank_chooser extends \core\output\chooser {
                 }, $fake));
         }
 
-        parent::__construct(new moodle_url('/question/question.php'),
+        parent::__construct(new moodle_url('/question/bank/editquestion/question.php'),
                 new lang_string('chooseqtypetoadd', 'question'), $sections, 'qtype');
 
         $this->set_instructions(new lang_string('selectaqtypefordescription', 'question'));

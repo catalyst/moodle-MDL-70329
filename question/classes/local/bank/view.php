@@ -832,7 +832,8 @@ class view {
     protected function create_new_question_form($category, $canadd): void {
         echo '<div class="createnewquestion">';
         if ($canadd) {
-            create_new_question_button($category->id, $this->editquestionurl->params(),
+            create_new_question_button($category->id,
+                    $this->requiredcolumns['\qbank_editquestion\editquestion_column']->editquestionurl->params(),
                     get_string('createnewquestion', 'question'));
         } else {
             print_string('nopermissionadd', 'question');

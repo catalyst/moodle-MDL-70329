@@ -18,15 +18,14 @@
  * Shows a screen where the user can choose a question type, before being
  * redirected to question.php
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_editquestion
  * @copyright  2009 Tim Hunt
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-require_once(__DIR__ . '/../config.php');
-require_once(__DIR__ . '/editlib.php');
+require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../editlib.php');
 
 // Read URL parameters.
 $categoryid = required_param('category', PARAM_INT);
@@ -41,7 +40,7 @@ $hiddenparams = array('category' => $categoryid);
 
 // Validate params.
 if (!$category = $DB->get_record('question_categories', array('id' => $categoryid))) {
-    print_error('categorydoesnotexist', 'question', $returnurl);
+    new moodle_exception('categorydoesnotexist', 'question', $returnurl);
 }
 
 if ($cmid) {
@@ -56,7 +55,7 @@ if ($cmid) {
     $cm = null;
     $hiddenparams['courseid'] = $courseid;
 } else {
-    print_error('missingcourseorcmid', 'question');
+    new moodle_exception('missingcourseorcmid', 'question');
 }
 
 // Check permissions.
@@ -71,7 +70,7 @@ if (!empty($appendqnumstring)) {
     $hiddenparams['appendqnumstring'] = $appendqnumstring;
 }
 
-$PAGE->set_url('/question/addquestion.php', $hiddenparams);
+$PAGE->set_url('/question/bank/editquestion/addquestion.php', $hiddenparams);
 if ($cmid) {
     $questionbankurl = new moodle_url('/question/edit.php', array('cmid' => $cmid));
 } else {

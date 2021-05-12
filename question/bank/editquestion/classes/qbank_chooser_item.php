@@ -22,9 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\output;
+namespace qbank_editquestion;
+
 defined('MOODLE_INTERNAL') || die();
 
+use context;
 use lang_string;
 use pix_icon;
 
@@ -35,8 +37,6 @@ use pix_icon;
  * @package    core_question
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see /question/bank/editquestion
  */
 class qbank_chooser_item extends \core\output\chooser_item {
 
@@ -47,8 +47,6 @@ class qbank_chooser_item extends \core\output\chooser_item {
      * @param context $context The relevant context.
      */
     public function __construct($qtype, $context) {
-        debugging('Class qbank_chooser_item has been deprecated and moved to bank/editquestion, 
-        please use editquestion plugin instead', DEBUG_DEVELOPER);
         $icon = new pix_icon('icon', $qtype->local_name(), $qtype->plugin_name(), [
             'class' => 'icon',
             'title' => $qtype->local_name()

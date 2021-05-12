@@ -20,6 +20,7 @@
  * @package    moodlecore
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas and others {@link http://moodle.com}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -623,14 +624,14 @@ function require_login_in_context($contextorid = null){
 function print_choose_qtype_to_add_form($hiddenparams, array $allowedqtypes = null, $enablejs = true) {
     global $CFG, $PAGE, $OUTPUT;
 
-    $chooser = core_question\output\qbank_chooser::get($PAGE->course, $hiddenparams, $allowedqtypes);
+    $chooser = qbank_editquestion\qbank_chooser::get($PAGE->course, $hiddenparams, $allowedqtypes);
     $renderer = $PAGE->get_renderer('question', 'bank');
 
     return $renderer->render($chooser);
 }
 
 /**
- * Print a button for creating a new question. This will open question/addquestion.php,
+ * Print a button for creating a new question. This will open bank/editquestion/addquestion.php,
  * which in turn goes to question/question.php before getting back to $params['returnurl']
  * (by default the question bank screen).
  *
@@ -645,7 +646,7 @@ function create_new_question_button($categoryid, $params, $caption, $tooltip = '
     global $CFG, $PAGE, $OUTPUT;
     static $choiceformprinted = false;
     $params['category'] = $categoryid;
-    $url = new moodle_url('/question/addquestion.php', $params);
+    $url = new moodle_url('/question/bank/editquestion/addquestion.php', $params);
     echo $OUTPUT->single_button($url, $caption, 'get', array('disabled'=>$disabled, 'title'=>$tooltip));
 
     if (!$choiceformprinted) {
