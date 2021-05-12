@@ -71,12 +71,12 @@ class view {
     /**
      * @var object|\cm_info|null if we are in a module context, the cm.
      */
-    protected $cm;
+    public $cm;
 
     /**
      * @var object the course we are within.
      */
-    protected $course;
+    public $course;
 
     /**
      * @var \question_bank_column_base[] these are all the 'columns' that are
@@ -129,6 +129,11 @@ class view {
     protected $searchconditions = array();
 
     /**
+     * @var string url of the new question page
+     */
+    public $returnurl;
+
+    /**
      * Constructor
      * @param \question_edit_contexts $contexts
      * @param \moodle_url $pageurl
@@ -141,16 +146,7 @@ class view {
         $this->course = $course;
         $this->cm = $cm;
 
-        // Create the url of the new question page to forward to.
-        $returnurl = $pageurl->out_as_local_url(false);
-        $this->editquestionurl = new \moodle_url('/question/question.php',
-                array('returnurl' => $returnurl));
-        if ($cm !== null) {
-            $this->editquestionurl->param('cmid', $cm->id);
-        } else {
-            $this->editquestionurl->param('courseid', $this->course->id);
-        }
-
+        $this->returnurl = $pageurl->out_as_local_url(false);
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
         // Possibly the heading part can be removed.
@@ -258,7 +254,7 @@ class view {
     protected function init_columns($wanted, $heading = ''): void {
         // If we are using the edit menu column, allow it to absorb all the actions.
         foreach ($wanted as $column) {
-            if ($column instanceof edit_menu_column) {
+            if ($column instanceof \qbank_viewquestionactions\viewquestionactions_column) {
                 $wanted = $column->claim_menuable_columns($wanted);
                 break;
             }
