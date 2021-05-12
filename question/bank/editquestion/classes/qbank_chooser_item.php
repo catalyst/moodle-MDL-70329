@@ -17,7 +17,7 @@
 /**
  * The qbank_chooser_item renderable.
  *
- * @package    core_question
+ * @package    qbank_editquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,7 +34,7 @@ use pix_icon;
 /**
  * The qbank_chooser_item renderable class.
  *
- * @package    core_question
+ * @package    qbank_editquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

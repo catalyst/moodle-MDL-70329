@@ -543,8 +543,11 @@ class view {
      *
      * @param int $questionid the question id.
      * @return \moodle_url the URL, HTML-escaped.
+     * @deprecated since Moodle 4.0
      */
     public function edit_question_moodle_url($questionid) {
+        debugging('Function edit_question_moodle_url() is deprecated, 
+        please use your feature plugin to implement its own url.', DEBUG_DEVELOPER);
         return new \moodle_url($this->editquestionurl, ['id' => $questionid]);
     }
 
@@ -553,8 +556,11 @@ class view {
      *
      * @param int $questionid the question id.
      * @return string the URL, HTML-escaped.
+     * @deprecated since Moodle 4.0
      */
     public function edit_question_url($questionid) {
+        debugging('Function edit_question_url() is deprecated, 
+        please use your feature plugin to implement its own url.', DEBUG_DEVELOPER);
         return $this->edit_question_moodle_url($questionid)->out();
     }
 
@@ -563,8 +569,11 @@ class view {
      *
      * @param int $questionid the question id.
      * @return \moodle_url the URL.
+     * @deprecated since Moodle 4.0
      */
     public function copy_question_moodle_url($questionid) {
+        debugging('Function copy_question_moodle_url() is deprecated, 
+        please use your feature plugin to implement its own url.', DEBUG_DEVELOPER);
         return new \moodle_url($this->editquestionurl, ['id' => $questionid, 'makecopy' => 1]);
     }
 
@@ -572,8 +581,11 @@ class view {
      * Get the URL for duplicating a given question.
      * @param int $questionid the question id.
      * @return string the URL, HTML-escaped.
+     * @deprecated since 4.0
      */
     public function copy_question_url($questionid) {
+        debugging('Function copy_question_url() is deprecated, 
+        please use your feature plugin to implement its own url.', DEBUG_DEVELOPER);
         return $this->copy_question_moodle_url($questionid)->out();
     }
 

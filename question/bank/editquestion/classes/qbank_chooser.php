@@ -17,7 +17,7 @@
 /**
  * The qbank_chooser renderable.
  *
- * @package    core_question
+ * @package    qbank_editquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -37,7 +37,7 @@ use stdClass;
 /**
  * The qbank_chooser renderable class.
  *
- * @package    core_question
+ * @package    qbank_editquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

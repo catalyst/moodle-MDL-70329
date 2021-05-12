@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Shows a screen where the user can choose a question type, before being
- * redirected to question.php
+ * Shows a screen where the user can choose a question type, before being redirected to question.php
  *
  * @package    qbank_editquestion
  * @copyright  2009 Tim Hunt

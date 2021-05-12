@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * Page for editing questions.
  *
@@ -30,6 +29,7 @@ require_once($CFG->libdir . '/formslib.php');
 
 // Read URL parameters telling us which question to edit.
 $id = optional_param('id', 0, PARAM_INT); // Question id.
+$makecopy = optional_param('makecopy', 0, PARAM_BOOL);
 $qtype = optional_param('qtype', '', PARAM_COMPONENT);
 $categoryid = optional_param('category', 0, PARAM_INT);
 $cmid = optional_param('cmid', 0, PARAM_INT);
@@ -43,6 +43,9 @@ $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 $url = new moodle_url('/question/bank/editquestion/question.php');
 if ($id !== 0) {
     $url->param('id', $id);
+}
+if ($makecopy) {
+    $url->param('makecopy', $makecopy);
 }
 if ($qtype !== '') {
     $url->param('qtype', $qtype);
@@ -170,6 +173,12 @@ if ($id) {
     if (!$formeditable) {
         question_require_capability_on($question, 'view');
     }
+    if ($makecopy) {
+        // If we are duplicating a question, add some indication to the question name.
+        $question->name = get_string('questionnamecopy', 'question', $question->name);
+        $question->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $category->id);
+        $question->beingcopied = true;
+    }
 
 } else { // Creating a new question.
     $question->formoptions->canedit = question_has_capability_on($question, 'edit');
@@ -199,6 +208,7 @@ if ($formeditable && $id) {
 
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
+$toform->makecopy = $makecopy;
 if ($cm !== null) {
     $toform->cmid = $cm->id;
     $toform->courseid = $cm->course;
@@ -218,6 +228,11 @@ if ($mform->is_cancelled()) {
     }
 
 } else if ($fromform = $mform->get_data()) {
+    // If we are saving as a copy, break the connection to the old question.
+    if ($makecopy) {
+        $question->id = 0;
+        $question->hidden = 0; // Copies should not be hidden.
+    }
 
     // Process the combination of usecurrentcat, categorymoveto and category form
     // fields, so the save_question method only has to consider $fromform->category.
@@ -241,6 +256,11 @@ if ($mform->is_cancelled()) {
     // We are actually saving the question.
     if (!empty($question->id)) {
         question_require_capability_on($question, 'edit');
+    } else {
+        require_capability('moodle/question:add', context::instance_by_id($contextid));
+        if (!empty($fromform->makecopy) && !$question->formoptions->cansaveasnew) {
+            new moodle_exception('nopermissions', '', '', 'edit');
+        }
     }
 
     // If this is a new question, save defaults for user in user_preferences table.
@@ -266,6 +286,7 @@ if ($mform->is_cancelled()) {
     // If we are saving and continuing to edit the question.
     if (!empty($fromform->updatebutton)) {
         $url->param('id', $question->id);
+        $url->remove_params('makecopy');
         redirect($url);
     }
 
@@ -294,7 +315,7 @@ if ($mform->is_cancelled()) {
         }
         $nexturlparams['id'] = $question->id;
         $nexturlparams['wizardnow'] = $fromform->wizard;
-        $nexturl = new moodle_url('/question/bank/editquestion/question.php', $nexturlparams);
+        $nexturl = new moodle_url('/question/question.php', $nexturlparams);
         if ($cmid) {
             $nexturl->param('cmid', $cmid);
         } else {
