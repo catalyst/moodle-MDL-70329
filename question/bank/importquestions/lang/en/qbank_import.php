@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Strings for component 'qbank_importquestions', language 'en'
  *
  * @package   qbank_importquestions
  * @copyright 2021, Marc-Alexandre Ghaly <marc-alexandreghaly@catalyst-ca.net>
