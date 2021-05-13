@@ -136,7 +136,7 @@ if ($form = $import_form->get_data()) {
 
     $params = $thispageurl->params() + array(
         'category' => $qformat->category->id . ',' . $qformat->category->contextid);
-    echo $OUTPUT->continue_button(new moodle_url('edit.php', $params));
+    echo $OUTPUT->continue_button(new moodle_url('/question/edit.php', $params));
     echo $OUTPUT->footer();
     exit;
 }
