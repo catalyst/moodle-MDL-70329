@@ -21,8 +21,6 @@
  * @subpackage questionbank
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71573
- * @see \core_question\bank\importquestions\import_form
  */
 
 
@@ -30,12 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
-
 /**
  * Form to import questions into the question bank.
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0 MDL-71608
+ * @see \core_question\bank\importquestions\import_form
  */
 class question_import_form extends moodleform {
 
