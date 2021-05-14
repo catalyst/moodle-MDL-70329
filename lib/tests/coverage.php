@@ -35,6 +35,8 @@ return new class extends phpunit_coverage_info {
     /** @var array The list of folders relative to the plugin root to include in coverage generation. */
     protected $includelistfolders = [
         'classes',
+        'xmldb',
+        'weblib.php',
 
         // This is a legacy hangup which relates to parts of the file storage API being placed in the wrong location.
         'filestorage',
@@ -46,8 +48,11 @@ return new class extends phpunit_coverage_info {
     /** @var array The list of folders relative to the plugin root to exclude from coverage generation. */
     protected $excludelistfolders = [
         'filestorage/tests',
+        'classes/access',
     ];
 
     /** @var array The list of files relative to the plugin root to exclude from coverage generation. */
-    protected $excludelistfiles = [];
+    protected $excludelistfiles = [
+        'xmldb/xmldb_constants.php',
+    ];
 };
