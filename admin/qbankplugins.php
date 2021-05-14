@@ -40,7 +40,7 @@ $qbankplugings = core_component::get_plugin_list('qbank');
 // Disable qbank plugin.
 if (($disable = optional_param('disable', '', PARAM_PLUGIN)) && confirm_sesskey()) {
     if (!isset($qbankplugings[$disable])) {
-        print_error('unknownquestiontype', 'question', $url, $disable);
+        throw new moodle_exception('unknownquestiontype', 'question', $url, $disable);
     }
 
     set_config('disabled', 1, 'qbank_' . $disable);
@@ -50,7 +50,7 @@ if (($disable = optional_param('disable', '', PARAM_PLUGIN)) && confirm_sesskey(
 // Enable qbank plugin.
 if (($enable = optional_param('enable', '', PARAM_PLUGIN)) && confirm_sesskey()) {
     if (!isset($qbankplugings[$enable])) {
-        print_error('unknownquestiontype', 'question', $url, $enable);
+        throw new moodle_exception('unknownquestiontype', 'question', $url, $enable);
     }
 
     unset_config('disabled', 'qbank_' . $enable);
@@ -130,6 +130,10 @@ $table->finish_output();
 
 echo $OUTPUT->footer();
 
+/**
+ * Helper function that calls the qbank_plugins_icon_html function
+ * depending on parameters.
+ */
 function qbank_plugins_enable_disable_icons($qbankplugin, $enabled) {
     if ($enabled) {
         return qbank_plugins_icon_html('disable', $qbankplugin, 't/hide',
@@ -140,6 +144,10 @@ function qbank_plugins_enable_disable_icons($qbankplugin, $enabled) {
     }
 }
 
+/**
+ * Helper function that returns the icon if the plugin is
+ * disabled or enabled.
+ */
 function qbank_plugins_icon_html($action, $qbankplugin, $icon, $alt, $tip) {
     global $OUTPUT;
     return $OUTPUT->action_icon(
