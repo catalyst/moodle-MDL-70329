@@ -91,7 +91,7 @@ if ($from_form = $export_form->get_data()) {
         $PAGE->requires->js_function_call('document.location.replace', array($export_url->out(false)), false, 1);
     }
 
-    echo $OUTPUT->continue_button(new moodle_url('edit.php', $thispageurl->params()));
+    echo $OUTPUT->continue_button(new moodle_url('question/edit.php', $thispageurl->params()));
     echo $OUTPUT->footer();
     exit;
 }
