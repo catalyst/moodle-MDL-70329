@@ -48,8 +48,10 @@ class core_question_renderer extends plugin_renderer_base {
      *      Must be a course or category context.
      * @param bool $showlabel if true, show the word 'Preview' after the icon.
      *      If false, just show the icon.
+     * @deprecated since Moodle 4.0
      */
     public function question_preview_link($questionid, context $context, $showlabel) {
+        debugging('Function question_preview_link() has been deprecated and not use anymore.', DEBUG_DEVELOPER);
         if ($showlabel) {
             $alt = '';
             $label = get_string('preview');

@@ -30,9 +30,12 @@
  */
 
 
-require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/questionlib.php');
-require_once(__DIR__ . '/previewlib.php');
+
+use qbank_previewquestion\output\forms\preview_options_form;
+use qbank_previewquestion\output\question_preview_options;
+use qbank_previewquestion\previewquestion_helper;
 
 /**
  * The maximum number of variants previewable. If there are more variants than this for a question
@@ -72,7 +75,7 @@ $maxvariant = min($question->get_num_variants(), QUESTION_PREVIEW_MAX_VARIANTS);
 $options = new question_preview_options($question);
 $options->load_user_defaults();
 $options->set_from_request();
-$PAGE->set_url(question_preview_url($id, $options->behaviour, $options->maxmark,
+$PAGE->set_url(previewquestion_helper::question_preview_url($id, $options->behaviour, $options->maxmark,
         $options, $options->variant, $context));
 
 // Get and validate existing preview, or start a new one.
@@ -86,7 +89,7 @@ if ($previewid) {
         // This may not seem like the right error message to display, but
         // actually from the user point of view, it makes sense.
         print_error('submissionoutofsequencefriendlymessage', 'question',
-                question_preview_url($question->id, $options->behaviour,
+                previewquestion_helper::question_preview_url($question->id, $options->behaviour,
                 $options->maxmark, $options, $options->variant, $context), null, $e);
     }
 
@@ -124,7 +127,7 @@ $options->behaviour = $quba->get_preferred_behaviour();
 $options->maxmark = $quba->get_question_max_mark($slot);
 
 // Create the settings form, and initialise the fields.
-$optionsform = new preview_options_form(question_preview_form_url($question->id, $context, $previewid),
+$optionsform = new preview_options_form(previewquestion_helper::question_preview_form_url($question->id, $context, $previewid),
         array('quba' => $quba, 'maxvariant' => $maxvariant));
 $optionsform->set_data($options);
 
@@ -136,12 +139,12 @@ if ($newoptions = $optionsform->get_submitted_data()) {
         $newoptions->variant = $options->variant;
     }
     if (isset($newoptions->saverestart)) {
-        restart_preview($previewid, $question->id, $newoptions, $context);
+        previewquestion_helper::restart_preview($previewid, $question->id, $newoptions, $context);
     }
 }
 
 // Prepare a URL that is used in various places.
-$actionurl = question_preview_action_url($question->id, $quba->get_id(), $options, $context);
+$actionurl = previewquestion_helper::question_preview_action_url($question->id, $quba->get_id(), $options, $context);
 
 // Process any actions from the buttons at the bottom of the form.
 if (data_submitted() && confirm_sesskey()) {
@@ -149,7 +152,7 @@ if (data_submitted() && confirm_sesskey()) {
     try {
 
         if (optional_param('restart', false, PARAM_BOOL)) {
-            restart_preview($previewid, $question->id, $options, $context);
+            previewquestion_helper::restart_preview($previewid, $question->id, $options, $context);
 
         } else if (optional_param('fill', null, PARAM_BOOL)) {
             $correctresponse = $quba->get_correct_response($slot);

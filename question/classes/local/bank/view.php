@@ -149,6 +149,9 @@ class view {
         $this->returnurl = $pageurl->out_as_local_url(false);
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
+        $this->editquestionurl = new \moodle_url('/question/bank/aecquestion/question.php',
+                array('returnurl' => $this->returnurl));
+
         // Possibly the heading part can be removed.
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();

@@ -759,9 +759,13 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
  * @param object $context context to run the preview in (affects things like
  *      filter settings, theme, lang, etc.) Defaults to $PAGE->context.
  * @return moodle_url the URL.
+ * @deprecated since Moodle 4.0
+ * @see qbank_previewquestion\previewquestion_helper
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
         $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
+    debugging('Function question_preview_url has been deprecated and moved to bank/previewquestion plugin, 
+        please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
 
     $params = array('id' => $questionid);
 
@@ -797,13 +801,15 @@ function question_preview_url($questionid, $preferredbehaviour = null,
         $params['variant'] = $variant;
     }
 
-    return new moodle_url('/question/preview.php', $params);
+    return new moodle_url('/question/bank/previewquestion/preview.php', $params);
 }
 
 /**
  * @return array that can be passed as $params to the {@link popup_action} constructor.
+ * @deprecated since Moodle 4.0
  */
 function question_preview_popup_params() {
+    debugging('Function question_preview_popup_params() has been deprecated and not use anymore.', DEBUG_DEVELOPER);
     return array(
         'height' => 600,
         'width' => 800,
@@ -2191,8 +2197,7 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
     }
 
     if ($module === 'core_question_preview') {
-        require_once($CFG->dirroot . '/question/previewlib.php');
-        return question_preview_question_pluginfile($course, $context,
+        return qbank_previewquestion\previewquestion_helper::question_preview_question_pluginfile($course, $context,
                 $component, $filearea, $qubaid, $slot, $args, $forcedownload, $options);
 
     } else {
