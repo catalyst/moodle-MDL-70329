@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_editquestion.
+ * Version information for qbank_aecquestion.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_editquestion';
+$plugin->component = 'qbank_aecquestion';
 $plugin->version   = 2021051200;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;

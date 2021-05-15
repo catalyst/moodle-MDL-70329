@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_editquestion, language 'en'
+ * Strings for component qbank_aecquestion, language 'en'
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Edit question';
+$string['pluginname'] = 'Add/edit/copy question';

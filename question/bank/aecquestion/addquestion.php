@@ -17,7 +17,7 @@
 /**
  * Shows a screen where the user can choose a question type, before being redirected to question.php
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2009 Tim Hunt
  * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -69,7 +69,7 @@ if (!empty($appendqnumstring)) {
     $hiddenparams['appendqnumstring'] = $appendqnumstring;
 }
 
-$PAGE->set_url('/question/bank/editquestion/addquestion.php', $hiddenparams);
+$PAGE->set_url('/question/bank/aecquestion/addquestion.php', $hiddenparams);
 if ($cmid) {
     $questionbankurl = new moodle_url('/question/edit.php', array('cmid' => $cmid));
 } else {

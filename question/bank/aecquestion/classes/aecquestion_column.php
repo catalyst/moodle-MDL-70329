@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base class for question bank columns that just contain an action icon.
+ * Class for question bank edit question column.
  *
- * @package   qbank_editquestion
+ * @package   qbank_aecquestion
  * @copyright 2009 Tim Hunt
  * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_editquestion;
+namespace qbank_aecquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -31,12 +31,12 @@ use core_question\local\bank\menu_action_column_base;
 use moodle_url;
 
 /**
- * Base class for question bank columns that just contain an action icon.
+ * Class for question bank edit question column.
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class editquestion_column extends menu_action_column_base {
+class aecquestion_column extends menu_action_column_base {
 
     /**
      * Contains the string.
@@ -64,7 +64,7 @@ class editquestion_column extends menu_action_column_base {
         parent::init();
         $this->stredit = get_string('editquestion', 'question');
         $this->strview = get_string('view');
-        $this->editquestionurl = new \moodle_url('/question/bank/editquestion/question.php',
+        $this->editquestionurl = new \moodle_url('/question/bank/aecquestion/question.php',
                 array('returnurl' => $this->qbank->returnurl));
         if ($this->qbank->cm !== null) {
             $this->editquestionurl->param('cmid', $this->qbank->cm->id);
@@ -87,10 +87,10 @@ class editquestion_column extends menu_action_column_base {
      * Get the URL for editing a question as a link.
      *
      * @param int $questionid the question id.
-     * @return \moodle_url the URL, HTML-escaped.
+     * @return moodle_url the URL, HTML-escaped.
      */
     public function edit_question_moodle_url($questionid) {
-        return new \moodle_url($this->editquestionurl, ['id' => $questionid]);
+        return new moodle_url($this->editquestionurl, ['id' => $questionid]);
     }
 
     /**

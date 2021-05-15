@@ -17,12 +17,12 @@
 /**
  * The qbank_chooser renderable.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_editquestion;
+namespace qbank_aecquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,7 +37,7 @@ use stdClass;
 /**
  * The qbank_chooser renderable class.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -66,7 +66,7 @@ class qbank_chooser extends \core\output\chooser {
                 }, $fake));
         }
 
-        parent::__construct(new moodle_url('/question/bank/editquestion/question.php'),
+        parent::__construct(new moodle_url('/question/bank/aecquestion/question.php'),
                 new lang_string('chooseqtypetoadd', 'question'), $sections, 'qtype');
 
         $this->set_instructions(new lang_string('selectaqtypefordescription', 'question'));

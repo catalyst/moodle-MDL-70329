@@ -17,12 +17,12 @@
 /**
  * The qbank_chooser_item renderable.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_editquestion;
+namespace qbank_aecquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,7 +34,7 @@ use pix_icon;
 /**
  * The qbank_chooser_item renderable class.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -16,7 +16,7 @@
 /**
  * Page for editing questions.
  *
- * @package    qbank_editquestion
+ * @package    qbank_aecquestion
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,7 +40,7 @@ $appendqnumstring = optional_param('appendqnumstring', '', PARAM_ALPHA);
 $inpopup = optional_param('inpopup', 0, PARAM_BOOL);
 $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 
-$url = new moodle_url('/question/bank/editquestion/question.php');
+$url = new moodle_url('/question/bank/aecquestion/question.php');
 if ($id !== 0) {
     $url->param('id', $id);
 }
@@ -105,7 +105,7 @@ if ($cmid) {
     $module = null;
     $cm = null;
 } else {
-    new moodle_exception('missingcourseorcmid', 'question');
+    throw new moodle_exception('missingcourseorcmid', 'question');
 }
 $contexts = new question_edit_contexts($thiscontext);
 $PAGE->set_pagelayout('admin');
@@ -116,7 +116,7 @@ if (optional_param('addcancel', false, PARAM_BOOL)) {
 
 if ($id) {
     if (!$question = $DB->get_record('question', array('id' => $id))) {
-        new moodle_exception('questiondoesnotexist', 'question', $returnurl);
+        throw new moodle_exception('questiondoesnotexist', 'question', $returnurl);
     }
     // We can use $COURSE here because it's been initialised as part of the
     // require_login above. Passing it as the third parameter tells the function
@@ -131,18 +131,18 @@ if ($id) {
 
     // Check that users are allowed to create this question type at the moment.
     if (!question_bank::qtype_enabled($qtype)) {
-        new moodle_exception('cannotenable', 'question', $returnurl, $qtype);
+        throw new moodle_exception('cannotenable', 'question', $returnurl, $qtype);
     }
 
 } else if ($categoryid) {
     // Category, but no qtype. They probably came from the addquestion.php
     // script without choosing a question type. Send them back.
-    $addurl = new moodle_url('/question/bank/editquestion/addquestion.php', $url->params());
+    $addurl = new moodle_url('/question/bank/aecquestion/addquestion.php', $url->params());
     $addurl->param('validationerror', 1);
     redirect($addurl);
 
 } else {
-    new moodle_exception('notenoughdatatoeditaquestion', 'question', $returnurl);
+    throw new moodle_exception('notenoughdatatoeditaquestion', 'question', $returnurl);
 }
 
 $qtypeobj = question_bank::get_qtype($question->qtype);
@@ -152,7 +152,7 @@ if (isset($question->categoryobject)) {
 } else {
     // Validate the question category.
     if (!$category = $DB->get_record('question_categories', array('id' => $question->category))) {
-        new moodle_exception('categorydoesnotexist', 'question', $returnurl);
+        throw new moodle_exception('categorydoesnotexist', 'question', $returnurl);
     }
 }
 
@@ -259,7 +259,7 @@ if ($mform->is_cancelled()) {
     } else {
         require_capability('moodle/question:add', context::instance_by_id($contextid));
         if (!empty($fromform->makecopy) && !$question->formoptions->cansaveasnew) {
-            new moodle_exception('nopermissions', '', '', 'edit');
+            throw new moodle_exception('nopermissions', '', '', 'edit');
         }
     }
 
