@@ -33,7 +33,7 @@ use core\output\checkbox_toggleall;
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class checkbox_column extends column_base {
+class checkbox_column extends \core_question\local\bank\column_base {
 
     public function get_name() {
         return 'checkbox';
