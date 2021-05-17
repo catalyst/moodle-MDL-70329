@@ -1,0 +1,1 @@
+YUI.add("moodle-question-preview",function(e,i){},"@VERSION@",{requires:[]});

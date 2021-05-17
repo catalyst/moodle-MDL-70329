@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library functions used by preview.php.
+ * Settings form for the preview options.
  *
  * @package    qbank_previewquestion
  * @copyright  2010 The Open University

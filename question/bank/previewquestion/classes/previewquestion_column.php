@@ -19,6 +19,7 @@
  *
  * @package   qbank_previewquestion
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,40 +50,6 @@ class previewquestion_column extends menu_action_column_base {
         return 'previewaction';
     }
 
-    //protected function display_content($question, $rowclasses) {
-    //    global $PAGE;
-    //
-    //    if (!\question_bank::is_qtype_installed($question->qtype)) {
-    //        // It sometimes happens that people end up with junk questions
-    //        // in their question bank of a type that is no longer installed.
-    //        // We cannot do most actions on them, because that leads to errors.
-    //        return;
-    //    }
-    //
-    //    if (question_has_capability_on($question, 'use')) {
-    //        echo $PAGE->get_renderer('core_question')->question_preview_link(
-    //                $question->id, $this->qbank->get_most_specific_context(), false);
-    //    }
-    //}
-    //
-    //public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
-    //    if (!\question_bank::is_qtype_installed($question->qtype)) {
-    //        // It sometimes happens that people end up with junk questions
-    //        // in their question bank of a type that is no longer installed.
-    //        // We cannot do most actions on them, because that leads to errors.
-    //        return null;
-    //    }
-    //
-    //    if (!question_has_capability_on($question, 'use')) {
-    //        return null;
-    //    }
-    //
-    //    $context = $this->qbank->get_most_specific_context();
-    //    $url = question_preview_url($question->id, null, null, null, null, $context);
-    //    return new \action_menu_link_secondary($url, new \pix_icon('t/preview', ''),
-    //            $this->strpreview, ['target' => 'questionpreview']);
-    //}
-
     /**
      * Get the information required to display this action either as a menu item or a separate action column.
      *
@@ -110,5 +77,39 @@ class previewquestion_column extends menu_action_column_base {
         } else {
             return [null, null, null];
         }
+    }
+
+    protected function display_content($question, $rowclasses) {
+        global $PAGE;
+
+        if (!\question_bank::is_qtype_installed($question->qtype)) {
+            // It sometimes happens that people end up with junk questions
+            // in their question bank of a type that is no longer installed.
+            // We cannot do most actions on them, because that leads to errors.
+            return;
+        }
+
+        if (question_has_capability_on($question, 'use')) {
+            echo $PAGE->get_renderer('qbank_previewquestion')->question_preview_link(
+                    $question->id, $this->qbank->get_most_specific_context(), false);
+        }
+    }
+
+    public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
+        if (!\question_bank::is_qtype_installed($question->qtype)) {
+            // It sometimes happens that people end up with junk questions
+            // in their question bank of a type that is no longer installed.
+            // We cannot do most actions on them, because that leads to errors.
+            return null;
+        }
+
+        if (!question_has_capability_on($question, 'use')) {
+            return null;
+        }
+
+        $context = $this->qbank->get_most_specific_context();
+        $url = previewquestion_helper::question_preview_url($question->id, null, null, null, null, $context);
+        return new \action_menu_link_secondary($url, new \pix_icon('t/preview', ''),
+                $this->strpreview, ['target' => 'questionpreview']);
     }
 }

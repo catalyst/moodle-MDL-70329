@@ -1,7 +1,7 @@
 {
-    "name": "moodle-qbank_previewquestion-preview",
+    "name": "moodle-question-preview",
     "builds": {
-        "moodle-qbank_previewquestion-preview": {
+        "moodle-question-preview": {
             "jsfiles": [
                 "preview.js"
             ]

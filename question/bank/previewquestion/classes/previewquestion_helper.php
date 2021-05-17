@@ -36,6 +36,7 @@ use stdClass;
 
 
 class previewquestion_helper {
+
     /**
      * Called via pluginfile.php -> question_pluginfile to serve files belonging to
      * a question in a question_attempt when that attempt is a preview.
@@ -199,5 +200,16 @@ class previewquestion_helper {
         }
 
         return new moodle_url('/question/bank/previewquestion/preview.php', $params);
+    }
+
+    /**
+     * Popup params for the question preview.
+     * @return array that can be passed as $params to the {@link popup_action} constructor.
+     */
+    public static function question_preview_popup_params() {
+        return array(
+                'height' => 600,
+                'width' => 800,
+        );
     }
 }

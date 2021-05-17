@@ -764,8 +764,8 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
         $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
-    debugging('Function question_preview_url has been deprecated and moved to bank/previewquestion plugin, 
-        please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
+    debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin, 
+    Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
 
     $params = array('id' => $questionid);
 
@@ -807,9 +807,11 @@ function question_preview_url($questionid, $preferredbehaviour = null,
 /**
  * @return array that can be passed as $params to the {@link popup_action} constructor.
  * @deprecated since Moodle 4.0
+ * @see qbank_previewquestion\previewquestion_helper
  */
 function question_preview_popup_params() {
-    debugging('Function question_preview_popup_params() has been deprecated and not use anymore.', DEBUG_DEVELOPER);
+    debugging('Function question_preview_popup_params() has been deprecated and moved to qbank_previewquestion plugin, 
+    Please use qbank_previewquestion\previewquestion_helper::question_preview_popup_params() instead.', DEBUG_DEVELOPER);
     return array(
         'height' => 600,
         'width' => 800,

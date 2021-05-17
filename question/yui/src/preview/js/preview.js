@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,17 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version information for qbank_previewquestion.
- *
- * @package    qbank_previewquestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+/*
+ * @copyright 2014 The Open University
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * JavaScript required by the question preview pop-up.
+ *
+ * @module moodle-question-preview
+ */
 
-$plugin->component = 'qbank_previewquestion';
-$plugin->version   = 2021051700;
-$plugin->requires  = 2021052500;
-$plugin->maturity  = MATURITY_STABLE;
+Y.log("The moodle-question-preview module has been deprecated. " +
+    "Please use moodle-qbank_previewquestion-preview instead.", 'moodle-core-notification', 'warn');

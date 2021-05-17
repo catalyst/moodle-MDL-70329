@@ -1,5 +1,5 @@
 {
-  "moodle-question-preview": {
+  "moodle-qbank_previewquestion-preview": {
     "requires": [
         "base",
         "dom",
