@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 use question_display_options;
 
 /**
- * Displays question preview options as default and set the options
+ * Displays question preview options as default and set the options.
  * Setting default, getting and setting user preferences in question preview options.
  *
  * @copyright  2010 The Open University
@@ -50,6 +50,7 @@ class question_preview_options extends question_display_options {
 
     /**
      * Constructor.
+     * @param $question
      */
     public function __construct($question) {
         $this->behaviour = 'deferredfeedback';

@@ -41,11 +41,21 @@ class previewquestion_column extends menu_action_column_base {
      */
     protected $strpreview;
 
+    /**
+     * A chance for subclasses to initialise themselves, for example to load lang strings,
+     * without having to override the constructor.
+     */
     public function init() {
         parent::init();
         $this->strpreview = get_string('preview');
     }
 
+    /**
+     * Get the internal name for this column. Used as a CSS class name,
+     * and to store information about the current sort. Must match PARAM_ALPHA.
+     *
+     * @return string column name.
+     */
     public function get_name() {
         return 'previewaction';
     }
@@ -79,6 +89,11 @@ class previewquestion_column extends menu_action_column_base {
         }
     }
 
+    /**
+     * Output the contents of this column.
+     * @param object $question the row from the $question table, augmented with extra information.
+     * @param string $rowclasses CSS class names that should be applied to this row of output.
+     */
     protected function display_content($question, $rowclasses) {
         global $PAGE;
 
@@ -95,6 +110,12 @@ class previewquestion_column extends menu_action_column_base {
         }
     }
 
+    /**
+     * Return the appropriate action menu link, or null if it does not apply to this question.
+     *
+     * @param \stdClass $question data about the question being displayed in this row.
+     * @return \action_menu_link|null the action, if applicable to this question.
+     */
     public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
         if (!\question_bank::is_qtype_installed($question->qtype)) {
             // It sometimes happens that people end up with junk questions

@@ -34,15 +34,17 @@ use question_display_options;
 use question_engine;
 use stdClass;
 
-
+/**
+ * Class previewquestion_helper contains all the library functions.
+ *
+ * @package qbank_previewquestion
+ */
 class previewquestion_helper {
 
     /**
      * Called via pluginfile.php -> question_pluginfile to serve files belonging to
      * a question in a question_attempt when that attempt is a preview.
      *
-     * @package  core_question
-     * @category files
      * @param stdClass $course course settings object
      * @param stdClass $context context object
      * @param string $component the name of the component we are serving files for.
@@ -51,8 +53,7 @@ class previewquestion_helper {
      * @param int $slot the relevant slot within the usage.
      * @param array $args the remaining bits of the file path.
      * @param bool $forcedownload whether the user must be forced to download the file.
-     * @param array $options additional options affecting the file serving
-     * @return bool false if file not found, does not return if found - justsend the file
+     * @param $fileoptions
      */
     public static function question_preview_question_pluginfile($course, $context, $component,
             $filearea, $qubaid, $slot, $args, $forcedownload, $fileoptions) {

@@ -30,18 +30,12 @@ defined('MOODLE_INTERNAL') || die();
 use context;
 use qbank_previewquestion\previewquestion_helper;
 
+/**
+ * Class renderer for rendering preview url
+ *
+ * @package qbank_previewquestion\output
+ */
 class renderer extends \plugin_renderer_base {
-
-    /**
-     * Throws in a call to the JS for AJAX etc.
-     *
-     * @return string html for the page
-     */
-    public function __construct()
-    {
-        global $PAGE;
-        parent::__construct($PAGE, RENDERER_TARGET_GENERAL);
-    }
 
     /**
      * Render an icon, optionally with the word 'Preview' beside it, to preview
