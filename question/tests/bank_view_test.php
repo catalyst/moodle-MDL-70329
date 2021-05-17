@@ -59,7 +59,7 @@ class core_question_bank_view_testcase extends advanced_testcase {
         $cache->delete($questiondata->id);
 
         // Generate the view.
-        $view = new core_question\bank\view($contexts, new moodle_url('/'), $course);
+        $view = new core_question\local\bank\view($contexts, new moodle_url('/'), $course);
         ob_start();
         $view->display('editq', 0, 20, $cat->id . ',' . $context->id, false, false, false);
         $html = ob_get_clean();
@@ -91,7 +91,7 @@ class core_question_bank_view_testcase extends advanced_testcase {
         $DB->set_field('question', 'qtype', 'unknownqtype', ['id' => $questiondata->id]);
 
         // Generate the view.
-        $view = new core_question\bank\view($contexts, new moodle_url('/'), $course);
+        $view = new core_question\local\bank\view($contexts, new moodle_url('/'), $course);
         ob_start();
         $view->display('editq', 0, 20, $cat->id . ',' . $context->id, false, false, false);
         $html = ob_get_clean();
