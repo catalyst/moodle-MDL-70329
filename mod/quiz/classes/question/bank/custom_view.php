@@ -33,7 +33,7 @@ use coding_exception;
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class custom_view extends \core_question\bank\view {
+class custom_view extends \core_question\local\bank\view {
     /** @var bool whether the quiz this is used by has been attemptd. */
     protected $quizhasattempts = false;
     /** @var \stdClass the quiz settings. */

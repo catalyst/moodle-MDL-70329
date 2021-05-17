@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for the {@link core_question\bank\random_question_loader} class.
+ * Tests for the {@link core_question\local\bank\random_question_loader} class.
  *
  * @package   core_question
  * @copyright 2015 The Open University
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 
 /**
- * Tests for the {@link core_question\bank\random_question_loader} class.
+ * Tests for the {@link core_question\local\bank\random_question_loader} class.
  *
  * @copyright  2015 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -38,7 +38,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
 
         $cat = $generator->create_question_category();
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
         $this->assertNull($loader->get_next_question_id($cat->id, 1));
@@ -46,7 +46,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
     public function test_unknown_category_behaves_like_empty() {
         // It is up the caller to make sure the category id is valid.
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
         $this->assertNull($loader->get_next_question_id(-1, 1));
     }
 
@@ -56,7 +56,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
         $cat = $generator->create_question_category();
         $info = $generator->create_question('description', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
     }
@@ -69,7 +69,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
         $DB->set_field('question', 'hidden', 1, array('id' => $question1->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
     }
@@ -80,7 +80,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('multianswer', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertEquals($question1->id, $loader->get_next_question_id($cat->id, 0));
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
@@ -95,7 +95,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', array('course' => $course));
         quiz_add_random_questions($quiz, 1, $cat->id, 1, false);
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
     }
@@ -106,7 +106,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertEquals($question1->id, $loader->get_next_question_id($cat->id, 1));
         $this->assertNull($loader->get_next_question_id($cat->id, 0));
@@ -119,7 +119,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
         $question2 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $questionids = array();
         $questionids[] = $loader->get_next_question_id($cat->id, 0);
@@ -138,7 +138,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $cat2 = $generator->create_question_category(array('parent' => $cat1->id));
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat1->id));
         $question2 = $generator->create_question('shortanswer', null, array('category' => $cat2->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertEquals($question2->id, $loader->get_next_question_id($cat2->id, 1));
         $this->assertEquals($question1->id, $loader->get_next_question_id($cat1->id, 1));
@@ -153,7 +153,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
         $question2 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()),
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()),
                 array($question2->id => 2));
 
         $this->assertEquals($question1->id, $loader->get_next_question_id($cat->id, 0));
@@ -175,7 +175,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $quba->start_all_questions();
         question_engine::save_questions_usage_by_activity($quba);
 
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array($quba->get_id())));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array($quba->get_id())));
 
         $this->assertEquals($question1->id, $loader->get_next_question_id($cat->id, 0));
         $this->assertEquals($question2->id, $loader->get_next_question_id($cat->id, 0));
@@ -187,7 +187,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
 
         $cat = $generator->create_question_category();
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertFalse($loader->is_question_available($cat->id, 0, 1));
         $this->assertFalse($loader->is_question_available($cat->id, 1, 1));
@@ -199,7 +199,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
         $cat = $generator->create_question_category();
         $info = $generator->create_question('description', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertFalse($loader->is_question_available($cat->id, 0, $info->id));
         $this->assertFalse($loader->is_question_available($cat->id, 1, $info->id));
@@ -211,7 +211,7 @@ class random_question_loader_testcase extends advanced_testcase {
 
         $cat = $generator->create_question_category();
         $question1 = $generator->create_question('shortanswer', null, array('category' => $cat->id));
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list(array()));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list(array()));
 
         $this->assertTrue($loader->is_question_available($cat->id, 0, $question1->id));
         $this->assertFalse($loader->is_question_available($cat->id, 0, $question1->id));
@@ -345,7 +345,7 @@ class random_question_loader_testcase extends advanced_testcase {
             return $tags[$tagname]->id;
         }, $usetagnames);
 
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list([]));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list([]));
         $result = $loader->get_questions($category->id, $includesubcategories, $tagids);
         // Generate the expected question set.
         $expectedquestions = array_map(function($index) use ($questions) {
@@ -370,7 +370,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $tagids = [];
         $limit = 1;
         $offset = 0;
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list([]));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list([]));
         list($category, $questions) = $this->create_category_and_questions($numberofquestions);
 
         // Sort the questions by id to match the ordering of the get_questions
@@ -413,7 +413,7 @@ class random_question_loader_testcase extends advanced_testcase {
         $limit = 10;
         $offset = 0;
         $fields = ['id', 'name'];
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list([]));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list([]));
         list($category, $questions) = $this->create_category_and_questions(1);
 
         $result = $loader->get_questions(
@@ -561,7 +561,7 @@ class random_question_loader_testcase extends advanced_testcase {
             return $tags[$tagname]->id;
         }, $usetagnames);
 
-        $loader = new \core_question\bank\random_question_loader(new qubaid_list([]));
+        $loader = new \core_question\local\bank\random_question_loader(new qubaid_list([]));
         $result = $loader->count_questions($category->id, $includesubcategories, $tagids);
 
         // Ensure the result matches what was expected.
