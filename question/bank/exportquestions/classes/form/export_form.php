@@ -17,12 +17,14 @@
 /**
  * Defines the export questions form.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_exportquestions
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_exportquestions\form;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 

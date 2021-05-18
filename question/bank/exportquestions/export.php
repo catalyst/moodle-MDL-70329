@@ -30,6 +30,9 @@ require_once($CFG->dirroot . '/question/bank/exportquestions/classes/form/export
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
+use qbank_exportquestions\exportquestions_helper;
+use qbank_exportquestions\form\question_export_form;
+
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('export', '/question/bank/exportquestions/export.php');
 
@@ -71,7 +74,7 @@ if ($from_form = $export_form->get_data()) {
     $qformat = new $classname();
     $filename = question_default_export_filename($COURSE, $category) .
             $qformat->export_file_extension();
-    $export_url = question_make_export_url($thiscontext->id, $category->id,
+    $export_url = exportquestions_helper::question_make_export_url($thiscontext->id, $category->id,
             $from_form->format, $withcategories, $withcontexts, $filename);
 
     echo $OUTPUT->box_start();
@@ -91,7 +94,7 @@ if ($from_form = $export_form->get_data()) {
         $PAGE->requires->js_function_call('document.location.replace', array($export_url->out(false)), false, 1);
     }
 
-    echo $OUTPUT->continue_button(new moodle_url('question/edit.php', $thispageurl->params()));
+    echo $OUTPUT->continue_button(new moodle_url('../../edit.php', $thispageurl->params()));
     echo $OUTPUT->footer();
     exit;
 }
