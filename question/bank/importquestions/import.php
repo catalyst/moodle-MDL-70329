@@ -36,7 +36,7 @@ use qbank_importquestions\forms\question_import_form;
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
 
-// get display strings
+// Get display strings.
 $txt = new stdClass();
 $txt->importerror = get_string('importerror', 'question');
 $txt->importquestions = get_string('importquestions', 'question');
@@ -48,9 +48,9 @@ if (!$category = $DB->get_record("question_categories", array('id' => $catid))) 
 
 $categorycontext = context::instance_by_id($category->contextid);
 $category->context = $categorycontext;
-//this page can be called without courseid or cmid in which case
-//we get the context from the category object.
-if ($contexts === null) { // need to get the course from the chosen category
+// This page can be called without courseid or cmid in which case.
+// We get the context from the category object.
+if ($contexts === null) { // Need to get the course from the chosen category.
     $contexts = new question_edit_contexts($categorycontext);
     $thiscontext = $contexts->lowest();
     if ($thiscontext->contextlevel == CONTEXT_COURSE){
@@ -81,14 +81,14 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
-// file upload form sumitted
+// File upload form sumitted.
 if ($form = $import_form->get_data()) {
 
-    // file checks out ok
+    // File checks out ok.
     $fileisgood = false;
 
-    // work out if this is an uploaded file
-    // or one from the filesarea.
+    // Work out if this is an uploaded file.
+    // Or one from the filesarea.
     $realfilename = $import_form->get_new_filename('newfile');
     $importfile = make_request_directory() . "/{$realfilename}";
     if (!$result = $import_form->save_file('newfile', $importfile, true)) {
@@ -105,7 +105,7 @@ if ($form = $import_form->get_data()) {
     $classname = 'qformat_' . $form->format;
     $qformat = new $classname();
 
-    // load data into class
+    // Load data into class.
     $qformat->setCategory($category);
     $qformat->setContexts($contexts->having_one_edit_tab_cap('import'));
     $qformat->setCourse($COURSE);
@@ -116,17 +116,17 @@ if ($form = $import_form->get_data()) {
     $qformat->setContextfromfile(!empty($form->contextfromfile));
     $qformat->setStoponerror($form->stoponerror);
 
-    // Do anything before that we need to
+    // Do anything before that we need to.
     if (!$qformat->importpreprocess()) {
         print_error('cannotimport', '', $thispageurl->out());
     }
 
-    // Process the uploaded file
+    // Process the uploaded file.
     if (!$qformat->importprocess()) {
         print_error('cannotimport', '', $thispageurl->out());
     }
 
-    // In case anything needs to be done after
+    // In case anything needs to be done after.
     if (!$qformat->importpostprocess()) {
         print_error('cannotimport', '', $thispageurl->out());
     }
@@ -148,6 +148,6 @@ if ($form = $import_form->get_data()) {
 
 echo $OUTPUT->heading_with_help($txt->importquestions, 'importquestions', 'question');
 
-/// Print upload form
+/// Print upload form.
 $import_form->display();
 echo $OUTPUT->footer();
