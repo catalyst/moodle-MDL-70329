@@ -12,15 +12,18 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
- *
- * @package   qbank_importquestions
- * @copyright 2021, Marc-Alexandre Ghaly <marc-alexandreghaly@catalyst-ca.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Defines the import questions form.
+ * 
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @package    qbank_importquestions
+ * @subpackage questionbank
+ * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
@@ -28,7 +31,7 @@ require_once($CFG->dirroot . '/question/bank/importquestions/classes/form/import
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
-use qbank_importquestions\form\question_import_form;
+use qbank_importquestions\forms\question_import_form;
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
