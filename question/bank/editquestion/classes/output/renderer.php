@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Class renderer for add/edit/copy
  *
- * @package qbank_editquestion\output
+ * @package qbank_editquestion
  */
 class renderer extends \plugin_renderer_base {
 
