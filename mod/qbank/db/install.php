@@ -25,10 +25,28 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once('../config.php');
+require_once($CFG->dirroot.'/course/lib.php');
+
 /**
  * Custom code to be run on installing the plugin.
+ * 
+ * @author      Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 function xmldb_qbank_install() {
+    global $DB;
 
+    // Retrieve names of question banks that are populated
+    $sqlq = 'SELECT name FROM mdl_question_categories qc WHERE qc.infoformat <> 0';
+    $rec = $DB->get_records_sql($sqlq);
+    $catname = $rec[0]->name;
+
+    $newcourses = array();
+    foreach($catname as $cat) {
+        $newcourses[] = $cat . ' course';
+    }
+
+    $v = 0;
     return true;
 }
