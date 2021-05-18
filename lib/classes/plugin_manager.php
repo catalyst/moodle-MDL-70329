@@ -1941,7 +1941,7 @@ class core_plugin_manager {
 
             'qbank' => array(
                 'importquestions',
-           ),
+            ),
 
             'qbehaviour' => array(
                 'adaptive', 'adaptivenopenalty', 'deferredcbm',

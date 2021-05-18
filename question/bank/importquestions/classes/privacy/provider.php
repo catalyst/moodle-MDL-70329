@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for core_question.
+ * Privacy Subsystem implementation for qbank_importquestions.
  *
  * @package   qbank_importquestions
  * @category  privacy
@@ -25,10 +25,8 @@
 
 namespace qbank_importquestions\privacy;
 
-class provider implements
-    // This plugin does not store any personal user data.
-    \core_privacy\local\metadata\null_provider {
- 
+class provider implements \core_privacy\local\metadata\null_provider {
+
     /**
      * Get the language string identifier with the component's language
      * file to explain why this plugin stores no data.

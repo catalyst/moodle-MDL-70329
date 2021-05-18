@@ -35,13 +35,13 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71608
- * @see \core_question\bank\importquestions\import_form
+ * @see qbank_importquestions\form\question_import_form
  */
 class question_import_form extends moodleform {
 
     protected function definition() {
         debugging('Class question_import_form in \core_question\import_form is deprecated,
-        please use core_question\bank\importquestions\import_form', DEBUG_DEVELOPER);
+        please use qbank_importquestions\form\question_import_form instead.', DEBUG_DEVELOPER);
 
         global $OUTPUT;
 

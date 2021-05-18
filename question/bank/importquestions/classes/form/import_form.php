@@ -22,17 +22,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_importquestions\forms;
+namespace qbank_importquestions\form;
 
+use moodle_exception;
 use moodleform;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
-
 /**
- * Form to export questions from the question bank.
+ * Form to import questions into the question bank.
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

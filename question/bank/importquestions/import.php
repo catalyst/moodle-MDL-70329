@@ -28,6 +28,8 @@ require_once($CFG->dirroot . '/question/bank/importquestions/classes/form/import
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
+use qbank_importquestions\form\question_import_form;
+
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
 
