@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A column with a checkbox for each question with name q{questionid}.
+ * A column with a type of question for each question with name q{questionid}.
  *
  * @package   qbank_viewquestiontype
  * @copyright 2009 Tim Hunt
