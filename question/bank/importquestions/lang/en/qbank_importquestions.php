@@ -23,4 +23,4 @@
  */
 
 $string['pluginname'] = 'Import question bank';
-$string['privacy:metadata'] = 'The Import question bank only imports existing question data.';
+$string['privacy:metadata'] = 'The import question bank will import questions from a file according to the selected file format.';
