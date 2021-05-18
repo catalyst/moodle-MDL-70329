@@ -55,7 +55,7 @@ class duplicatequestion_column extends menu_action_column_base {
         parent::init();
         $this->strcopy = get_string('duplicate');
 
-        $this->duplicatequestionurl = new \moodle_url('/question/bank/aecquestion/question.php',
+        $this->duplicatequestionurl = new \moodle_url('/question/bank/editquestion/question.php',
                 array('returnurl' => $this->qbank->returnurl));
         if ($this->qbank->cm !== null) {
             $this->duplicatequestionurl->param('cmid', $this->qbank->cm->id);

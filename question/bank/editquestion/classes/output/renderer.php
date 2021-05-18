@@ -15,16 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_aecquestion.
+ * Helper class for adding/editing a question.
  *
- * @package    qbank_aecquestion
+ * This code is based on question/renderer.php by The Open University.
+ *
+ * @package    qbank_editquestion
  * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_editquestion\output;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_aecquestion';
-$plugin->version   = 2021051200;
-$plugin->requires  = 2021052500;
-$plugin->maturity  = MATURITY_STABLE;
+/**
+ * Class renderer for add/edit/copy
+ *
+ * @package qbank_editquestion\output
+ */
+class renderer extends \plugin_renderer_base {
+
+    /**
+     * Render a qbank_chooser.
+     *
+     * @param \renderable $qbankchooser The chooser.
+     * @return string
+     */
+    public function render_qbank_chooser(\renderable $qbankchooser) {
+        return $this->render_from_template('qbank_editquestion/qbank_chooser', $qbankchooser->export_for_template($this));
+    }
+}

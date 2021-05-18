@@ -1,3 +1,4 @@
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,10 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * JavaScript required by the add question pop-up.
+ * Strings for component qbank_editquestion, language 'en'
  *
- * @module moodle-question-chooser
+ * @package    qbank_editquestion
+ * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-Y.log("The moodle-question-chooser module has been deprecated. " +
-    "Please use moodle-qbank_editquestion-chooser instead.", 'moodle-core-notification', 'warn');
+$string['pluginname'] = 'Edit question';

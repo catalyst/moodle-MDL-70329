@@ -17,13 +17,13 @@
 /**
  * Class for question bank edit question column.
  *
- * @package   qbank_aecquestion
+ * @package   qbank_editquestion
  * @copyright 2009 Tim Hunt
  * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_aecquestion;
+namespace qbank_editquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -36,7 +36,7 @@ use moodle_url;
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class aecquestion_column extends menu_action_column_base {
+class editquestion_column extends menu_action_column_base {
 
     /**
      * Contains the string.
@@ -64,7 +64,7 @@ class aecquestion_column extends menu_action_column_base {
         parent::init();
         $this->stredit = get_string('editquestion', 'question');
         $this->strview = get_string('view');
-        $this->editquestionurl = new \moodle_url('/question/bank/aecquestion/question.php',
+        $this->editquestionurl = new \moodle_url('/question/bank/editquestion/question.php',
                 array('returnurl' => $this->qbank->returnurl));
         if ($this->qbank->cm !== null) {
             $this->editquestionurl->param('cmid', $this->qbank->cm->id);

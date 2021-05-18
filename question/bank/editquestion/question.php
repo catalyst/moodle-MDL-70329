@@ -16,9 +16,8 @@
 /**
  * Page for editing questions.
  *
- * @package    qbank_aecquestion
+ * @package    qbank_editquestion
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +39,7 @@ $appendqnumstring = optional_param('appendqnumstring', '', PARAM_ALPHA);
 $inpopup = optional_param('inpopup', 0, PARAM_BOOL);
 $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 
-$url = new moodle_url('/question/bank/aecquestion/question.php');
+$url = new moodle_url('/question/bank/editquestion/question.php');
 if ($id !== 0) {
     $url->param('id', $id);
 }
@@ -137,7 +136,7 @@ if ($id) {
 } else if ($categoryid) {
     // Category, but no qtype. They probably came from the addquestion.php
     // script without choosing a question type. Send them back.
-    $addurl = new moodle_url('/question/bank/aecquestion/addquestion.php', $url->params());
+    $addurl = new moodle_url('/question/bank/editquestion/addquestion.php', $url->params());
     $addurl->param('validationerror', 1);
     redirect($addurl);
 

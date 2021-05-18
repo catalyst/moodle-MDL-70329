@@ -17,7 +17,7 @@
 /**
  * Shows a screen where the user can choose a question type, before being redirected to question.php
  *
- * @package    qbank_aecquestion
+ * @package    qbank_editquestion
  * @copyright  2009 Tim Hunt
  * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,6 +25,8 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/../../editlib.php');
+
+use qbank_editquestion\editquestion_helper;
 
 // Read URL parameters.
 $categoryid = required_param('category', PARAM_INT);
@@ -69,7 +71,7 @@ if (!empty($appendqnumstring)) {
     $hiddenparams['appendqnumstring'] = $appendqnumstring;
 }
 
-$PAGE->set_url('/question/bank/aecquestion/addquestion.php', $hiddenparams);
+$PAGE->set_url('/question/bank/editquestion/addquestion.php', $hiddenparams);
 if ($cmid) {
     $questionbankurl = new moodle_url('/question/edit.php', array('cmid' => $cmid));
 } else {
@@ -86,6 +88,6 @@ $PAGE->set_title($chooseqtype);
 echo $OUTPUT->header();
 echo $OUTPUT->notification(get_string('youmustselectaqtype', 'question'));
 echo $OUTPUT->box_start('generalbox boxwidthnormal boxaligncenter', 'chooseqtypebox');
-echo print_choose_qtype_to_add_form($hiddenparams, null, false);
+echo editquestion_helper::print_choose_qtype_to_add_form($hiddenparams, null, false);
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();

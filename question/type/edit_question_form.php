@@ -256,6 +256,7 @@ abstract class question_edit_form extends question_wizard_form {
         $buttonarray[] = $mform->createElement('submit', 'updatebutton',
                              get_string('savechangesandcontinueediting', 'question'));
         if ($this->can_preview()) {
+            // This need to be changed before merging, the renderer should point to the plugin renderer.
             $previewlink = $PAGE->get_renderer('core_question')->question_preview_link(
                     $this->question->id, $this->context, true);
             $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
