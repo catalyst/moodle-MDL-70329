@@ -12,15 +12,19 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Defines the export questions form.
  *
- * @package   qbank_importquestions
- * @copyright 2021, Marc-Alexandre Ghaly <marc-alexandreghaly@catalyst-ca.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    qbank_importquestions
+ * @copyright  2007 Jamie Pratt me@jamiep.org
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace qbank_importquestions\forms;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -28,7 +32,7 @@ require_once($CFG->libdir . '/formslib.php');
 
 
 /**
- * Form to import questions into the question bank.
+ * Form to export questions from the question bank.
  *
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
