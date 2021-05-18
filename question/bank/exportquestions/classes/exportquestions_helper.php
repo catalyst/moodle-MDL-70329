@@ -15,11 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library functions used by question/preview.php.
+ * Library functions used by qbank_exportquestions/export.php.
  *
  * @package    qbank_exportquestions
- * @copyright  2010 The Open University
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
