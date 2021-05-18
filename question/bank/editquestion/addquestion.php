@@ -41,7 +41,7 @@ $hiddenparams = array('category' => $categoryid);
 
 // Validate params.
 if (!$category = $DB->get_record('question_categories', array('id' => $categoryid))) {
-    new moodle_exception('categorydoesnotexist', 'question', $returnurl);
+    throw new moodle_exception('categorydoesnotexist', 'question', $returnurl);
 }
 
 if ($cmid) {
@@ -56,7 +56,7 @@ if ($cmid) {
     $cm = null;
     $hiddenparams['courseid'] = $courseid;
 } else {
-    new moodle_exception('missingcourseorcmid', 'question');
+    throw new moodle_exception('missingcourseorcmid', 'question');
 }
 
 // Check permissions.
