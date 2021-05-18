@@ -35,12 +35,12 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71585
- * @see \core_question\bank\managecategories\move_form
+ * @see qbank_managecategories\form\move_form
  */
 class question_move_form extends moodleform {
     protected function definition() {
         debugging('Class question_move_form in \core_question\move_form is deprecated,
-        please use core_question\bank\managecategories\question_move_form', DEBUG_DEVELOPER);
+        please use core_question\bank\managecategories\form\question_move_form instead.', DEBUG_DEVELOPER);
 
         $mform = $this->_form;
 

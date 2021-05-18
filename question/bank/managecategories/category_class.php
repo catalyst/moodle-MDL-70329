@@ -30,9 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 define('QUESTION_PAGE_LENGTH', 25);
 
 require_once($CFG->libdir . '/listlib.php');
-require_once($CFG->dirroot . '/question/bank/managecategories/category_form.php');
-require_once($CFG->dirroot . '/question/bank/managecategories/move_form.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/form/category_form.php');
+require_once($CFG->dirroot . '/question/bank/managecategories/form/move_form.php');
 
+use qbank_managecategories\form\question_category_edit_form;
 
 /**
  * Class representing a list of question categories

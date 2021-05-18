@@ -23,10 +23,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-require_once("../../../config.php");
+require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
 require_once($CFG->dirroot."/question/bank/managecategories/category_class.php");
+
+use qbank_managecategories\form\question_move_form;
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');

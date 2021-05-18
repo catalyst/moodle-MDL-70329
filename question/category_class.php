@@ -40,7 +40,6 @@ require_once($CFG->dirroot . '/question/move_form.php');
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71585
- * @see \core_question\bank\managecategories\category_class
  */
 class question_category_list extends moodle_list {
     public $table = "question_categories";
@@ -116,6 +115,7 @@ class question_category_list extends moodle_list {
  *
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0 MDL-71585
  */
 class question_category_list_item extends list_item {
     public function set_icon_html($first, $last, $lastitem){
@@ -178,6 +178,7 @@ class question_category_list_item extends list_item {
  *
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0 MDL-71585
  */
 class question_category_object {
 
@@ -215,6 +216,8 @@ class question_category_object {
      * @param context[] $addcontexts contexts where the current user can add questions.
      */
     public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
+        debugging('Class question_category_list in \core_question\category_class is deprecated,
+        please use core_question\bank\managecategories\category_class', DEBUG_DEVELOPER);
 
         $this->tab = str_repeat('&nbsp;', $this->tabsize);
 

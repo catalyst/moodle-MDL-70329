@@ -17,12 +17,14 @@
 /**
  * Defines the form for editing question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories\form;
+
+use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
 
