@@ -17,8 +17,10 @@
 /**
  * Library functions used by qbank_exportquestions/export.php.
  *
+ * This code is based on lib/questionlib.php by Martin Dougiamas.
+ *
  * @package    qbank_exportquestions
- * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @copyright  2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
