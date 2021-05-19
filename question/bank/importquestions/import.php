@@ -17,7 +17,6 @@
 /**
  * Defines the import questions form.
  * 
- * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @package    qbank_importquestions
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
@@ -31,7 +30,7 @@ require_once($CFG->dirroot . '/question/bank/importquestions/classes/form/import
 require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
-use qbank_importquestions\forms\question_import_form;
+use qbank_importquestions\form\question_import_form;
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
