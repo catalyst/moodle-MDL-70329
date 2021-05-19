@@ -23,3 +23,4 @@
  */
 
 $string['pluginname'] = 'Edit question';
+$string['privacy:metadata'] = 'Edit question plugin will edit the selected question using the qtype form.';
