@@ -26,6 +26,7 @@
 namespace qbank_viewquestionactions;
 
 defined('MOODLE_INTERNAL') || die();
+
 use core_question\local\bank\column_base;
 use core_question\local\bank\menuable_action;
 
