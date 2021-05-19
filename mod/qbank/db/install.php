@@ -47,6 +47,11 @@ function xmldb_qbank_install() {
     
     $rec = $DB->get_records_sql($sqlq);
 
+    // Retrieve same category id.
+    $sqlcoursecount = 'SELECT coursecount FROM mdl_course_categories';
+    $coursecount = $DB->get_records_sql($sqlcoursecount);
+
+
     // Data from populated questions.
     $populatedcat = array();
     foreach($rec as $cat) {
@@ -54,12 +59,12 @@ function xmldb_qbank_install() {
         
         // Add course here.
         $newcourse = new stdClass();
-        $newcourse->category    = $cat->category;
+        //$newcourse->category    = 0;
         $newcourse->fullname    = $cat->name;
         $newcourse->shortname   = $cat->name;
 
         // Same category id is needed to create course.
-        create_course($newcourse);
+        //create_course($newcourse);
         //$DB->insert_record('course', $newcourse);
     }
 
