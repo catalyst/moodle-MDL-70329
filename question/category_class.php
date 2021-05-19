@@ -40,6 +40,7 @@ require_once($CFG->dirroot . '/question/move_form.php');
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71585
+ * @see \qbank_managecategories\question_category_list
  */
 class question_category_list extends moodle_list {
     public $table = "question_categories";
@@ -58,7 +59,7 @@ class question_category_list extends moodle_list {
 
     public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null, $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null){
         debugging('Class question_category_list in \core_question\category_class is deprecated,
-        please use core_question\bank\managecategories\category_class', DEBUG_DEVELOPER);
+        please use core_question\bank\managecategories\category_class instead.', DEBUG_DEVELOPER);
 
         parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
         $this->context = $context;
@@ -116,9 +117,12 @@ class question_category_list extends moodle_list {
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71585
+ * @see \qbank_managecategories\question_category_list_item
  */
 class question_category_list_item extends list_item {
     public function set_icon_html($first, $last, $lastitem){
+        debugging('Function set_icon_html() in \core_question\category_class is deprecated,
+        please use qbank_managecategories\question_category_list_item::set_icon_html() instead.', DEBUG_DEVELOPER);
         global $CFG;
         $category = $this->item;
         $url = new moodle_url('/question/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
@@ -138,6 +142,8 @@ class question_category_list_item extends list_item {
     }
 
     public function item_html($extraargs = array()){
+        debugging('Function item_html() in \core_question\category_class is deprecated,
+        please use qbank_managecategories\question_category_list_item::item_html() instead.', DEBUG_DEVELOPER);
         global $CFG, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
@@ -179,6 +185,7 @@ class question_category_list_item extends list_item {
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71585
+ * @see \qbank_managecategories\question_category_object
  */
 class question_category_object {
 
@@ -217,7 +224,7 @@ class question_category_object {
      */
     public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
         debugging('Class question_category_list in \core_question\category_class is deprecated,
-        please use core_question\bank\managecategories\category_class', DEBUG_DEVELOPER);
+        please use core_question\bank\managecategories\category_class instead.', DEBUG_DEVELOPER);
 
         $this->tab = str_repeat('&nbsp;', $this->tabsize);
 

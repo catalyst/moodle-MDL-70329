@@ -17,17 +17,17 @@
 /**
  * This script allows a teacher to create, edit and delete question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_managecategories
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
-require_once($CFG->dirroot."/question/bank/managecategories/category_class.php");
 
 use qbank_managecategories\form\question_move_form;
+use qbank_managecategories\question_category_object;
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');

@@ -15,166 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A class for representing question categories.
+ * Class for performing operations on question categories.
  *
- * @package    moodlecore
- * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories;
 
 defined('MOODLE_INTERNAL') || die();
 
 // number of categories to display on page
 define('QUESTION_PAGE_LENGTH', 25);
 
-require_once($CFG->libdir . '/listlib.php');
-require_once($CFG->dirroot . '/question/bank/managecategories/form/category_form.php');
-require_once($CFG->dirroot . '/question/bank/managecategories/form/move_form.php');
-
+use context;
+use moodle_url;
 use qbank_managecategories\form\question_category_edit_form;
+use question_bank;
+use stdClass;
 
-/**
- * Class representing a list of question categories
- *
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class question_category_list extends moodle_list {
-    public $table = "question_categories";
-    public $listitemclassname = 'question_category_list_item';
-    /**
-     * @var reference to list displayed below this one.
-     */
-    public $nextlist = null;
-    /**
-     * @var reference to list displayed above this one.
-     */
-    public $lastlist = null;
-
-    public $context = null;
-    public $sortby = 'parent, sortorder, name';
-
-    public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null, $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null){
-        parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
-        $this->context = $context;
-    }
-
-    public function get_records() {
-        $this->records = get_categories_for_contexts($this->context->id, $this->sortby);
-    }
-
-    /**
-     * Returns the highest category id that the $item can have as its parent.
-     * Note: question categories cannot go higher than the TOP category.
-     *
-     * @param list_item $item The item which its top level parent is going to be returned.
-     * @return int
-     */
-    public function get_top_level_parent_id($item) {
-        // Put the item at the highest level it can go.
-        $topcategory = question_get_top_category($item->item->contextid, true);
-        return $topcategory->id;
-    }
-
-    /**
-     * process any actions.
-     *
-     * @param integer $left id of item to move left
-     * @param integer $right id of item to move right
-     * @param integer $moveup id of item to move up
-     * @param integer $movedown id of item to move down
-     * @return void
-     * @throws coding_exception
-     */
-    public function process_actions($left, $right, $moveup, $movedown) {
-        $category = new stdClass();
-        if (!empty($left)) {
-            // Moved Left (In to another category).
-            $category->id = $left;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
-        } else if (!empty($right)) {
-            // Moved Right (Out of the current category).
-            $category->id = $right;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
-        }
-        parent::process_actions($left, $right, $moveup, $movedown);
-    }
-}
-
-/**
- * An item in a list of question categories.
- *
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class question_category_list_item extends list_item {
-    public function set_icon_html($first, $last, $lastitem){
-        global $CFG;
-        $category = $this->item;
-        $url = new moodle_url('/question/bank/managecategories/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
-        $this->icons['edit']= $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
-        parent::set_icon_html($first, $last, $lastitem);
-        $toplevel = ($this->parentlist->parentitem === null);//this is a top level item
-        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('movedowncontext'=>$this->id, 'tocontext'=>$this->parentlist->nextlist->context->id, 'sesskey'=>sesskey()));
-            $this->icons['down'] = $this->image_icon(
-                get_string('shareincontext', 'question', $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
-        }
-        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('moveupcontext'=>$this->id, 'tocontext'=>$this->parentlist->lastlist->context->id, 'sesskey'=>sesskey()));
-            $this->icons['up'] = $this->image_icon(
-                get_string('shareincontext', 'question', $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
-        }
-    }
-
-    public function item_html($extraargs = array()){
-        global $CFG, $OUTPUT;
-        $str = $extraargs['str'];
-        $category = $this->item;
-
-        $editqestions = get_string('editquestions', 'question');
-
-        // Each section adds html to be displayed as part of this list item.
-        $questionbankurl = new moodle_url('/question/edit.php', $this->parentlist->pageurl->params());
-        $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
-        $item = '';
-        $text = format_string($category->name, true, ['context' => $this->parentlist->context]);
-        if ($category->idnumber !== null && $category->idnumber !== '') {
-            $text .= ' ' . html_writer::span(
-                    html_writer::span(get_string('idnumber', 'question'), 'accesshide') .
-                    ' ' . $category->idnumber, 'badge badge-primary');
-        }
-        $text .= ' (' . $category->questioncount . ')';
-        $item .= html_writer::tag('b', html_writer::link($questionbankurl, $text,
-                        ['title' => $editqestions]) . ' ');
-        $item .= format_text($category->info, $category->infoformat,
-                array('context' => $this->parentlist->context, 'noclean' => true));
-
-        // Don't allow delete if this is the top category, or the last editable category in this context.
-        if ($category->parent && !question_is_only_child_of_top_category_in_context($category->id)) {
-            $deleteurl = new moodle_url($this->parentlist->pageurl, array('delete' => $this->id, 'sesskey' => sesskey()));
-            $item .= html_writer::link($deleteurl,
-                    $OUTPUT->pix_icon('t/delete', $str->delete),
-                    array('title' => $str->delete));
-        }
-
-        return $item;
-    }
-}
-
-
-/**
- * Class for performing operations on question categories.
- *
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class question_category_object {
 
     /**
@@ -322,7 +181,7 @@ class question_category_object {
             }
         }
         echo $list->display_page_numbers();
-     }
+    }
 
     /**
      * gets all the courseids for the given categories
@@ -342,7 +201,7 @@ class question_category_object {
     }
 
     public function edit_single_category($categoryid) {
-    /// Interface for adding a new category
+        /// Interface for adding a new category
         global $DB;
         /// Interface for editing existing categories
         $category = $DB->get_record("question_categories", array("id" => $categoryid));
