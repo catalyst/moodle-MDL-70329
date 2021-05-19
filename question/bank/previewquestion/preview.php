@@ -33,8 +33,8 @@
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/questionlib.php');
 
-use qbank_previewquestion\output\forms\preview_options_form;
-use qbank_previewquestion\output\question_preview_options;
+use qbank_previewquestion\form\preview_options_form;
+use qbank_previewquestion\question_preview_options;
 use qbank_previewquestion\previewquestion_helper;
 
 /**

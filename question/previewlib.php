@@ -36,12 +36,12 @@ require_once($CFG->libdir . '/formslib.php');
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0
- * @see qbank_previewquestion\output\forms\preview_options_form
+ * @see qbank_previewquestion\form\preview_options_form
  */
 class preview_options_form extends moodleform {
     public function definition() {
         debugging('Class preview_options_form has been deprecated and moved to qbank_previewquestion plugin, 
-        Please use qbank_previewquestion\output\forms\preview_options_form instead.', DEBUG_DEVELOPER);
+        Please use qbank_previewquestion\form\preview_options_form instead.', DEBUG_DEVELOPER);
         $mform = $this->_form;
 
         $hiddenofvisible = array(

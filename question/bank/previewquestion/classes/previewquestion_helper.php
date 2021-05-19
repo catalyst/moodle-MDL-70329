@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use context;
 use moodle_url;
-use qbank_previewquestion\output\question_preview_options;
 use question_display_options;
 use question_engine;
 use stdClass;
