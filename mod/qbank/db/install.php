@@ -37,16 +37,16 @@ require_once($CFG->dirroot.'/course/lib.php');
 function xmldb_qbank_install() {
     global $DB;
 
-    // Retrieve names of question banks that are populated
-    $sqlq = 'SELECT name FROM mdl_question_categories qc WHERE qc.infoformat <> 0';
+    // Retrieve question bank id that are populated.
+    $sqlq = 'SELECT id, name FROM mdl_question_categories qc WHERE qc.infoformat <> 0';
     $rec = $DB->get_records_sql($sqlq);
-    $catname = $rec[0]->name;
 
     $newcourses = array();
-    foreach($catname as $cat) {
-        $newcourses[] = $cat . ' course';
+    foreach($rec as $cat) {
+        // Fix array append
+        $newcourses[] = $cat->id;
     }
+    // Add course here
 
-    $v = 0;
     return true;
 }
