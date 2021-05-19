@@ -199,7 +199,7 @@ function quiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $time
                 $usedquestionids[$question->id] = 1;
             }
         }
-        $randomloader = new \core_question\local\bank\random_question_loader($qubaids, $usedquestionids);
+        $randomloader = new \core_question\bank\random_question_loader($qubaids, $usedquestionids);
 
         foreach ($quizobj->get_questions() as $questiondata) {
             $slot += 1;
