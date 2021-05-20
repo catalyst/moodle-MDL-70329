@@ -38,7 +38,7 @@ abstract class row_base extends column_base {
     /**
      * Check if the column is an extra row of not.
      */
-    public function is_extra_row() {
+    public function is_extra_row(): bool {
         return true;
     }
 

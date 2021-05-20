@@ -6768,7 +6768,7 @@ class admin_page_manageqbanks extends admin_setting {
      *
      * @return true
      */
-    public function get_setting() {
+    public function get_setting(): bool {
         return true;
     }
 
@@ -6777,7 +6777,7 @@ class admin_page_manageqbanks extends admin_setting {
      *
      * @return true
      */
-    public function get_defaultsetting() {
+    public function get_defaultsetting(): bool {
         return true;
     }
 
@@ -6787,7 +6787,7 @@ class admin_page_manageqbanks extends admin_setting {
      * @param mixed $data string or array, must not be NULL
      * @return string Always returns ''
      */
-    public function write_setting($data) {
+    public function write_setting($data): string {
         // Do not write any setting.
         return '';
     }
@@ -6798,7 +6798,7 @@ class admin_page_manageqbanks extends admin_setting {
      * @param string $query The string to search for
      * @return bool true for related false for not
      */
-    public function is_related($query) {
+    public function is_related($query): bool {
         if (parent::is_related($query)) {
             return true;
         }
@@ -6819,7 +6819,7 @@ class admin_page_manageqbanks extends admin_setting {
      * @param string $query
      * @return string highlight
      */
-    public function output_html($data, $query='') {
+    public function output_html($data, $query = ''): string {
         global $CFG, $OUTPUT;
         $return = '';
 

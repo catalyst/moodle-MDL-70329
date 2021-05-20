@@ -20,7 +20,6 @@
  * @package    moodlecore
  * @subpackage questionbank
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
