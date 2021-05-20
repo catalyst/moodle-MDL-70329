@@ -39,35 +39,56 @@ function xmldb_qbank_install() {
     global $DB;
 
     // Retrieve question bank informations that are populated.
-    $sqlq = 'SELECT DISTINCT q.category, qc.name, qc.contextid, ctx.contextlevel
+    $sqlq = "SELECT DISTINCT q.category, qc.name, qc.contextid, ctx.contextlevel, ctx.instanceid
             FROM mdl_question q
             JOIN mdl_question_categories qc ON qc.id = q.category
             JOIN mdl_context ctx ON ctx.id = qc.contextid
-            ORDER BY ctx.contextlevel;';
+            ORDER BY ctx.contextlevel;";
     
     $rec = $DB->get_records_sql($sqlq);
 
     // Retrieve same category id.
-    $sqlcoursecount = 'SELECT coursecount FROM mdl_course_categories';
-    $coursecount = $DB->get_records_sql($sqlcoursecount);
-
-
+    
     // Data from populated questions.
-    $populatedcat = array();
     foreach($rec as $cat) {
-        $populatedcat[] = $cat->category;
-        
+        $contextlevel = $cat->contextlevel;
         // Add course here.
         $newcourse = new stdClass();
+        switch ($contextlevel) {
+            // case "10":
+            //     echo "";
+            //     break;
+            // case "30":
+            //     echo "";
+            //     break;
+            // case "40":
+            //     echo "";
+            //     break;
+            // case "50":
+            //     echo "";
+            //     break;
+            case "70":
+                $q = "SELECT category FROM mdl_course WHERE id = ?";
+                $catid = $DB->get_records_sql($q, [$cat->instanceid]);
+                $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
+                $newcourse->fullname    = "New course from question bank " . $cat->name;
+                $newcourse->category    = +$catid;
+                create_course($newcourse);
+                break;
+            case "80":
+                echo "this is a block";
+                break;
+        }
+
         //$newcourse->category    = 0;
-        $newcourse->fullname    = $cat->name;
-        $newcourse->shortname   = $cat->name;
+        // $newcourse->fullname    = $cat->name;
+        // $newcourse->shortname   = $cat->name;
 
         // Same category id is needed to create course.
-        //create_course($newcourse);
+        
         //$DB->insert_record('course', $newcourse);
     }
 
-
+    $v = 0;
     return true;
 }
