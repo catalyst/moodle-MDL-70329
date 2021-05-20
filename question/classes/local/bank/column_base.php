@@ -68,28 +68,28 @@ abstract class column_base {
     /**
      * Check if the column is an extra row of not.
      */
-    public function is_extra_row() {
+    public function is_extra_row(): bool {
         return false;
     }
 
     /**
      * Check if the row has an extra preference to view/hide.
      */
-    public function has_preference() {
+    public function has_preference(): bool {
         return false;
     }
 
     /**
      * Get if the preference key of the row.
      */
-    public function get_preference_key() {
+    public function get_preference_key(): bool {
         return false;
     }
 
     /**
      * Get if the preference of the row.
      */
-    public function get_preference() {
+    public function get_preference(): bool {
         return false;
     }
 
@@ -129,7 +129,7 @@ abstract class column_base {
     /**
      * Title for this column. Not used if is_sortable returns an array.
      */
-    protected abstract function get_title();
+    abstract protected function get_title();
 
     /**
      * @return string a fuller version of the name. Use this when get_title() returns
@@ -214,7 +214,7 @@ abstract class column_base {
     /**
      * @return string the CSS classes to apply to every cell in this column.
      */
-    protected function get_classes() {
+    protected function get_classes(): string {
         $classes = $this->get_extra_classes();
         $classes[] = $this->get_name();
         return implode(' ', $classes);
@@ -226,12 +226,12 @@ abstract class column_base {
      *
      * @return string column name.
      */
-    public abstract function get_name();
+    abstract public function get_name();
 
     /**
      * @return array any extra class names you would like applied to every cell in this column.
      */
-    public function get_extra_classes() {
+    public function get_extra_classes(): array {
         return array();
     }
 
@@ -240,7 +240,7 @@ abstract class column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    protected abstract function display_content($question, $rowclasses);
+    abstract protected function display_content($question, $rowclasses);
 
     /**
      * Output the closing column tag
@@ -270,7 +270,7 @@ abstract class column_base {
      *
      * @return array 'table_alias' => 'JOIN clause'
      */
-    public function get_extra_joins() {
+    public function get_extra_joins(): array {
         return array();
     }
 
@@ -278,7 +278,7 @@ abstract class column_base {
      * @return array fields required. use table alias 'q' for the question table, or one of the
      * ones from get_extra_joins. Every field requested must specify a table prefix.
      */
-    public function get_required_fields() {
+    public function get_required_fields(): array {
         return array();
     }
 
@@ -340,7 +340,7 @@ abstract class column_base {
      * @param bool $reverse whether the normal direction should be reversed.
      * @return string 'ASC' or 'DESC'
      */
-    protected function sortorder($reverse) {
+    protected function sortorder($reverse): string {
         if ($reverse) {
             return ' DESC';
         } else {
