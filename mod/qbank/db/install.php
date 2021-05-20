@@ -39,7 +39,7 @@ function xmldb_qbank_install() {
     global $DB;
 
     // Retrieve question bank informations that are populated.
-    $sqlq = "SELECT DISTINCT q.category, qc.name, qc.contextid, ctx.contextlevel, ctx.instanceid
+    $sqlq = "SELECT DISTINCT qc.name, qc.contextid, ctx.contextlevel, ctx.instanceid
             FROM mdl_question q
             JOIN mdl_question_categories qc ON qc.id = q.category
             JOIN mdl_context ctx ON ctx.id = qc.contextid
@@ -68,8 +68,13 @@ function xmldb_qbank_install() {
             //     echo "";
             //     break;
             case "70":
-                $q = "SELECT category FROM mdl_course WHERE id = ?";
-                $catid = $DB->get_records_sql($q, [$cat->instanceid]);
+                // Retrieving Course id from course_module table where id = instanceid.
+                $q = "SELECT course FROM mdl_course_modules WHERE id = ?";
+                $courseid = $DB->get_records_sql($q, [$cat->instanceid]);
+                $courseid = array_values(json_decode(json_encode($courseid), true))[0]['course'];
+                // Retrieving Course category id from course table where id = courseid.
+                $qu = "SELECT category FROM mdl_course WHERE id = ?";
+                $catid = $DB->get_records_sql($qu, [$courseid]);
                 $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
                 $newcourse->fullname    = "New course from question bank " . $cat->name;
                 $newcourse->category    = +$catid;
