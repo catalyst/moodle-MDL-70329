@@ -164,7 +164,7 @@ class view {
      * local_*_get_question_bank_search_conditions() must return an array of
      * \core_question\bank\search\condition objects.
      */
-    protected function init_search_conditions() {
+    protected function init_search_conditions(): void {
         $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
         foreach ($searchplugins as $component => $function) {
             foreach ($function($this) as $searchobject) {
@@ -255,7 +255,7 @@ class view {
      * @param array $wanted Collection of column names
      * @param string $heading The name of column that is set as heading
      */
-    protected function init_columns($wanted, $heading = '') {
+    protected function init_columns($wanted, $heading = ''): void {
         // If we are using the edit menu column, allow it to absorb all the actions.
         foreach ($wanted as $column) {
             if ($column instanceof edit_menu_column) {
@@ -295,11 +295,18 @@ class view {
         return count($this->visiblecolumns);
     }
 
+    /**
+     * Get course id.
+     * @return mixed
+     */
     public function get_courseid() {
         return $this->course->id;
     }
 
-    protected function init_sort() {
+    /**
+     * Initialise sorting.
+     */
+    protected function init_sort(): void {
         $this->init_sort_from_params();
         if (empty($this->sort)) {
             $this->sort = $this->default_sort();
@@ -343,7 +350,7 @@ class view {
     /**
      * Initialise sort from parameters.
      */
-    protected function init_sort_from_params() {
+    protected function init_sort_from_params(): void {
         $this->sort = array();
         for ($i = 1; $i <= self::MAX_SORTS; $i++) {
             if (!$sort = optional_param('qbs' . $i, '', PARAM_TEXT)) {
@@ -370,7 +377,7 @@ class view {
      * @param $sorts
      * @return array
      */
-    protected function sort_to_params($sorts) {
+    protected function sort_to_params($sorts): array {
         $params = array();
         $i = 0;
         foreach ($sorts as $sort => $order) {
@@ -456,7 +463,7 @@ class view {
      * Create the SQL query to retrieve the indicated questions, based on
      * \core_question\bank\search\condition filters.
      */
-    protected function build_query() {
+    protected function build_query(): void {
         // Get the required tables and fields.
         $joins = array();
         $fields = array('q.hidden', 'q.category');
@@ -516,7 +523,7 @@ class view {
      * @param int $perpage number of questions per page.
      * @return \moodle_recordset questionid => data about each question.
      */
-    protected function load_page_questions($page, $perpage) {
+    protected function load_page_questions($page, $perpage): \moodle_recordset {
         global $DB;
         $questions = $DB->get_recordset_sql($this->loadsql, $this->sqlparams, $page * $perpage, $perpage);
         if (empty($questions)) {
@@ -530,7 +537,7 @@ class view {
     /**
      * Returns the base url.
      */
-    public function base_url() {
+    public function base_url(): \moodle_url {
         return $this->baseurl;
     }
 
@@ -578,7 +585,7 @@ class view {
      * Get the context we are displaying the question bank for.
      * @return \context context object.
      */
-    public function get_most_specific_context() {
+    public function get_most_specific_context(): \context {
         return $this->contexts->lowest();
     }
 
@@ -613,7 +620,7 @@ class view {
      * @param array $tagids current list of selected tags.
      */
     public function display($tabname, $page, $perpage, $cat,
-            $recurse, $showhidden, $showquestiontext, $tagids = []) {
+            $recurse, $showhidden, $showquestiontext, $tagids = []): void {
         global $PAGE, $CFG;
 
         if ($this->process_actions_needing_ui()) {
@@ -650,7 +657,7 @@ class view {
      * Print the text for category.
      * @param $categoryandcontext
      */
-    protected function print_choose_category_message($categoryandcontext) {
+    protected function print_choose_category_message($categoryandcontext): void {
         echo "<p style=\"text-align:center;\"><b>";
         print_string('selectcategoryabove', 'question');
         echo "</b></p>";
@@ -660,7 +667,6 @@ class view {
      * Gets current selected category.
      * @param $categoryandcontext
      * @return false|mixed|\stdClass
-     * @throws \dml_exception
      */
     protected function get_current_category($categoryandcontext) {
         global $DB, $OUTPUT;
@@ -760,7 +766,7 @@ class view {
      * @param bool $showtextoption whether to include the 'Show question text' checkbox.
      */
     protected function display_options_form($showquestiontext, $scriptpath = '/question/edit.php',
-            $showtextoption = true) {
+            $showtextoption = true): void {
         global $PAGE;
 
         echo \html_writer::start_tag('form', array('method' => 'get',
@@ -797,7 +803,7 @@ class view {
     /**
      * Print the "advanced" UI elements for the form to select which questions. Hidden by default.
      */
-    protected function display_advanced_search_form() {
+    protected function display_advanced_search_form(): void {
         print_collapsible_region_start('', 'advancedsearch', get_string('advancedsearchoptions', 'question'),
                 'question_bank_advanced_search');
         foreach ($this->searchconditions as $searchcondition) {
@@ -810,7 +816,7 @@ class view {
      * Display the checkbox UI for toggling the display of the question text in the list.
      * @param bool $showquestiontext the current or default value for whether to display the text.
      */
-    protected function display_showtext_checkbox($showquestiontext) {
+    protected function display_showtext_checkbox($showquestiontext): void {
         echo '<div>';
         echo \html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'qbshowtext',
                 'value' => 0, 'id' => 'qbshowtext_off'));
@@ -822,12 +828,12 @@ class view {
     /**
      * Display the header element for the question bank.
      */
-    protected function display_question_bank_header() {
+    protected function display_question_bank_header(): void {
         global $OUTPUT;
         echo $OUTPUT->heading(get_string('questionbank', 'question'), 2);
     }
 
-    protected function create_new_question_form($category, $canadd) {
+    protected function create_new_question_form($category, $canadd): void {
         echo '<div class="createnewquestion">';
         if ($canadd) {
             create_new_question_button($category->id, $this->editquestionurl->params(),
@@ -854,7 +860,7 @@ class view {
      */
     protected function display_question_list($contexts, $pageurl, $categoryandcontext,
             $cm = null, $recurse=1, $page=0, $perpage=100, $showhidden=false,
-            $showquestiontext = false, $addcontexts = array()) {
+            $showquestiontext = false, $addcontexts = array()): void {
         global $OUTPUT;
 
         // This function can be moderately slow with large question counts and may time out.
@@ -944,7 +950,7 @@ class view {
      * @param \context  $catcontext  The context of the category being displayed.
      * @param array    $addcontexts contexts where the user is allowed to add new questions.
      */
-    protected function display_bottom_controls($totalnumber, $recurse, $category, \context $catcontext, array $addcontexts) {
+    protected function display_bottom_controls($totalnumber, $recurse, $category, \context $catcontext, array $addcontexts): void {
         $caneditall = has_capability('moodle/question:editall', $catcontext);
         $canuseall = has_capability('moodle/question:useall', $catcontext);
         $canmoveall = has_capability('moodle/question:moveall', $catcontext);
@@ -987,7 +993,7 @@ class view {
     /**
      * Start of the table html.
      */
-    protected function start_table() {
+    protected function start_table(): void {
         echo '<table id="categoryquestions">' . "\n";
         echo "<thead>\n";
         $this->print_table_headers();
@@ -998,7 +1004,7 @@ class view {
     /**
      * End of the table html.
      */
-    protected function end_table() {
+    protected function end_table(): void {
         echo "</tbody>\n";
         echo "</table>\n";
     }
@@ -1006,7 +1012,7 @@ class view {
     /**
      * Print table header.
      */
-    protected function print_table_headers() {
+    protected function print_table_headers(): void {
         echo "<tr>\n";
         foreach ($this->visiblecolumns as $column) {
             $column->display_header();
@@ -1020,7 +1026,7 @@ class view {
      * @param $rowcount
      * @return array
      */
-    protected function get_row_classes($question, $rowcount) {
+    protected function get_row_classes($question, $rowcount): array {
         $classes = array();
         if ($question->hidden) {
             $classes[] = 'dimmed_text';
@@ -1037,7 +1043,7 @@ class view {
      * @param $question
      * @param $rowcount
      */
-    protected function print_table_row($question, $rowcount) {
+    protected function print_table_row($question, $rowcount): void {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));
         if ($rowclasses) {
             echo '<tr class="' . $rowclasses . '">' . "\n";
@@ -1056,7 +1062,7 @@ class view {
     /**
      * Process actions for the selected action.
      */
-    public function process_actions() {
+    public function process_actions(): void {
         global $DB;
         // Now, check for commands on this page and modify variables as necessary.
         if (optional_param('move', false, PARAM_BOOL) and confirm_sesskey()) {
@@ -1179,7 +1185,7 @@ class view {
      * Add another search control to this view.
      * @param condition $searchcondition the condition to add.
      */
-    public function add_searchcondition($searchcondition) {
+    public function add_searchcondition($searchcondition): void {
         $this->searchconditions[] = $searchcondition;
     }
 }

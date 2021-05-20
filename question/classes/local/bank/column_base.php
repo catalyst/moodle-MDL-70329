@@ -55,13 +55,13 @@ abstract class column_base {
      * A chance for subclasses to initialise themselves, for example to load lang strings,
      * without having to override the constructor.
      */
-    protected function init() {
+    protected function init(): void {
     }
 
     /**
      * Set the column as heading
      */
-    public function set_as_heading() {
+    public function set_as_heading(): void {
         $this->isheading = true;
     }
 
@@ -96,7 +96,7 @@ abstract class column_base {
     /**
      * Output the column header cell.
      */
-    public function display_header() {
+    public function display_header(): void {
         echo '<th class="header ' . $this->get_classes() . '" scope="col">';
         $sortable = $this->is_sortable();
         $name = get_class($this);
@@ -147,7 +147,7 @@ abstract class column_base {
      * @param bool $defaultreverse whether the default sort order for this column is descending, rather than ascending.
      * @return string HTML fragment.
      */
-    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false) {
+    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): string {
         $currentsort = $this->qbank->get_primary_sort_order($sort);
         $newsortreverse = $defaultreverse;
         if ($currentsort) {
@@ -175,7 +175,7 @@ abstract class column_base {
      * @param bool $reverse sort is descending, not ascending.
      * @return string HTML image tag.
      */
-    protected function get_sort_icon($reverse) {
+    protected function get_sort_icon($reverse): string {
         global $OUTPUT;
         if ($reverse) {
             return $OUTPUT->pix_icon('t/sort_desc', get_string('desc'), '', array('class' => 'iconsort'));
@@ -189,7 +189,7 @@ abstract class column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    public function display($question, $rowclasses) {
+    public function display($question, $rowclasses): void {
         $this->display_start($question, $rowclasses);
         $this->display_content($question, $rowclasses);
         $this->display_end($question, $rowclasses);
@@ -201,7 +201,7 @@ abstract class column_base {
      * @param \stdClass $question
      * @param string $rowclasses
      */
-    protected function display_start($question, $rowclasses) {
+    protected function display_start($question, $rowclasses): void {
         $tag = 'td';
         $attr = array('class' => $this->get_classes());
         if ($this->isheading) {
@@ -226,7 +226,7 @@ abstract class column_base {
      *
      * @return string column name.
      */
-    abstract public function get_name();
+    abstract public function get_name(): string;
 
     /**
      * @return array any extra class names you would like applied to every cell in this column.
@@ -240,7 +240,7 @@ abstract class column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    abstract protected function display_content($question, $rowclasses);
+    abstract protected function display_content($question, $rowclasses): void;
 
     /**
      * Output the closing column tag
@@ -248,7 +248,7 @@ abstract class column_base {
      * @param object $question
      * @param string $rowclasses
      */
-    protected function display_end($question, $rowclasses) {
+    protected function display_end($question, $rowclasses): void {
         $tag = 'td';
         if ($this->isheading) {
             $tag = 'th';
@@ -301,7 +301,7 @@ abstract class column_base {
      *
      * @param array $questions
      */
-    public function load_question_tags(array $questions) {
+    public function load_question_tags(array $questions): void {
         $firstquestion = reset($questions);
         if (isset($firstquestion->tags)) {
             // Looks like tags are already loaded, so don't do it again.
@@ -354,7 +354,7 @@ abstract class column_base {
      *      one of those. Otherwise will be empty.
      * @return string some SQL to go in the order by clause.
      */
-    public function sort_expression($reverse, $subsort) {
+    public function sort_expression($reverse, $subsort): string {
         $sortable = $this->is_sortable();
         if (is_array($sortable)) {
             if (array_key_exists($subsort, $sortable)) {

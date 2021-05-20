@@ -54,7 +54,7 @@ abstract class menu_action_column_base extends action_column_base implements men
      */
     abstract protected function get_url_icon_and_label(\stdClass $question): array;
 
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses):void {
         [$url, $icon, $label] = $this->get_url_icon_and_label($question);
         if ($url) {
             $this->print_icon($icon, $label, $url);
