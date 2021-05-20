@@ -29,6 +29,8 @@ require_once($CFG->dirroot."/question/editlib.php");
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\question_category_object;
 
+require_login();
+
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
 
@@ -49,7 +51,7 @@ $param->moveto = optional_param('moveto', 0, PARAM_INT);
 $param->edit = optional_param('edit', 0, PARAM_INT);
 
 $url = new moodle_url($thispageurl);
-foreach ((array)$param as $key=>$value) {
+foreach ((array)$param as $key => $value) {
     if (($key !== 'cancel' && $value !== 0) || ($key === 'cancel' && $value !== '')) {
         $url->param($key, $value);
     }
@@ -79,7 +81,7 @@ if ($param->moveupcontext || $param->movedowncontext) {
     }
     $newtopcat = question_get_top_category($param->tocontext);
     if (!$newtopcat) {
-        print_error('invalidcontext');
+        throw new moodle_exception('invalidcontext');
     }
     $oldcat = $DB->get_record('question_categories', array('id' => $catid), '*', MUST_EXIST);
     // Log the move to another context.
@@ -94,7 +96,7 @@ if ($param->moveupcontext || $param->movedowncontext) {
 
 if ($param->delete) {
     if (!$category = $DB->get_record("question_categories", array("id" => $param->delete))) {
-        print_error('nocate', 'question', $thispageurl->out(), $param->delete);
+        throw new moodle_exception('nocate', 'question', $thispageurl->out(), $param->delete);
     }
 
     question_remove_stale_questions_from_category($param->delete);
@@ -123,7 +125,7 @@ if ($qcobject->catform->is_cancelled()) {
 } else if ($catformdata = $qcobject->catform->get_data()) {
     $catformdata->infoformat = $catformdata->info['format'];
     $catformdata->info       = $catformdata->info['text'];
-    if (!$catformdata->id) {//new category
+    if (!$catformdata->id) {// New category.
         $qcobject->add_category($catformdata->parent, $catformdata->name,
                 $catformdata->info, false, $catformdata->infoformat, $catformdata->idnumber);
     } else {
@@ -132,7 +134,7 @@ if ($qcobject->catform->is_cancelled()) {
     }
     redirect($thispageurl);
 } else if ((!empty($param->delete) and (!$questionstomove) and confirm_sesskey())) {
-    $qcobject->delete_category($param->delete);//delete the category now no questions to move
+    $qcobject->delete_category($param->delete);// Delete the category now no questions to move.
     $thispageurl->remove_params('cat', 'category');
     redirect($thispageurl);
 }
@@ -152,7 +154,7 @@ echo $renderer->extra_horizontal_navigation();
 // Display the UI.
 if (!empty($param->edit)) {
     $qcobject->edit_single_category($param->edit);
-} else if ($questionstomove){
+} else if ($questionstomove) {
     $qcobject->display_move_form($questionstomove, $category);
 } else {
     // Display the user interface.

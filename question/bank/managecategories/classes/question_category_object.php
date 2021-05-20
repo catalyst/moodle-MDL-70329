@@ -25,7 +25,7 @@ namespace qbank_managecategories;
 
 defined('MOODLE_INTERNAL') || die();
 
-// number of categories to display on page
+// Number of categories to display on page.
 define('QUESTION_PAGE_LENGTH', 25);
 
 use context;
@@ -127,7 +127,7 @@ class question_category_object {
             $this->editlists[$context->id] =
                 new question_category_list('ul', '', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
             $this->editlists[$context->id]->lastlist =& $lastlist;
-            if ($lastlist!== null) {
+            if ($lastlist !== null) {
                 $lastlist->nextlist =& $this->editlists[$context->id];
             }
             $lastlist =& $this->editlists[$context->id];
@@ -140,7 +140,7 @@ class question_category_object {
         }
         $this->catform = new question_category_edit_form($this->pageurl, compact('contexts', 'currentcat'));
         if (!$currentcat) {
-            $this->catform->set_data(array('parent'=>$defaultcategory));
+            $this->catform->set_data(array('parent' => $defaultcategory));
         }
     }
 
@@ -153,9 +153,8 @@ class question_category_object {
         // Interface for editing existing categories.
         $this->output_edit_lists();
 
-
         echo '<br />';
-        // Interface for adding a new category:
+        // Interface for adding a new category.
         $this->output_new_table();
         echo '<br />';
 
@@ -180,9 +179,10 @@ class question_category_object {
         echo $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
 
         foreach ($this->editlists as $context => $list) {
-            $listhtml = $list->to_html(0, array('str'=>$this->str));
+            $listhtml = $list->to_html(0, array('str' => $this->str));
             if ($listhtml) {
-                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' . $list->context->contextlevel);
+                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
+                    $list->context->contextlevel);
                 $fullcontext = context::instance_by_id($context);
                 echo $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
                 echo $listhtml;
@@ -200,7 +200,7 @@ class question_category_object {
      */
     public function get_course_ids(array $categories) : array {
         $courseids = array();
-        foreach ($categories as $key=>$cat) {
+        foreach ($categories as $key => $cat) {
             $courseids[$key] = $cat->course;
             if (!empty($cat->children)) {
                 $courseids = array_merge($courseids, $this->get_course_ids($cat->children));
@@ -277,13 +277,13 @@ class question_category_object {
     public function delete_category(int $categoryid) : void {
         global $CFG, $DB;
         question_can_delete_cat($categoryid);
-        if (!$category = $DB->get_record("question_categories", array("id" => $categoryid))) {  // security
+        if (!$category = $DB->get_record("question_categories", array("id" => $categoryid))) {  // Security.
             throw new moodle_exception('unknowcategory');
         }
-        // Send the children categories to live with their grandparent
+        // Send the children categories to live with their grandparent.
         $DB->set_field("question_categories", "parent", $category->parent, array("parent" => $category->id));
 
-        // Finally delete the category itself
+        // Finally delete the category itself.
         $DB->delete_records("question_categories", array("id" => $category->id));
 
         // Log the deletion of this category.
@@ -337,12 +337,13 @@ class question_category_object {
             throw new moodle_exception('categorynamecantbeblank', 'question');
         }
         list($parentid, $contextid) = explode(',', $newparent);
-        //moodle_form makes sure select element output is legal no need for further cleaning
+        // ...moodle_form makes sure select element output is legal no need for further cleaning.
         require_capability('moodle/question:managecategory', context::instance_by_id($contextid));
 
         if ($parentid) {
-            if(!($DB->get_field('question_categories', 'contextid', array('id' => $parentid)) == $contextid)) {
-                throw new moodle_exception('cannotinsertquestioncatecontext', 'question', '', array('cat'=>$newcategory, 'ctx'=>$contextid));
+            if (!($DB->get_field('question_categories', 'contextid', array('id' => $parentid)) == $contextid)) {
+                throw new moodle_exception('cannotinsertquestioncatecontext', 'question', '',
+                    ['cat' => $newcategory, 'ctx' => $contextid]);
             }
         }
 
