@@ -17,20 +17,21 @@
 /**
  * Defines classes used for plugin info.
  *
- * The code is based on lib/classes/plugininfo/local.php by David Mudrak.
- *
  * @package    core
  * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace core\plugininfo;
 
-use moodle_url;
+namespace core\plugininfo;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class for question banks
+ * Class for qbank plugins
+ *
+ * @package    core_qbank
+ * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qbank extends base {
 
@@ -44,10 +45,62 @@ class qbank extends base {
 
     /**
      * Return URL used for management of plugins of this type.
-     * @return moodle_url
+     * @return \moodle_url
      */
     public static function get_manage_url() {
-        return new moodle_url('/admin/qbankplugins.php');
+        return new \moodle_url('/admin/settings.php', array('section' => 'manageqbanks'));
+    }
+
+    /**
+     * Gathers and returns the information about all plugins of the given type
+     *
+     * @param string $type the name of the plugintype, eg. mod, auth or workshopform
+     * @param string $typerootdir full path to the location of the plugin dir
+     * @param string $typeclass the name of the actually called class
+     * @param \core_plugin_manager $pluginman the plugin manager calling this method
+     * @return array of plugintype classes, indexed by the plugin name
+     */
+    public static function get_plugins($type, $typerootdir, $typeclass, $pluginman) {
+        global $CFG;
+
+        $qbank = parent::get_plugins($type, $typerootdir, $typeclass, $pluginman);
+        $order = array_keys($qbank);
+        $sortedqbanks = array();
+        foreach ($order as $qbankname) {
+            $sortedqbanks[$qbankname] = $qbank[$qbankname];
+        }
+        return $sortedqbanks;
+    }
+
+    /**
+     * Finds all enabled plugins, the result may include missing plugins.
+     * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
+     */
+    public static function get_enabled_plugins() {
+        global $CFG;
+        $pluginmanager = \core_plugin_manager::instance();
+        $plugins = $pluginmanager->get_installed_plugins('qbank');
+
+        if (!$plugins) {
+            return array();
+        }
+
+        $plugins = array_keys($plugins);
+
+        // Filter to return only enabled plugins.
+        $enabled = array();
+        foreach ($plugins as $plugin) {
+            $qbankinfo = $pluginmanager->get_plugin_info('qbank_'.$plugin);
+            $qbankavailable = $qbankinfo->get_status();
+            if ($qbankavailable === \core_plugin_manager::PLUGIN_STATUS_MISSING) {
+                continue;
+            }
+            $disabled = get_config('qbank_' . $plugin, 'disabled');
+            if (empty($disabled)) {
+                $enabled[$plugin] = $plugin;
+            }
+        }
+        return $enabled;
     }
 
     /**
@@ -69,8 +122,19 @@ class qbank extends base {
             return;
         }
 
+        if (!$hassiteconfig) {
+            return;
+        }
+
+        $section = $this->get_settings_section_name();
+
+        $settings = null;
         if (file_exists($this->full_path('settings.php'))) {
-            include($this->full_path('settings.php'));
+            $settings = new \admin_settingpage($section, $this->displayname, 'moodle/site:config', $this->is_enabled() === false);
+            include($this->full_path('settings.php')); // This may also set $settings to null.
+        }
+        if ($settings) {
+            $ADMIN->add($parentnodename, $settings);
         }
     }
 }
