@@ -42,14 +42,14 @@ class exportquestions_helper {
      *
      * @param int $contextid Current context.
      * @param int $categoryid Category id.
-     * @param string $format
-     * @param string $withcategories
-     * @param $withcontexts
-     * @param $filename
-     * @return moodle_url
+     * @param string $format Format.
+     * @param string $withcategories nocategories or withcategories text.
+     * @param string $withcontexts nocontexts or withcontexts text.
+     * @param string $filename File name.
+     * @return moodle_url Return an URL.
      */
     public static function question_make_export_url($contextid, $categoryid, $format, $withcategories,
-                                      $withcontexts, $filename) {
+                                      $withcontexts, $filename) : moodle_url {
         global $CFG;
         $urlbase = "$CFG->wwwroot/pluginfile.php";
         return moodle_url::make_file_url($urlbase,

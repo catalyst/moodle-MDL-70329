@@ -84,7 +84,7 @@ class question_export_form extends moodleform {
         $mform->setDefault('cattofile', 1);
         $mform->setDefault('contexttofile', 1);
 
-        // Set a template for the format select elements
+        // Set a template for the format select elements.
         $renderer = $mform->defaultRenderer();
         $template = "{help} {element}\n";
         $renderer->setGroupElementTemplate($template, 'format');
