@@ -64,9 +64,16 @@ function xmldb_qbank_install() {
             // case "40":
             //     echo "";
             //     break;
-            // case "50":
-            //     echo "";
-            //     break;
+            case "50":
+                // Retrieving Course category id from course table where id = instanceid.
+                $qu = "SELECT category FROM mdl_course WHERE id = ?";
+                $catid = $DB->get_records_sql($qu, [$cat->instanceid]);
+                $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
+                // Populating object / should add a time() later on
+                $newcourse->fullname    = "New course from question bank " . $cat->name;
+                $newcourse->category    = +$catid;
+                create_course($newcourse);
+                break;
             case "70":
                 // Retrieving Course id from course_module table where id = instanceid.
                 $q = "SELECT course FROM mdl_course_modules WHERE id = ?";
@@ -76,6 +83,7 @@ function xmldb_qbank_install() {
                 $qu = "SELECT category FROM mdl_course WHERE id = ?";
                 $catid = $DB->get_records_sql($qu, [$courseid]);
                 $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
+                // Populating object / should add a time() later on
                 $newcourse->fullname    = "New course from question bank " . $cat->name;
                 $newcourse->category    = +$catid;
                 create_course($newcourse);
@@ -84,14 +92,6 @@ function xmldb_qbank_install() {
                 echo "this is a block";
                 break;
         }
-
-        //$newcourse->category    = 0;
-        // $newcourse->fullname    = $cat->name;
-        // $newcourse->shortname   = $cat->name;
-
-        // Same category id is needed to create course.
-        
-        //$DB->insert_record('course', $newcourse);
     }
 
     $v = 0;
