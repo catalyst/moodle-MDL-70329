@@ -33,11 +33,13 @@ use moodle_list;
 class question_category_list extends moodle_list {
     public $table = "question_categories";
     public $listitemclassname = '\qbank_managecategories\question_category_list_item';
+
     /**
      * Reference to list displayed below this one.
      * @var $nextlist
      */
     public $nextlist = null;
+
     /**
      * Reference to list displayed above this one.
      * @var $lastlist
@@ -47,12 +49,13 @@ class question_category_list extends moodle_list {
     public $context = null;
     public $sortby = 'parent, sortorder, name';
 
-    public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null, $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null){
+    public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null,
+                                $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null) {
         parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
         $this->context = $context;
     }
 
-    public function get_records() {
+    public function get_records() : void {
         $this->records = get_categories_for_contexts($this->context->id, $this->sortby);
     }
 
@@ -60,17 +63,17 @@ class question_category_list extends moodle_list {
      * Returns the highest category id that the $item can have as its parent.
      * Note: question categories cannot go higher than the TOP category.
      *
-     * @param list_item $item The item which its top level parent is going to be returned.
+     * @param \list_item $item The item which its top level parent is going to be returned.
      * @return int
      */
-    public function get_top_level_parent_id($item) {
+    public function get_top_level_parent_id($item) : int {
         // Put the item at the highest level it can go.
         $topcategory = question_get_top_category($item->item->contextid, true);
         return $topcategory->id;
     }
 
     /**
-     * process any actions.
+     * Process any actions.
      *
      * @param integer $left id of item to move left
      * @param integer $right id of item to move right
@@ -78,7 +81,7 @@ class question_category_list extends moodle_list {
      * @param integer $movedown id of item to move down
      * @return void
      */
-    public function process_actions($left, $right, $moveup, $movedown) {
+    public function process_actions($left, $right, $moveup, $movedown) : void {
         $category = new stdClass();
         if (!empty($left)) {
             // Moved Left (In to another category).

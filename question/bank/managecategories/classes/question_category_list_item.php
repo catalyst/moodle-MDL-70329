@@ -29,26 +29,45 @@ use html_writer;
 use moodle_url;
 
 class question_category_list_item extends \list_item {
-    public function set_icon_html($first, $last, $lastitem){
+
+    /**
+     * Override set_icon_html function.
+     *
+     * @param bool $first Is the first on the list.
+     * @param bool $last Is the last on the list.
+     * @param \list_item $lastitem Last item.
+     */
+    public function set_icon_html($first, $last, $lastitem) : void {
         global $CFG;
         $category = $this->item;
-        $url = new moodle_url('/question/bank/managecategories/category.php', ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
+        $url = new moodle_url('/question/bank/managecategories/category.php',
+            ($this->parentlist->pageurl->params() + array('edit'=>$category->id)));
         $this->icons['edit']= $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
         parent::set_icon_html($first, $last, $lastitem);
         $toplevel = ($this->parentlist->parentitem === null);//this is a top level item
-        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('movedowncontext'=>$this->id, 'tocontext'=>$this->parentlist->nextlist->context->id, 'sesskey'=>sesskey()));
+        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items)>1)) {
+            $url = new moodle_url($this->parentlist->pageurl,
+                array('movedowncontext'=>$this->id, 'tocontext'=>$this->parentlist->nextlist->context->id, 'sesskey'=>sesskey()));
             $this->icons['down'] = $this->image_icon(
-                    get_string('shareincontext', 'question', $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
+                    get_string('shareincontext', 'question',
+                        $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
         }
-        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items)>1)){
-            $url = new moodle_url($this->parentlist->pageurl, array('moveupcontext'=>$this->id, 'tocontext'=>$this->parentlist->lastlist->context->id, 'sesskey'=>sesskey()));
+        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items)>1)) {
+            $url = new moodle_url($this->parentlist->pageurl,
+                array('moveupcontext'=>$this->id, 'tocontext'=>$this->parentlist->lastlist->context->id, 'sesskey'=>sesskey()));
             $this->icons['up'] = $this->image_icon(
-                    get_string('shareincontext', 'question', $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
+                    get_string('shareincontext', 'question',
+                        $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
         }
     }
 
-    public function item_html($extraargs = array()){
+    /**
+     * Override item_html function.
+     *
+     * @param array $extraargs
+     * @return string Item html.
+     */
+    public function item_html($extraargs = array()) : string {
         global $CFG, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
