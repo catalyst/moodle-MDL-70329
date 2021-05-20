@@ -181,8 +181,7 @@ class view {
      */
     protected function get_question_bank_columns(): array {
         $questionbankclasscolumns = array();
-        $plugintype = 'qbank';
-        $plugins = \core_component::get_plugin_list($plugintype);
+        $plugins = \core\plugininfo\qbank::get_enabled_plugins();
         foreach ($plugins as $plugin => $notusing) {
             $questionbankclasses = \core_component::get_plugin_list_with_class('qbank',
                     $plugin . '_column', $plugin . '_column.php');
