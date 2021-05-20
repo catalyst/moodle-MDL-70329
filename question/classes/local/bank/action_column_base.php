@@ -55,7 +55,7 @@ abstract class action_column_base extends column_base {
      * @param $title
      * @param $url
      */
-    protected function print_icon($icon, $title, $url) {
+    protected function print_icon($icon, $title, $url): void {
         global $OUTPUT;
         echo '<a title="' . $title . '" href="' . $url . '">' . $OUTPUT->pix_icon($icon, $title) . '</a>';
     }
