@@ -14,13 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qbank_managecategories\privacy;
+
 /**
- * Strings for component 'qbank_managecategories', language 'en'
+ * Privacy Subsystem for qbank_managecategories implementing null_provider.
  *
  * @package   qbank_managecategories
- * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @category  privacy
+ * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-$string['pluginname'] = 'Manage question bank categories';
-$string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
