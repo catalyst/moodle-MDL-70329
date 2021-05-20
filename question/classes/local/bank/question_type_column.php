@@ -46,7 +46,7 @@ class question_type_column extends column_base {
         return get_string('questiontype', 'question');
     }
 
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         echo print_question_icon($question);
     }
 

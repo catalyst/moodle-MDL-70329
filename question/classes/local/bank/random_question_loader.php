@@ -90,7 +90,7 @@ class random_question_loader {
      *      in order to be eligible for being picked.
      * @return int|null the id of the question picked, or null if there aren't any.
      */
-    public function get_next_question_id($categoryid, $includesubcategories, $tagids = []) {
+    public function get_next_question_id($categoryid, $includesubcategories, $tagids = []): ?int {
         $this->ensure_questions_for_category_loaded($categoryid, $includesubcategories, $tagids);
 
         $categorykey = $this->get_category_key($categoryid, $includesubcategories, $tagids);
@@ -138,7 +138,7 @@ class random_question_loader {
      * @param array $tagids An array of tag ids. If an array is provided, then
      *      only the questions that are tagged with ALL the provided tagids will be loaded.
      */
-    protected function ensure_questions_for_category_loaded($categoryid, $includesubcategories, $tagids = []) {
+    protected function ensure_questions_for_category_loaded($categoryid, $includesubcategories, $tagids = []): void {
         global $DB;
 
         $categorykey = $this->get_category_key($categoryid, $includesubcategories, $tagids);
@@ -193,7 +193,7 @@ class random_question_loader {
      *
      * @param int $questionid the question that is being used.
      */
-    protected function use_question($questionid) {
+    protected function use_question($questionid): void {
         if (isset($this->recentlyusedquestions[$questionid])) {
             $this->recentlyusedquestions[$questionid] += 1;
         } else {
