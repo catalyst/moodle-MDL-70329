@@ -460,15 +460,6 @@ abstract class question_engine {
     public static function initialise_js() {
         return question_flags::initialise_js();
     }
-
-    /**
-     * Get the translated name of a question bank, for display in the UI.
-     * @param string $bank the internal name of the model.
-     * @return string name from the current language pack.
-     */
-    public static function get_bank_name($bank) {
-        return get_string('pluginname', 'qbank_' . $bank);
-    }
 }
 
 
