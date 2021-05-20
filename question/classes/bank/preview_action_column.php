@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class preview_action_column extends \core_question\local\bank\action_column_base implements menuable_action {
+class preview_action_column extends action_column_base implements menuable_action {
     /**
      * @var string store this lang string for performance.
      */

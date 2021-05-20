@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_type_column extends column_base {
-    public function get_name() {
+    public function get_name(): string {
         return 'qtype';
     }
 
@@ -50,11 +50,11 @@ class question_type_column extends column_base {
         echo print_question_icon($question);
     }
 
-    public function get_required_fields() {
+    public function get_required_fields(): array {
         return array('q.qtype');
     }
 
-    public function is_sortable() {
+    public function is_sortable(): string {
         return 'q.qtype';
     }
 }

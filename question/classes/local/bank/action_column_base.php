@@ -35,24 +35,54 @@ defined('MOODLE_INTERNAL') || die();
  */
 abstract class action_column_base extends column_base {
 
-    protected function get_title() {
+    /**
+     * Title for this column. Not used if is_sortable returns an array.
+     */
+    protected function get_title(): string {
         return '&#160;';
     }
 
-    public function get_extra_classes() {
+    /**
+     * @return array any extra class names you would like applied to every cell in this column.
+     */
+    public function get_extra_classes():array {
         return array('iconcol');
     }
 
+    /**
+     * Print the icon of the action.
+     * @param $icon
+     * @param $title
+     * @param $url
+     */
     protected function print_icon($icon, $title, $url) {
         global $OUTPUT;
         echo '<a title="' . $title . '" href="' . $url . '">' . $OUTPUT->pix_icon($icon, $title) . '</a>';
     }
 
-    public function get_extra_joins() {
+    /**
+     * Return an array 'table_alias' => 'JOIN clause' to bring in any data that
+     * this column required.
+     *
+     * The return values for all the columns will be checked. It is OK if two
+     * columns join in the same table with the same alias and identical JOIN clauses.
+     * If to columns try to use the same alias with different joins, you get an error.
+     * The only table included by default is the question table, which is aliased to 'q'.
+     *
+     * It is importnat that your join simply adds additional data (or NULLs) to the
+     * existing rows of the query. It must not cause additional rows.
+     *
+     * @return array 'table_alias' => 'JOIN clause'
+     */
+    public function get_extra_joins(): array {
         return array('qc' => 'JOIN {question_categories} qc ON qc.id = q.category');
     }
 
-    public function get_required_fields() {
+    /**
+     * @return array fields required. use table alias 'q' for the question table, or one of the
+     * ones from get_extra_joins. Every field requested must specify a table prefix.
+     */
+    public function get_required_fields():array {
         // Createdby is required for permission checks.
         // Qtype so we can easily avoid applying actions to question types that
         // are no longer installed.
