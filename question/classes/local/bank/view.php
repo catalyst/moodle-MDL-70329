@@ -20,7 +20,6 @@
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +27,6 @@ namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
-
 
 /**
  * This class prints a view of the question bank, including
@@ -48,6 +46,7 @@ use core_question\bank\search\condition;
  *  + outputting table headers.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class view {
@@ -197,7 +196,7 @@ class view {
      *
      * @return array
      */
-    protected function wanted_columns() {
+    protected function wanted_columns(): array {
         global $CFG;
         $this->requiredcolumns = array();
         $questionbankclasscolumns = $this->get_question_bank_columns();
@@ -217,7 +216,7 @@ class view {
             $classobject = new $fullname($this);
             // Check if it has custom preference selector to view/hide.
             if ($classobject->has_preference()) {
-                if(!$classobject->get_preference()) {
+                if (!$classobject->get_preference()) {
                     continue;
                 }
             }
@@ -245,7 +244,7 @@ class view {
      *
      * @return string Column name for the heading
      */
-    protected function heading_column() {
+    protected function heading_column(): string {
         // Possibly can be deprecated.
         return 'question_bank_question_name_column';
     }
@@ -285,14 +284,14 @@ class view {
      * @param string $colname a column internal name.
      * @return bool is this column included in the output?
      */
-    public function has_column($colname) {
+    public function has_column($colname): bool {
         return isset($this->visiblecolumns[$colname]);
     }
 
     /**
      * @return int The number of columns in the table.
      */
-    public function get_column_count() {
+    public function get_column_count(): int {
         return count($this->visiblecolumns);
     }
 
@@ -315,7 +314,7 @@ class view {
      * @param string $sort the sort parameter to process.
      * @return array array($colname, $subsort).
      */
-    protected function parse_subsort($sort) {
+    protected function parse_subsort($sort): array {
         // Do the parsing.
         if (strpos($sort, '-') !== false) {
             list($colname, $subsort) = explode('-', $sort, 2);
@@ -341,6 +340,9 @@ class view {
         return array($colname, $subsort);
     }
 
+    /**
+     * Initialise sort from parameters.
+     */
     protected function init_sort_from_params() {
         $this->sort = array();
         for ($i = 1; $i <= self::MAX_SORTS; $i++) {
@@ -363,6 +365,11 @@ class view {
         }
     }
 
+    /**
+     * Sort to parameters.
+     * @param $sorts
+     * @return array
+     */
     protected function sort_to_params($sorts) {
         $params = array();
         $i = 0;
@@ -376,8 +383,11 @@ class view {
         return $params;
     }
 
-
-    protected function default_sort() {
+    /**
+     * Default sort for question data.
+     * @return int[]
+     */
+    protected function default_sort(): array {
         // Change required after implementing as plugins.
         return array(
                 'core_question\local\bank\question_type_column' => 1,
@@ -389,7 +399,7 @@ class view {
      * @param string $sort a column or column_subsort name.
      * @return int the current sort order for this column -1, 0, 1
      */
-    public function get_primary_sort_order($sort) {
+    public function get_primary_sort_order($sort): int {
         $order = reset($this->sort);
         $primarysort = key($this->sort);
         if ($sort == $primarysort) {
@@ -406,7 +416,7 @@ class view {
      * @param bool $newsortreverse whether to sort in reverse order.
      * @return string The new URL.
      */
-    public function new_sort_url($sort, $newsortreverse) {
+    public function new_sort_url($sort, $newsortreverse): string {
         if ($newsortreverse) {
             $order = -1;
         } else {
@@ -489,7 +499,12 @@ class view {
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
     }
 
-    protected function get_question_count() {
+    /**
+     * Get the number of questions.
+     * @return int
+     * @throws \dml_exception
+     */
+    protected function get_question_count(): int {
         global $DB;
         return $DB->count_records_sql($this->countsql, $this->sqlparams);
     }
@@ -512,6 +527,9 @@ class view {
         return $questions;
     }
 
+    /**
+     * Returns the base url.
+     */
     public function base_url() {
         return $this->baseurl;
     }
@@ -628,12 +646,22 @@ class view {
 
     }
 
+    /**
+     * Print the text for category.
+     * @param $categoryandcontext
+     */
     protected function print_choose_category_message($categoryandcontext) {
         echo "<p style=\"text-align:center;\"><b>";
         print_string('selectcategoryabove', 'question');
         echo "</b></p>";
     }
 
+    /**
+     * Gets current selected category.
+     * @param $categoryandcontext
+     * @return false|mixed|\stdClass
+     * @throws \dml_exception
+     */
     protected function get_current_category($categoryandcontext) {
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
@@ -956,6 +984,9 @@ class view {
         echo "</div>\n";
     }
 
+    /**
+     * Start of the table html.
+     */
     protected function start_table() {
         echo '<table id="categoryquestions">' . "\n";
         echo "<thead>\n";
@@ -964,11 +995,17 @@ class view {
         echo "<tbody>\n";
     }
 
+    /**
+     * End of the table html.
+     */
     protected function end_table() {
         echo "</tbody>\n";
         echo "</table>\n";
     }
 
+    /**
+     * Print table header.
+     */
     protected function print_table_headers() {
         echo "<tr>\n";
         foreach ($this->visiblecolumns as $column) {
@@ -977,6 +1014,12 @@ class view {
         echo "</tr>\n";
     }
 
+    /**
+     * Gets the classes for row.
+     * @param $question
+     * @param $rowcount
+     * @return array
+     */
     protected function get_row_classes($question, $rowcount) {
         $classes = array();
         if ($question->hidden) {
@@ -989,6 +1032,11 @@ class view {
         return $classes;
     }
 
+    /**
+     * Prints the table row.
+     * @param $question
+     * @param $rowcount
+     */
     protected function print_table_row($question, $rowcount) {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));
         if ($rowclasses) {
@@ -1005,6 +1053,9 @@ class view {
         }
     }
 
+    /**
+     * Process actions for the selected action.
+     */
     public function process_actions() {
         global $DB;
         // Now, check for commands on this page and modify variables as necessary.
@@ -1013,7 +1064,7 @@ class view {
             $category = required_param('category', PARAM_SEQUENCE);
             list($tocategoryid, $contextid) = explode(',', $category);
             if (! $tocategory = $DB->get_record('question_categories', array('id' => $tocategoryid, 'contextid' => $contextid))) {
-                print_error('cannotfindcate', 'question');
+                throw new \moodle_exception('cannotfindcate', 'question');
             }
             $tocontext = \context::instance_by_id($contextid);
             require_capability('moodle/question:add', $tocontext);
@@ -1060,7 +1111,7 @@ class view {
                     }
                     redirect($this->baseurl);
                 } else {
-                    print_error('invalidconfirm', 'question');
+                    throw new \moodle_exception('invalidconfirm', 'question');
                 }
             }
         }
@@ -1077,15 +1128,19 @@ class view {
         }
     }
 
-    public function process_actions_needing_ui() {
+    /**
+     * Process actions with ui.
+     * @return bool
+     */
+    public function process_actions_needing_ui(): bool {
         global $DB, $OUTPUT;
         if (optional_param('deleteselected', false, PARAM_BOOL)) {
             // Make a list of all the questions that are selected.
             $rawquestions = $_REQUEST; // This code is called by both POST forms and GET links, so cannot use data_submitted.
-            $questionlist = '';  // comma separated list of ids of questions to be deleted
-            $questionnames = ''; // string with names of questions separated by <br /> with
-            // an asterix in front of those that are in use
-            $inuse = false;      // set to true if at least one of the questions is in use
+            $questionlist = '';  // Comma separated list of ids of questions to be deleted.
+            $questionnames = ''; // String with names of questions separated by <br/> with an asterix
+            // in front of those that are in use.
+            $inuse = false;      // Set to true if at least one of the questions is in use.
             foreach ($rawquestions as $key => $value) {    // Parse input for question ids.
                 if (preg_match('!^q([0-9]+)$!', $key, $matches)) {
                     $key = $matches[1];
