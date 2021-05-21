@@ -18,7 +18,8 @@
  * Question bank installation.
  *
  * @package     mod_qbank
- * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright   2021 Catalyst IT Australia Pty Ltd
+ * @author      Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

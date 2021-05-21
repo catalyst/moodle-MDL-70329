@@ -18,8 +18,8 @@
  * The main mod_qbank configuration form.
  *
  * @package     mod_qbank
- * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
- * @author      2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright   2021 Catalyst IT Australia Pty Ltd
+ * @author      Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,7 +31,8 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
  * Module instance settings form.
  *
  * @package     mod_qbank
- * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright   2021 Catalyst IT Australia Pty Ltd
+ * @author      Safat Shahin <safatshahin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_qbank_mod_form extends moodleform_mod {
