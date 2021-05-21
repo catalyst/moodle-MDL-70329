@@ -99,4 +99,17 @@ class createcourse_helper {
 
         return $newcourse;
     }
+
+    /**
+     * Checks if course already exists.
+     *
+     * @param   string $coursename Course name.
+     * @return  bool true or false.
+     */
+    public static function course_exists(string $coursename) {
+
+        global $DB;
+
+        return $DB->record_exists('course', array('fullname' => $coursename)) ? true : false;
+    }
 }

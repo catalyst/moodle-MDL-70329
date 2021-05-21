@@ -53,13 +53,13 @@ function xmldb_qbank_install() {
             case "40":
                 $catid = $cat->instanceid;
                 $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
-                create_course($newcrs);
+                createcourse_helper::course_exists($newcourse->fullname) ? 0 : create_course($newcrs);
                 break;
             case "50":
                 // Retrieving Course category id from course table where id = instanceid.
                 $catid = createcourse_helper::get_coursecatid($cat->instanceid);
                 $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
-                create_course($newcrs);
+                createcourse_helper::course_exists($newcourse->fullname) ? 0 : create_course($newcrs);
                 break;
             case "70":
                 // Retrieving Course id from course_module table where id = instanceid.
@@ -67,7 +67,7 @@ function xmldb_qbank_install() {
                 // Retrieving Course category id from course table where id = courseid.
                 $catid = createcourse_helper::get_coursecatid($courseid);
                 $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
-                create_course($newcrs);
+                createcourse_helper::course_exists($newcourse->fullname) ? 0 : create_course($newcrs);
                 break;
         }
     }
