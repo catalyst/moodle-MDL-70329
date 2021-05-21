@@ -19,7 +19,6 @@
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * Base class for representing a column in a {@link question_bank_view}.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class column_base {
