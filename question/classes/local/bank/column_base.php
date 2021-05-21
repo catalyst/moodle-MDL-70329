@@ -226,7 +226,7 @@ abstract class column_base {
      *
      * @return string column name.
      */
-    abstract public function get_name(): string;
+    abstract public function get_name();
 
     /**
      * @return array any extra class names you would like applied to every cell in this column.
@@ -240,7 +240,7 @@ abstract class column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    abstract protected function display_content($question, $rowclasses): void;
+    abstract protected function display_content($question, $rowclasses);
 
     /**
      * Output the closing column tag
