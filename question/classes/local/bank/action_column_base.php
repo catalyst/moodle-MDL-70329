@@ -19,7 +19,6 @@
  *
  * @package   core_question
  * @copyright 2009 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * A base class for actions that are an icon that lets you manipulate the question in some way.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class action_column_base extends column_base {

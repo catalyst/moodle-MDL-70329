@@ -19,7 +19,6 @@
  *
  * @package   core_question
  * @copyright 2009 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * Base class for 'columns' that are actually displayed as a row following the main question row.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class row_base extends column_base {
@@ -48,7 +48,7 @@ abstract class row_base extends column_base {
      * @param \stdClass $question
      * @param string $rowclasses
      */
-    protected function display_start($question, $rowclasses) {
+    protected function display_start($question, $rowclasses): void {
         if ($rowclasses) {
             echo '<tr class="' . $rowclasses . '">' . "\n";
         } else {
@@ -63,7 +63,7 @@ abstract class row_base extends column_base {
      * @param object $question
      * @param string $rowclasses
      */
-    protected function display_end($question, $rowclasses) {
+    protected function display_end($question, $rowclasses): void {
         echo "</td></tr>\n";
     }
 }

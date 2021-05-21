@@ -18,7 +18,8 @@
  * Defines classes used for plugin info.
  *
  * @package    core
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,10 +28,11 @@ namespace core\plugininfo;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class for qbank plugins
+ * Base class for qbank plugins.
  *
  * @package    core_qbank
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qbank extends base {
