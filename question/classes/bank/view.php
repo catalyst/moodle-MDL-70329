@@ -48,6 +48,8 @@ use core_question\bank\search\condition;
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \core_question\local\bank\view
  */
 class view {
     const MAX_SORTS = 3;
@@ -136,6 +138,9 @@ class view {
      * @param object $cm (optional) activity settings.
      */
     public function __construct($contexts, $pageurl, $course, $cm = null) {
+        // Debugging message will be re-added after implementing the changes in mod_quiz.
+        //debugging('Class view in \core_question\bank\view is deprecated,
+        //please use \core_question\local\bank\view instead.', DEBUG_DEVELOPER);
         $this->contexts = $contexts;
         $this->baseurl = $pageurl;
         $this->course = $course;
