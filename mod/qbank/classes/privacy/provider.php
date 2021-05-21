@@ -18,7 +18,8 @@
  * Privacy Subsystem implementation for mod_qbank.
  *
  * @package     mod_qbank
- * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright   2021 Catalyst IT Australia Pty Ltd
+ * @author      Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Privacy Subsystem for mod_qbank implementing null_provider.
  *
- * @copyright   2021 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
+ * @copyright   2021 Catalyst IT Australia Pty Ltd
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {
