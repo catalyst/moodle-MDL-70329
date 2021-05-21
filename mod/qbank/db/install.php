@@ -24,9 +24,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+error_reporting(-1);
+ini_set('display_errors', true);
+require_once($CFG->dirroot . '/mod/qbank/classes/createcourse_helper.php');
 
-require_once('../config.php');
-require_once($CFG->dirroot.'/course/lib.php');
+use mod_qbank\createcourse_helper;
 
 /**
  * Custom code to be run on installing the plugin.
@@ -36,20 +38,10 @@ require_once($CFG->dirroot.'/course/lib.php');
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 function xmldb_qbank_install() {
-    global $DB;
 
-    // Retrieve question bank informations that are populated.
-    $sqlq = "SELECT DISTINCT qc.name, qc.contextid, ctx.contextlevel, ctx.instanceid
-            FROM mdl_question q
-            JOIN mdl_question_categories qc ON qc.id = q.category
-            JOIN mdl_context ctx ON ctx.id = qc.contextid
-            ORDER BY ctx.contextlevel;";
-    
-    $rec = $DB->get_records_sql($sqlq);
-
-    // Retrieve same category id.
-    
     // Data from populated questions.
+    $rec = createcourse_helper::get_populated();
+    
     foreach($rec as $cat) {
         $contextlevel = $cat->contextlevel;
         // Add course here.
@@ -58,34 +50,21 @@ function xmldb_qbank_install() {
             // case "10":
             //     echo "";
             //     break;
-            // case "30":
-            //     echo "";
-            //     break;
             // case "40":
             //     echo "";
             //     break;
             case "50":
                 // Retrieving Course category id from course table where id = instanceid.
-                $qu = "SELECT category FROM mdl_course WHERE id = ?";
-                $catid = $DB->get_records_sql($qu, [$cat->instanceid]);
-                $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
-                // Populating object / should add a time() later on
-                $newcourse->fullname    = "New course from question bank " . $cat->name;
-                $newcourse->category    = +$catid;
-                create_course($newcourse);
+                $catid = createcourse_helper::get_coursecatid($cat->instanceid);
+                $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
+                create_course($newcrs);
                 break;
             case "70":
                 // Retrieving Course id from course_module table where id = instanceid.
-                $q = "SELECT course FROM mdl_course_modules WHERE id = ?";
-                $courseid = $DB->get_records_sql($q, [$cat->instanceid]);
-                $courseid = array_values(json_decode(json_encode($courseid), true))[0]['course'];
+                $courseid = createcourse_helper::get_courseid($cat->instanceid);
                 // Retrieving Course category id from course table where id = courseid.
-                $qu = "SELECT category FROM mdl_course WHERE id = ?";
-                $catid = $DB->get_records_sql($qu, [$courseid]);
-                $catid = array_values(json_decode(json_encode($catid), true))[0]['category'];
-                // Populating object / should add a time() later on
-                $newcourse->fullname    = "New course from question bank " . $cat->name;
-                $newcourse->category    = +$catid;
+                $catid = createcourse_helper::get_coursecatid($courseid);
+                $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
                 create_course($newcourse);
                 break;
             case "80":
@@ -93,7 +72,5 @@ function xmldb_qbank_install() {
                 break;
         }
     }
-
-    $v = 0;
     return true;
 }
