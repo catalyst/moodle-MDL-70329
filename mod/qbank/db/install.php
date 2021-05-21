@@ -32,7 +32,7 @@ use mod_qbank\createcourse_helper;
 
 /**
  * Custom code to be run on installing the plugin.
- * 
+ *
  * @package     mod_qbank
  * @author      Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,8 +41,8 @@ function xmldb_qbank_install() {
 
     // Data from populated questions.
     $rec = createcourse_helper::get_populated();
-    
-    foreach($rec as $cat) {
+
+    foreach ($rec as $cat) {
         $contextlevel = $cat->contextlevel;
         // Add course here.
         $newcourse = new stdClass();
@@ -50,9 +50,11 @@ function xmldb_qbank_install() {
             // case "10":
             //     echo "";
             //     break;
-            // case "40":
-            //     echo "";
-            //     break;
+            case "40":
+                $catid = $cat->instanceid;
+                $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
+                create_course($newcrs);
+                break;
             case "50":
                 // Retrieving Course category id from course table where id = instanceid.
                 $catid = createcourse_helper::get_coursecatid($cat->instanceid);
@@ -61,14 +63,11 @@ function xmldb_qbank_install() {
                 break;
             case "70":
                 // Retrieving Course id from course_module table where id = instanceid.
-                $courseid = createcourse_helper::get_courseid($cat->instanceid);
+                $courseid = createcourse_helper::get_module_courseid($cat->instanceid);
                 // Retrieving Course category id from course table where id = courseid.
                 $catid = createcourse_helper::get_coursecatid($courseid);
                 $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
-                create_course($newcourse);
-                break;
-            case "80":
-                echo "this is a block";
+                create_course($newcrs);
                 break;
         }
     }

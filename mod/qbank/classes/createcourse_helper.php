@@ -32,7 +32,7 @@ class createcourse_helper {
 
     /**
      * Get all populated question banks.
-     * 
+     *
      * @return stdClass $rec Return question category records.
      */
     public static function get_populated() {
@@ -53,12 +53,12 @@ class createcourse_helper {
 
     /**
      * Get course category id from course table.
-     * 
+     *
      * @param  string $courseid Course id.
      * @return string $catid Returns course category id.
      */
     public static function get_coursecatid(string $courseid) {
-        
+
         global $DB;
 
         $qu = "SELECT category FROM mdl_course WHERE id = ?";
@@ -70,14 +70,14 @@ class createcourse_helper {
 
     /**
      * Get course id from course_modules table.
-     * 
+     *
      * @param  string $instanceid Course instance id.
      * @return string $Course id Returns course id.
      */
-    public static function get_courseid(string $instanceid) {
-        
+    public static function get_module_courseid(string $instanceid) {
+
         global $DB;
-        
+
         $q = "SELECT course FROM mdl_course_modules WHERE id = ?";
         $courseid = $DB->get_records_sql($q, [$instanceid]);
         $courseid = array_values(json_decode(json_encode($courseid), true))[0]['course'];
@@ -87,7 +87,7 @@ class createcourse_helper {
 
     /**
      * Populate new course object.
-     * 
+     *
      * @param   stdClass $newcourse Object to populate.
      * @param   stdClass $cat Question bank category informations.
      * @param   string  $catid Category id where the new course should be added.
