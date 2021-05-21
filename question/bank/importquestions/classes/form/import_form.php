@@ -70,7 +70,7 @@ class question_import_form extends moodleform {
         $mform->addRule("formatchoices", null, 'required', null, 'client');
 
         // Import options.
-        $mform->addElement('header','general', get_string('general', 'form'));
+        $mform->addElement('header', 'general', get_string('general', 'form'));
 
         $mform->addElement('questioncategory', 'category', get_string('importcategory', 'question'), compact('contexts'));
         $mform->setDefault('category', $defaultcategory);
@@ -95,7 +95,7 @@ class question_import_form extends moodleform {
         $mform->setDefault('stoponerror', 1);
         $mform->addHelpButton('stoponerror', 'stoponerror', 'question');
 
-        // The file to import
+        // The file to import.
         $mform->addElement('header', 'importfileupload', get_string('importquestions', 'question'));
 
         $mform->addElement('filepicker', 'newfile', get_string('import'));
