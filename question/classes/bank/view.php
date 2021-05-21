@@ -139,8 +139,8 @@ class view {
      */
     public function __construct($contexts, $pageurl, $course, $cm = null) {
         // Debugging message will be re-added after implementing the changes in mod_quiz.
-        //debugging('Class view in \core_question\bank\view is deprecated,
-        //please use \core_question\local\bank\view instead.', DEBUG_DEVELOPER);
+        // ...debugging('Class view in \core_question\bank\view is deprecated,
+        // please use \core_question\local\bank\view instead.', DEBUG_DEVELOPER);.
         $this->contexts = $contexts;
         $this->baseurl = $pageurl;
         $this->course = $course;

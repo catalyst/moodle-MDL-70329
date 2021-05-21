@@ -49,8 +49,8 @@ abstract class column_base {
      */
     public function __construct(view $qbank) {
         // Debugging message will be re-added after implementing the changes in mod_quiz.
-        //debugging('Class column_base in \core_question\bank\column_base is deprecated,
-        //please use \core_question\local\bank\column_base instead.', DEBUG_DEVELOPER);
+        // ...debugging('Class column_base in \core_question\bank\column_base is deprecated,
+        // please use \core_question\local\bank\column_base instead.', DEBUG_DEVELOPER);.
         $this->qbank = $qbank;
         $this->init();
     }
