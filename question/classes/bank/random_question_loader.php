@@ -68,8 +68,8 @@ class random_question_loader {
      */
     public function __construct(\qubaid_condition $qubaids, array $usedquestions = array()) {
         // Debugging message will be re-added after implementing the changes in mod_quiz.
-        //debugging('Class random_question_loader in \core_question\bank\random_question_loader is deprecated,
-        //please use \core_question\local\bank\random_question_loader instead.', DEBUG_DEVELOPER);
+        // ...debugging('Class random_question_loader in \core_question\bank\random_question_loader is deprecated,
+        // please use \core_question\local\bank\random_question_loader instead.', DEBUG_DEVELOPER);.
         $this->qubaids = $qubaids;
         $this->recentlyusedquestions = $usedquestions;
 
