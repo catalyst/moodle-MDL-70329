@@ -18,7 +18,8 @@
  * The mod_qbank course module viewed event.
  *
  * @package    mod_qbank
- * @copyright  2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     2021 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,7 +32,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @package    mod_qbank
  * @since      Moodle 4.0
- * @copyright  2021 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     2021 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_module_viewed extends \core\event\course_module_viewed {
