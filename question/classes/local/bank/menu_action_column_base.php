@@ -19,7 +19,6 @@
  *
  * @package   core_question
  * @copyright 2019 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,6 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  * interface yourself.
  *
  * @copyright 2019 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class menu_action_column_base extends action_column_base implements menuable_action {

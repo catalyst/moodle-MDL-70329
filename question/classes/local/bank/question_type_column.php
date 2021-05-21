@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * This file will is deleted in a plugin, kept it here as base needs at least one default sort criteria.
  * A column type for the name of the question type.
  *
  * @package   core_question
