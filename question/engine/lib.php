@@ -51,7 +51,6 @@ require_once($CFG->libdir . '/questionlib.php');
  * which is the main class that is used by other code that wants to use questions.
  *
  * @copyright  2009 The Open University
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class question_engine {
