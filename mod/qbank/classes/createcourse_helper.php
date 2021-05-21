@@ -28,6 +28,8 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot .'/course/lib.php');
 
+use core_course_category;
+
 class createcourse_helper {
 
     /**
@@ -111,5 +113,37 @@ class createcourse_helper {
         global $DB;
 
         return $DB->record_exists('course', array('fullname' => $coursename)) ? true : false;
+    }
+
+    /**
+     * Create a single category for system question banks.
+     *
+     * @param   string $categoryname Category name.
+     * @param   stdClass $newcategory Object containing new category informations.
+     * @return  bool true or false.
+     */
+    public static function create_system_category(string $categoryname, object $newcategory) {
+
+        global $DB;
+
+        $newcategory->id = 0;
+        $newcategory->name = $categoryname;
+
+        if ($DB->record_exists('course_categories', array('name' => $categoryname))) {
+            return 0;
+        } else {
+            return core_course_category::create($newcategory);
+        }
+    }
+
+    public static function get_system_coursecatid(string $categoryname) {
+
+        global $DB;
+
+        $q = "SELECT id FROM mdl_course_categories WHERE name = ?";
+        $catid = $DB->get_records_sql($q, [$categoryname]);
+        $catid = array_values(json_decode(json_encode($catid), true))[0]['id'];
+
+        return $catid;
     }
 }

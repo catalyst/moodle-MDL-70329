@@ -24,9 +24,6 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-error_reporting(-1);
-ini_set('display_errors', true);
-require_once($CFG->dirroot . '/mod/qbank/classes/createcourse_helper.php');
 
 use mod_qbank\createcourse_helper;
 
@@ -47,9 +44,13 @@ function xmldb_qbank_install() {
         // Add course here.
         $newcourse = new stdClass();
         switch ($contextlevel) {
-            // case "10":
-            //     echo "";
-            //     break;
+            case "10":
+                $newcategory = new stdClass();
+                createcourse_helper::create_system_category("System category", $newcategory);
+                $catid = createcourse_helper::get_system_coursecatid("System category");
+                $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
+                createcourse_helper::course_exists($newcourse->fullname) ? 0 : create_course($newcrs);
+                break;
             case "40":
                 $catid = $cat->instanceid;
                 $newcrs = createcourse_helper::populate_course($newcourse, $cat, $catid);
