@@ -89,9 +89,44 @@ class mod_qbank_mod_form extends moodleform_mod {
         }
 
         if (!empty($CFG->enableavailability)) {
-            // To make it work with core_availability\frontend.
-            $mform->addElement('hidden', 'availabilityconditionsjson', null);
-            $mform->setType('availabilityconditionsjson', PARAM_RAW);
+            // Add special button to end of previous section if groups/groupings
+            // are enabled.
+
+            $availabilityplugins = \core\plugininfo\availability::get_enabled_plugins();
+            $groupavailability = $this->_features->groups && array_key_exists('group', $availabilityplugins);
+            $groupingavailability = $this->_features->groupings && array_key_exists('grouping', $availabilityplugins);
+
+            if ($groupavailability || $groupingavailability) {
+                // When creating the button, we need to set type=button to prevent it behaving as a submit.
+                $mform->addElement('static', 'restrictgroupbutton', '',
+                        html_writer::tag('button', get_string('restrictbygroup', 'availability'), [
+                                'id' => 'restrictbygroup',
+                                'type' => 'button',
+                                'disabled' => 'disabled',
+                                'class' => 'btn btn-secondary',
+                                'data-groupavailability' => $groupavailability,
+                                'data-groupingavailability' => $groupingavailability
+                        ])
+                );
+            }
+
+            // Availability field. This is just a textarea; the user interface
+            // interaction is all implemented in JavaScript.
+            $mform->addElement('header', 'availabilityconditionsheader',
+                    get_string('restrictaccess', 'availability'));
+            // Note: This field cannot be named 'availability' because that
+            // conflicts with fields in existing modules (such as assign).
+            // So it uses a long name that will not conflict.
+            $mform->addElement('textarea', 'availabilityconditionsjson',
+                    get_string('accessrestrictions', 'availability'));
+            // The _cm variable may not be a proper cm_info, so get one from modinfo.
+            if ($this->_cm) {
+                $modinfo = get_fast_modinfo($COURSE);
+                $cm = $modinfo->get_cm($this->_cm->id);
+            } else {
+                $cm = null;
+            }
+            \core_availability\frontend::include_all_javascript($COURSE, $cm);
         }
 
         // Conditional activities: completion tracking section.
