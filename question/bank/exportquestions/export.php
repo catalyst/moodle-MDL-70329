@@ -17,12 +17,10 @@
 /**
  * Script for importing questions into the question bank.
  *
- * @package    moodlecore
- * @subpackage questionbank
+ * @package    qbank_exportquestions
  * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
