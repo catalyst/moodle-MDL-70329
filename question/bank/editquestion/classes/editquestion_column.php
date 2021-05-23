@@ -19,7 +19,6 @@
  *
  * @package   qbank_editquestion
  * @copyright 2009 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,6 +33,7 @@ use moodle_url;
  * Class for question bank edit question column.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class editquestion_column extends menu_action_column_base {
@@ -60,7 +60,7 @@ class editquestion_column extends menu_action_column_base {
      * A chance for subclasses to initialise themselves, for example to load lang strings,
      * without having to override the constructor.
      */
-    public function init() {
+    public function init(): void {
         parent::init();
         $this->stredit = get_string('editquestion', 'question');
         $this->strview = get_string('view');
@@ -89,7 +89,7 @@ class editquestion_column extends menu_action_column_base {
      * @param int $questionid the question id.
      * @return moodle_url the URL, HTML-escaped.
      */
-    public function edit_question_moodle_url($questionid) {
+    public function edit_question_moodle_url($questionid): moodle_url {
         return new moodle_url($this->editquestionurl, ['id' => $questionid]);
     }
 

@@ -19,7 +19,6 @@
  *
  * @package   qbank_duplicatequestion
  * @copyright 2013 The Open University
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,6 +33,7 @@ use moodle_url;
  * Question bank column for the duplicate action icon.
  *
  * @copyright 2013 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class duplicatequestion_column extends menu_action_column_base {
@@ -51,7 +51,7 @@ class duplicatequestion_column extends menu_action_column_base {
      * A chance for subclasses to initialise themselves, for example to load lang strings,
      * without having to override the constructor.
      */
-    public function init() {
+    public function init(): void {
         parent::init();
         $this->strcopy = get_string('duplicate');
 
@@ -80,7 +80,7 @@ class duplicatequestion_column extends menu_action_column_base {
      * @param int $questionid the question id.
      * @return \moodle_url the URL.
      */
-    public function duplicate_question_moodle_url($questionid) {
+    public function duplicate_question_moodle_url($questionid): moodle_url {
         return new \moodle_url($this->duplicatequestionurl, ['id' => $questionid, 'makecopy' => 1]);
     }
 

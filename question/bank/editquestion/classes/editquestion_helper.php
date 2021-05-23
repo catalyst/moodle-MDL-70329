@@ -20,7 +20,8 @@
  * This code is based on question/editlib.php by Martin Dougiamas.
  *
  * @package    qbank_editquestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace qbank_editquestion;
@@ -30,7 +31,9 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Class editquestion_helper for methods related to add/edit/copy
  *
- * @package qbank_editquestion
+ * @package    qbank_editquestion
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  */
 class editquestion_helper {
 

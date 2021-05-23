@@ -18,9 +18,10 @@
  * Strings for component qbank_duplicatequestion, language 'en'
  *
  * @package    qbank_duplicatequestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Duplicate question';
-$string['privacy:metadata'] = 'Duplicate question plugin will create a new question using the data of the current question.';
+$string['privacy:metadata'] = 'Duplicate question created a copy of a question, it does not store any user data.';

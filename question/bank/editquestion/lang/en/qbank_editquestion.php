@@ -18,9 +18,10 @@
  * Strings for component qbank_editquestion, language 'en'
  *
  * @package    qbank_editquestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Edit question';
-$string['privacy:metadata'] = 'Edit question plugin will edit the selected question using the qtype form.';
+$string['privacy:metadata'] = 'Edit question plugin edits a question, it does not store any user data.';

@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Helper class for adding/editing a question.
+ * Renderer for adding/editing a question.
  *
  * This code is based on question/renderer.php by The Open University.
  *
  * @package    qbank_editquestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,9 +30,12 @@ namespace qbank_editquestion\output;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class renderer for add/edit/copy
+ * Renderer for add/edit/copy
  *
- * @package qbank_editquestion
+ * @package    qbank_editquestion
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends \plugin_renderer_base {
 
