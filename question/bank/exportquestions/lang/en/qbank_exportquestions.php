@@ -18,7 +18,8 @@
  * Strings for component 'qbank_exportquestions', language 'en'
  *
  * @package   qbank_exportquestions
- * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @copyright 2021 Catalyst IT Australia Pty Ltd
+ * @author    Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
