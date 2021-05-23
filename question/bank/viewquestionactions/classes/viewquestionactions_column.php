@@ -19,7 +19,6 @@
  *
  * @package   qbank_viewquestionactions
  * @copyright 2019 The Open University
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,6 +38,7 @@ use core_question\local\bank\menuable_action;
  * column containing an Edit menu.
  *
  * @copyright 2019 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class viewquestionactions_column extends column_base {
@@ -57,7 +57,7 @@ class viewquestionactions_column extends column_base {
      * @param column_base[] $allcolumns a set of columns.
      * @return column_base[] the non-action columns from the set.
      */
-    public function claim_menuable_columns($allcolumns) {
+    public function claim_menuable_columns($allcolumns): array {
         $remainingcolumns = [];
         foreach ($allcolumns as $key => $column) {
             if ($column instanceof menuable_action) {
@@ -71,6 +71,8 @@ class viewquestionactions_column extends column_base {
 
     /**
      * Title for this column. Not used if is_sortable returns an array.
+     *
+     * @return \lang_string|string
      */
     protected function get_title() {
         return get_string('actions');
@@ -82,7 +84,7 @@ class viewquestionactions_column extends column_base {
      *
      * @return string column name.
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'editmenu';
     }
 
@@ -91,7 +93,7 @@ class viewquestionactions_column extends column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
         $menu = new \action_menu();
@@ -118,7 +120,7 @@ class viewquestionactions_column extends column_base {
      * ones from get_extra_joins. Every field requested must specify a table prefix.
      * @return array fields required.
      */
-    public function get_required_fields() {
+    public function get_required_fields(): array {
         return ['q.qtype'];
     }
 }

@@ -18,9 +18,10 @@
  * Strings for component qbank_viewquestionactions, language 'en'
  *
  * @package    qbank_viewquestionactions
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'View question actions';
-$string['privacy:metadata'] = 'View question action is the column to contain all the actions for the question bank.';
+$string['privacy:metadata'] = 'View question action will process all the actions, it does not contain any user data.';

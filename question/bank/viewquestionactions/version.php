@@ -17,14 +17,14 @@
 /**
  * Version information for qbank_viewquestionactions.
  *
- * @package    qbank_viewquestionactions
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_viewquestionactions';
-$plugin->version   = 2021050900;
+$plugin->version   = 2021052300;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;
