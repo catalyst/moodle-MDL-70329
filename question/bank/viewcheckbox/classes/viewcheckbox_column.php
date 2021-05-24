@@ -19,7 +19,6 @@
  *
  * @package   qbank_viewcheckbox
  * @copyright 2009 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace qbank_viewcheckbox;
@@ -30,6 +29,10 @@ use core_question\local\bank\column_base;
 
 /**
  * A column with a checkbox for each question with name q{questionid}.
+ * @package   qbank_viewcheckbox
+ * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class viewcheckbox_column extends column_base {
 
@@ -39,7 +42,7 @@ class viewcheckbox_column extends column_base {
      *
      * @return string column name.
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'checkbox';
     }
 
@@ -74,7 +77,7 @@ class viewcheckbox_column extends column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
         $checkbox = new checkbox_toggleall('qbank', false, [
@@ -93,7 +96,7 @@ class viewcheckbox_column extends column_base {
      * ones from get_extra_joins. Every field requested must specify a table prefix.
      * @return array fields required.
      */
-    public function get_required_fields() {
+    public function get_required_fields(): array {
         return array('q.id');
     }
 }
