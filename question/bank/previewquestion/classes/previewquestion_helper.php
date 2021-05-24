@@ -36,7 +36,10 @@ use stdClass;
 /**
  * Class previewquestion_helper contains all the library functions.
  *
- * @package qbank_previewquestion
+ * @package    qbank_previewquestion
+ * @copyright  2010 The Open University
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class previewquestion_helper {
 
@@ -55,7 +58,7 @@ class previewquestion_helper {
      * @param $fileoptions
      */
     public static function question_preview_question_pluginfile($course, $context, $component,
-            $filearea, $qubaid, $slot, $args, $forcedownload, $fileoptions) {
+            $filearea, $qubaid, $slot, $args, $forcedownload, $fileoptions): void {
         global $USER, $DB, $CFG;
 
         list($context, $course, $cm) = get_context_info_array($context->id);
@@ -94,9 +97,10 @@ class previewquestion_helper {
      * @param int $questionid the question being previewed.
      * @param int $qubaid the id of the question usage for this preview.
      * @param question_preview_options $options the options in use.
+     * @return moodle_url
      */
     public static function question_preview_action_url($questionid, $qubaid,
-            question_preview_options $options, $context) {
+            question_preview_options $options, $context): moodle_url {
         $params = array(
                 'id' => $questionid,
                 'previewid' => $qubaid,
@@ -115,8 +119,9 @@ class previewquestion_helper {
      * @param int $questionid the question being previewed.
      * @param context $context the current moodle context.
      * @param int $previewid optional previewid to sign post saved previewed answers.
+     * @return moodle_url
      */
-    public static function question_preview_form_url($questionid, $context, $previewid = null) {
+    public static function question_preview_form_url($questionid, $context, $previewid = null): moodle_url {
         $params = array(
                 'id' => $questionid,
         );
@@ -138,7 +143,7 @@ class previewquestion_helper {
      * @param object $displayoptions
      * @param object $context
      */
-    public static function restart_preview($previewid, $questionid, $displayoptions, $context) {
+    public static function restart_preview($previewid, $questionid, $displayoptions, $context): void {
         global $DB;
 
         if ($previewid) {
@@ -163,7 +168,7 @@ class previewquestion_helper {
      * @return moodle_url the URL.
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
-            $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
+            $maxmark = null, $displayoptions = null, $variant = null, $context = null): moodle_url {
 
         $params = array('id' => $questionid);
 
@@ -206,7 +211,7 @@ class previewquestion_helper {
      * Popup params for the question preview.
      * @return array that can be passed as $params to the {@link popup_action} constructor.
      */
-    public static function question_preview_popup_params() {
+    public static function question_preview_popup_params(): array {
         return array(
                 'height' => 600,
                 'width' => 800,

@@ -18,9 +18,10 @@
  * Strings for component qbank_previewquestion, language 'en'
  *
  * @package    qbank_previewquestion
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Preview question';
-$string['privacy:metadata'] = 'Preview question plugin previews a question in a pop-up window.';
+$string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';

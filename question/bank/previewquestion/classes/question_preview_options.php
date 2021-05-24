@@ -72,7 +72,7 @@ class question_preview_options extends question_display_options {
      * Names of the options we store in the user preferences table.
      * @return array
      */
-    protected function get_user_pref_fields() {
+    protected function get_user_pref_fields(): array {
         return array('behaviour', 'correctness', 'marks', 'markdp', 'feedback',
                 'generalfeedback', 'rightanswer', 'history');
     }
@@ -81,7 +81,7 @@ class question_preview_options extends question_display_options {
      * Names and param types of the options we read from the request.
      * @return array
      */
-    protected function get_field_types() {
+    protected function get_field_types(): array {
         return array(
                 'behaviour' => PARAM_ALPHA,
                 'maxmark' => PARAM_LOCALISEDFLOAT,
@@ -99,7 +99,7 @@ class question_preview_options extends question_display_options {
     /**
      * Load the value of the options from the user_preferences table.
      */
-    public function load_user_defaults() {
+    public function load_user_defaults(): void {
         $defaults = get_config('question_preview');
         foreach ($this->get_user_pref_fields() as $field) {
             $this->$field = get_user_preferences(
@@ -112,7 +112,7 @@ class question_preview_options extends question_display_options {
      * Save a change to the user's preview options to the database.
      * @param object $newoptions
      */
-    public function save_user_preview_options($newoptions) {
+    public function save_user_preview_options($newoptions): void {
         foreach ($this->get_user_pref_fields() as $field) {
             if (isset($newoptions->$field)) {
                 set_user_preference(self::OPTIONPREFIX . $field, $newoptions->$field);
@@ -123,7 +123,7 @@ class question_preview_options extends question_display_options {
     /**
      * Set the value of any fields included in the request.
      */
-    public function set_from_request() {
+    public function set_from_request(): void {
         foreach ($this->get_field_types() as $field => $type) {
             $this->$field = optional_param($field, $this->$field, $type);
         }
@@ -135,7 +135,7 @@ class question_preview_options extends question_display_options {
      *
      * @return array URL fragment.
      */
-    public function get_url_params() {
+    public function get_url_params(): array {
         $params = array();
         foreach ($this->get_field_types() as $field => $notused) {
             if ($field == 'behaviour' || $field == 'maxmark' || is_null($this->$field)) {

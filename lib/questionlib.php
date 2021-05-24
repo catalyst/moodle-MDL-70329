@@ -764,8 +764,9 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
         $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
-    debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin, 
-    Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
+    // Debugging message will be re-added after implementing the changes in mod_quiz.
+    // ...debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin,
+    //Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);.
 
     $params = array('id' => $questionid);
 
@@ -810,8 +811,9 @@ function question_preview_url($questionid, $preferredbehaviour = null,
  * @see qbank_previewquestion\previewquestion_helper
  */
 function question_preview_popup_params() {
-    debugging('Function question_preview_popup_params() has been deprecated and moved to qbank_previewquestion plugin, 
-    Please use qbank_previewquestion\previewquestion_helper::question_preview_popup_params() instead.', DEBUG_DEVELOPER);
+    // Debugging message will be re-added after implementing the changes in mod_quiz.
+    // ...debugging('Function question_preview_popup_params() has been deprecated and moved to qbank_previewquestion plugin,
+    //Please use qbank_previewquestion\previewquestion_helper::question_preview_popup_params() instead.', DEBUG_DEVELOPER);.
     return array(
         'height' => 600,
         'width' => 800,

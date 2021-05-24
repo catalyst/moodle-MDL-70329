@@ -19,7 +19,6 @@
  *
  * @package   qbank_previewquestion
  * @copyright 2009 Tim Hunt
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,6 +32,7 @@ use core_question\local\bank\menu_action_column_base;
  * Question bank columns for the preview action icon.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class previewquestion_column extends menu_action_column_base {
@@ -45,7 +45,7 @@ class previewquestion_column extends menu_action_column_base {
      * A chance for subclasses to initialise themselves, for example to load lang strings,
      * without having to override the constructor.
      */
-    public function init() {
+    public function init(): void {
         parent::init();
         $this->strpreview = get_string('preview');
     }
@@ -94,7 +94,7 @@ class previewquestion_column extends menu_action_column_base {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $PAGE;
 
         if (!\question_bank::is_qtype_installed($question->qtype)) {

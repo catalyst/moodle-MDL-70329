@@ -33,7 +33,10 @@ use qbank_previewquestion\previewquestion_helper;
 /**
  * Class renderer for rendering preview url
  *
- * @package qbank_previewquestion\output
+ * @package    qbank_previewquestion
+ * @copyright  2009 The Open University
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends \plugin_renderer_base {
 

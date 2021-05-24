@@ -52,8 +52,9 @@ class core_question_renderer extends plugin_renderer_base {
      * @see qbank_previewquestion\output
      */
     public function question_preview_link($questionid, context $context, $showlabel) {
-        debugging('Function question_preview_link() has been deprecated and moved to qbank_previewquestion plugin, 
-        Please use qbank_previewquestion renderer.', DEBUG_DEVELOPER);
+        // Debugging message will be re-added after implementing the changes in mod_quiz.
+        // ...debugging('Function question_preview_link() has been deprecated and moved to qbank_previewquestion plugin,
+        //Please use qbank_previewquestion renderer.', DEBUG_DEVELOPER);.
         if ($showlabel) {
             $alt = '';
             $label = get_string('preview');
