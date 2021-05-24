@@ -21,7 +21,8 @@ namespace qbank_managecategories\privacy;
  *
  * @package   qbank_managecategories
  * @category  privacy
- * @copyright 2021, Guillermo Gomez Arias <guillermogomez@catalyst-ca.net>
+ * @copyright 2021 Catalyst IT Australia Pty Ltd
+ * @author    Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {
