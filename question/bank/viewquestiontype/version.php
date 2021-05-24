@@ -18,13 +18,14 @@
  * Version information for qbank_viewquestiontype.
  *
  * @package    qbank_viewquestiontype
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_viewquestiontype';
-$plugin->version   = 2021051200;
+$plugin->version   = 2021052500;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;

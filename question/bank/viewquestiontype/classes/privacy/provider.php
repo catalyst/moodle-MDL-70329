@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_viewquestiontype, language 'en'
+ * Privacy Subsystem for qbank_viewquestiontype.
  *
  * @package    qbank_viewquestiontype
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,5 +23,26 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'View questiontype';
-$string['privacy:metadata'] = 'View questiontype shows the questiontype column, it does not store any user data.';
+namespace qbank_viewquestiontype\privacy;
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Privacy Subsystem for qbank_viewquestiontype implementing null_provider.
+ *
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
