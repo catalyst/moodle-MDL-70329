@@ -26,7 +26,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Question bank';
+$string['course_summary'] = 'This course has been created as part of the upgrade to Moodle 4.0.
+The question bank in this category has been migrated to a question bank activity in this course.
+All the questions that were previously located in this categories question bank have been migrated to the question bank activity in this course.';
 $string['modulename'] = 'Question bank';
 $string['modulename_help'] = 'This activity allows a teacher to create, preview, and edit questions in a database of question categories.
 
@@ -36,6 +38,7 @@ Questions are given version control and statistics once they have been used, and
 $string['modulename_link'] = 'mod/qbank/view';
 $string['modulenameplural'] = 'Question banks';
 $string['pluginadministration'] = 'Question bank administration';
+$string['pluginname'] = 'Question bank';
 $string['privacy:metadata'] = 'The Question bank plugin does not store any personal data, for now.';
 $string['qbankname'] = 'Question bank name';
 $string['qbankname_help'] = 'Enter the Question bank name';

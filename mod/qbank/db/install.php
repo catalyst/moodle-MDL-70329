@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_qbank\helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -30,5 +32,20 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_qbank_install() {
 
-    return true;
+    // Get data from populated questions.
+    $questioncategories = helper::get_categories_populated();
+    foreach ($questioncategories as $qcategory) {
+        $contextlevel = (int)$qcategory->contextlevel;
+
+        if ($contextlevel === CONTEXT_COURSECAT) {
+            $categoryname = helper::get_category_name($qcategory->instanceid);
+            $shortname = substr("Question bank: " . $qcategory->instanceid . '-' . $categoryname, 0, 254);
+            $course = helper::get_course($shortname);
+            if (!$course) {
+                // Create a new course for each category with questions.
+                $course = helper::create_category_course($shortname, $qcategory->instanceid);
+            }
+            // TODO: Create the mod_activity here using this course: $course.
+        }
+    }
 }
