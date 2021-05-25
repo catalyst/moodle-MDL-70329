@@ -15,17 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_viewquestionname.
+ * Strings for component qbank_viewcheckbox, language 'en'
  *
- * @package    qbank_viewquestionname
+ * @package    qbank_viewcheckbox
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->component = 'qbank_viewquestionname';
-$plugin->version   = 2021052500;
-$plugin->requires  = 2021052500;
-$plugin->maturity  = MATURITY_STABLE;
+$string['pluginname'] = 'View checkbox';
+$string['privacy:metadata'] = 'View checkbox shows the checkbox column, it does not store any user data.';

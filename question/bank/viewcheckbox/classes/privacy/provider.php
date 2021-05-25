@@ -15,17 +15,34 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_viewquestionname.
+ * Privacy Subsystem for qbank_viewcheckbox.
  *
- * @package    qbank_viewquestionname
+ * @package    qbank_viewcheckbox
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_viewcheckbox\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_viewquestionname';
-$plugin->version   = 2021052500;
-$plugin->requires  = 2021052500;
-$plugin->maturity  = MATURITY_STABLE;
+/**
+ * Privacy Subsystem for qbank_viewcheckbox implementing null_provider.
+ *
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}

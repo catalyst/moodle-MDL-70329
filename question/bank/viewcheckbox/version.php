@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for qbank_viewquestionname.
+ * Version information for qbank_viewcheckbox.
  *
- * @package    qbank_viewquestionname
+ * @package    qbank_viewcheckbox
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_viewquestionname';
-$plugin->version   = 2021052500;
+$plugin->component = 'qbank_viewcheckbox';
+$plugin->version   = 2021052400;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;

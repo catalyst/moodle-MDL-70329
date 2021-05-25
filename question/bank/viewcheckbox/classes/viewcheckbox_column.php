@@ -15,26 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A column type for the name of the question name.
+ * A column with a checkbox for each question with name q{questionid}.
  *
- * @package   qbank_viewquestionname
+ * @package   qbank_viewcheckbox
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace qbank_viewquestionname;
+namespace qbank_viewcheckbox;
 defined('MOODLE_INTERNAL') || die();
 
+use core\output\checkbox_toggleall;
 use core_question\local\bank\column_base;
 
 /**
- * A column type for the name of the question name.
- *
+ * A column with a checkbox for each question with name q{questionid}.
+ * @package   qbank_viewcheckbox
  * @copyright 2009 Tim Hunt
  * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class viewquestionname_column_helper extends column_base {
-    protected $checkboxespresent = null;
+class viewcheckbox_column extends column_base {
 
     /**
      * Get the internal name for this column. Used as a CSS class name,
@@ -43,30 +43,33 @@ class viewquestionname_column_helper extends column_base {
      * @return string column name.
      */
     public function get_name(): string {
-        return 'questionname';
+        return 'checkbox';
     }
 
     /**
      * Title for this column. Not used if is_sortable returns an array.
      */
     protected function get_title() {
-        return get_string('question');
+        global $OUTPUT;
+
+        $mastercheckbox = new checkbox_toggleall('qbank', true, [
+                'id' => 'qbheadercheckbox',
+                'name' => 'qbheadercheckbox',
+                'value' => '1',
+                'label' => get_string('selectall'),
+                'labelclasses' => 'accesshide',
+        ]);
+
+        return $OUTPUT->render($mastercheckbox);
     }
 
     /**
-     * Get the label for the question.
-     * @param $question
-     * @return string
+     * Use this when get_title() returns
+     * something very short, and you want a longer version as a tool tip.
+     * @return string a fuller version of the name.
      */
-    protected function label_for($question): string {
-        if (is_null($this->checkboxespresent)) {
-            $this->checkboxespresent = $this->qbank->has_column('\qbank_viewcheckbox\viewcheckbox_column');
-        }
-        if ($this->checkboxespresent) {
-            return 'checkq' . $question->id;
-        } else {
-            return '';
-        }
+    protected function get_title_tip() {
+        return get_string('selectquestionsforbulk', 'question');
     }
 
     /**
@@ -75,14 +78,17 @@ class viewquestionname_column_helper extends column_base {
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
     protected function display_content($question, $rowclasses): void {
-        $labelfor = $this->label_for($question);
-        if ($labelfor) {
-            echo '<label for="' . $labelfor . '">';
-        }
-        echo format_string($question->name);
-        if ($labelfor) {
-            echo '</label>';
-        }
+        global $OUTPUT;
+
+        $checkbox = new checkbox_toggleall('qbank', false, [
+                'id' => "checkq{$question->id}",
+                'name' => "q{$question->id}",
+                'value' => '1',
+                'label' => get_string('select'),
+                'labelclasses' => 'accesshide',
+        ]);
+
+        echo $OUTPUT->render($checkbox);
     }
 
     /**
@@ -91,23 +97,6 @@ class viewquestionname_column_helper extends column_base {
      * @return array fields required.
      */
     public function get_required_fields(): array {
-        return array('q.id', 'q.name');
-    }
-
-    /**
-     * Can this column be sorted on? You can return either:
-     *  + false for no (the default),
-     *  + a field name, if sorting this column corresponds to sorting on that datbase field.
-     *  + an array of subnames to sort on as follows
-     *  return array(
-     *      'firstname' => array('field' => 'uc.firstname', 'title' => get_string('firstname')),
-     *      'lastname' => array('field' => 'uc.lastname', 'title' => get_string('lastname')),
-     *  );
-     * As well as field, and field, you can also add 'revers' => 1 if you want the default sort
-     * order to be DESC.
-     * @return mixed as above.
-     */
-    public function is_sortable() {
-        return 'q.name';
+        return array('q.id');
     }
 }

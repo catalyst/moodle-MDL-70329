@@ -18,8 +18,10 @@
  * Strings for component qbank_viewquestionname, language 'en'
  *
  * @package    qbank_viewquestionname
- * @copyright  2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'View question name';
+$string['privacy:metadata'] = 'View question name shows the name column, it does not store any user data.';

@@ -19,7 +19,6 @@
  *
  * @package   qbank_viewquestionname
  * @copyright 2019 The Open University
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * A question bank column showing the question name with idnumber and tags.
  *
  * @copyright 2019 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class viewquestionname_column extends viewquestionname_column_helper {
@@ -41,7 +41,7 @@ class viewquestionname_column extends viewquestionname_column_helper {
      *
      * @return string column name.
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'qnameidnumbertags';
     }
 
@@ -50,7 +50,7 @@ class viewquestionname_column extends viewquestionname_column_helper {
      * @param object $question the row from the $question table, augmented with extra information.
      * @param string $rowclasses CSS class names that should be applied to this row of output.
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
         $layoutclasses = 'd-inline-flex flex-nowrap overflow-hidden w-100';
@@ -87,7 +87,7 @@ class viewquestionname_column extends viewquestionname_column_helper {
      * ones from get_extra_joins. Every field requested must specify a table prefix.
      * @return array fields required.
      */
-    public function get_required_fields() {
+    public function get_required_fields(): array {
         $fields = parent::get_required_fields();
         $fields[] = 'q.idnumber';
         return $fields;
@@ -122,7 +122,7 @@ class viewquestionname_column extends viewquestionname_column_helper {
      *
      * @param \stdClass[] $questions the questions that will be displayed.
      */
-    public function load_additional_data(array $questions) {
+    public function load_additional_data(array $questions): void {
         parent::load_additional_data($questions);
         parent::load_question_tags($questions);
     }
