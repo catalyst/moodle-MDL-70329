@@ -27,6 +27,7 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
 
 use qbank_managecategories\form\question_move_form;
+use qbank_managecategories\managecategories_helper;
 use qbank_managecategories\question_category_object;
 
 require_login();
@@ -99,7 +100,7 @@ if ($param->delete) {
         throw new moodle_exception('nocate', 'question', $thispageurl->out(), $param->delete);
     }
 
-    question_remove_stale_questions_from_category($param->delete);
+    managecategories_helper::question_remove_stale_questions_from_category($param->delete);
     $questionstomove = $DB->count_records("question", array("category" => $param->delete));
 
     // Second pass, if we still have questions to move, setup the form.
