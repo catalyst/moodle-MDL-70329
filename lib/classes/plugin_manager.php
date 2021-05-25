@@ -1940,7 +1940,7 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-                'duplicatequestion', 'editquestion', 'viewquestionactions',
+                'duplicatequestion', 'editquestion',
             ),
 
             'qbehaviour' => array(

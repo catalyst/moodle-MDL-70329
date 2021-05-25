@@ -26,6 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_duplicatequestion';
-$plugin->version   = 2021052400;
+$plugin->version   = 2021052500;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;
+$plugin->dependencies = array(
+        'qbank_viewquestionactions' => ANY_VERSION,
+        'qbank_editquestion' => ANY_VERSION
+);
