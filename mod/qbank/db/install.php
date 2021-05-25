@@ -34,12 +34,11 @@ function xmldb_qbank_install() {
 
     // Get data from populated questions.
     $questioncategories = helper::get_categories_populated();
-
     foreach ($questioncategories as $qcategory) {
-        $contextlevel = $qcategory->contextlevel;
+        $contextlevel = (int)$qcategory->contextlevel;
 
         if ($contextlevel === CONTEXT_COURSECAT) {
-            $coursename = substr("qbank_" . CONTEXT_COURSECAT . $qcategory->name, 254);
+            $coursename = substr("qbank_" . CONTEXT_COURSECAT . $qcategory->name, 0, 254);
             if (!helper::course_exists($coursename)) {
                 // Create a new course for each category with questions.
                 $course = helper::create_category_course($coursename, $qcategory->instanceid);
