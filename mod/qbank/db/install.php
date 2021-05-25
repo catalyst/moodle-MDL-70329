@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_qbank\helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -30,5 +32,18 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_qbank_install() {
 
-    return true;
+    // Get data from populated questions.
+    $questioncategories = helper::get_categories_populated();
+
+    foreach ($questioncategories as $qcategory) {
+        $contextlevel = $qcategory->contextlevel;
+
+        if ($contextlevel === CONTEXT_COURSECAT) {
+            $coursename = substr("qbank_" . CONTEXT_COURSECAT . $qcategory->name, 254);
+            if (!helper::course_exists($coursename)) {
+                // Create a new course for each category with questions.
+                $course = helper::create_category_course($coursename, $qcategory->instanceid);
+            }
+        }
+    }
 }
