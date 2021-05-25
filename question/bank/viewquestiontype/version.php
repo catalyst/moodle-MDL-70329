@@ -26,6 +26,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_viewquestiontype';
-$plugin->version   = 2021052500;
+$plugin->version   = 2021052501;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;
+$plugin->dependencies = array(
+        'qbank_viewcheckbox' => ANY_VERSION
+);
