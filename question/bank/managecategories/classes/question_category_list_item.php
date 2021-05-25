@@ -17,6 +17,7 @@
 /**
  * An item in a list of question categories.
  *
+ * @package    qbank_managecategories
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,6 +29,12 @@ defined('MOODLE_INTERNAL') || die();
 use html_writer;
 use moodle_url;
 
+/**
+ * An item in a list of question categories.
+ *
+ * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class question_category_list_item extends \list_item {
 
     /**

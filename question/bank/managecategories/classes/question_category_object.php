@@ -17,6 +17,7 @@
 /**
  * Class for performing operations on question categories.
  *
+ * @package    qbank_managecategories
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,6 +36,12 @@ use qbank_managecategories\form\question_category_edit_form;
 use question_bank;
 use stdClass;
 
+/**
+ * Class for performing operations on question categories.
+ *
+ * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class question_category_object {
 
     /**
@@ -46,7 +53,15 @@ class question_category_object {
      * @var array nested lists to display categories.
      */
     public $editlists = array();
+
+    /**
+     * @var string tab.
+     */
     public $tab;
+
+    /**
+     * @var int tab size.
+     */
     public $tabsize = 3;
 
     /**
@@ -293,12 +308,22 @@ class question_category_object {
 
     }
 
-    public function move_questions_and_delete_category($oldcat, $newcat) : void {
+    /**
+     * Move questions and then delete the category.
+     *
+     * @param int $oldcat id of the old category.
+     * @param int $newcat id of the new category.
+     */
+    public function move_questions_and_delete_category(int $oldcat, int $newcat) : void {
         question_can_delete_cat($oldcat);
         $this->move_questions($oldcat, $newcat);
         $this->delete_category($oldcat);
     }
 
+    /**
+     * Display the form to move a category.
+     *
+     */
     public function display_move_form($questionsincategory, $category) : void {
         global $OUTPUT;
         $vars = new stdClass();
@@ -308,7 +333,14 @@ class question_category_object {
         $this->moveform->display();
     }
 
-    public function move_questions($oldcat, $newcat) : void {
+    /**
+     * Move questions to another category.
+     *
+     * @param int $oldcat id of the old category.
+     * @param int $newcat id of the new category.
+     * @throws \dml_exception
+     */
+    public function move_questions(int $oldcat, int $newcat) : void {
         global $DB;
         $questionids = $DB->get_records_select_menu('question',
                 'category = ? AND (parent = 0 OR parent = id)', array($oldcat), '', 'id,1');

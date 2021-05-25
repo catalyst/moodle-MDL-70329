@@ -17,6 +17,7 @@
 /**
  * Class representing a list of question categories
  *
+ * @package    qbank_managecategories
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,8 +31,24 @@ require_once($CFG->libdir. '/listlib.php');
 use stdClass;
 use moodle_list;
 
+/**
+ * Class representing a list of question categories.
+ *
+ * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class question_category_list extends moodle_list {
+
+    /**
+     * Table name.
+     * @var $table
+     */
     public $table = "question_categories";
+
+    /**
+     * List item class name.
+     * @var $listitemclassname
+     */
     public $listitemclassname = '\qbank_managecategories\question_category_list_item';
 
     /**
@@ -55,6 +72,9 @@ class question_category_list extends moodle_list {
         $this->context = $context;
     }
 
+    /**
+     * Set the array of records of list items.
+     */
     public function get_records() : void {
         $this->records = get_categories_for_contexts($this->context->id, $this->sortby);
     }
