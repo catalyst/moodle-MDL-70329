@@ -23,8 +23,8 @@
  */
 
 namespace core_question\local\bank;
-defined('MOODLE_INTERNAL') || die();
 
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Base class for 'columns' that are actually displayed as a row following the main question row.

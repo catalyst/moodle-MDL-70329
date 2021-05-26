@@ -23,18 +23,19 @@
  */
 
 namespace core_question\local\bank;
-defined('MOODLE_INTERNAL') || die();
 
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * A question bank column which gathers together all the actions into a menu.
  *
  * This question bank column, if added to the question bank, will
  * replace all of the other columns which implement the
- * {@link menuable_action} interface and replace them with a single
+ * menuable_action interface and replace them with a single
  * column containing an Edit menu.
  *
  * @copyright 2019 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_menu_column extends column_base {
@@ -65,14 +66,28 @@ class edit_menu_column extends column_base {
         return $remainingcolumns;
     }
 
+    /**
+     * Title for this column. Not used if is_sortable returns an array.
+     */
     protected function get_title() {
         return get_string('actions');
     }
 
+    /**
+     * Get the internal name for this column. Used as a CSS class name,
+     * and to store information about the current sort. Must match PARAM_ALPHA.
+     *
+     * @return string column name.
+     */
     public function get_name(): string {
         return 'editmenu';
     }
 
+    /**
+     * Output this column.
+     * @param object $question the row from the $question table, augmented with extra information.
+     * @param string $rowclasses CSS class names that should be applied to this row of output.
+     */
     protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
@@ -95,6 +110,11 @@ class edit_menu_column extends column_base {
         echo $OUTPUT->render($menu);
     }
 
+    /**
+     * Use table alias 'q' for the question table, or one of the
+     * ones from get_extra_joins. Every field requested must specify a table prefix.
+     * @return array fields required.
+     */
     public function get_required_fields():array {
         return ['q.qtype'];
     }

@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Base class for qbank plugins.
  *
- * @package    core_qbank
+ * @package    core
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -41,7 +41,7 @@ class qbank extends base {
      * Defines if there should be a way to uninstall the qbank plugin via the administration UI.
      * @return bool
      */
-    public function is_uninstall_allowed() {
+    public function is_uninstall_allowed(): bool {
         return true;
     }
 
@@ -49,7 +49,7 @@ class qbank extends base {
      * Return URL used for management of plugins of this type.
      * @return \moodle_url
      */
-    public static function get_manage_url() {
+    public static function get_manage_url(): \moodle_url {
         return new \moodle_url('/admin/settings.php', array('section' => 'manageqbanks'));
     }
 
@@ -62,7 +62,7 @@ class qbank extends base {
      * @param \core_plugin_manager $pluginman the plugin manager calling this method
      * @return array of plugintype classes, indexed by the plugin name
      */
-    public static function get_plugins($type, $typerootdir, $typeclass, $pluginman) {
+    public static function get_plugins($type, $typerootdir, $typeclass, $pluginman): array {
         global $CFG;
 
         $qbank = parent::get_plugins($type, $typerootdir, $typeclass, $pluginman);
@@ -78,7 +78,7 @@ class qbank extends base {
      * Finds all enabled plugins, the result may include missing plugins.
      * @return array|null of enabled plugins $pluginname=>$pluginname, null means unknown
      */
-    public static function get_enabled_plugins() {
+    public static function get_enabled_plugins(): ?array {
         global $CFG;
         $pluginmanager = \core_plugin_manager::instance();
         $plugins = $pluginmanager->get_installed_plugins('qbank');
@@ -106,6 +106,22 @@ class qbank extends base {
     }
 
     /**
+     * Checks if a qbank plugin is enabled or not.
+     * @param $fullpluginname
+     * @return bool
+     */
+    public static function check_qbank_status($fullpluginname): bool {
+        $pluginmanager = \core_plugin_manager::instance();
+        $qbankinfo = $pluginmanager->get_plugin_info($fullpluginname);
+        $qbankavailable = $qbankinfo->get_status();
+        if ($qbankavailable === \core_plugin_manager::PLUGIN_STATUS_MISSING ||
+                !empty(get_config($fullpluginname, 'disabled'))) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Loads plugin settings to the settings tree
      *
      * This function usually includes settings.php file in plugins folder.
@@ -115,7 +131,7 @@ class qbank extends base {
      * @param string $parentnodename
      * @param bool $hassiteconfig whether the current user has moodle/site:config capability
      */
-    public function load_settings(\part_of_admin_tree $adminroot, $parentnodename, $hassiteconfig) {
+    public function load_settings(\part_of_admin_tree $adminroot, $parentnodename, $hassiteconfig): void {
         global $CFG, $USER, $DB, $OUTPUT, $PAGE; // In case settings.php wants to refer to them.
         $ADMIN = $adminroot; // May be used in settings.php.
         $plugininfo = $this; // Also can be used inside settings.php.

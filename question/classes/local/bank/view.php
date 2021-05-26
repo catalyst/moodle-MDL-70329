@@ -133,21 +133,6 @@ class view {
      */
     public $returnurl;
 
-    protected $corequestionbankcolumns = array(
-            'checkbox_column',
-            'question_type_column',
-            'question_name_idnumber_tags_column',
-            'edit_menu_column',
-            'edit_action_column',
-            'copy_action_column',
-            'tags_action_column',
-            'preview_action_column',
-            'delete_action_column',
-            'export_xml_action_column',
-            'creator_name_column',
-            'modifier_name_column'
-    );
-
     /**
      * Constructor
      * @param \question_edit_contexts $contexts
@@ -200,6 +185,7 @@ class view {
      */
     protected function get_question_bank_columns(): array {
         $questionbankclasscolumns = array();
+        $newpluginclasscolumns = array();
         $corequestionbankcolumns = array(
                 'checkbox_column',
                 'question_type_column',
@@ -214,6 +200,9 @@ class view {
                 'creator_name_column',
                 'modifier_name_column'
         );
+        if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
+            $corequestionbankcolumns[] = 'question_text_row';
+        }
 
         foreach ($corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
@@ -228,20 +217,17 @@ class view {
             }
             $questionbankclasscolumns[$shortname] = new $fullname($this);
         }
-        //var_dump($questionbankclasscolumns);die;
-        //$plugins = \core\plugininfo\qbank::get_enabled_plugins();
         $plugins = \core_component::get_plugin_list_with_class('qbank', 'columns', 'columns.php');
-        foreach ($plugins as $notusing => $plugin) {
-            //$questionbankclasses = \core_component::get_plugin_list_with_class('qbank',
-            //        $plugin . '_column', $plugin . '_column.php');
-            //$questionbankclasses = \core_component
-            //        ::get_component_classes_in_namespace('qbank_'.$plugin, '');
+        foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin($this);
             $pluginobjects = $pluginentrypointobject->get_question_columns();
             foreach ($pluginobjects as $pluginobject) {
-                //$questionbankclasscolumns[] = $pluginobject;
                 $classname = new \ReflectionClass(get_class($pluginobject));
                 foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
+                    if (!\core\plugininfo\qbank::check_qbank_status($componentname)) {
+                        unset($questionbankclasscolumns[$classname->getShortName()]);
+                        continue;
+                    }
                     if ($corequestionbankcolumn === $classname->getShortName()) {
                         // Check if it has custom preference selector to view/hide.
                         if ($pluginobject->has_preference()) {
@@ -250,10 +236,19 @@ class view {
                             }
                         }
                         $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
+                    } else {
+                        // Any community plugin for column/action.
+                        $newpluginclasscolumns[$classname->getShortName()] = $pluginobject;
                     }
                 }
             }
         }
+
+        // New plugins added at the end of the array, will change in sorting feature.
+        foreach ($newpluginclasscolumns as $key => $newpluginclasscolumn) {
+            $questionbankclasscolumns[$key] = $newpluginclasscolumn;
+        }
+
         return $questionbankclasscolumns;
     }
 
@@ -264,11 +259,13 @@ class view {
      */
     protected function wanted_columns(): array {
         global $CFG;
-
         $this->requiredcolumns = array();
-        //$questionbankclasscolumns = $this->get_question_bank_plugins();
+
         if (empty($CFG->questionbankcolumns)) {
             $questionbankcolumns = $this->get_question_bank_columns();
+            foreach ($questionbankcolumns as $classobject) {
+                $this->requiredcolumns[get_class($classobject)] = $classobject;
+            }
         } else {
             // Config overrides the array, but uses the deprecated classes.
             $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
@@ -284,9 +281,6 @@ class view {
             }
         }
 
-        foreach ($questionbankcolumns as $classobject) {
-            $this->requiredcolumns[get_class($classobject)] = $classobject;
-        }
         return $this->requiredcolumns;
     }
 

@@ -39,7 +39,6 @@ namespace core_question\local\bank;
  * questions passed into the constructor as $usedquestions.
  *
  * @copyright 2015 The Open University
- * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class random_question_loader {

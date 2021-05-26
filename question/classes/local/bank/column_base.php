@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base class for representing a column in a {@link question_bank_view}.
+ * Base class for representing a column.
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas and others {@link http://moodle.com}
@@ -23,11 +23,11 @@
  */
 
 namespace core_question\local\bank;
+
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
- * Base class for representing a column in a {@link question_bank_view}.
+ * Base class for representing a column.
  *
  * @copyright 2009 Tim Hunt
  * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
