@@ -57,7 +57,7 @@ function report_competency_extend_navigation_module($navigation, $cm) {
     }
 
     if (has_any_capability(array('moodle/competency:usercompetencyview', 'moodle/competency:coursecompetencymanage'),
-            context_course::instance($cm->course))) {
+            context_course::instance($cm->course)) && plugin_supports('mod', $cm->modname, FEATURE_COMPETENCIES, true)) {
         $url = new moodle_url('/report/competency/index.php', array('id' => $cm->course, 'mod' => $cm->id));
         $name = get_string('pluginname', 'report_competency');
         $navigation->add($name, $url, navigation_node::TYPE_SETTING, null, 'competencybreakdown');

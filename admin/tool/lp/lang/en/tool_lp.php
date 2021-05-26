@@ -63,6 +63,7 @@ $string['competencyframeworkroot'] = 'No parent (top-level competency)';
 $string['competencyframeworks'] = 'Competency frameworks';
 $string['competencyframeworksrepository'] = 'Competency frameworks repository';
 $string['competencyframeworkupdated'] = 'Competency framework updated.';
+$string['competencyfeaturedisabled'] = 'The competency feature (FEATURE_COMPETENCIES) is disabled for module: {$a}';
 $string['competencyoutcome_complete'] = 'Mark as complete';
 $string['competencyoutcome_evidence'] = 'Attach an evidence';
 $string['competencyoutcome_none'] = 'None';

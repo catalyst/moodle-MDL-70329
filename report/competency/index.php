@@ -37,6 +37,9 @@ $currentmodule = optional_param('mod', null, PARAM_INT);
 if ($currentmodule > 0) {
     $cm = get_coursemodule_from_id('', $currentmodule, 0, false, MUST_EXIST);
     $context = context_module::instance($cm->id);
+    if (!plugin_supports('mod', $cm->modname, FEATURE_COMPETENCIES, true)) {
+        throw new moodle_exception('competencyfeaturedisabled', 'tool_lp', null, $cm->modname);
+    }
 }
 
 // Fetch current active group.

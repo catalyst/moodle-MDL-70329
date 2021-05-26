@@ -434,6 +434,26 @@ define('FEATURE_MOD_INTRO', 'mod_intro');
 /** True if module has default completion */
 define('FEATURE_MODEDIT_DEFAULT_COMPLETION', 'modedit_default_completion');
 
+/**
+ * True if module supports availability feature.
+ */
+define('FEATURE_AVAILABILITY', 'mod_availability');
+
+/**
+ * True if module supports competencies feature.
+ */
+define('FEATURE_COMPETENCIES', 'mod_competencies');
+
+/**
+ * True if module supports completion feature.
+ */
+define('FEATURE_COMPLETION', 'mod_completion');
+
+/**
+ * True if module supports access restrictions feature.
+ */
+define('FEATURE_RESTRICTIONS', 'mod_restrictions');
+
 define('FEATURE_COMMENT', 'comment');
 
 define('FEATURE_RATE', 'rate');

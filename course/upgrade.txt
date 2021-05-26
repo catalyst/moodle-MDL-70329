@@ -48,6 +48,10 @@ compatibility (to not break third-party plugins without it), legacy_format_rende
 course formats don't have their own renderer.
 * New external core_course\external\get_state returns current state information for a given course.
 * New external function core_course_update_course runs given action to edit course status.
+* The following features that can be controlled when adding a new module to core are now validated in moodleform_mod.php:
+  - FEATURE_AVAILABILITY (if the module supports availability feature).
+  - FEATURE_COMPLETION (if the module supports completion feature).
+  - FEATURE_RESTRICTIONS (if the module supports access restrictions feature).
 
 === 3.11 ===
 * A new callback xxx_coursemodule_definition_after_data that allows plugins to extend activity forms after the data is set.

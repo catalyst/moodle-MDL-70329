@@ -26,6 +26,11 @@ information provided here is intended especially for developers.
   should no longer be used.
 * The completion_info function print_help_icon() which has been deprecated since Moodle 2.0 should no longer be used.
 * @babel/polyfill has been removed in favour of corejs@3
+* The following features that can be controlled when adding a new module to core were added to moodlelib.php:
+  - FEATURE_AVAILABILITY (if the module supports availability feature).
+  - FEATURE_COMPETENCIES (if the module supports competencies feature).
+  - FEATURE_COMPLETION (if the module supports completion feature).
+  - FEATURE_RESTRICTIONS (if the module supports access restrictions feature).
 
 === 3.11 ===
 * PHPUnit has been upgraded to 9.5 (see MDL-71036 for details).
