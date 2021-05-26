@@ -228,13 +228,13 @@ class view {
                         unset($questionbankclasscolumns[$classname->getShortName()]);
                         continue;
                     }
-                    if ($corequestionbankcolumn === $classname->getShortName()) {
-                        // Check if it has custom preference selector to view/hide.
-                        if ($pluginobject->has_preference()) {
-                            if (!$pluginobject->get_preference()) {
-                                continue;
-                            }
+                    // Check if it has custom preference selector to view/hide.
+                    if ($pluginobject->has_preference()) {
+                        if (!$pluginobject->get_preference()) {
+                            continue;
                         }
+                    }
+                    if ($corequestionbankcolumn === $classname->getShortName()) {
                         $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
                     } else {
                         // Any community plugin for column/action.
