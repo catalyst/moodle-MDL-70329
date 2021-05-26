@@ -82,8 +82,8 @@ abstract class column_base {
     /**
      * Get if the preference key of the row.
      */
-    public function get_preference_key(): bool {
-        return false;
+    public function get_preference_key(): string {
+        return '';
     }
 
     /**

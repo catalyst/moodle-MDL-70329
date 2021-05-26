@@ -45,9 +45,9 @@ abstract class column_base {
 
     /**
      * Constructor.
-     * @param view $qbank the question bank view we are helping to render.
+     * @param $qbank the question bank view we are helping to render.
      */
-    public function __construct(view $qbank) {
+    public function __construct($qbank) {
         // Debugging message will be re-added after implementing the changes in mod_quiz.
         // ...debugging('Class column_base in \core_question\bank\column_base is deprecated,
         // please use \core_question\local\bank\column_base instead.', DEBUG_DEVELOPER);.
@@ -70,6 +70,27 @@ abstract class column_base {
     }
 
     public function is_extra_row() {
+        return false;
+    }
+
+    /**
+     * Check if the row has an extra preference to view/hide.
+     */
+    public function has_preference(): bool {
+        return false;
+    }
+
+    /**
+     * Get if the preference key of the row.
+     */
+    public function get_preference_key(): string {
+        return '';
+    }
+
+    /**
+     * Get if the preference of the row.
+     */
+    public function get_preference(): bool {
         return false;
     }
 

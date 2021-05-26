@@ -71,12 +71,12 @@ class view {
     /**
      * @var object|\cm_info|null if we are in a module context, the cm.
      */
-    protected $cm;
+    public $cm;
 
     /**
      * @var object the course we are within.
      */
-    protected $course;
+    public $course;
 
     /**
      * @var \question_bank_column_base[] these are all the 'columns' that are
@@ -129,6 +129,26 @@ class view {
     protected $searchconditions = array();
 
     /**
+     * @var string url of the new question page.
+     */
+    public $returnurl;
+
+    protected $corequestionbankcolumns = array(
+            'checkbox_column',
+            'question_type_column',
+            'question_name_idnumber_tags_column',
+            'edit_menu_column',
+            'edit_action_column',
+            'copy_action_column',
+            'tags_action_column',
+            'preview_action_column',
+            'delete_action_column',
+            'export_xml_action_column',
+            'creator_name_column',
+            'modifier_name_column'
+    );
+
+    /**
      * Constructor
      * @param \question_edit_contexts $contexts
      * @param \moodle_url $pageurl
@@ -142,11 +162,11 @@ class view {
         $this->cm = $cm;
 
         // Create the url of the new question page to forward to.
-        $returnurl = $pageurl->out_as_local_url(false);
+        $this->returnurl = $pageurl->out_as_local_url(false);
         $this->editquestionurl = new \moodle_url('/question/question.php',
-                array('returnurl' => $returnurl));
-        if ($cm !== null) {
-            $this->editquestionurl->param('cmid', $cm->id);
+                array('returnurl' => $this->returnurl));
+        if ($this->cm !== null) {
+            $this->editquestionurl->param('cmid', $this->cm->id);
         } else {
             $this->editquestionurl->param('courseid', $this->course->id);
         }
@@ -180,12 +200,58 @@ class view {
      */
     protected function get_question_bank_columns(): array {
         $questionbankclasscolumns = array();
-        $plugins = \core\plugininfo\qbank::get_enabled_plugins();
-        foreach ($plugins as $plugin => $notusing) {
-            $questionbankclasses = \core_component::get_plugin_list_with_class('qbank',
-                    $plugin . '_column', $plugin . '_column.php');
-            foreach ($questionbankclasses as $key => $questionbankclass) {
-                $questionbankclasscolumns[] = $questionbankclass;
+        $corequestionbankcolumns = array(
+                'checkbox_column',
+                'question_type_column',
+                'question_name_idnumber_tags_column',
+                'edit_menu_column',
+                'edit_action_column',
+                'copy_action_column',
+                'tags_action_column',
+                'preview_action_column',
+                'delete_action_column',
+                'export_xml_action_column',
+                'creator_name_column',
+                'modifier_name_column'
+        );
+
+        foreach ($corequestionbankcolumns as $fullname) {
+            $shortname = $fullname;
+            if (!class_exists($fullname)) {
+                if (class_exists('core_question\\local\\bank\\' . $fullname)) {
+                    $fullname = 'core_question\\local\\bank\\' . $fullname;
+                } else if (class_exists('core_question\\bank\\' . $fullname)) {
+                    $fullname = 'core_question\\bank\\' . $fullname;
+                } else {
+                    throw new \coding_exception("No such class exists: $fullname");
+                }
+            }
+            $questionbankclasscolumns[$shortname] = new $fullname($this);
+        }
+        //var_dump($questionbankclasscolumns);die;
+        //$plugins = \core\plugininfo\qbank::get_enabled_plugins();
+        $plugins = \core_component::get_plugin_list_with_class('qbank', 'columns', 'columns.php');
+        foreach ($plugins as $notusing => $plugin) {
+            //$questionbankclasses = \core_component::get_plugin_list_with_class('qbank',
+            //        $plugin . '_column', $plugin . '_column.php');
+            //$questionbankclasses = \core_component
+            //        ::get_component_classes_in_namespace('qbank_'.$plugin, '');
+            $pluginentrypointobject = new $plugin($this);
+            $pluginobjects = $pluginentrypointobject->get_question_columns();
+            foreach ($pluginobjects as $pluginobject) {
+                //$questionbankclasscolumns[] = $pluginobject;
+                $classname = new \ReflectionClass(get_class($pluginobject));
+                foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
+                    if ($corequestionbankcolumn === $classname->getShortName()) {
+                        // Check if it has custom preference selector to view/hide.
+                        if ($pluginobject->has_preference()) {
+                            if (!$pluginobject->get_preference()) {
+                                continue;
+                            }
+                        }
+                        $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
+                    }
+                }
             }
         }
         return $questionbankclasscolumns;
@@ -198,29 +264,28 @@ class view {
      */
     protected function wanted_columns(): array {
         global $CFG;
+
         $this->requiredcolumns = array();
-        $questionbankclasscolumns = $this->get_question_bank_columns();
+        //$questionbankclasscolumns = $this->get_question_bank_plugins();
         if (empty($CFG->questionbankcolumns)) {
-            $questionbankcolumns = $questionbankclasscolumns;
+            $questionbankcolumns = $this->get_question_bank_columns();
         } else {
-            // Config overrides the array, need to discuss this.
+            // Config overrides the array, but uses the deprecated classes.
             $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
-            foreach ($questionbankcolumns as $questionbankcolumn) {
-                if (!in_array($questionbankcolumn, $questionbankclasscolumns)) {
-                    throw new \coding_exception("No such class exists: $questionbankcolumn");
+            foreach ($questionbankcolumns as $fullname) {
+                if (! class_exists($fullname)) {
+                    if (class_exists('core_question\\bank\\' . $fullname)) {
+                        $fullname = 'core_question\\bank\\' . $fullname;
+                    } else {
+                        throw new \coding_exception("No such class exists: $fullname");
+                    }
                 }
+                $this->requiredcolumns[$fullname] = new $fullname($this);
             }
         }
 
-        foreach ($questionbankcolumns as $fullname) {
-            $classobject = new $fullname($this);
-            // Check if it has custom preference selector to view/hide.
-            if ($classobject->has_preference()) {
-                if (!$classobject->get_preference()) {
-                    continue;
-                }
-            }
-            $this->requiredcolumns[$fullname] = $classobject;
+        foreach ($questionbankcolumns as $classobject) {
+            $this->requiredcolumns[get_class($classobject)] = $classobject;
         }
         return $this->requiredcolumns;
     }
@@ -245,7 +310,6 @@ class view {
      * @return string Column name for the heading
      */
     protected function heading_column(): string {
-        // Possibly can be deprecated.
         return 'question_bank_question_name_column';
     }
 
@@ -258,7 +322,7 @@ class view {
     protected function init_columns($wanted, $heading = ''): void {
         // If we are using the edit menu column, allow it to absorb all the actions.
         foreach ($wanted as $column) {
-            if ($column instanceof edit_menu_column) {
+            if ($column instanceof edit_menu_column || $column instanceof \core_question\bank\edit_menu_column) {
                 $wanted = $column->claim_menuable_columns($wanted);
                 break;
             }
@@ -274,7 +338,7 @@ class view {
                 $this->visiblecolumns[get_class($column)] = $column;
             }
         }
-        // Possibly can be removed.
+
         if (array_key_exists($heading, $this->requiredcolumns)) {
             $this->requiredcolumns[$heading]->set_as_heading();
         }
@@ -395,10 +459,9 @@ class view {
      * @return int[]
      */
     protected function default_sort(): array {
-        // Change required after implementing as plugins.
         return array(
-                'core_question\local\bank\question_type_column' => 1,
-                // ...'core_question\local\bank\question_name_idnumber_tags_column-name' => 1.
+                'core_question\bank\question_type_column' => 1,
+                'core_question\bank\question_name_idnumber_tags_column-name' => 1
         );
     }
 
