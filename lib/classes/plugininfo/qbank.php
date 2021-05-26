@@ -113,6 +113,9 @@ class qbank extends base {
     public static function check_qbank_status($fullpluginname): bool {
         $pluginmanager = \core_plugin_manager::instance();
         $qbankinfo = $pluginmanager->get_plugin_info($fullpluginname);
+        if (empty($qbankinfo)) {
+            return false;
+        }
         $qbankavailable = $qbankinfo->get_status();
         if ($qbankavailable === \core_plugin_manager::PLUGIN_STATUS_MISSING ||
                 !empty(get_config($fullpluginname, 'disabled'))) {
