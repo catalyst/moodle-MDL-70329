@@ -141,6 +141,14 @@ abstract class moodleform_mod extends moodleform {
     }
 
     /**
+     * Get the module name.
+     * @return string
+     */
+    public function get_modname() {
+        return $this->_modname;
+    }
+
+    /**
      * Get the current data for the form.
      * @return stdClass|null
      */
@@ -213,6 +221,9 @@ abstract class moodleform_mod extends moodleform {
         $this->_features->gradecat          = ($this->_features->outcomes or $this->_features->hasgrades);
         $this->_features->advancedgrading   = plugin_supports('mod', $this->_modname, FEATURE_ADVANCED_GRADING, false);
         $this->_features->canrescale = (component_callback_exists('mod_' . $this->_modname, 'rescale_activity_grades') !== false);
+        $this->_features->availability      = plugin_supports('mod', $this->_modname, FEATURE_AVAILABILITY, true);
+        $this->_features->completion        = plugin_supports('mod', $this->_modname, FEATURE_COMPLETION, true);
+        $this->_features->restrictions      = plugin_supports('mod', $this->_modname, FEATURE_RESTRICTIONS, true);
     }
 
     /**
@@ -321,59 +332,61 @@ abstract class moodleform_mod extends moodleform {
         }
 
         // Completion: If necessary, freeze fields
-        $completion = new completion_info($COURSE);
-        if ($completion->is_enabled()) {
-            // If anybody has completed the activity, these options will be 'locked'
-            $completedcount = empty($this->_cm)
-                ? 0
-                : $completion->count_user_data($this->_cm);
+        if ($this->_features->completion) {
+            $completion = new completion_info($COURSE);
+            if ($completion->is_enabled()) {
+                // If anybody has completed the activity, these options will be 'locked'.
+                $completedcount = empty($this->_cm)
+                    ? 0
+                    : $completion->count_user_data($this->_cm);
 
-            $freeze = false;
-            if (!$completedcount) {
-                if ($mform->elementExists('unlockcompletion')) {
-                    $mform->removeElement('unlockcompletion');
-                }
-                // Automatically set to unlocked (note: this is necessary
-                // in order to make it recalculate completion once the option
-                // is changed, maybe someone has completed it now)
-                $mform->getElement('completionunlocked')->setValue(1);
-            } else {
-                // Has the element been unlocked, either by the button being pressed
-                // in this request, or the field already being set from a previous one?
-                if ($mform->exportValue('unlockcompletion') ||
-                        $mform->exportValue('completionunlocked')) {
-                    // Yes, add in warning text and set the hidden variable
-                    $mform->insertElementBefore(
-                        $mform->createElement('static', 'completedunlocked',
-                            get_string('completedunlocked', 'completion'),
-                            get_string('completedunlockedtext', 'completion')),
-                        'unlockcompletion');
-                    $mform->removeElement('unlockcompletion');
+                $freeze = false;
+                if (!$completedcount) {
+                    if ($mform->elementExists('unlockcompletion')) {
+                        $mform->removeElement('unlockcompletion');
+                    }
+                    // Automatically set to unlocked (note: this is necessary
+                    // in order to make it recalculate completion once the option
+                    // is changed, maybe someone has completed it now).
                     $mform->getElement('completionunlocked')->setValue(1);
                 } else {
-                    // No, add in the warning text with the count (now we know
-                    // it) before the unlock button
-                    $mform->insertElementBefore(
-                        $mform->createElement('static', 'completedwarning',
-                            get_string('completedwarning', 'completion'),
-                            get_string('completedwarningtext', 'completion', $completedcount)),
-                        'unlockcompletion');
-                    $freeze = true;
+                    // Has the element been unlocked, either by the button being pressed
+                    // in this request, or the field already being set from a previous one?
+                    if ($mform->exportValue('unlockcompletion') ||
+                        $mform->exportValue('completionunlocked')) {
+                        // Yes, add in warning text and set the hidden variable.
+                        $mform->insertElementBefore(
+                            $mform->createElement('static', 'completedunlocked',
+                                get_string('completedunlocked', 'completion'),
+                                get_string('completedunlockedtext', 'completion')),
+                            'unlockcompletion');
+                        $mform->removeElement('unlockcompletion');
+                        $mform->getElement('completionunlocked')->setValue(1);
+                    } else {
+                        // No, add in the warning text with the count (now we know
+                        // it) before the unlock button.
+                        $mform->insertElementBefore(
+                            $mform->createElement('static', 'completedwarning',
+                                get_string('completedwarning', 'completion'),
+                                get_string('completedwarningtext', 'completion', $completedcount)),
+                            'unlockcompletion');
+                        $freeze = true;
+                    }
                 }
-            }
 
-            if ($freeze) {
-                $mform->freeze('completion');
-                if ($mform->elementExists('completionview')) {
-                    $mform->freeze('completionview'); // don't use hardFreeze or checkbox value gets lost
+                if ($freeze) {
+                    $mform->freeze('completion');
+                    if ($mform->elementExists('completionview')) {
+                        $mform->freeze('completionview'); // Do not use hardFreeze or checkbox value gets lost.
+                    }
+                    if ($mform->elementExists('completionusegrade')) {
+                        $mform->freeze('completionusegrade');
+                    }
+                    if ($mform->elementExists('completiongradeitemnumber')) {
+                        $mform->freeze('completiongradeitemnumber');
+                    }
+                    $mform->freeze($this->_customcompletionelements);
                 }
-                if ($mform->elementExists('completionusegrade')) {
-                    $mform->freeze('completionusegrade');
-                }
-                if ($mform->elementExists('completiongradeitemnumber')) {
-                    $mform->freeze('completiongradeitemnumber');
-                }
-                $mform->freeze($this->_customcompletionelements);
             }
         }
 
@@ -470,36 +483,38 @@ abstract class moodleform_mod extends moodleform {
             }
         }
 
-        // Completion: Don't let them choose automatic completion without turning
-        // on some conditions. Ignore this check when completion settings are
-        // locked, as the options are then disabled.
-        $automaticcompletion = array_key_exists('completion', $data);
-        $automaticcompletion = $automaticcompletion && $data['completion'] == COMPLETION_TRACKING_AUTOMATIC;
-        $automaticcompletion = $automaticcompletion && !empty($data['completionunlocked']);
+        if ($this->_features->completion) {
+            // Completion: Don't let them choose automatic completion without turning
+            // on some conditions. Ignore this check when completion settings are
+            // locked, as the options are then disabled.
+            $automaticcompletion = array_key_exists('completion', $data);
+            $automaticcompletion = $automaticcompletion && $data['completion'] == COMPLETION_TRACKING_AUTOMATIC;
+            $automaticcompletion = $automaticcompletion && !empty($data['completionunlocked']);
 
-        if ($automaticcompletion) {
-            // View to complete.
-            $rulesenabled = !empty($data['completionview']);
+            if ($automaticcompletion) {
+                // View to complete.
+                $rulesenabled = !empty($data['completionview']);
 
-            // Use grade to complete (only one grade item).
-            $rulesenabled = $rulesenabled || !empty($data['completionusegrade']);
+                // Use grade to complete (only one grade item).
+                $rulesenabled = $rulesenabled || !empty($data['completionusegrade']);
 
-            // Use grade to complete (specific grade item).
-            if (!$rulesenabled && isset($data['completiongradeitemnumber'])) {
-                $rulesenabled = $data['completiongradeitemnumber'] != '';
-            }
+                // Use grade to complete (specific grade item).
+                if (!$rulesenabled && isset($data['completiongradeitemnumber'])) {
+                    $rulesenabled = $data['completiongradeitemnumber'] != '';
+                }
 
-            // Module-specific completion rules.
-            $rulesenabled = $rulesenabled || $this->completion_rule_enabled($data);
+                // Module-specific completion rules.
+                $rulesenabled = $rulesenabled || $this->completion_rule_enabled($data);
 
-            if (!$rulesenabled) {
-                // No rules are enabled. Can't set automatically completed without rules.
-                $errors['completion'] = get_string('badautocompletion', 'completion');
+                if (!$rulesenabled) {
+                    // No rules are enabled. Can't set automatically completed without rules.
+                    $errors['completion'] = get_string('badautocompletion', 'completion');
+                }
             }
         }
 
         // Availability: Check availability field does not have errors.
-        if (!empty($CFG->enableavailability)) {
+        if (!empty($CFG->enableavailability) && $this->_features->restrictions) {
             \core_availability\frontend::report_validation_errors($data, $errors);
         }
 
@@ -573,23 +588,29 @@ abstract class moodleform_mod extends moodleform {
 
         $mform->addElement('header', 'modstandardelshdr', get_string('modstandardels', 'form'));
 
-        $section = get_fast_modinfo($COURSE)->get_section_info($this->_section);
-        $allowstealth = !empty($CFG->allowstealth) && $this->courseformat->allow_stealth_module_visibility($this->_cm, $section);
-        if ($allowstealth && $section->visible) {
-            $modvisiblelabel = 'modvisiblewithstealth';
-        } else if ($section->visible) {
-            $modvisiblelabel = 'modvisible';
-        } else {
-            $modvisiblelabel = 'modvisiblehiddensection';
-        }
-        $mform->addElement('modvisible', 'visible', get_string($modvisiblelabel), null,
-                array('allowstealth' => $allowstealth, 'sectionvisible' => $section->visible, 'cm' => $this->_cm));
-        $mform->addHelpButton('visible', $modvisiblelabel);
-        if (!empty($this->_cm)) {
-            $context = context_module::instance($this->_cm->id);
-            if (!has_capability('moodle/course:activityvisibility', $context)) {
-                $mform->hardFreeze('visible');
+        if ($this->_features->availability) {
+            $section = get_fast_modinfo($COURSE)->get_section_info($this->_section);
+            $allowstealth = !empty($CFG->allowstealth) &&
+                $this->courseformat->allow_stealth_module_visibility($this->_cm, $section);
+            if ($allowstealth && $section->visible) {
+                $modvisiblelabel = 'modvisiblewithstealth';
+            } else if ($section->visible) {
+                $modvisiblelabel = 'modvisible';
+            } else {
+                $modvisiblelabel = 'modvisiblehiddensection';
             }
+            $mform->addElement('modvisible', 'visible', get_string($modvisiblelabel), null,
+                array('allowstealth' => $allowstealth, 'sectionvisible' => $section->visible, 'cm' => $this->_cm));
+            $mform->addHelpButton('visible', $modvisiblelabel);
+            if (!empty($this->_cm)) {
+                $context = context_module::instance($this->_cm->id);
+                if (!has_capability('moodle/course:activityvisibility', $context)) {
+                    $mform->hardFreeze('visible');
+                }
+            }
+        } else {
+            $mform->addElement('hidden', 'visible', 1);
+            $mform->setType('visible', PARAM_INT);
         }
 
         if ($this->_features->idnumber) {
@@ -620,7 +641,7 @@ abstract class moodleform_mod extends moodleform {
             $mform->addHelpButton('groupingid', 'grouping', 'group');
         }
 
-        if (!empty($CFG->enableavailability)) {
+        if (!empty($CFG->enableavailability) && $this->_features->restrictions) {
             // Add special button to end of previous section if groups/groupings
             // are enabled.
 
@@ -662,120 +683,122 @@ abstract class moodleform_mod extends moodleform {
         }
 
         // Conditional activities: completion tracking section
-        if(!isset($completion)) {
-            $completion = new completion_info($COURSE);
-        }
-        if ($completion->is_enabled()) {
-            $mform->addElement('header', 'activitycompletionheader', get_string('activitycompletion', 'completion'));
-            // Unlock button for if people have completed it (will
-            // be removed in definition_after_data if they haven't)
-            $mform->addElement('submit', 'unlockcompletion', get_string('unlockcompletion', 'completion'));
-            $mform->registerNoSubmitButton('unlockcompletion');
-            $mform->addElement('hidden', 'completionunlocked', 0);
-            $mform->setType('completionunlocked', PARAM_INT);
-
-            $trackingdefault = COMPLETION_TRACKING_NONE;
-            // If system and activity default is on, set it.
-            if ($CFG->completiondefault && $this->_features->defaultcompletion) {
-                $hasrules = plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_HAS_RULES, true);
-                $tracksviews = plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_TRACKS_VIEWS, true);
-                if ($hasrules || $tracksviews) {
-                    $trackingdefault = COMPLETION_TRACKING_AUTOMATIC;
-                } else {
-                    $trackingdefault = COMPLETION_TRACKING_MANUAL;
-                }
+        if ($this->_features->completion) {
+            if (!isset($completion)) {
+                $completion = new completion_info($COURSE);
             }
+            if ($completion->is_enabled()) {
+                $mform->addElement('header', 'activitycompletionheader', get_string('activitycompletion', 'completion'));
+                // Unlock button for if people have completed it (will
+                // be removed in definition_after_data if they haven't).
+                $mform->addElement('submit', 'unlockcompletion', get_string('unlockcompletion', 'completion'));
+                $mform->registerNoSubmitButton('unlockcompletion');
+                $mform->addElement('hidden', 'completionunlocked', 0);
+                $mform->setType('completionunlocked', PARAM_INT);
 
-            $mform->addElement('select', 'completion', get_string('completion', 'completion'),
-                array(COMPLETION_TRACKING_NONE=>get_string('completion_none', 'completion'),
-                COMPLETION_TRACKING_MANUAL=>get_string('completion_manual', 'completion')));
-            $mform->setDefault('completion', $trackingdefault);
-            $mform->addHelpButton('completion', 'completion', 'completion');
-
-            // Automatic completion once you view it
-            $gotcompletionoptions = false;
-            if (plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
-                $mform->addElement('checkbox', 'completionview', get_string('completionview', 'completion'),
-                    get_string('completionview_desc', 'completion'));
-                $mform->hideIf('completionview', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
-                // Check by default if automatic completion tracking is set.
-                if ($trackingdefault == COMPLETION_TRACKING_AUTOMATIC) {
-                    $mform->setDefault('completionview', 1);
-                }
-                $gotcompletionoptions = true;
-            }
-
-            if (plugin_supports('mod', $this->_modname, FEATURE_GRADE_HAS_GRADE, false)) {
-                // This activity supports grading.
-                $gotcompletionoptions = true;
-
-                $component = "mod_{$this->_modname}";
-                $itemnames = component_gradeitems::get_itemname_mapping_for_component($component);
-
-                if (count($itemnames) === 1) {
-                    // Only one gradeitem in this activity.
-                    // We use the completionusegrade field here.
-                    $mform->addElement(
-                        'checkbox',
-                        'completionusegrade',
-                        get_string('completionusegrade', 'completion'),
-                        get_string('completionusegrade_desc', 'completion')
-                    );
-                    $mform->hideIf('completionusegrade', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
-                    $mform->addHelpButton('completionusegrade', 'completionusegrade', 'completion');
-
-                    // The disabledIf logic differs between ratings and other grade items due to different field types.
-                    if ($this->_features->rating) {
-                        // If using the rating system, there is no grade unless ratings are enabled.
-                        $mform->disabledIf('completionusegrade', 'assessed', 'eq', 0);
+                $trackingdefault = COMPLETION_TRACKING_NONE;
+                // If system and activity default is on, set it.
+                if ($CFG->completiondefault && $this->_features->defaultcompletion) {
+                    $hasrules = plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_HAS_RULES, true);
+                    $tracksviews = plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_TRACKS_VIEWS, true);
+                    if ($hasrules || $tracksviews) {
+                        $trackingdefault = COMPLETION_TRACKING_AUTOMATIC;
                     } else {
-                        // All other field types use the '$gradefieldname' field's modgrade_type.
-                        $itemnumbers = array_keys($itemnames);
-                        $itemnumber = array_shift($itemnumbers);
-                        $gradefieldname = component_gradeitems::get_field_name_for_itemnumber($component, $itemnumber, 'grade');
-                        $mform->disabledIf('completionusegrade', "{$gradefieldname}[modgrade_type]", 'eq', 'none');
+                        $trackingdefault = COMPLETION_TRACKING_MANUAL;
                     }
-                } else if (count($itemnames) > 1) {
-                    // There are multiple grade items in this activity.
-                    // Show them all.
-                    $options = [
-                        '' => get_string('activitygradenotrequired', 'completion'),
-                    ];
-                    foreach ($itemnames as $itemnumber => $itemname) {
-                        $options[$itemnumber] = get_string("grade_{$itemname}_name", $component);
-                    }
-
-                    $mform->addElement(
-                        'select',
-                        'completiongradeitemnumber',
-                        get_string('completionusegrade', 'completion'),
-                        $options
-                    );
-                    $mform->hideIf('completiongradeitemnumber', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
                 }
-            }
 
-            // Automatic completion according to module-specific rules
-            $this->_customcompletionelements = $this->add_completion_rules();
-            foreach ($this->_customcompletionelements as $element) {
-                $mform->hideIf($element, 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
-            }
+                $mform->addElement('select', 'completion', get_string('completion', 'completion'),
+                    array(COMPLETION_TRACKING_NONE => get_string('completion_none', 'completion'),
+                        COMPLETION_TRACKING_MANUAL => get_string('completion_manual', 'completion')));
+                $mform->setDefault('completion', $trackingdefault);
+                $mform->addHelpButton('completion', 'completion', 'completion');
 
-            $gotcompletionoptions = $gotcompletionoptions ||
-                count($this->_customcompletionelements)>0;
+                // Automatic completion once you view it.
+                $gotcompletionoptions = false;
+                if (plugin_supports('mod', $this->_modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
+                    $mform->addElement('checkbox', 'completionview', get_string('completionview', 'completion'),
+                        get_string('completionview_desc', 'completion'));
+                    $mform->hideIf('completionview', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
+                    // Check by default if automatic completion tracking is set.
+                    if ($trackingdefault == COMPLETION_TRACKING_AUTOMATIC) {
+                        $mform->setDefault('completionview', 1);
+                    }
+                    $gotcompletionoptions = true;
+                }
 
-            // Automatic option only appears if possible
-            if ($gotcompletionoptions) {
-                $mform->getElement('completion')->addOption(
-                    get_string('completion_automatic', 'completion'),
-                    COMPLETION_TRACKING_AUTOMATIC);
-            }
+                if (plugin_supports('mod', $this->_modname, FEATURE_GRADE_HAS_GRADE, false)) {
+                    // This activity supports grading.
+                    $gotcompletionoptions = true;
 
-            // Completion expected at particular date? (For progress tracking)
-            $mform->addElement('date_time_selector', 'completionexpected', get_string('completionexpected', 'completion'),
+                    $component = "mod_{$this->_modname}";
+                    $itemnames = component_gradeitems::get_itemname_mapping_for_component($component);
+
+                    if (count($itemnames) === 1) {
+                        // Only one gradeitem in this activity.
+                        // We use the completionusegrade field here.
+                        $mform->addElement(
+                            'checkbox',
+                            'completionusegrade',
+                            get_string('completionusegrade', 'completion'),
+                            get_string('completionusegrade_desc', 'completion')
+                        );
+                        $mform->hideIf('completionusegrade', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
+                        $mform->addHelpButton('completionusegrade', 'completionusegrade', 'completion');
+
+                        // The disabledIf logic differs between ratings and other grade items due to different field types.
+                        if ($this->_features->rating) {
+                            // If using the rating system, there is no grade unless ratings are enabled.
+                            $mform->disabledIf('completionusegrade', 'assessed', 'eq', 0);
+                        } else {
+                            // All other field types use the '$gradefieldname' field's modgrade_type.
+                            $itemnumbers = array_keys($itemnames);
+                            $itemnumber = array_shift($itemnumbers);
+                            $gradefieldname = component_gradeitems::get_field_name_for_itemnumber($component, $itemnumber, 'grade');
+                            $mform->disabledIf('completionusegrade', "{$gradefieldname}[modgrade_type]", 'eq', 'none');
+                        }
+                    } else if (count($itemnames) > 1) {
+                        // There are multiple grade items in this activity.
+                        // Show them all.
+                        $options = [
+                            '' => get_string('activitygradenotrequired', 'completion'),
+                        ];
+                        foreach ($itemnames as $itemnumber => $itemname) {
+                            $options[$itemnumber] = get_string("grade_{$itemname}_name", $component);
+                        }
+
+                        $mform->addElement(
+                            'select',
+                            'completiongradeitemnumber',
+                            get_string('completionusegrade', 'completion'),
+                            $options
+                        );
+                        $mform->hideIf('completiongradeitemnumber', 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
+                    }
+                }
+
+                // Automatic completion according to module-specific rules.
+                $this->_customcompletionelements = $this->add_completion_rules();
+                foreach ($this->_customcompletionelements as $element) {
+                    $mform->hideIf($element, 'completion', 'ne', COMPLETION_TRACKING_AUTOMATIC);
+                }
+
+                $gotcompletionoptions = $gotcompletionoptions ||
+                    count($this->_customcompletionelements) > 0;
+
+                // Automatic option only appears if possible.
+                if ($gotcompletionoptions) {
+                    $mform->getElement('completion')->addOption(
+                        get_string('completion_automatic', 'completion'),
+                        COMPLETION_TRACKING_AUTOMATIC);
+                }
+
+                // Completion expected at particular date? (For progress tracking).
+                $mform->addElement('date_time_selector', 'completionexpected', get_string('completionexpected', 'completion'),
                     array('optional' => true));
-            $mform->addHelpButton('completionexpected', 'completionexpected', 'completion');
-            $mform->hideIf('completionexpected', 'completion', 'eq', COMPLETION_TRACKING_NONE);
+                $mform->addHelpButton('completionexpected', 'completionexpected', 'completion');
+                $mform->hideIf('completionexpected', 'completion', 'eq', COMPLETION_TRACKING_NONE);
+            }
         }
 
         // Populate module tags.
