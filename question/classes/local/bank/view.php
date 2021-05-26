@@ -453,10 +453,20 @@ class view {
      * @return int[]
      */
     protected function default_sort(): array {
-        return array(
-                'core_question\bank\question_type_column' => 1,
-                'core_question\bank\question_name_idnumber_tags_column-name' => 1
-        );
+        $defaultsort = array();
+        if (\core\plugininfo\qbank::check_qbank_status('qbank_viewquestiontype')
+                && class_exists('\\qbank_viewquestiontype\\question_type_column')) {
+            $defaultsort ['\qbank_viewquestiontype\question_type_column'] = 1;
+        } else {
+            $defaultsort ['core_question\bank\question_type_column'] = 1;
+        }
+        if (\core\plugininfo\qbank::check_qbank_status('qbank_viewquestiontype')
+                && class_exists('\\qbank_viewquestiontype\\question_name_idnumber_tags_column')) {
+            $defaultsort ['\qbank_viewquestiontype\question_name_idnumber_tags_column-name'] = 1;
+        } else {
+            $defaultsort ['core_question\bank\question_name_idnumber_tags_column-name'] = 1;
+        }
+        return $defaultsort;
     }
 
     /**
