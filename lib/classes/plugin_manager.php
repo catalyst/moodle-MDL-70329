@@ -23,7 +23,6 @@
  *
  * @package    core
  * @copyright  2011 David Mudrak <david@moodle.com>
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
