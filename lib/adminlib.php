@@ -6754,8 +6754,9 @@ class admin_page_managemessageoutputs extends admin_externalpage {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class admin_page_manageqbanks extends admin_setting {
+
     /**
-     * Constructor
+     * Class admin_page_manageqbanks constructor.
      */
     public function __construct() {
         $this->nosave = true;
@@ -6764,7 +6765,7 @@ class admin_page_manageqbanks extends admin_setting {
     }
 
     /**
-     * Always returns true
+     * Always returns true.
      *
      * @return true
      */
@@ -6773,7 +6774,7 @@ class admin_page_manageqbanks extends admin_setting {
     }
 
     /**
-     * Always returns true
+     * Always returns true.
      *
      * @return true
      */
@@ -6782,7 +6783,7 @@ class admin_page_manageqbanks extends admin_setting {
     }
 
     /**
-     * Always returns '' and doesn't write anything
+     * Always returns '' and doesn't write anything.
      *
      * @param mixed $data string or array, must not be NULL
      * @return string Always returns ''
@@ -6793,7 +6794,7 @@ class admin_page_manageqbanks extends admin_setting {
     }
 
     /**
-     * Search to find if Query is related to content bank plugin
+     * Search to find if Query is related to content bank plugin.
      *
      * @param string $query The string to search for
      * @return bool true for related false for not
@@ -6813,7 +6814,7 @@ class admin_page_manageqbanks extends admin_setting {
     }
 
     /**
-     * Return XHTML to display control
+     * Return XHTML to display control.
      *
      * @param mixed $data Unused
      * @param string $query

@@ -35,7 +35,6 @@ $PAGE->set_url('/admin/qbankplugins.php');
 $PAGE->set_context($syscontext);
 
 require_admin();
-require_sesskey();
 
 $return = new moodle_url('/admin/settings.php', array('section' => 'manageqbanks'));
 
@@ -58,6 +57,8 @@ switch ($action) {
         }
         break;
 }
+
 core_plugin_manager::reset_caches();
 
 redirect($return);
+

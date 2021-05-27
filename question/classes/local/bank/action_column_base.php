@@ -43,6 +43,8 @@ abstract class action_column_base extends column_base {
     }
 
     /**
+     * Get extra classes for the column.
+     *
      * @return array any extra class names you would like applied to every cell in this column.
      */
     public function get_extra_classes():array {
@@ -51,6 +53,7 @@ abstract class action_column_base extends column_base {
 
     /**
      * Print the icon of the action.
+     *
      * @param $icon
      * @param $title
      * @param $url
@@ -61,8 +64,7 @@ abstract class action_column_base extends column_base {
     }
 
     /**
-     * Return an array 'table_alias' => 'JOIN clause' to bring in any data that
-     * this column required.
+     * Return an array 'table_alias' => 'JOIN clause' to bring in any data that this column required.
      *
      * The return values for all the columns will be checked. It is OK if two
      * columns join in the same table with the same alias and identical JOIN clauses.
@@ -79,8 +81,10 @@ abstract class action_column_base extends column_base {
     }
 
     /**
-     * @return array fields required. use table alias 'q' for the question table, or one of the
+     * Use table alias 'q' for the question table, or one of the
      * ones from get_extra_joins. Every field requested must specify a table prefix.
+     *
+     * @return array fields required.
      */
     public function get_required_fields():array {
         // Createdby is required for permission checks.

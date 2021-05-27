@@ -107,7 +107,7 @@ class qbank extends base {
 
     /**
      * Checks if a qbank plugin is enabled or not.
-     * @param $fullpluginname
+     * @param string $fullpluginname the name of the plugin
      * @return bool
      */
     public static function check_qbank_status($fullpluginname): bool {

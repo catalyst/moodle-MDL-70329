@@ -43,6 +43,7 @@ namespace core_question\bank;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0
  * @see \core_question\local\bank\random_question_loader
+ * @todo MDL-71516 the deprecation msg need to be uncommented after changes done in mod_quiz
  */
 class random_question_loader {
     /** @var \qubaid_condition which usages to consider previous attempts from. */

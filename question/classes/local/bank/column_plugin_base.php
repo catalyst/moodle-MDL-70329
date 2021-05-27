@@ -16,6 +16,7 @@
 
 /**
  * Base class class for column plugins.
+ *
  * Every qbank plugin wants to implement a column/action element, must extent this class.
  *
  * @package    core_question
@@ -31,17 +32,20 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Class column_plugin_base is the base class for column plugins.
  *
- * @package core_question\local\bank
+ * @package core_question
  */
 abstract class column_plugin_base {
 
+    /**
+     * @var view $qbank the question bank view we are helping to render.
+     */
     protected $qbank;
 
     /**
-     * column_plugin_base constructor.
+     * Class column_plugin_base constructor.
      *
      * this constructor requires the view object to be passed.
-     * @param $qbank
+     * @param view $qbank
      */
     public function __construct($qbank) {
         $this->qbank = $qbank;

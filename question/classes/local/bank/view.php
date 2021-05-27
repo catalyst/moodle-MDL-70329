@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Class to print a view of the question bank.
  *
@@ -24,12 +23,15 @@
  */
 
 namespace core_question\local\bank;
+
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
 
 /**
- * This class prints a view of the question bank, including
+ * This class prints a view of the question bank.
+ *
+ * including
  *  + Some controls to allow users to to select what is displayed.
  *  + A list of questions as a table.
  *  + Further controls to do things with the questions.
@@ -50,6 +52,10 @@ use core_question\bank\search\condition;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class view {
+
+    /**
+     * Maximum number of sorts allowed.
+     */
     const MAX_SORTS = 3;
 
     /**
@@ -181,7 +187,7 @@ class view {
     /**
      * Get the list of qbank plugins with available classes for columns.
      *
-     * @returns array
+     * @return array
      */
     protected function get_question_bank_columns(): array {
         $questionbankclasscolumns = array();
@@ -288,7 +294,7 @@ class view {
     /**
      * Get a column object from its name.
      *
-     * @param string $columnname.
+     * @param string $columnname
      * @return column_base.
      */
     protected function get_column_type($columnname) {
@@ -339,6 +345,8 @@ class view {
     }
 
     /**
+     * Checks if the column included in the output.
+     *
      * @param string $colname a column internal name.
      * @return bool is this column included in the output?
      */
@@ -347,6 +355,8 @@ class view {
     }
 
     /**
+     * Get the count of the columns.
+     *
      * @return int The number of columns in the table.
      */
     public function get_column_count(): int {
@@ -432,7 +442,8 @@ class view {
 
     /**
      * Sort to parameters.
-     * @param $sorts
+     *
+     * @param array $sorts
      * @return array
      */
     protected function sort_to_params($sorts): array {
@@ -470,6 +481,8 @@ class view {
     }
 
     /**
+     * Gets the primary sort order according to the default sort.
+     *
      * @param string $sort a column or column_subsort name.
      * @return int the current sort order for this column -1, 0, 1
      */
@@ -608,9 +621,8 @@ class view {
         return $this->baseurl;
     }
 
-    // Need to remove these methods for urls and implement it inside the plugin.
     /**
-     * Get the URL for editing a question as a {@link \moodle_url}.
+     * Get the URL for editing a question as a moodle url.
      *
      * @param int $questionid the question id.
      * @return \moodle_url the URL, HTML-escaped.
@@ -630,7 +642,7 @@ class view {
     }
 
     /**
-     * Get the URL for duplicating a question as a {@link \moodle_url}.
+     * Get the URL for duplicating a question as a moodle url.
      *
      * @param int $questionid the question id.
      * @return \moodle_url the URL.
@@ -722,7 +734,8 @@ class view {
 
     /**
      * Print the text for category.
-     * @param $categoryandcontext
+     *
+     * @param string $categoryandcontext
      */
     protected function print_choose_category_message($categoryandcontext): void {
         echo "<p style=\"text-align:center;\"><b>";
@@ -732,7 +745,7 @@ class view {
 
     /**
      * Gets current selected category.
-     * @param $categoryandcontext
+     * @param string $categoryandcontext
      * @return false|mixed|\stdClass
      */
     protected function get_current_category($categoryandcontext) {
@@ -755,7 +768,8 @@ class view {
     }
 
     /**
-     * prints category information
+     * Prints category information.
+     *
      * @param \stdClass $category the category row from the database.
      * @deprecated since Moodle 2.7 MDL-40313.
      * @see \core_question\bank\search\condition
@@ -771,7 +785,11 @@ class view {
     }
 
     /**
-     * Prints a form to choose categories
+     * Prints a form to choose categories.
+     *
+     * @param array $contexts
+     * @param \moodle_url $pageurl
+     * @param string $current
      * @deprecated since Moodle 2.7 MDL-40313.
      * @see \core_question\bank\search\condition
      * @todo MDL-41978 This will be deleted in Moodle 2.8
@@ -808,6 +826,10 @@ class view {
 
     /**
      * Print a single option checkbox.
+     *
+     * @param $name
+     * @param $value
+     * @param $label
      * @deprecated since Moodle 2.7 MDL-40313.
      * @see \core_question\bank\search\condition
      * @see html_writer::checkbox
@@ -900,6 +922,12 @@ class view {
         echo $OUTPUT->heading(get_string('questionbank', 'question'), 2);
     }
 
+    /**
+     * Create a new question form.
+     *
+     * @param $category
+     * @param $canadd
+     */
     protected function create_new_question_form($category, $canadd): void {
         echo '<div class="createnewquestion">';
         if ($canadd) {
@@ -1089,8 +1117,8 @@ class view {
 
     /**
      * Gets the classes for row.
-     * @param $question
-     * @param $rowcount
+     * @param \stdClass $question
+     * @param int $rowcount
      * @return array
      */
     protected function get_row_classes($question, $rowcount): array {
@@ -1107,8 +1135,8 @@ class view {
 
     /**
      * Prints the table row.
-     * @param $question
-     * @param $rowcount
+     * @param \stdClass $question
+     * @param int $rowcount
      */
     protected function print_table_row($question, $rowcount): void {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));

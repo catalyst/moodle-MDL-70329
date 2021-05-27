@@ -34,6 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class column_base {
+
     /**
      * @var view $qbank the question bank view we are helping to render.
      */
@@ -132,8 +133,10 @@ abstract class column_base {
     abstract protected function get_title();
 
     /**
-     * @return string a fuller version of the name. Use this when get_title() returns
+     * Use this when get_title() returns
      * something very short, and you want a longer version as a tool tip.
+     *
+     * @return string a fuller version of the name.
      */
     protected function get_title_tip() {
         return '';
@@ -212,7 +215,9 @@ abstract class column_base {
     }
 
     /**
-     * @return string the CSS classes to apply to every cell in this column.
+     * The CSS classes to apply to every cell in this column.
+     *
+     * @return string
      */
     protected function get_classes(): string {
         $classes = $this->get_extra_classes();
@@ -229,7 +234,9 @@ abstract class column_base {
     abstract public function get_name();
 
     /**
-     * @return array any extra class names you would like applied to every cell in this column.
+     * Any extra class names you would like applied to every cell in this column.
+     *
+     * @return array
      */
     public function get_extra_classes(): array {
         return array();
@@ -275,8 +282,10 @@ abstract class column_base {
     }
 
     /**
-     * @return array fields required. use table alias 'q' for the question table, or one of the
+     * Use table alias 'q' for the question table, or one of the
      * ones from get_extra_joins. Every field requested must specify a table prefix.
+     *
+     * @return array fields required.
      */
     public function get_required_fields(): array {
         return array();
@@ -349,6 +358,8 @@ abstract class column_base {
     }
 
     /**
+     * Sorts the expressions.
+     *
      * @param bool $reverse Whether to sort in the reverse of the default sort order.
      * @param string $subsort if is_sortable returns an array of subnames, then this will be
      *      one of those. Otherwise will be empty.

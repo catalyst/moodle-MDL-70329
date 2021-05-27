@@ -36,6 +36,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2019 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \core_question\local\bank\edit_menu_column
  */
 class edit_menu_column extends column_base {
     /**

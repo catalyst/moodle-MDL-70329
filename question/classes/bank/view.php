@@ -50,6 +50,7 @@ use core_question\bank\search\condition;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0
  * @see \core_question\local\bank\view
+ * @todo MDL-71516 the deprecation msg need to be uncommented after changes done in mod_quiz
  */
 class view {
     const MAX_SORTS = 3;

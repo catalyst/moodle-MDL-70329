@@ -36,6 +36,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2019 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \core_question\local\bank\menu_action_column_base
  */
 abstract class menu_action_column_base extends action_column_base implements menuable_action {
 
