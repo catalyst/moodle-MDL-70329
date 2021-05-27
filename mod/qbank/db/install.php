@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Custom code to be run on installing the plugin.
+ * @throws \dml_exception
+ * @throws \coding_exception|moodle_exception
  */
 function xmldb_qbank_install() {
 
@@ -37,15 +39,37 @@ function xmldb_qbank_install() {
     foreach ($questioncategories as $qcategory) {
         $contextlevel = (int)$qcategory->contextlevel;
 
-        if ($contextlevel === CONTEXT_COURSECAT) {
-            $categoryname = helper::get_category_name($qcategory->instanceid);
-            $shortname = substr("Question bank: " . $qcategory->instanceid . '-' . $categoryname, 0, 254);
-            $course = helper::get_course($shortname);
-            if (!$course) {
-                // Create a new course for each category with questions.
-                $course = helper::create_category_course($shortname, $qcategory->instanceid);
-            }
-            // TODO: Create the mod_activity here using this course: $course.
+        // Initialize variables qbank name and course object that will be used in each case.
+        $qbankname = null;
+        $course = null;
+
+        switch ($contextlevel) {
+            case CONTEXT_SYSTEM:
+                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' . get_string('coresystem'), 0, 254);
+                $course = get_course(SITEID);
+                break;
+            case CONTEXT_COURSECAT:
+                $categoryname = helper::get_category_name($qcategory->instanceid);
+                $shortname = substr("Question bank: " . $qcategory->instanceid . '-' . $categoryname, 0, 254);
+                $course = helper::get_course($shortname, $qcategory->instanceid);
+                if (!$course) {
+                    // Create a new course for each category with questions.
+                    $course = helper::create_category_course($shortname, $qcategory->instanceid);
+                }
+                $qbankname = $shortname;
+                break;
+            case CONTEXT_COURSE:
+                $course = get_course($qcategory->instanceid);
+                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' . $course->shortname, 0, 254);
+                break;
+            case CONTEXT_MODULE:
+                $cm = helper::get_coursemodule($qcategory->instanceid);
+                $course = get_course($cm->course);
+                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' .$course->shortname, 0, 254);
+                break;
         }
+
+        // Create the qbank module.
+        $qbank = helper::create_qbank_instance($qbankname, $course);
     }
 }

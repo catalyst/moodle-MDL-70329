@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Testing method course_exists in helper class.
+ * Testing method get_categories_populated, create_category_course and get_course in helper class.
  *
  * @package    mod_qbank
  * @category   test
@@ -69,11 +69,11 @@ class coursecreation_test extends \advanced_testcase {
         $coursename2 = substr("Question bank: This course does not exist yet", 0, 255);
 
         // Test that course_exists function returns true for courses that already exist.
-        $courseexists = helper::get_course($course1->shortname);
+        $courseexists = helper::get_course($course1->shortname, $category1->id);
         $this->assertEquals($course1->shortname, $courseexists->shortname);
 
         // Test that course does not exist before being created.
-        $course2 = helper::get_course($courseshortname2);
+        $course2 = helper::get_course($courseshortname2, $category2->id);
         $this->assertNull($course2);
 
         // Test that course exists after being created with create_category_course function.

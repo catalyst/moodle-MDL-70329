@@ -29,6 +29,8 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot.'/course/modlib.php');
+
 /**
  * Class helper contains all library functions.
  *
@@ -58,18 +60,56 @@ class helper {
      * Get a course object given the short name.
      *
      * @param string $shortname Course shortname to check
+     * @param int $categoryid Course category id.
      * @return null|object Returns a course.
      * @throws \dml_exception A DML specific exception is thrown for any errors.
      */
-    public static function get_course(string $shortname): ?object {
+    public static function get_course(string $shortname, int $categoryid): ?object {
         global $DB;
 
-        $course = $DB->get_record('course', ['shortname' => $shortname]);
+        $course = $DB->get_record('course', ['shortname' => $shortname, 'category' => $categoryid]);
         if (!$course) {
             return null;
         }
 
         return $course;
+    }
+
+    /**
+     * Get a qbank object given the short name.
+     *
+     * @param string $name mod_qbank name to check.
+     * @param object $course Course object.
+     * @return null|object Returns a qbank object.
+     * @throws \dml_exception A DML specific exception is thrown for any errors.
+     */
+    public static function get_qbank(string $name, object $course): ?object {
+        global $DB;
+
+        $qbank = $DB->get_record('qbank', ['name' => $name, 'course' => $course->id]);
+        if (!$qbank) {
+            return null;
+        }
+
+        return $qbank;
+    }
+
+    /**
+     * Get course id from course_modules table.
+     *
+     * @param int $instanceid course_module instance id.
+     * @return object|null Returns a course module object.
+     * @throws \dml_exception A DML specific exception is thrown for any errors.
+     */
+    public static function get_coursemodule(int $instanceid): ?object {
+        global $DB;
+
+        $coursemodule = $DB->get_record('course_modules', ['id' => $instanceid]);
+        if (!$coursemodule) {
+            return null;
+        }
+
+        return $coursemodule;
     }
 
     /**
@@ -93,7 +133,6 @@ class helper {
     /**
      * Creates course.
      *
-     * @param string $coursename Course name to create
      * @param string $shortname Course short name to create
      * @param int $categoryid Category id parent to the course
      * @return object Returns a course object.
@@ -109,5 +148,38 @@ class helper {
         $newcourse->summary = get_string('course_summary', 'mod_qbank');
 
         return create_course($newcourse);
+    }
+
+    /**
+     * Creates qbank instance.
+     *
+     * @param string $name qbank name to create.
+     * @param object $course Course parent to the qbank.
+     * @return object New qbank instance object created.
+     * @throws \moodle_exception
+     */
+    public static function create_qbank_instance(string $name, object $course): ?object {
+        global $DB;
+
+        $qbank = self::get_qbank($name, $course);
+        if (!$qbank) {
+            $moduleinfo = new stdClass();
+            $moduleinfo->modulename = 'qbank';
+            $moduleinfo->name = $name;
+            if ($course->id === SITEID) {
+                $moduleinfo->section = 1;
+            } else {
+                $section = course_create_section($course->id);
+                $moduleinfo->section = $section->section;
+            }
+            $moduleinfo->course = $course->id;
+            $moduleinfo->visible = false;
+
+            $moduleid = $DB->get_record_select('modules', "name= :name", ['name' => 'qbank'], 'id');
+            $moduleinfo->module = (int)$moduleid->id;
+
+            $qbank = add_moduleinfo($moduleinfo, $course);
+        }
+        return $qbank;
     }
 }
