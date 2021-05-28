@@ -85,19 +85,19 @@ class view {
     public $course;
 
     /**
-     * @var \question_bank_column_base[] these are all the 'columns' that are
+     * @var column_base[] these are all the 'columns' that are
      * part of the display. Array keys are the class name.
      */
     protected $requiredcolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var column_base[] these are the 'columns' that are
      * actually displayed as a column, in order. Array keys are the class name.
      */
     protected $visiblecolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
@@ -906,52 +906,72 @@ class view {
             $column->load_additional_data($questions);
         }
 
-        echo '<div class="categorypagingbarcontainer">';
         $pageingurl = new \moodle_url('edit.php', $pageurl->params());
         $pagingbar = new \paging_bar($totalnumber, $page, $perpage, $pageingurl);
         $pagingbar->pagevar = 'qpage';
-        echo $OUTPUT->render($pagingbar);
-        echo '</div>';
+
+        $this->display_top_pagnation($pagingbar);
 
         echo '<form method="post" action="edit.php">';
         echo '<fieldset class="invisiblefieldset" style="display: block;">';
         echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
         echo \html_writer::input_hidden_params($this->baseurl);
 
-        echo '<div class="categoryquestionscontainer" id="questionscontainer">';
-        $this->start_table();
-        $rowcount = 0;
-        foreach ($questions as $question) {
-            $this->print_table_row($question, $rowcount);
-            $rowcount += 1;
-        }
-        $this->end_table();
-        echo "</div>\n";
+        $this->display_questions($questions);
 
-        echo '<div class="categorypagingbarcontainer pagingbottom">';
+        $this->display_bottom_pagination($pagingbar, $totalnumber, $perpage, $pageurl);
+
+        $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
+
+        echo '</fieldset>';
+        echo "</form>\n";
+    }
+
+    /**
+     * Display the top pagination bar.
+     *
+     * @param $pagingbar
+     */
+    protected function display_top_pagnation($pagingbar): void {
+        global $OUTPUT;
+        echo \html_writer::tag('div', $OUTPUT->render($pagingbar), array('class' => 'categorypagingbarcontainer'));
+    }
+
+    /**
+     * Display bottom pagination bar.
+     *
+     * @param $pagingbar
+     * @param $totalnumber
+     * @param $perpage
+     * @param $pageurl
+     */
+    protected function display_bottom_pagination($pagingbar, $totalnumber, $perpage, $pageurl): void {
+        global $OUTPUT;
+        echo \html_writer::start_tag('div', array('class' => 'categorypagingbarcontainer pagingbottom'));
         echo $OUTPUT->render($pagingbar);
         if ($totalnumber > DEFAULT_QUESTIONS_PER_PAGE) {
             if ($perpage == DEFAULT_QUESTIONS_PER_PAGE) {
                 $url = new \moodle_url('edit.php', array_merge($pageurl->params(),
                         array('qpage' => 0, 'qperpage' => MAXIMUM_QUESTIONS_PER_PAGE)));
                 if ($totalnumber > MAXIMUM_QUESTIONS_PER_PAGE) {
-                    $showall = '<a href="'.$url.'">'.get_string('showperpage', 'moodle', MAXIMUM_QUESTIONS_PER_PAGE).'</a>';
+                    $showall = \html_writer::tag('a',
+                            get_string('showperpage', 'moodle', MAXIMUM_QUESTIONS_PER_PAGE),
+                            array('href' => $url));
                 } else {
-                    $showall = '<a href="'.$url.'">'.get_string('showall', 'moodle', $totalnumber).'</a>';
+                    $showall = \html_writer::tag('a',
+                            get_string('showall', 'moodle', $totalnumber),
+                            array('href' => $url));
                 }
             } else {
                 $url = new \moodle_url('edit.php', array_merge($pageurl->params(),
                         array('qperpage' => DEFAULT_QUESTIONS_PER_PAGE)));
-                $showall = '<a href="'.$url.'">'.get_string('showperpage', 'moodle', DEFAULT_QUESTIONS_PER_PAGE).'</a>';
+                $showall = \html_writer::tag('a',
+                        get_string('showperpage', 'moodle', DEFAULT_QUESTIONS_PER_PAGE),
+                        array('href' => $url));
             }
-            echo "<div class='paging'>{$showall}</div>";
+            echo \html_writer::tag('div', $showall);
         }
-        echo '</div>';
-
-        $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
-
-        echo '</fieldset>';
-        echo "</form>\n";
+        echo \html_writer::end_tag('div');
     }
 
     /**
@@ -1001,13 +1021,57 @@ class view {
                 question_category_select_menu($addcontexts, false, 0, "{$category->id},{$category->contextid}");
             }
         }
+
         echo \html_writer::end_tag('div');
     }
 
     /**
-     * Start of the table html.
+     * Display the questions.
+     *
+     * @param $questions
      */
-    protected function start_table(): void {
+    protected function display_questions($questions): void {
+        echo \html_writer::start_tag('div',
+                array('class' => 'categoryquestionscontainer', 'id' => 'questionscontainer'));
+        $this->print_table($questions);
+        echo \html_writer::end_tag('div');
+    }
+
+    /**
+     * Prints the actual table with question.
+     */
+    protected function print_table($questions): void {
+        // Start of the table.
+        echo \html_writer::start_tag('table', array('id' => 'categoryquestions'));
+
+        // Prints the table header.
+        echo \html_writer::start_tag('thread');
+        echo \html_writer::start_tag('tr');
+        $this->print_table_headers();
+        echo \html_writer::end_tag('tr');
+        echo \html_writer::end_tag('thread');
+
+        // Prints the table row or content.
+        echo \html_writer::start_tag('tbody');
+        $rowcount = 0;
+        foreach ($questions as $question) {
+            $this->print_table_row($question, $rowcount);
+            $rowcount += 1;
+        }
+        echo \html_writer::end_tag('tbody');
+
+        // End of the table.
+        echo \html_writer::end_tag('table');
+    }
+
+    /**
+     * Start of the table html.
+     *
+     * @deprecated since Moodle 4.0
+     * @see print_table()
+     */
+    protected function start_table() {
+        debugging('Function start_table() is deprecated, please use print_table() instead.', DEBUG_DEVELOPER);
         echo '<table id="categoryquestions">' . "\n";
         echo "<thead>\n";
         $this->print_table_headers();
@@ -1017,25 +1081,28 @@ class view {
 
     /**
      * End of the table html.
+     *
+     * @deprecated since Moodle 4.0
+     * @see print_table()
      */
-    protected function end_table(): void {
+    protected function end_table() {
+        debugging('Function end_table() is deprecated, please use print_table() instead.', DEBUG_DEVELOPER);
         echo "</tbody>\n";
         echo "</table>\n";
     }
 
     /**
-     * Print table header.
+     * Print table headers from child classes.
      */
     protected function print_table_headers(): void {
-        echo "<tr>\n";
         foreach ($this->visiblecolumns as $column) {
             $column->display_header();
         }
-        echo "</tr>\n";
     }
 
     /**
-     * Gets the classes for row.
+     * Gets the classes for the row.
+     *
      * @param \stdClass $question
      * @param int $rowcount
      * @return array
@@ -1053,21 +1120,22 @@ class view {
     }
 
     /**
-     * Prints the table row.
+     * Prints the table row from child classes.
+     *
      * @param \stdClass $question
      * @param int $rowcount
      */
     protected function print_table_row($question, $rowcount): void {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));
+        $attributes = array();
         if ($rowclasses) {
-            echo '<tr class="' . $rowclasses . '">' . "\n";
-        } else {
-            echo "<tr>\n";
+            $attributes['class'] = $rowclasses;
         }
+        echo \html_writer::start_tag('tr', $attributes);
         foreach ($this->visiblecolumns as $column) {
             $column->display($question, $rowclasses);
         }
-        echo "</tr>\n";
+        echo \html_writer::end_tag('tr');
         foreach ($this->extrarows as $row) {
             $row->display($question, $rowclasses);
         }
@@ -1202,4 +1270,6 @@ class view {
     public function add_searchcondition($searchcondition): void {
         $this->searchconditions[] = $searchcondition;
     }
+
 }
+
