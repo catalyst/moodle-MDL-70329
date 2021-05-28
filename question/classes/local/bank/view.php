@@ -733,14 +733,12 @@ class view {
     }
 
     /**
-     * Print the text for category.
-     *
-     * @param string $categoryandcontext
+     * Print the text if category id not available.
      */
-    protected function print_choose_category_message($categoryandcontext): void {
-        echo "<p style=\"text-align:center;\"><b>";
-        print_string('selectcategoryabove', 'question');
-        echo "</b></p>";
+    protected function print_choose_category_message(): void {
+        echo \html_writer::start_tag('p', array('style' => "\"text-align:center;\""));
+        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
+        echo \html_writer::end_tag('p');
     }
 
     /**
@@ -752,7 +750,7 @@ class view {
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         if (!$categoryid) {
-            $this->print_choose_category_message($categoryandcontext);
+            $this->print_choose_category_message();
             return false;
         }
 
@@ -765,87 +763,6 @@ class view {
         }
 
         return $category;
-    }
-
-    /**
-     * Prints category information.
-     *
-     * @param \stdClass $category the category row from the database.
-     * @deprecated since Moodle 2.7 MDL-40313.
-     * @see \core_question\bank\search\condition
-     * @todo MDL-41978 This will be deleted in Moodle 2.8
-     */
-    protected function print_category_info($category) {
-        $formatoptions = new \stdClass();
-        $formatoptions->noclean = true;
-        $formatoptions->overflowdiv = true;
-        echo '<div class="boxaligncenter">';
-        echo format_text($category->info, $category->infoformat, $formatoptions, $this->course->id);
-        echo "</div>\n";
-    }
-
-    /**
-     * Prints a form to choose categories.
-     *
-     * @param array $contexts
-     * @param \moodle_url $pageurl
-     * @param string $current
-     * @deprecated since Moodle 2.7 MDL-40313.
-     * @see \core_question\bank\search\condition
-     * @todo MDL-41978 This will be deleted in Moodle 2.8
-     */
-    protected function display_category_form($contexts, $pageurl, $current) {
-        global $OUTPUT;
-
-        debugging('display_category_form() is deprecated, please use ' .
-                '\core_question\bank\search\condition instead.', DEBUG_DEVELOPER);
-        // Get all the existing categories now.
-        echo '<div class="choosecategory">';
-        $catmenu = question_category_options($contexts, false, 0, true);
-
-        $select = new \single_select($this->baseurl, 'category', $catmenu, $current, null, 'catmenu');
-        $select->set_label(get_string('selectacategory', 'question'));
-        echo $OUTPUT->render($select);
-        echo "</div>\n";
-    }
-
-    /**
-     * Display the options form.
-     * @param bool $recurse no longer used.
-     * @param bool $showhidden no longer used.
-     * @param bool $showquestiontext whether to show the question text.
-     * @deprecated since Moodle 2.7 MDL-40313.
-     * @see display_options_form
-     * @todo MDL-41978 This will be deleted in Moodle 2.8
-     * @see \core_question\bank\search\condition
-     */
-    protected function display_options($recurse, $showhidden, $showquestiontext) {
-        debugging('display_options() is deprecated, please use display_options_form instead.', DEBUG_DEVELOPER);
-        $this->display_options_form($showquestiontext);
-    }
-
-    /**
-     * Print a single option checkbox.
-     *
-     * @param $name
-     * @param $value
-     * @param $label
-     * @deprecated since Moodle 2.7 MDL-40313.
-     * @see \core_question\bank\search\condition
-     * @see html_writer::checkbox
-     * @todo MDL-41978 This will be deleted in Moodle 2.8
-     */
-    protected function display_category_form_checkbox($name, $value, $label) {
-        debugging('display_category_form_checkbox() is deprecated, ' .
-                'please use \core_question\bank\search\condition instead.', DEBUG_DEVELOPER);
-        echo '<div><input type="hidden" id="' . $name . '_off" name="' . $name . '" value="0" />';
-        echo '<input type="checkbox" id="' . $name . '_on" name="' . $name . '" value="1"';
-        if ($value) {
-            echo ' checked="checked"';
-        }
-        echo ' onchange="getElementById(\'displayoptions\').submit(); return true;" />';
-        echo '<label for="' . $name . '_on">' . $label . '</label>';
-        echo "</div>\n";
     }
 
     /**
@@ -906,12 +823,12 @@ class view {
      * @param bool $showquestiontext the current or default value for whether to display the text.
      */
     protected function display_showtext_checkbox($showquestiontext): void {
-        echo '<div>';
+        echo \html_writer::start_tag('div');
         echo \html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'qbshowtext',
                 'value' => 0, 'id' => 'qbshowtext_off'));
         echo \html_writer::checkbox('qbshowtext', '1', $showquestiontext, ' ' . get_string('showquestiontext', 'question'),
                 array('id' => 'qbshowtext_on', 'class' => 'searchoptions mr-1'));
-        echo "</div>\n";
+        echo \html_writer::end_tag('div');
     }
 
     /**
@@ -929,14 +846,14 @@ class view {
      * @param $canadd
      */
     protected function create_new_question_form($category, $canadd): void {
-        echo '<div class="createnewquestion">';
+        echo \html_writer::start_tag('div', array('class' => "createnewquestion"));
         if ($canadd) {
             create_new_question_button($category->id, $this->editquestionurl->params(),
                     get_string('createnewquestion', 'question'));
         } else {
             print_string('nopermissionadd', 'question');
         }
-        echo '</div>';
+        echo \html_writer::end_tag('div');
     }
 
     /**
@@ -1050,9 +967,11 @@ class view {
         $canuseall = has_capability('moodle/question:useall', $catcontext);
         $canmoveall = has_capability('moodle/question:moveall', $catcontext);
 
-        echo '<div class="modulespecificbuttonscontainer">';
+        echo \html_writer::start_tag('div', array('class' => "modulespecificbuttonscontainer"));
         if ($caneditall || $canmoveall || $canuseall) {
-            echo '<strong>&nbsp;'.get_string('withselected', 'question').':</strong><br />';
+            $withselectedcontent = '&nbsp;' . get_string('withselected', 'question') . ':';
+            echo \html_writer::tag('strong', $withselectedcontent);
+            echo \html_writer::empty_tag('br');
 
             // Print delete and move selected question.
             if ($caneditall) {
@@ -1082,7 +1001,7 @@ class view {
                 question_category_select_menu($addcontexts, false, 0, "{$category->id},{$category->contextid}");
             }
         }
-        echo "</div>\n";
+        echo \html_writer::end_tag('div');
     }
 
     /**
