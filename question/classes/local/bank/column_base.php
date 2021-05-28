@@ -107,25 +107,24 @@ abstract class column_base {
         $name = get_class($this);
         $title = $this->get_title();
         $tip = $this->get_title_tip();
-
+        $links = array();
         if (is_array($sortable)) {
             if ($title) {
                 $data['title'] = $title;
             }
-            $links = array();
             foreach ($sortable as $subsort => $details) {
                 $links[] = $this->make_sort_link($name . '-' . $subsort,
                         $details['title'], isset($details['tip']) ? $details['tip'] : '', !empty($details['reverse']));
             }
-            $data['sortlinks'] = $links;
+            $data['sortlinks'] = implode(' / ', $links);
         } else if ($sortable) {
             $data['sortlinks'] = $this->make_sort_link($name, $title, $tip);
         } else {
             $data['sortable'] = false;
+            $data['tiptitle'] = $title;
             if ($tip) {
                 $data['sorttip'] = true;
                 $data['tip'] = $tip;
-                $data['tiptitle'] = $title;
             }
         }
 
@@ -154,9 +153,9 @@ abstract class column_base {
      * @param string $title the link text.
      * @param string $tip the link tool-tip text. If empty, defaults to title.
      * @param bool $defaultreverse whether the default sort order for this column is descending, rather than ascending.
-     * @return \stdClass
+     * @return string
      */
-    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): \stdClass {
+    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): string {
         $currentsort = $this->qbank->get_primary_sort_order($sort);
         $newsortreverse = $defaultreverse;
         if ($currentsort) {
@@ -176,12 +175,20 @@ abstract class column_base {
             $link .= $this->get_sort_icon($currentsort < 0);
         }
 
-        $sortlink = new \stdClass();
-        $sortlink->url = $this->qbank->new_sort_url($sort, $newsortreverse);
-        $sortlink->tip = $tip;
-        $sortlink->content = $link;
+        $link = '<a href="' . $this->qbank->new_sort_url($sort, $newsortreverse) . '" title="' . $tip . '">';
+        $link .= $title;
+        if ($currentsort) {
+            $link .= $this->get_sort_icon($currentsort < 0);
+        }
+        $link .= '</a>';
+        return $link;
 
-        return $sortlink;
+        //$sortlink = new \stdClass();
+        //$sortlink->url = $this->qbank->new_sort_url($sort, $newsortreverse);
+        //$sortlink->tip = $tip;
+        //$sortlink->content = $link;
+        //
+        //return $sortlink;
     }
 
     /**

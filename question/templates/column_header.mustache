@@ -21,19 +21,18 @@
     {{/title}}
     {{^sortable}}
         {{^sorttip}}
-            {{title}}
+            {{tiptitle}}
         {{/sorttip}}
         {{#sorttip}}
             <span title="{{tip}}">{{{tiptitle}}}</span>
         {{/sorttip}}
     {{/sortable}}
     {{#sortable}}
-        {{#sortlinks}}
-            <div class="sorters">
-                <a href="{{{url}}}" title="{{tip}}">
-                    {{{content}}}
-                </a>
-            </div>
-        {{/sortlinks}}
+        <div class="sorters">
+            {{{sortlinks}}}
+            <!--                <a href="{{{url}}}" title="{{tip}}">-->
+            <!--                    {{{content}}}-->
+            <!--                </a>-->
+        </div>
     {{/sortable}}
 </th>
