@@ -170,11 +170,6 @@ abstract class column_base {
             $tip = get_string('sortbyx', '', $tip);
         }
 
-        $link = $title;
-        if ($currentsort) {
-            $link .= $this->get_sort_icon($currentsort < 0);
-        }
-
         $link = '<a href="' . $this->qbank->new_sort_url($sort, $newsortreverse) . '" title="' . $tip . '">';
         $link .= $title;
         if ($currentsort) {
@@ -182,13 +177,6 @@ abstract class column_base {
         }
         $link .= '</a>';
         return $link;
-
-        //$sortlink = new \stdClass();
-        //$sortlink->url = $this->qbank->new_sort_url($sort, $newsortreverse);
-        //$sortlink->tip = $tip;
-        //$sortlink->content = $link;
-        //
-        //return $sortlink;
     }
 
     /**

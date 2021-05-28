@@ -50,11 +50,12 @@ abstract class row_base extends column_base {
      */
     protected function display_start($question, $rowclasses): void {
         if ($rowclasses) {
-            echo '<tr class="' . $rowclasses . '">' . "\n";
+            echo \html_writer::start_tag('tr', array('class' => $rowclasses));
         } else {
-            echo "<tr>\n";
+            echo \html_writer::start_tag('tr');
         }
-        echo '<td colspan="' . $this->qbank->get_column_count() . '" class="' . $this->get_name() . '">';
+        echo \html_writer::start_tag('td',
+                array('colspan' => $this->qbank->get_column_count(), 'class' => $this->get_name()));
     }
 
     /**
@@ -64,6 +65,9 @@ abstract class row_base extends column_base {
      * @param string $rowclasses
      */
     protected function display_end($question, $rowclasses): void {
-        echo "</td></tr>\n";
+        echo \html_writer::end_tag('td');
+        echo \html_writer::end_tag('tr');
     }
+
 }
+
