@@ -118,4 +118,6 @@ class edit_menu_column extends column_base {
     public function get_required_fields():array {
         return ['q.qtype'];
     }
+
 }
+

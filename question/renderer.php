@@ -69,6 +69,14 @@ class core_question_bank_renderer extends plugin_renderer_base {
     }
 
     /**
+     * @param $qbankheaderdata
+     * @return bool|string
+     */
+    public function render_column_header($qbankheaderdata) {
+        return $this->render_from_template('core_question/column_header', $qbankheaderdata);
+    }
+
+    /**
      * Render a qbank_chooser.
      *
      * @param renderable $qbankchooser The chooser.
@@ -131,4 +139,5 @@ class core_question_bank_renderer extends plugin_renderer_base {
             'see core_question_bank_renderer::render_qbank_chooser().', DEBUG_DEVELOPER);
         return '';
     }
+
 }

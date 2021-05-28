@@ -47,7 +47,7 @@ abstract class action_column_base extends column_base {
      *
      * @return array any extra class names you would like applied to every cell in this column.
      */
-    public function get_extra_classes():array {
+    public function get_extra_classes(): array {
         return array('iconcol');
     }
 
@@ -60,7 +60,7 @@ abstract class action_column_base extends column_base {
      */
     protected function print_icon($icon, $title, $url): void {
         global $OUTPUT;
-        echo '<a title="' . $title . '" href="' . $url . '">' . $OUTPUT->pix_icon($icon, $title) . '</a>';
+        echo \html_writer::tag('a', $OUTPUT->pix_icon($icon, $title), array('title' => $title, 'href' => $url));
     }
 
     /**
@@ -92,4 +92,6 @@ abstract class action_column_base extends column_base {
         // are no longer installed.
         return ['q.id', 'q.qtype', 'q.createdby', 'qc.contextid'];
     }
+
 }
+

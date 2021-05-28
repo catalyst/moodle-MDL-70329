@@ -98,33 +98,39 @@ abstract class column_base {
      * Output the column header cell.
      */
     public function display_header(): void {
-        echo '<th class="header ' . $this->get_classes() . '" scope="col">';
+        global $PAGE;
+
+        $data = array();
+        $data['sortable'] = true;
+        $data['extraclasses'] = $this->get_classes();
         $sortable = $this->is_sortable();
         $name = get_class($this);
         $title = $this->get_title();
         $tip = $this->get_title_tip();
+
         if (is_array($sortable)) {
             if ($title) {
-                echo '<div class="title">' . $title . '</div>';
+                $data['title'] = $title;
             }
             $links = array();
             foreach ($sortable as $subsort => $details) {
                 $links[] = $this->make_sort_link($name . '-' . $subsort,
                         $details['title'], isset($details['tip']) ? $details['tip'] : '', !empty($details['reverse']));
             }
-            echo '<div class="sorters">' . implode(' / ', $links) . '</div>';
+            $data['sortlinks'] = $links;
         } else if ($sortable) {
-            echo $this->make_sort_link($name, $title, $tip);
+            $data['sortlinks'] = $this->make_sort_link($name, $title, $tip);
         } else {
+            $data['sortable'] = false;
             if ($tip) {
-                echo '<span title="' . $tip . '">';
-            }
-            echo $title;
-            if ($tip) {
-                echo '</span>';
+                $data['sorttip'] = true;
+                $data['tip'] = $tip;
+                $data['tiptitle'] = $title;
             }
         }
-        echo "</th>\n";
+
+        $renderer = $PAGE->get_renderer('core_question', 'bank');
+        echo $renderer->render_column_header($data);
     }
 
     /**
@@ -148,9 +154,9 @@ abstract class column_base {
      * @param string $title the link text.
      * @param string $tip the link tool-tip text. If empty, defaults to title.
      * @param bool $defaultreverse whether the default sort order for this column is descending, rather than ascending.
-     * @return string HTML fragment.
+     * @return \stdClass
      */
-    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): string {
+    protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): \stdClass {
         $currentsort = $this->qbank->get_primary_sort_order($sort);
         $newsortreverse = $defaultreverse;
         if ($currentsort) {
@@ -164,13 +170,18 @@ abstract class column_base {
         } else {
             $tip = get_string('sortbyx', '', $tip);
         }
-        $link = '<a href="' . $this->qbank->new_sort_url($sort, $newsortreverse) . '" title="' . $tip . '">';
-        $link .= $title;
+
+        $link = $title;
         if ($currentsort) {
             $link .= $this->get_sort_icon($currentsort < 0);
         }
-        $link .= '</a>';
-        return $link;
+
+        $sortlink = new \stdClass();
+        $sortlink->url = $this->qbank->new_sort_url($sort, $newsortreverse);
+        $sortlink->tip = $tip;
+        $sortlink->content = $link;
+
+        return $sortlink;
     }
 
     /**
@@ -379,4 +390,6 @@ abstract class column_base {
             throw new \coding_exception('sort_expression called on a non-sortable column.');
         }
     }
+
 }
+
