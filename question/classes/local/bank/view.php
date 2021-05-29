@@ -523,23 +523,6 @@ class view {
     }
 
     /**
-     * Create the SQL query to retrieve the indicated questions
-     *
-     * @param \stdClass $category no longer used.
-     * @param bool $recurse no longer used.
-     * @param bool $showhidden no longer used.
-     * @deprecated since Moodle 2.7 MDL-40313.
-     * @see build_query()
-     * @see \core_question\bank\search\condition
-     * @todo MDL-41978 This will be deleted in Moodle 2.8
-     */
-    protected function build_query_sql($category, $recurse, $showhidden) {
-        debugging('build_query_sql() is deprecated, please use \core_question\bank\view::build_query() and ' .
-                '\core_question\bank\search\condition classes instead.', DEBUG_DEVELOPER);
-        self::build_query();
-    }
-
-    /**
      * Create the SQL query to retrieve the indicated questions, based on
      * \core_question\bank\search\condition filters.
      */
