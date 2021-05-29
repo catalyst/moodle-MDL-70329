@@ -49,11 +49,11 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
-echo '<div class="questionbankwindow boxwidthwide boxaligncenter">';
+echo \html_writer::start_div('questionbankwindow boxwidthwide boxaligncenter');
 $questionbank->display('questions', $pagevars['qpage'], $pagevars['qperpage'],
         $pagevars['cat'], $pagevars['recurse'], $pagevars['showhidden'],
         $pagevars['qbshowtext'], $pagevars['qtagids']);
-echo "</div>\n";
+echo \html_writer::end_div();
 
 // Log the view of this category.
 list($categoryid, $contextid) = explode(',', $pagevars['cat']);

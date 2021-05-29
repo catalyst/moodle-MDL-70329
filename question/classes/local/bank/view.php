@@ -912,9 +912,9 @@ class view {
 
         $this->display_top_pagnation($pagingbar);
 
-        echo '<form method="post" action="edit.php">';
-        echo '<fieldset class="invisiblefieldset" style="display: block;">';
-        echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />';
+        echo \html_writer::start_tag('form', array('action' => 'edit.php'));
+        echo \html_writer::start_tag('fieldset', array('class' => 'invisiblefieldset', 'style' => "display: block;"));
+        echo \html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
         echo \html_writer::input_hidden_params($this->baseurl);
 
         $this->display_questions($questions);
@@ -923,8 +923,8 @@ class view {
 
         $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
 
-        echo '</fieldset>';
-        echo "</form>\n";
+        echo \html_writer::end_tag('fieldset');
+        echo \html_writer::end_tag('form');
     }
 
     /**
