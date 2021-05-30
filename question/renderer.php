@@ -69,11 +69,23 @@ class core_question_bank_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render the column headers.
+     *
      * @param $qbankheaderdata
      * @return bool|string
      */
     public function render_column_header($qbankheaderdata) {
         return $this->render_from_template('core_question/column_header', $qbankheaderdata);
+    }
+
+    /**
+     * Render the column sort elements.
+     *
+     * @param $sortdata
+     * @return bool|string
+     */
+    public function render_column_sort($sortdata) {
+        return $this->render_from_template('core_question/column_sort', $sortdata);
     }
 
     /**

@@ -86,7 +86,7 @@ abstract class action_column_base extends column_base {
      *
      * @return array fields required.
      */
-    public function get_required_fields():array {
+    public function get_required_fields(): array {
         // Createdby is required for permission checks.
         // Qtype so we can easily avoid applying actions to question types that
         // are no longer installed.

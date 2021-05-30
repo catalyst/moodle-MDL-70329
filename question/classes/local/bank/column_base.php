@@ -156,6 +156,8 @@ abstract class column_base {
      * @return string
      */
     protected function make_sort_link($sort, $title, $tip, $defaultreverse = false): string {
+        global $PAGE;
+        $sortdata = array();
         $currentsort = $this->qbank->get_primary_sort_order($sort);
         $newsortreverse = $defaultreverse;
         if ($currentsort) {
@@ -170,13 +172,17 @@ abstract class column_base {
             $tip = get_string('sortbyx', '', $tip);
         }
 
-        $link = '<a href="' . $this->qbank->new_sort_url($sort, $newsortreverse) . '" title="' . $tip . '">';
-        $link .= $title;
+        $link = $title;
         if ($currentsort) {
             $link .= $this->get_sort_icon($currentsort < 0);
         }
-        $link .= '</a>';
-        return $link;
+
+        $sortdata['sorturl'] = $this->qbank->new_sort_url($sort, $newsortreverse);
+        $sortdata['sortcontent'] = $link;
+        $sortdata['sorttip'] = $tip;
+        $renderer = $PAGE->get_renderer('core_question', 'bank');
+        return $renderer->render_column_sort($sortdata);
+
     }
 
     /**
