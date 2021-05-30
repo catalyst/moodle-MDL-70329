@@ -67,8 +67,10 @@ class question_bank_column_testcase extends advanced_testcase {
         $columnbase->display_header();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString(' title="Sort by Apple ascending">Apple</a>', $output);
-        $this->assertStringContainsString(' title="Sort by Banana ascending">Banana</a>', $output);
+        $this->assertStringContainsString(' title="Sort by Apple ascending">', $output);
+        $this->assertStringContainsString('Apple', $output);
+        $this->assertStringContainsString(' title="Sort by Banana ascending">', $output);
+        $this->assertStringContainsString('Banana', $output);
     }
 
     /**
@@ -103,7 +105,9 @@ class question_bank_column_testcase extends advanced_testcase {
         $columnbase->display_header();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString(' title="Sort by Apple Tooltips ascending">Apple</a>', $output);
-        $this->assertStringContainsString(' title="Sort by Banana Tooltips ascending">Banana</a>', $output);
+        $this->assertStringContainsString(' title="Sort by Apple Tooltips ascending">', $output);
+        $this->assertStringContainsString('Apple', $output);
+        $this->assertStringContainsString(' title="Sort by Banana Tooltips ascending">', $output);
+        $this->assertStringContainsString('Banana', $output);
     }
 }
