@@ -1,0 +1,103 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * A column with a type of question for each question with name q{questionid}.
+ *
+ * @package   qbank_viewquestiontype
+ * @copyright 2009 Tim Hunt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace qbank_viewquestiontype;
+
+defined('MOODLE_INTERNAL') || die();
+
+use core_question\local\bank\column_base;
+
+/**
+ * A column type for the name of the question type.
+ *
+ * @package   qbank_viewquestiontype
+ * @copyright 2009 Tim Hunt
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class question_type_column extends column_base {
+
+    /**
+     * Get the internal name for this column. Used as a CSS class name,
+     * and to store information about the current sort. Must match PARAM_ALPHA.
+     *
+     * @return string column name.
+     */
+    public function get_name(): string {
+        return 'qtype';
+    }
+
+    /**
+     * Title for this column. Not used if is_sortable returns an array.
+     */
+    protected function get_title() {
+        return get_string('qtypeveryshort', 'question');
+    }
+
+    /**
+     * Use this when get_title() returns
+     * something very short, and you want a longer version as a tool tip.
+     * @return string a fuller version of the name.
+     */
+    protected function get_title_tip() {
+        return get_string('questiontype', 'question');
+    }
+
+    /**
+     * Output the contents of this column.
+     * @param object $question the row from the $question table, augmented with extra information.
+     * @param string $rowclasses CSS class names that should be applied to this row of output.
+     */
+    protected function display_content($question, $rowclasses): void {
+        echo print_question_icon($question);
+    }
+
+    /**
+     * Use table alias 'q' for the question table, or one of the
+     * ones from get_extra_joins. Every field requested must specify a table prefix.
+     * @return array fields required.
+     */
+    public function get_required_fields(): array {
+        return array('q.qtype');
+    }
+
+    /**
+     * Can this column be sorted on? You can return either:
+     *  + false for no (the default),
+     *  + a field name, if sorting this column corresponds to sorting on that datbase field.
+     *  + an array of subnames to sort on as follows
+     *  return array(
+     *      'firstname' => array('field' => 'uc.firstname', 'title' => get_string('firstname')),
+     *      'lastname' => array('field' => 'uc.lastname', 'title' => get_string('lastname')),
+     *  );
+     * As well as field, and field, you can also add 'revers' => 1 if you want the default sort
+     * order to be DESC.
+     * @return mixed as above.
+     */
+    public function is_sortable() {
+        return 'q.qtype';
+    }
+
+}
+
