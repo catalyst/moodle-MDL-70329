@@ -1945,6 +1945,7 @@ class core_plugin_manager {
                 'exporttoxml',
                 'deletequestion',
                 'exportquestions',
+                'importquestions'
             ),
 
             'qbehaviour' => array(
