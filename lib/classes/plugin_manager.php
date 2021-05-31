@@ -1939,7 +1939,6 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-<<<<<<< HEAD
                 'managecategories',
                 'tagquestion',
                 'editquestion',
@@ -1949,9 +1948,8 @@ class core_plugin_manager {
                 'importquestions',
                 'previewquestion',
                 'viewquestiontext',
-=======
-                'viewcreator'
->>>>>>> MDL-71613 qbank_viewcreator: Add View creator to core
+                'viewcreator',
+                'viewquestiontype',
             ),
 
             'qbehaviour' => array(
