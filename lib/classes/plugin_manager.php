@@ -1939,8 +1939,8 @@ class core_plugin_manager {
             ),
 
             'qbank' => [
-                'comment', 'deletequestion', 'exporttoxml', 'previewquestion',
-                'tagquestion', 'viewcreator',
+                'comment', 'deletequestion', 'exporttoxml', 'importquestions',
+                'previewquestion', 'tagquestion', 'viewcreator',
             ],
 
             'qbehaviour' => array(
