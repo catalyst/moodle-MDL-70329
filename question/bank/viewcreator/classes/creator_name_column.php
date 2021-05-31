@@ -17,33 +17,34 @@
 /**
  * A column type for the name of the question creator.
  *
- * @package    core_question
- * @copyright  2009 Tim Hunt
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see        \qbank_viewcreator\creator_name_column 
+ * @package   qbank_viewcreator
+ * @copyright 2009 Tim Hunt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace qbank_viewcreator;
+
 defined('MOODLE_INTERNAL') || die();
 
+use core_question\local\bank\column_base;
 
 /**
  * A column type for the name of the question creator.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class creator_name_column extends column_base {
-    public function get_name() {
+    public function get_name() : string {
         return 'creatorname';
     }
 
-    protected function get_title() {
+    protected function get_title() : string {
         return get_string('createdby', 'question');
     }
 
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses) : void {
         if (!empty($question->creatorfirstname) && !empty($question->creatorlastname)) {
             $u = new \stdClass();
             $u = username_load_fields_from_object($u, $question, 'creator');
@@ -52,11 +53,11 @@ class creator_name_column extends column_base {
         }
     }
 
-    public function get_extra_joins() {
+    public function get_extra_joins() : array {
         return array('uc' => 'LEFT JOIN {user} uc ON uc.id = q.createdby');
     }
 
-    public function get_required_fields() {
+    public function get_required_fields() : array {
         $allnames = \core_user\fields::get_name_fields();
         $requiredfields = array();
         foreach ($allnames as $allname) {
@@ -66,7 +67,7 @@ class creator_name_column extends column_base {
         return $requiredfields;
     }
 
-    public function is_sortable() {
+    public function is_sortable() : array {
         return array(
             'firstname' => array('field' => 'uc.firstname', 'title' => get_string('firstname')),
             'lastname' => array('field' => 'uc.lastname', 'title' => get_string('lastname')),
