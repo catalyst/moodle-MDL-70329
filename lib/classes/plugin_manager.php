@@ -1947,6 +1947,7 @@ class core_plugin_manager {
                 'exportquestions',
                 'importquestions',
                 'previewquestion',
+                'viewquestiontext',
             ),
 
             'qbehaviour' => array(
