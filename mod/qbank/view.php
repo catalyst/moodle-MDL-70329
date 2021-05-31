@@ -48,6 +48,8 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
+require_capability('mod/qbank:view', $modulecontext);
+
 $event = \mod_qbank\event\course_module_viewed::create(array(
     'objectid' => $moduleinstance->id,
     'context' => $modulecontext
