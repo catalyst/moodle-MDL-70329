@@ -17,9 +17,10 @@
 /**
  * A column type for the name of the question last modifier.
  *
- * @package   core_question
- * @copyright 2009 Tim Hunt
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    qbank_viewcreator
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qbank_viewcreator;
@@ -31,6 +32,7 @@ use core_question\local\bank\column_base;
  * A column type for the name of the question last modifier.
  *
  * @copyright 2009 Tim Hunt
+ * @author    2021 Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class modifier_name_column extends column_base {
@@ -43,12 +45,18 @@ class modifier_name_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
+        global $OUTPUT, $PAGE;
+        $displaydata = array();
+        $displaydata['haslabel'] = false;
+
         if (!empty($question->modifierfirstname) && !empty($question->modifierlastname)) {
             $u = new \stdClass();
             $u = username_load_fields_from_object($u, $question, 'modifier');
-            $date = userdate($question->timemodified, get_string('strftimedatetime', 'langconfig'));
-            echo fullname($u) . '<br>' . \html_writer::tag('span', $date, array('class' => 'date'));
+            $displaydata['date'] = userdate($question->timemodified, get_string('strftimedatetime', 'langconfig'));
+            $displaydata['nameclasses'] = 'date';
+            $displaydata['modifier'] = fullname($u);
         }
+        echo $PAGE->get_renderer('qbank_viewcreator')->render_modifier_name($displaydata);
     }
 
     public function get_extra_joins(): array {

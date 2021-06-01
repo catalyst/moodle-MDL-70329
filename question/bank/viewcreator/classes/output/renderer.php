@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_viewcreator, language 'en'
+ * Renderer for qbank_viewcreator.
  *
  * @package    qbank_viewcreator
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,5 +23,37 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'viewcreator';
-$string['privacy:metadata'] = 'View creator shows the questioncreator column, it does not store any user data.';
+namespace qbank_viewcreator\output;
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Class renderer.
+ *
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class renderer extends \plugin_renderer_base {
+
+    /**
+     * Render question creator.
+     *
+     * @param array $displaydata
+     * @return string
+     */
+    public function render_creator_name($displaydata) {
+        return $this->render_from_template('qbank_viewcreator/creator_display', $displaydata);
+    }
+
+    /**
+     * Render question modifier.
+     *
+     * @param array $displaydata
+     * @return string
+     */
+    public function render_modifier_name($displaydata) {
+        return $this->render_from_template('qbank_viewcreator/modifier_display', $displaydata);
+    }
+
+}

@@ -17,9 +17,10 @@
 /**
  * A column type for the name of the question creator.
  *
- * @package   qbank_viewcreator
- * @copyright 2009 Tim Hunt
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    qbank_viewcreator
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qbank_viewcreator;
@@ -45,12 +46,18 @@ class creator_name_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
+        global $OUTPUT, $PAGE;
+        $displaydata = array();
+        $displaydata['haslabel'] = false;
+
         if (!empty($question->creatorfirstname) && !empty($question->creatorlastname)) {
             $u = new \stdClass();
             $u = username_load_fields_from_object($u, $question, 'creator');
-            $date = userdate($question->timecreated, get_string('strftimedatetime', 'langconfig'));
-            echo fullname($u) . '<br>' . \html_writer::tag('span', $date, array('class' => 'date'));
+            $displaydata['date'] = userdate($question->timecreated, get_string('strftimedatetime', 'langconfig'));
+            $displaydata['nameclasses'] = 'date';
+            $displaydata['creator'] = fullname($u);
         }
+        echo $PAGE->get_renderer('qbank_viewcreator')->render_creator_name($displaydata);
     }
 
     public function get_extra_joins(): array {
