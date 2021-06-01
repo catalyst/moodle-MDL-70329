@@ -14,6 +14,23 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
+{{!
+    @template qbank_viewquestionname/questionname_display
+
+    Example context (json):
+    {
+        "displaydata": [
+          {
+                "haslabel": false,
+                "nameclasses": "class-name class-name",
+                "namecontent": "Question name",
+                "idnumber": "questionidnumber",
+                "tags": "tags html",
+                "labelfor": "labelkey"
+          }
+        ]
+    }
+}}
 
 {{^haslabel}}
     <span class="d-inline-flex flex-nowrap overflow-hidden w-100">
@@ -23,6 +40,8 @@
         <span class="ml-1">
             <span class="accesshide">{{#str}}idnumber, question{{/str}}</span>&nbsp<span class="badge badge-primary">{{idnumber}}</span>
         </span>
+    </span>
+    <span class="d-inline-flex flex-nowrap overflow-hidden w-100">
         {{{tags}}}
     </span>
 {{/haslabel}}
@@ -34,6 +53,8 @@
         <span class="ml-1">
             <span class="accesshide">{{#str}}idnumber, question{{/str}}</span><span class="badge badge-primary">{{idnumber}}</span>
         </span>
+    </label>
+    <label for="{{labelfor}}" class="d-inline-flex flex-nowrap overflow-hidden w-100">
         {{{tags}}}
     </label>
 {{/haslabel}}

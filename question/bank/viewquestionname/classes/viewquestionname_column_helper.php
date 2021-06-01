@@ -62,7 +62,7 @@ class viewquestionname_column_helper extends column_base {
 
     /**
      * Get the label for the question.
-     * @param $question
+     * @param object $question
      * @return string
      */
     protected function label_for($question): string {

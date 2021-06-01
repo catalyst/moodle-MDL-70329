@@ -49,4 +49,6 @@ class columns extends column_plugin_base {
                 new question_name_idnumber_tags_column($this->qbank),
         );
     }
+
 }
+

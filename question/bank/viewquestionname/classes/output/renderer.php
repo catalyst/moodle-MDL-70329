@@ -39,7 +39,7 @@ class renderer extends \plugin_renderer_base {
     /**
      * Render question name.
      *
-     * @param $displaydata
+     * @param array $displaydata
      * @return string
      */
     public function render_question_name($displaydata) {
