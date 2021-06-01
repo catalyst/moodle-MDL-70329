@@ -18,8 +18,8 @@
  * Privacy Subsystem for qbank_viewcreator.
  *
  * @package    qbank_viewcreator
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2021 Catalyst IT Canada Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -42,7 +42,7 @@ class provider implements \core_privacy\local\metadata\null_provider {
      *
      * @return  string
      */
-    public static function get_reason() : string {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 }
