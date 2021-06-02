@@ -39,7 +39,7 @@ class viewquestionname_column_helper extends column_base {
 
     /**
      *
-     * @var null
+     * @var null $checkboxespresent
      */
     protected $checkboxespresent = null;
 
@@ -56,7 +56,7 @@ class viewquestionname_column_helper extends column_base {
     /**
      * Title for this column. Not used if is_sortable returns an array.
      */
-    protected function get_title() {
+    protected function get_title(): string {
         return get_string('question');
     }
 

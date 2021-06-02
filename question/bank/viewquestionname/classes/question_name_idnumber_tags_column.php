@@ -100,7 +100,7 @@ class question_name_idnumber_tags_column extends viewquestionname_column_helper 
      * order to be DESC.
      * @return mixed as above.
      */
-    public function is_sortable() {
+    public function is_sortable(): array {
         return [
                 'name' => ['field' => 'q.name', 'title' => get_string('questionname', 'question')],
                 'idnumber' => ['field' => 'q.idnumber', 'title' => get_string('idnumber', 'question')],
