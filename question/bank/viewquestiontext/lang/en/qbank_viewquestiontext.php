@@ -25,3 +25,4 @@
 
 $string['pluginname'] = 'View question text';
 $string['privacy:metadata'] = 'View question text shows the question description, it does not store any user data.';
+

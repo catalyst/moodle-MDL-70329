@@ -36,6 +36,7 @@ use core_question\local\bank\row_base;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_text_row extends row_base {
+
     /**
      * To initialise subclasses
      * @var $formatoptions
@@ -65,7 +66,7 @@ class question_text_row extends row_base {
     /**
      * Title for this column. Not used if is_sortable returns an array.
      */
-    protected function get_title() {
+    protected function get_title(): string {
         return get_string('questiontext', 'question');
     }
 
