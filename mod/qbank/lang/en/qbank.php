@@ -42,5 +42,6 @@ $string['pluginname'] = 'Question bank';
 $string['privacy:metadata'] = 'The Question bank plugin does not store any personal data, for now.';
 $string['qbankname'] = 'Question bank name';
 $string['qbankname_help'] = 'Enter the Question bank name';
-$string['qbank:view'] = 'View Question bank';
 $string['qbank:addinstance'] = 'Add a new Question bank';
+$string['qbank:view'] = 'View Question bank';
+$string['qbank:viewhidden'] = 'View hidden Question bank';
