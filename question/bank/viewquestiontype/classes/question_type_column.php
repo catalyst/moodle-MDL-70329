@@ -51,7 +51,7 @@ class question_type_column extends column_base {
     /**
      * Title for this column. Not used if is_sortable returns an array.
      */
-    protected function get_title() {
+    protected function get_title(): string {
         return get_string('qtypeveryshort', 'question');
     }
 
@@ -60,7 +60,7 @@ class question_type_column extends column_base {
      * something very short, and you want a longer version as a tool tip.
      * @return string a fuller version of the name.
      */
-    protected function get_title_tip() {
+    protected function get_title_tip(): string {
         return get_string('questiontype', 'question');
     }
 
@@ -93,9 +93,9 @@ class question_type_column extends column_base {
      *  );
      * As well as field, and field, you can also add 'revers' => 1 if you want the default sort
      * order to be DESC.
-     * @return mixed as above.
+     * @return string.
      */
-    public function is_sortable() {
+    public function is_sortable(): string {
         return 'q.qtype';
     }
 
