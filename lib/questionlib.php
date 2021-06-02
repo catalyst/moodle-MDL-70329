@@ -1888,6 +1888,8 @@ function question_get_question_capabilities() {
         'moodle/question:moveall',
         'moodle/question:tagmine',
         'moodle/question:tagall',
+        'moodle/question:commentmine',
+        'moodle/question:commentall',
     );
 }
 
