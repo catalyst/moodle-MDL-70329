@@ -95,7 +95,7 @@ class question_type_column extends column_base {
      * order to be DESC.
      * @return string.
      */
-    public function is_sortable(): string {
+    public function is_sortable() {
         return 'q.qtype';
     }
 
