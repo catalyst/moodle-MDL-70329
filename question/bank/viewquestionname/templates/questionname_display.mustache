@@ -41,9 +41,11 @@
             <span class="accesshide">{{#str}}idnumber, question{{/str}}</span>&nbsp<span class="badge badge-primary">{{idnumber}}</span>
         </span>
     </span>
-    <span class="d-inline-flex flex-nowrap overflow-hidden w-100">
-        {{{tags}}}
-    </span>
+    {{#tags}}
+        <span class="d-inline-flex flex-nowrap overflow-hidden w-100">
+            {{{tags}}}
+        </span>
+    {{/tags}}
 {{/haslabel}}
 {{#haslabel}}
     <label for="{{labelfor}}" class="d-inline-flex flex-nowrap overflow-hidden w-100">
@@ -54,7 +56,9 @@
             <span class="accesshide">{{#str}}idnumber, question{{/str}}</span><span class="badge badge-primary">{{idnumber}}</span>
         </span>
     </label>
-    <label for="{{labelfor}}" class="d-inline-flex flex-nowrap overflow-hidden w-100">
-        {{{tags}}}
-    </label>
+    {{#tags}}
+        <label for="{{labelfor}}" class="d-inline-flex flex-nowrap overflow-hidden w-100">
+            {{{tags}}}
+        </label>
+    {{/tags}}
 {{/haslabel}}
