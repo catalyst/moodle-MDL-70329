@@ -24,9 +24,6 @@
  * @module moodle-question-preview
  */
 
-Y.log("The moodle-question-preview module has been deprecated. " +
-    "Please use moodle-qbank_previewquestion-preview instead.", 'moodle-core-notification', 'warn');
-
 M.question = M.question || {};
 M.question.preview = M.question.preview || {};
 
@@ -48,3 +45,4 @@ M.question.preview.init = function() {
     // Stop a question form being submitted more than once.
     Y.on('submit', M.core_question_engine.prevent_repeat_submission, '#mform1', null, Y);
 };
+
