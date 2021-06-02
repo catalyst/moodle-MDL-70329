@@ -2675,5 +2675,122 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2021060900.00);
     }
 
+    if ($oldversion < 2021061700.01) {
+        // Define table question_bank_entry to be created.
+        $table = new xmldb_table('question_bank_entry');
+
+        // Adding fields to table question_bank_entry.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questioncategoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('idnumber', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('hidden', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('ownerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table question_bank_entry.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('questioncategoryid', XMLDB_KEY_FOREIGN, ['questioncategoryid'], 'question_categories', ['id']);
+        $table->add_key('ownerid', XMLDB_KEY_FOREIGN, ['ownerid'], 'user', ['id']);
+
+        // Adding indexes to table question_bank_entry.
+        $table->add_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['questioncategoryid', 'idnumber']);
+
+        // Conditionally launch create table for question_bank_entry.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table question_versions to be created.
+        $table = new xmldb_table('question_versions');
+
+        // Adding fields to table question_versions.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questionbankentryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('versionnumber', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 1);
+        $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+        // Adding keys to table question_versions.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entry', ['id']);
+        $table->add_key('questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'question', ['id']);
+
+        // Conditionally launch create table for question_versions.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table question_references to be created.
+        $table = new xmldb_table('question_references');
+
+        // Adding fields to table question_references.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('usingcontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('component', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('questionbankentryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('versionnumber', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table question_references.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
+        $table->add_key('itemid', XMLDB_KEY_FOREIGN, ['itemid'], 'quiz_slots', ['id']);
+        $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entry', ['id']);
+
+        // Conditionally launch create table for question_references.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table question_set_references to be created.
+        $table = new xmldb_table('question_set_references');
+
+        // Adding fields to table question_set_references.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('usingcontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('component', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('questionscontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('filtercondition', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+
+        // Adding keys to table question_set_references.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
+        $table->add_key('itemid', XMLDB_KEY_FOREIGN, ['itemid'], 'quiz_slots', ['id']);
+        $table->add_key('questionscontextid', XMLDB_KEY_FOREIGN, ['questionscontextid'], 'context', ['id']);
+
+        // Conditionally launch create table for question_set_references.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Split question table in two tables (question_bank_entry and question_versions).
+        $questions = $DB->get_recordset('question');
+        foreach ($questions as $question) {
+            // Populate table question_bank_entry.
+            $questionbankentry = new \stdClass();
+            $questionbankentry->questioncategoryid = $question->category;
+            $questionbankentry->name = $question->name;
+            $questionbankentry->idnumber = $question->idnumber;
+            $questionbankentry->hidden = $question->hidden;
+            $questionbankentry->ownerid = $question->createdby;
+            $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+
+            // Populate table question_versions.
+            $questionversions = new \stdClass();
+            $questionversions->questionbankentryid = $questionbankentry->id;
+            $questionversions->versionnumber = 1;
+            $questionversions->questionid = $question->id;
+            $DB->insert_record('question_versions', $questionversions);
+        }
+        $questions->close();
+
+        // TODO: Remove fields from question table.
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2021061700.01);
+    }
+
     return true;
 }
