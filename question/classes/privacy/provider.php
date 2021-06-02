@@ -126,6 +126,11 @@ class provider implements
         // The 'question_statistics' table contains aggregated statistics about responses.
         // It does not contain any identifiable user data.
 
+        $items->add_database_table('question_bank_entry', [
+            'name'              => 'privacy:metadata:database:question_bank_entry:name',
+            'modifiedby'        => 'privacy:metadata:database:question_bank_entry:modifiedby',
+        ], 'privacy:metadata:database:question_bank_entry');
+
         // The question subsystem makes use of the qtype, qformat, and qbehaviour plugin types.
         $items->add_plugintype_link('qtype', [], 'privacy:metadata:link:qtype');
         $items->add_plugintype_link('qformat', [], 'privacy:metadata:link:qformat');
