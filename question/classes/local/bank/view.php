@@ -676,8 +676,12 @@ class view {
      * Get the URL to preview a question.
      * @param \stdClass $questiondata the data defining the question.
      * @return \moodle_url the URL.
+     * @deprecated since Moodle 4.0
+     * @see \qbank_previewquestion\previewquestion_helper::question_preview_url()
      */
     public function preview_question_url($questiondata) {
+        debugging('Function preview_question_url() has been deprecated and moved to qbank_previewquestion plugin,
+         please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
         return question_preview_url($questiondata->id, null, null, null, null,
                 $this->get_most_specific_context());
     }

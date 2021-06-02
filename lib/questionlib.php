@@ -765,9 +765,18 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
  * @param object $context context to run the preview in (affects things like
  *      filter settings, theme, lang, etc.) Defaults to $PAGE->context.
  * @return moodle_url the URL.
+ * @deprecated since Moodle
+ * @see qbank_previewquestion\previewquestion_helper::question_preview_url()
+ * @todo uncomment the debug messages after implementing the changes in mod_quiz.
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
         $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
+    // Debugging message will be re-added after implementing the changes in mod_quiz.
+    // ...debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin,
+    // Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);.
+
+    return \qbank_previewquestion\previewquestion_helper::question_preview_url($questionid, $preferredbehaviour = null,
+            $maxmark = null, $displayoptions = null, $variant = null, $context = null);
 
     $params = array('id' => $questionid);
 
@@ -808,8 +817,17 @@ function question_preview_url($questionid, $preferredbehaviour = null,
 
 /**
  * @return array that can be passed as $params to the {@link popup_action} constructor.
+ * @deprecated since Moodle 4.0
+ * @see qbank_previewquestion\previewquestion_helper::question_preview_popup_params()
+ * @todo uncomment the debug messages after implementing the changes to mod_quiz.
  */
 function question_preview_popup_params() {
+    // Debugging message will be re-added after implementing the changes in mod_quiz.
+    // ...debugging('Function question_preview_popup_params() has been deprecated and moved to qbank_previewquestion plugin,
+    // Please use qbank_previewquestion\previewquestion_helper::question_preview_popup_params() instead.', DEBUG_DEVELOPER);.
+
+    return \qbank_previewquestion\previewquestion_helper::question_preview_popup_params();
+
     return array(
         'height' => 600,
         'width' => 800,
@@ -2293,8 +2311,7 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
     }
 
     if ($module === 'core_question_preview') {
-        require_once($CFG->dirroot . '/question/previewlib.php');
-        return question_preview_question_pluginfile($course, $context,
+        return qbank_previewquestion\previewquestion_helper::question_preview_question_pluginfile($course, $context,
                 $component, $filearea, $qubaid, $slot, $args, $forcedownload, $options);
 
     } else {
