@@ -1943,7 +1943,7 @@ class core_plugin_manager {
                 'editquestion', 'exporttoxml', 'exportquestions',
                 'deletequestion', 'importquestions', 'managecategories',
                 'tagquestion', 'viewcreator', 'viewquestiontype',
-                'viewquestionname', 'viewquestiontext'
+                'viewquestionname', 'viewquestiontext', 'previewquestion'
             ),
 
             'qbehaviour' => array(
