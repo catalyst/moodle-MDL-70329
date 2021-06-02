@@ -41,8 +41,7 @@ use qbank_previewquestion\previewquestion_helper;
 class renderer extends \plugin_renderer_base {
 
     /**
-     * Render an icon, optionally with the word 'Preview' beside it, to preview
-     * a given question.
+     * Render an icon, optionally with the word 'Preview' beside it, to preview a given question.
      *
      * @param int $questionid the id of the question to be previewed.
      * @param context $context the context in which the preview is happening.
@@ -68,4 +67,6 @@ class renderer extends \plugin_renderer_base {
 
         return $this->action_link($link, $image . $label, $action, $attributes);
     }
+
 }
+

@@ -30,12 +30,14 @@ use question_display_options;
 
 /**
  * Displays question preview options as default and set the options.
+ *
  * Setting default, getting and setting user preferences in question preview options.
  *
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_preview_options extends question_display_options {
+
     /** @var string the behaviour to use for this preview. */
     public $behaviour;
 
@@ -50,7 +52,7 @@ class question_preview_options extends question_display_options {
 
     /**
      * Constructor.
-     * @param $question
+     * @param \stdClass $question
      */
     public function __construct($question) {
         $this->behaviour = 'deferredfeedback';

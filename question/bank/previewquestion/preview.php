@@ -22,8 +22,7 @@
  * information is stored in the session as an array of subsequent states rather
  * than in the database.
  *
- * @package    moodlecore
- * @subpackage questionengine
+ * @package    qbank_previewquestion
  * @copyright  Alex Smith {@link http://maths.york.ac.uk/serving_maths} and
  *      numerous contributors.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -88,19 +87,19 @@ if ($previewid) {
     } catch (Exception $e) {
         // This may not seem like the right error message to display, but
         // actually from the user point of view, it makes sense.
-        print_error('submissionoutofsequencefriendlymessage', 'question',
+        throw new moodle_exception('submissionoutofsequencefriendlymessage', 'question',
                 previewquestion_helper::question_preview_url($question->id, $options->behaviour,
                 $options->maxmark, $options, $options->variant, $context), null, $e);
     }
 
     if ($quba->get_owning_context()->instanceid != $USER->id) {
-        print_error('notyourpreview', 'question');
+        throw new moodle_exception('notyourpreview', 'question');
     }
 
     $slot = $quba->get_first_question_number();
     $usedquestion = $quba->get_question($slot, false);
     if ($usedquestion->id != $question->id) {
-        print_error('questionidmismatch', 'question');
+        throw new moodle_exception('questionidmismatch', 'question');
     }
     $question = $usedquestion;
     $options->variant = $quba->get_variant($slot);
@@ -189,7 +188,7 @@ if (data_submitted() && confirm_sesskey()) {
         }
 
     } catch (question_out_of_sequence_exception $e) {
-        print_error('submissionoutofsequencefriendlymessage', 'question', $actionurl);
+        throw new moodle_exception('submissionoutofsequencefriendlymessage', 'question', $actionurl);
 
     } catch (Exception $e) {
         // This sucks, if we display our own custom error message, there is no way
@@ -198,7 +197,7 @@ if (data_submitted() && confirm_sesskey()) {
         if (!empty($e->debuginfo)) {
             $debuginfo = $e->debuginfo;
         }
-        print_error('errorprocessingresponses', 'question', $actionurl,
+        throw new moodle_exception('errorprocessingresponses', 'question', $actionurl,
                 $e->getMessage(), $debuginfo);
     }
 }

@@ -36,6 +36,7 @@ use core_question\local\bank\menu_action_column_base;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class preview_action_column extends menu_action_column_base {
+
     /**
      * @var string store this lang string for performance.
      */
@@ -133,4 +134,6 @@ class preview_action_column extends menu_action_column_base {
         return new \action_menu_link_secondary($url, new \pix_icon('t/preview', ''),
                 $this->strpreview, ['target' => 'questionpreview']);
     }
+
 }
+

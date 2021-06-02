@@ -52,8 +52,20 @@ class core_question_renderer extends plugin_renderer_base {
      *      Must be a course or category context.
      * @param bool $showlabel if true, show the word 'Preview' after the icon.
      *      If false, just show the icon.
+     * @deprecated since Moodle 4.0
+     * @see qbank_previewquestion\output\renderer
+     * @todo uncomment the debugging message after implementing the changes in mod_quiz
      */
     public function question_preview_link($questionid, context $context, $showlabel) {
+        // Debugging message will be re-added after implementing the changes in mod_quiz.
+        // ...debugging('Function question_preview_link() has been deprecated and moved to qbank_previewquestion plugin,
+        // Please use qbank_previewquestion renderer.', DEBUG_DEVELOPER);.
+
+        global $PAGE;
+        return $PAGE->get_renderer('qbank_previewquestion')->question_preview_link(
+                $questionid, $context, $showlabel
+        );
+
         if ($showlabel) {
             $alt = '';
             $label = get_string('preview');

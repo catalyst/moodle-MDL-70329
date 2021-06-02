@@ -55,7 +55,8 @@ class previewquestion_helper {
      * @param int $slot the relevant slot within the usage.
      * @param array $args the remaining bits of the file path.
      * @param bool $forcedownload whether the user must be forced to download the file.
-     * @param $fileoptions
+     * @param array $fileoptions
+     * @return void false if file not found, does not return if found - justsend the file
      */
     public static function question_preview_question_pluginfile($course, $context, $component,
             $filearea, $qubaid, $slot, $args, $forcedownload, $fileoptions): void {
@@ -94,9 +95,11 @@ class previewquestion_helper {
 
     /**
      * The the URL to use for actions relating to this preview.
+     *
      * @param int $questionid the question being previewed.
      * @param int $qubaid the id of the question usage for this preview.
      * @param question_preview_options $options the options in use.
+     * @param context $context
      * @return moodle_url
      */
     public static function question_preview_action_url($questionid, $qubaid,
@@ -209,7 +212,7 @@ class previewquestion_helper {
 
     /**
      * Popup params for the question preview.
-     * @return array that can be passed as $params to the {@link popup_action} constructor.
+     * @return array that can be passed as $params to the {@see popup_action} constructor.
      */
     public static function question_preview_popup_params(): array {
         return array(

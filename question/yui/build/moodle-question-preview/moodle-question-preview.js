@@ -26,6 +26,7 @@ YUI.add('moodle-question-preview', function (Y, NAME) {
  * @module moodle-question-preview
  */
 
+
 M.question = M.question || {};
 M.question.preview = M.question.preview || {};
 

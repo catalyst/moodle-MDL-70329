@@ -39,6 +39,10 @@ use question_engine;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class preview_options_form extends moodleform {
+
+    /**
+     * Preview form definition.
+     */
     public function definition() {
         $mform = $this->_form;
 
@@ -98,4 +102,6 @@ class preview_options_form extends moodleform {
         $mform->addElement('submit', 'saveupdate',
                 get_string('updatedisplayoptions', 'question'));
     }
+
 }
+
