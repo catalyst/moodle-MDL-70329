@@ -37,7 +37,16 @@ $capabilities = [
             'manager' => CAP_ALLOW
         ]
     ],
-
+    // Ability to see hidden question banks, and the basic information about it.
+    'mod/qbank:viewhidden' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ]
+    ],
     // Ability to add a new question bank to the course.
     'mod/qbank:addinstance' => [
         'riskbitmask' => RISK_XSS,
