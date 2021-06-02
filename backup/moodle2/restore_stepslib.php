@@ -2518,8 +2518,11 @@ class restore_comments_structure_step extends restore_structure_step {
         $mapping = false;
         if ($data->itemid) {
             $mapping = $this->task->get_comment_mapping_itemname($data->commentarea);
-            $data->itemid = $this->get_mappingid($mapping, $data->itemid);
+            if ($mapping) {
+                $data->itemid = $this->get_mappingid($mapping, $data->itemid);
+            }
         }
+
         // Only restore the comment if has no mapping OR we have found the matching mapping
         if (!$mapping || $data->itemid) {
             // Only if user mapping and context
@@ -2527,7 +2530,8 @@ class restore_comments_structure_step extends restore_structure_step {
             if ($data->userid && $this->task->get_contextid()) {
                 $data->contextid = $this->task->get_contextid();
                 // Only if there is another comment with same context/user/timecreated
-                $params = array('contextid' => $data->contextid, 'userid' => $data->userid, 'timecreated' => $data->timecreated);
+                $params = array('contextid' => $data->contextid, 'userid' => $data->userid,
+                                'timecreated' => $data->timecreated, 'itemid' => $data->itemid);
                 if (!$DB->record_exists('comments', $params)) {
                     $DB->insert_record('comments', $data);
                 }

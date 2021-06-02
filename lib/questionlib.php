@@ -1706,7 +1706,7 @@ function question_has_capability_on($questionorid, $cap, $notused = -1) {
 
     // These are existing questions capabilities that are set per category.
     // Each of these has a 'mine' and 'all' version that is appended to the capability name.
-    $capabilitieswithallandmine = ['edit' => 1, 'view' => 1, 'use' => 1, 'move' => 1, 'tag' => 1];
+    $capabilitieswithallandmine = ['edit' => 1, 'view' => 1, 'use' => 1, 'move' => 1, 'tag' => 1, 'comment' => 1];
 
     if (!isset($capabilitieswithallandmine[$cap])) {
         return has_capability('moodle/question:' . $cap, $context);
@@ -1881,6 +1881,8 @@ function question_get_question_capabilities() {
         'moodle/question:moveall',
         'moodle/question:tagmine',
         'moodle/question:tagall',
+        'moodle/question:commentmine',
+        'moodle/question:commentall',
     );
 }
 
