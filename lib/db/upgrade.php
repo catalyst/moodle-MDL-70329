@@ -579,13 +579,13 @@ function xmldb_main_upgrade($oldversion) {
 
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2019032900.01);
-     }
+    }
 
     if ($oldversion < 2019040200.01) {
         // Removing the themes BSB, Clean, More from core.
         // If these theme wish to be retained empty this array before upgrade.
         $themes = array('theme_bootstrapbase' => 'bootstrapbase',
-                'theme_clean' => 'clean', 'theme_more' => 'more');
+            'theme_clean' => 'clean', 'theme_more' => 'more');
         foreach ($themes as $key => $theme) {
             if (check_dir_exists($CFG->dirroot . '/theme/' . $theme, false)) {
                 // Ignore the themes that have been re-downloaded.
@@ -708,8 +708,8 @@ function xmldb_main_upgrade($oldversion) {
         foreach ($selfconversationsrs as $selfconversation) {
             $DB->update_record('message_conversations',
                 ['id' => $selfconversation->conversationid,
-                 'type' => \core_message\api::MESSAGE_CONVERSATION_TYPE_SELF,
-                 'convhash' => \core_message\helper::get_conversation_hash([$selfconversation->userid])
+                    'type' => \core_message\api::MESSAGE_CONVERSATION_TYPE_SELF,
+                    'convhash' => \core_message\helper::get_conversation_hash([$selfconversation->userid])
                 ]
             );
 
@@ -1569,7 +1569,7 @@ function xmldb_main_upgrade($oldversion) {
             $DB->delete_records('competency_userevidence', ['id' => $userevidence->id]);
 
             if ($record = $DB->get_record('context', ['contextlevel' => CONTEXT_USER, 'instanceid' => $userevidence->userid],
-                    '*', IGNORE_MISSING)) {
+                '*', IGNORE_MISSING)) {
                 // Delete all orphaned user evidences files.
                 $fs->delete_area_files($record->id, 'core_competency', 'userevidence', $userevidence->userid);
             }
@@ -2728,7 +2728,7 @@ function xmldb_main_upgrade($oldversion) {
             $sql = 'SELECT *
                     FROM {user_preferences} up
                     WHERE ' . $DB->sql_like('up.name', ':name', false, false) . ' AND ' .
-                        $DB->sql_like('up.value', ':value', false, false);
+                $DB->sql_like('up.value', ':value', false, false);
             $params = [
                 'name' => 'message_provider_%',
                 'value' => '%jabber%',
@@ -3565,6 +3565,159 @@ privatefiles,moodle|/user/files.php';
 
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2022011100.01);
+    }
+
+    // Introduce question versioning to core.
+    // First, create the new tables.
+    if ($oldversion < 2022011200.02) {
+        // Define table question_bank_entries to be created.
+        $table = new xmldb_table('question_bank_entries');
+
+        // Adding fields to table question_bank_entries.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questioncategoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('idnumber', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('ownerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table question_bank_entries.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('questioncategoryid', XMLDB_KEY_FOREIGN, ['questioncategoryid'], 'question_categories', ['id']);
+        $table->add_key('ownerid', XMLDB_KEY_FOREIGN, ['ownerid'], 'user', ['id']);
+
+        // Conditionally launch create table for question_bank_entries.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Create category id and id number index.
+        $index = new xmldb_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['questioncategoryid', 'idnumber']);
+
+        // Conditionally launch add index categoryidnumber.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Define table question_versions to be created.
+        $table = new xmldb_table('question_versions');
+
+        // Adding fields to table question_versions.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questionbankentryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('version', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 1);
+        $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('status', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'ready');
+
+        // Adding keys to table question_versions.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entries', ['id']);
+        $table->add_key('questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'question', ['id']);
+
+        // Conditionally launch create table for question_versions.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table question_references to be created.
+        $table = new xmldb_table('question_references');
+
+        // Adding fields to table question_references.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('usingcontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('component', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('questionbankentryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('version', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table question_references.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
+        $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entries', ['id']);
+
+        // Conditionally launch create table for question_references.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define table question_set_references to be created.
+        $table = new xmldb_table('question_set_references');
+
+        // Adding fields to table question_set_references.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('usingcontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('component', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('questionscontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('filtercondition', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Adding keys to table question_set_references.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
+        $table->add_key('itemid', XMLDB_KEY_FOREIGN, ['itemid'], 'quiz_slots', ['id']);
+        $table->add_key('questionscontextid', XMLDB_KEY_FOREIGN, ['questionscontextid'], 'context', ['id']);
+
+        // Conditionally launch create table for question_set_references.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2022011200.02);
+    }
+
+    if ($oldversion < 2022011200.03) {
+        // Next, split question records into the new tables.
+        upgrade_migrate_question_table();
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2022011200.03);
+    }
+
+    // Finally, drop fields from question table.
+    if ($oldversion < 2022011200.04) {
+        // Define fields to be dropped from questions.
+        $table = new xmldb_table('question');
+
+        $field = new xmldb_field('version');
+        // Conditionally launch drop field version.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('hidden');
+        // Conditionally launch drop field hidden.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define index categoryidnumber (not unique) to be dropped form question.
+        $index = new xmldb_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['category', 'idnumber']);
+
+        // Conditionally launch drop index categoryidnumber.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Define key category (foreign) to be dropped form questions.
+        $key = new xmldb_key('category', XMLDB_KEY_FOREIGN, ['category'], 'question_categories', ['id']);
+
+        // Launch drop key category.
+        $dbman->drop_key($table, $key);
+
+        $field = new xmldb_field('idnumber');
+        // Conditionally launch drop field idnumber.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('category');
+        // Conditionally launch drop field category.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2022011200.04);
     }
 
     return true;
