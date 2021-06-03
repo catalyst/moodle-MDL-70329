@@ -1943,7 +1943,7 @@ class core_plugin_manager {
                 'tagquestion',
                 'editquestion',
                 'exporttoxml',
-
+                'deletequestion',
             ),
 
             'qbehaviour' => array(
