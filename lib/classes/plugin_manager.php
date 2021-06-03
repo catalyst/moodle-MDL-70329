@@ -1939,7 +1939,7 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-                ''
+                'deletequestion',
             ),
 
             'qbehaviour' => array(
