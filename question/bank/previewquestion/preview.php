@@ -243,38 +243,14 @@ $PAGE->set_heading($title);
 echo $OUTPUT->header();
 
 $previewdata = array();
-// Start the question form.
-//echo html_writer::start_tag('form', array('method' => 'post', 'action' => $actionurl,
-//        'enctype' => 'multipart/form-data', 'id' => 'responseform'));
 $previewdata['actionurl'] = $actionurl;
-//echo html_writer::start_tag('div');
-//echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-//echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'slots', 'value' => $slot));
-//echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'scrollpos', 'value' => '', 'id' => 'scrollpos'));
-//echo html_writer::end_tag('div');
 $previewdata['session'] = sesskey();
 $previewdata['slot'] = $slot;
-
 // Output of the question.
 $previewdata['question'] = $quba->render_question($slot, $options, $displaynumber);
-
-// Finish the question form.
-//echo html_writer::start_tag('div', array('id' => 'previewcontrols', 'class' => 'controls'));
-//echo html_writer::empty_tag('input', $restartdisabled + array('type' => 'submit',
-//        'name' => 'restart', 'value' => get_string('restart', 'question'), 'class' => 'btn btn-secondary'));
 $previewdata['restartdisabled'] = html_writer::attributes($restartdisabled);
-//echo html_writer::empty_tag('input', $finishdisabled + array('type' => 'submit',
-//        'name' => 'save',    'value' => get_string('save', 'question'), 'class' => 'btn btn-secondary'));
 $previewdata['finishdisabled'] = html_writer::attributes($finishdisabled);
-//echo html_writer::empty_tag('input', $filldisabled + array('type' => 'submit',
-//        'name' => 'fill',    'value' => get_string('fillincorrect', 'question'), 'class' => 'btn btn-secondary'));
 $previewdata['filldisabled'] = html_writer::attributes($filldisabled);
-//echo html_writer::empty_tag('input', $finishdisabled + array('type' => 'submit',
-//        'name' => 'finish',  'value' => get_string('submitandfinish', 'question'), 'class' => 'btn btn-secondary'));
-
-//echo html_writer::end_tag('div');
-//echo html_writer::end_tag('form');
-
 // Output the technical info.
 $previewdata['techinfo'] = print_collapsible_region_start('', 'techinfo', get_string('technicalinfo', 'question'),
         'core_question_preview_techinfo_collapsed', true, true, $OUTPUT->help_icon('technicalinfo', 'question'));
