@@ -68,5 +68,14 @@ class renderer extends \plugin_renderer_base {
         return $this->action_link($link, $image . $label, $action, $attributes);
     }
 
+    /**
+     * Render the preview page.
+     *
+     * @param array $previewdata
+     */
+    public function render_preview_page($previewdata) {
+        return $this->render_from_template('qbank_previewquestion/preview_question', $previewdata);
+    }
+
 }
 
