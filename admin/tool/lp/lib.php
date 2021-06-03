@@ -129,6 +129,7 @@ function tool_lp_extend_navigation_category_settings($navigation, $coursecategor
  *
  * @param moodleform $formwrapper The moodle quickforms wrapper object.
  * @param MoodleQuickForm $mform The actual form object (required to modify the form).
+ * @throws \coding_exception|dml_exception
  */
 function tool_lp_coursemodule_standard_elements($formwrapper, $mform) {
     global $CFG, $COURSE;
@@ -139,26 +140,34 @@ function tool_lp_coursemodule_standard_elements($formwrapper, $mform) {
         return;
     }
 
-    $mform->addElement('header', 'competenciessection', get_string('competencies', 'core_competency'));
-
-    MoodleQuickForm::registerElementType('course_competencies',
-                                         "$CFG->dirroot/$CFG->admin/tool/lp/classes/course_competencies_form_element.php",
-                                         'tool_lp_course_competencies_form_element');
-    $cmid = null;
-    if ($cm = $formwrapper->get_coursemodule()) {
-        $cmid = $cm->id;
+    // Validate if the module supports competencies feature.
+    $feature = true;
+    if ($formwrapper->get_modname() !== null) {
+        $feature = plugin_supports('mod', $formwrapper->get_modname(), FEATURE_COMPETENCIES, true);
     }
-    $options = array(
-        'courseid' => $COURSE->id,
-        'cmid' => $cmid
-    );
-    $mform->addElement('course_competencies', 'competencies', get_string('modcompetencies', 'tool_lp'), $options);
-    $mform->addHelpButton('competencies', 'modcompetencies', 'tool_lp');
-    MoodleQuickForm::registerElementType('course_competency_rule',
-                                         "$CFG->dirroot/$CFG->admin/tool/lp/classes/course_competency_rule_form_element.php",
-                                         'tool_lp_course_competency_rule_form_element');
-    // Reuse the same options.
-    $mform->addElement('course_competency_rule', 'competency_rule', get_string('uponcoursemodulecompletion', 'tool_lp'), $options);
+    if ($feature) {
+        $mform->addElement('header', 'competenciessection', get_string('competencies', 'core_competency'));
+
+        MoodleQuickForm::registerElementType('course_competencies',
+            "$CFG->dirroot/$CFG->admin/tool/lp/classes/course_competencies_form_element.php",
+            'tool_lp_course_competencies_form_element');
+        $cmid = null;
+        if ($cm = $formwrapper->get_coursemodule()) {
+            $cmid = $cm->id;
+        }
+        $options = array(
+            'courseid' => $COURSE->id,
+            'cmid' => $cmid
+        );
+        $mform->addElement('course_competencies', 'competencies', get_string('modcompetencies', 'tool_lp'), $options);
+        $mform->addHelpButton('competencies', 'modcompetencies', 'tool_lp');
+        MoodleQuickForm::registerElementType('course_competency_rule',
+            "$CFG->dirroot/$CFG->admin/tool/lp/classes/course_competency_rule_form_element.php",
+            'tool_lp_course_competency_rule_form_element');
+        // Reuse the same options.
+        $mform->addElement('course_competency_rule', 'competency_rule',
+            get_string('uponcoursemodulecompletion', 'tool_lp'), $options);
+    }
 }
 
 /**
