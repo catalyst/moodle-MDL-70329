@@ -6746,6 +6746,7 @@ class admin_page_managemessageoutputs extends admin_externalpage {
     }
 }
 
+
 /**
  * Manage question banks page.
  *

@@ -1920,7 +1920,7 @@ class core_plugin_manager {
             'mod' => array(
                 'assign', 'assignment', 'book', 'chat', 'choice', 'data', 'feedback', 'folder',
                 'forum', 'glossary', 'h5pactivity', 'imscp', 'label', 'lesson', 'lti', 'page',
-                'quiz', 'resource', 'scorm', 'survey', 'url', 'wiki', 'workshop'
+                'qbank', 'quiz', 'resource', 'scorm', 'survey', 'url', 'wiki', 'workshop'
             ),
 
             'paygw' => [
