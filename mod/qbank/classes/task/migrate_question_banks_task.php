@@ -83,6 +83,7 @@ class migrate_question_banks_task extends adhoc_task {
         // Create the qbank module and change the context id to point to the new mod_bank.
         if ($course && $qbankname && $contextid) {
             $qbank = helper::create_qbank_instance($qbankname, $course);
+            helper::migrate_question_categories($qbank, $contextid);
         }
     }
 }

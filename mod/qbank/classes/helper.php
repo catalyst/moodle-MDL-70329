@@ -185,4 +185,20 @@ class helper {
         }
         return $qbank;
     }
+
+    /**
+     * Migrates question categories with newly created qbank contextid.
+     *
+     * @param object $qbank Newly created qbank object.
+     * @param int $oldcontextid Context id to migrate.
+     * @return void
+     * @throws \moodle_exception
+     */
+    public static function migrate_question_categories(object $qbank, int $oldcontextid): void {
+        global $DB;
+
+        $contextid = \context_module::instance($qbank->coursemodule)->id;
+        //Update new context id.
+        $DB->set_field('question_categories', 'contextid', $contextid, ['contextid' => $oldcontextid]);
+    }
 }
