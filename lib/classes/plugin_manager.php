@@ -1942,6 +1942,7 @@ class core_plugin_manager {
                 'comment',
                 'deletequestion',
                 'editquestion',
+                'exporttoxml',
                 'exportquestions',
                 'importquestions',
                 'previewquestion',
