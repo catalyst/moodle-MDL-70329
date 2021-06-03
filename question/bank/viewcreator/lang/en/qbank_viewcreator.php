@@ -23,5 +23,5 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'viewcreator';
-$string['privacy:metadata'] = 'View creator shows the questioncreator column, it does not store any user data.';
+$string['pluginname'] = 'View creator';
+$string['privacy:metadata'] = 'View creator shows question creator and modifier column, it does not store user data.';
