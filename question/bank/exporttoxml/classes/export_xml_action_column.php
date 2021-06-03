@@ -17,32 +17,36 @@
 /**
  * Question bank column export the question in Moodle XML format.
  *
- * @package   core_question
+ * @package   qbank_exporttoxml
  * @copyright 2019 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank;
+namespace qbank_exporttoxml;
+
 defined('MOODLE_INTERNAL') || die();
 
+use core_question\local\bank\menu_action_column_base;
 
 /**
  * Question bank column export the question in Moodle XML format.
  *
+ * @package   qbank_exporttoxml
  * @copyright 2019 The Open University
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @todo MDL-72004 delete the class and add it to lib/db/renameclasses.php pointing to the plugin
  */
 class export_xml_action_column extends menu_action_column_base {
+
     /** @var string avoids repeated calls to get_string('duplicate'). */
     protected $strexportasxml;
 
-    public function init() {
+    public function init(): void {
         parent::init();
         $this->strexportasxml = get_string('exportasxml', 'question');
     }
 
-    public function get_name() {
+    public function get_name(): string {
         return 'exportasxmlaction';
     }
 
@@ -58,7 +62,9 @@ class export_xml_action_column extends menu_action_column_base {
             return [null, null, null];
         }
 
-        return [\qbank_exporttoxml\exporttoxml_helper::question_get_export_single_question_url($question),
+        return [exporttoxml_helper::question_get_export_single_question_url($question),
                 't/download', $this->strexportasxml];
     }
+
 }
+
