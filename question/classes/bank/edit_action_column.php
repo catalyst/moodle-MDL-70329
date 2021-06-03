@@ -31,6 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_editquestion\edit_action_column
  */
 class edit_action_column extends menu_action_column_base {
     protected $stredit;
