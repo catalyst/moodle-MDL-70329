@@ -1939,13 +1939,10 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-
-
                 'managecategories',
-
                 'tagquestion',
-
                 'editquestion',
+                'exporttoxml',
 
             ),
 
