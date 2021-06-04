@@ -104,7 +104,7 @@ class question_import_form extends moodleform {
         // Submit button.
         $mform->addElement('submit', 'submitbutton', get_string('import'));
 
-        // Set a template for the format select elements
+        // Set a template for the format select elements.
         $renderer = $mform->defaultRenderer();
         $template = "{help} {element}\n";
         $renderer->setGroupElementTemplate($template, 'format');
