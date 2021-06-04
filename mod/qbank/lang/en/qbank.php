@@ -27,8 +27,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['course_summary'] = 'This course has been created as part of the upgrade to Moodle 4.0.
-The question bank in this category has been migrated to a question bank activity in this course.
-All the questions that were previously located in this categories question bank have been migrated to the question bank activity in this course.';
+The question bank in this course category has been migrated to a question bank activity in this course.
+All the questions that were previously located in this course categories question bank have been migrated to the question bank activity in this course.';
 $string['modulename'] = 'Question bank';
 $string['modulename_help'] = 'This activity allows a teacher to create, preview, and edit questions in a database of question categories.
 
