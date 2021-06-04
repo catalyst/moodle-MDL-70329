@@ -52,10 +52,6 @@ function xmldb_qbank_install() {
                 $categoryname = helper::get_category_name($qcategory->instanceid);
                 $shortname = substr("Question bank: " . $qcategory->instanceid . '-' . $categoryname, 0, 254);
                 $course = helper::get_course($shortname, $qcategory->instanceid);
-                if (!$course) {
-                    // Create a new course for each category with questions.
-                    $course = helper::create_category_course($shortname, $qcategory->instanceid);
-                }
                 $qbankname = $shortname;
                 break;
             case CONTEXT_COURSE:
@@ -69,7 +65,19 @@ function xmldb_qbank_install() {
                 break;
         }
 
-        // Create the qbank module.
-        $qbank = helper::create_qbank_instance($qbankname, $course);
+        // Create an adhoc task that will process the creation of mod_bank and the migration of question categories.
+        if (!PHPUNIT_TEST) {
+            $task = new \mod_qbank\task\migrate_question_banks_task();
+            $task->set_custom_data(
+                [
+                    'contextlevel' => $contextlevel,
+                    'contextid' => $qcategory->contextid,
+                    'course' => $course,
+                    'qbankname' => $qbankname,
+                    'qcategoryinstanceid' => $qcategory->instanceid,
+                ]
+            );
+            \core\task\manager::queue_adhoc_task($task, true);
+        }
     }
 }

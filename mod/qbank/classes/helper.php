@@ -167,6 +167,9 @@ class helper {
             $moduleinfo->modulename = 'qbank';
             $moduleinfo->name = $name;
             if ($course->id === SITEID) {
+                if (!$DB->get_record('course_sections', ['course' => SITEID, 'section' => 1])) {
+                    course_create_section(SITEID, 1);
+                }
                 $moduleinfo->section = 1;
             } else {
                 $section = course_create_section($course->id);
@@ -175,8 +178,8 @@ class helper {
             $moduleinfo->course = $course->id;
             $moduleinfo->visible = false;
 
-            $moduleid = $DB->get_record_select('modules', "name= :name", ['name' => 'qbank'], 'id');
-            $moduleinfo->module = (int)$moduleid->id;
+            $module = $DB->get_record('modules', ['name' => $moduleinfo->modulename]);
+            $moduleinfo->module = $module->id;
 
             $qbank = add_moduleinfo($moduleinfo, $course);
         }
