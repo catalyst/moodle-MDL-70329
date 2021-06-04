@@ -18,7 +18,7 @@
  * Privacy Subsystem for qbank_viewcreator.
  *
  * @package    qbank_viewcreator
- * @copyright  2021 Catalyst IT Canada Pty Ltd
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Privacy Subsystem for qbank_viewcreator implementing null_provider.
  *
- * @copyright  2021 Catalyst IT Canada Pty Ltd
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
