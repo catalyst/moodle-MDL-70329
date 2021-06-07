@@ -1,3 +1,4 @@
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The purpose of this module is to centralize selectors related to question.
+ * External services definition for qbank_tagquestion.
  *
- * @module     core_question/question_selectors
- * @copyright  2018 Simey Lameze <lameze@moodle.com>
+ * @package    qbank_tagquestion
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
-    // eslint-disable-next-line no-console
-    console.log('warn: The core_question/selectors has been deprecated. Please use qbank_tagquestion/selectors instead.');
-    return {
-        actions: {
-            save: '[data-action="save"]',
-            edittags: '[data-action="edittags"]',
-        },
-        containers: {
-            loadingIcon: '[data-region="overlay-icon-container"]',
-        },
-    };
-});
+
+defined('MOODLE_INTERNAL') || die();
+
+$functions = [
+        'qbank_tagquestion_submit_tags_form' => [
+                'classname' => 'qbank_tagquestion\external\qbank_tagquestion_external',
+                'methodname' => 'submit_tags_form',
+                'description' => 'Update the question tags.',
+                'type' => 'write',
+                'ajax' => true,
+            ],
+    ];
