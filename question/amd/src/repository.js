@@ -32,6 +32,8 @@ define(['jquery', 'core/ajax'], function($, Ajax) {
      * @return {promise}
      */
     var submitTagCreateUpdateForm = function(questionId, contextId, formdata) {
+        // eslint-disable-next-line no-console
+        console.log('warn: The core_question/repository has been deprecated. Please use qbank_tagquestion/repository instead.');
         var request = {
             methodname: 'core_question_submit_tags_form',
             args: {

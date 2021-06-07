@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define([], function() {
+    // eslint-disable-next-line no-console
+    console.log('warn: The core_question/selectors has been deprecated. Please use qbank_tagquestion/selectors instead.');
     return {
         actions: {
             save: '[data-action="save"]',
