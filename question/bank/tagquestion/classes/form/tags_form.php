@@ -17,33 +17,28 @@
 /**
  * The mform to manage question tags.
  *
- * @package   core_question
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\form;
+namespace qbank_tagquestion\form;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/lib/formslib.php');
 require_once($CFG->dirroot . '/lib/questionlib.php');
+
 /**
  * The mform class for  manage question tags.
  *
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \qbank_tagquestion\form\tags_form
  */
-class tags extends \moodleform {
+class tags_form extends \moodleform {
 
-    /**
-     * The form definition
-     */
     public function definition() {
-        debugging('Class column_base in core_question\form\tags is deprecated,
-         please use qbank_tagquestion\form\tags_form instead.', DEBUG_DEVELOPER);
         $mform = $this->_form;
         $customdata = $this->_customdata;
 
@@ -96,4 +91,6 @@ class tags extends \moodleform {
             }
         }
     }
+
 }
+
