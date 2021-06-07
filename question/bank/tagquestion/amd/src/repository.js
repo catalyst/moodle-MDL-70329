@@ -16,7 +16,9 @@
 /**
  * A javascript module to handle question ajax actions.
  *
- * @module     core_question/repository
+ * @module     qbank_tagquestion/repository
+ * @class      repository
+ * @package    qbank_tagquestion
  * @copyright  2017 Simey Lameze <lameze@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,10 +32,8 @@ define(['jquery', 'core/ajax'], function($, Ajax) {
      * @return {promise}
      */
     var submitTagCreateUpdateForm = function(questionId, contextId, formdata) {
-        // eslint-disable-next-line no-console
-        console.log('warn: The core_question/repository has been deprecated. Please use qbank_tagquestion/repository instead.');
         var request = {
-            methodname: 'core_question_submit_tags_form',
+            methodname: 'qbank_tagquestion_submit_tags_form',
             args: {
                 questionid: questionId,
                 contextid: contextId,
