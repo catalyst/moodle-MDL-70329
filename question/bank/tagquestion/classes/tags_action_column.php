@@ -17,32 +17,36 @@
 /**
  * The question tags column subclass.
  *
- * @package   core_question
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace core_question\bank;
+
+namespace qbank_tagquestion;
+
 defined('MOODLE_INTERNAL') || die();
 
+use core_question\local\bank\action_column_base;
+use core_question\local\bank\menuable_action;
 
 /**
  * Action to add and remove tags to questions.
  *
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \qbank_tagquestion\tags_action_column
  */
 class tags_action_column extends action_column_base implements menuable_action {
+
     /**
      * @var string store this lang string for performance.
      */
     protected $managetags;
 
-    public function init() {
+    public function init(): void {
         parent::init();
         global $PAGE;
-        $PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);
+        $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#questionscontainer']);
         $this->managetags = get_string('managetags', 'tag');
     }
 
@@ -51,7 +55,7 @@ class tags_action_column extends action_column_base implements menuable_action {
      *
      * @return string
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'tagsaction';
     }
 
@@ -61,7 +65,7 @@ class tags_action_column extends action_column_base implements menuable_action {
      * @param object $question The question database record.
      * @param string $rowclasses
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
         if (\core_tag_tag::is_enabled('core_question', 'question') &&
@@ -80,8 +84,8 @@ class tags_action_column extends action_column_base implements menuable_action {
      * @return array with two elements, \moodle_url and
      *     an array or data $attributes needed to make the JavaScript work.
      */
-    protected function get_link_url_and_attributes($question) {
-        $url = new \moodle_url($this->qbank->edit_question_url($question->id));
+    protected function get_link_url_and_attributes($question): array {
+        $url = new \moodle_url($this->qbank->returnurl);
 
         $attributes = [
                 'data-action' => 'edittags',
