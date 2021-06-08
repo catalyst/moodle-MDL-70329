@@ -25,4 +25,3 @@
 
 $string['pluginname'] = 'Export to XML';
 $string['privacy:metadata'] = 'Export to xml exports single question to xml, it does not store any user data.';
-

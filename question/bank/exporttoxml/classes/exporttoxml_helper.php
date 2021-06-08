@@ -45,7 +45,7 @@ class exporttoxml_helper {
      *      (Only ->id and ->contextid are used.)
      * @return \moodle_url the requested URL.
      */
-    public static function question_get_export_single_question_url($question) {
+    public static function question_get_export_single_question_url($question): \moodle_url {
         $params = ['id' => $question->id, 'sesskey' => sesskey()];
         $context = \context::instance_by_id($question->contextid);
         switch ($context->contextlevel) {

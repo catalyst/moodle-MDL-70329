@@ -32,6 +32,8 @@ $cmid = optional_param('cmid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $urlparams = ['id' => $questionid, 'sesskey' => sesskey()];
 
+\core_question\local\bank\helper::check_qbank_status('qbank_exporttoxml');
+
 if ($cmid) {
     $cm = get_coursemodule_from_id(null, $cmid);
     require_login($cm->course, false, $cm);
