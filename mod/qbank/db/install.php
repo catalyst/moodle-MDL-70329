@@ -71,5 +71,8 @@ function xmldb_qbank_install() {
 
         // Create the qbank module.
         $qbank = helper::create_qbank_instance($qbankname, $course);
+        if ($qbank) {
+            helper::migrate_question_categories($qbank, $qcategory->contextid);
+        }
     }
 }

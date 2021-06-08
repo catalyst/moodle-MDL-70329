@@ -167,6 +167,9 @@ class helper {
             $moduleinfo->modulename = 'qbank';
             $moduleinfo->name = $name;
             if ($course->id === SITEID) {
+                if (!$DB->get_record('course_sections', ['course' => SITEID, 'section' => 1])) {
+                    course_create_section(SITEID, 1);
+                }
                 $moduleinfo->section = 1;
             } else {
                 $section = course_create_section($course->id);
@@ -175,11 +178,27 @@ class helper {
             $moduleinfo->course = $course->id;
             $moduleinfo->visible = false;
 
-            $moduleid = $DB->get_record_select('modules', "name= :name", ['name' => 'qbank'], 'id');
-            $moduleinfo->module = (int)$moduleid->id;
+            $module = $DB->get_record('modules', ['name' => $moduleinfo->modulename]);
+            $moduleinfo->module = $module->id;
 
             $qbank = add_moduleinfo($moduleinfo, $course);
         }
         return $qbank;
+    }
+
+    /**
+     * Migrates question categories with newly created qbank contextid.
+     *
+     * @param object $qbank Newly created qbank object.
+     * @param int $oldcontextid Context id to migrate.
+     * @return void
+     * @throws \moodle_exception
+     */
+    public static function migrate_question_categories(object $qbank, int $oldcontextid): void {
+        global $DB;
+
+        $contextid = \context_module::instance($qbank->coursemodule)->id;
+        //Update new context id.
+        $DB->set_field('question_categories', 'contextid', $contextid, ['contextid' => $oldcontextid]);
     }
 }
