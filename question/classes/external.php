@@ -125,8 +125,6 @@ class core_question_external extends external_api {
      * @see \qbank_tagquestion\external\qbank_tagquestion_external
      */
     public static function submit_tags_form_parameters() {
-        debugging('API core_question_submit_tags_form is deprecated,
-         please use qbank_tagquestion_submit_tags_form instead.', DEBUG_DEVELOPER);
         return new external_function_parameters([
                 'questionid' => new external_value(PARAM_INT, 'The question id'),
                 'contextid' => new external_value(PARAM_INT, 'The editing context id'),
@@ -219,8 +217,6 @@ class core_question_external extends external_api {
      * @see \qbank_tagquestion\external\qbank_tagquestion_external
      */
     public static function  submit_tags_form_returns() {
-        debugging('API core_question_submit_tags_form is deprecated,
-         please use qbank_tagquestion_submit_tags_form instead.', DEBUG_DEVELOPER);
         return new external_single_structure([
                 'status' => new external_value(PARAM_BOOL, 'status: true if success')
         ]);
