@@ -416,6 +416,11 @@ if ($hassiteconfig) {
     }
 }
 
+if ($hassiteconfig){
+    $temp = new admin_externalpage('settingqbank', get_string('qbanksettings', 'admin'), new moodle_url("/question/qbanksettings.php"));
+    $ADMIN->add('qbanksettings', $temp);
+}
+
 // Question type settings
 if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) {
 

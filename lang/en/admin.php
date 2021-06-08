@@ -794,6 +794,7 @@ $string['manageformats'] = 'Manage course formats';
 $string['manageformatsgotosettings'] = 'Default format can be changed in {$a}';
 $string['managelang'] = 'Manage';
 $string['questionbanks'] = 'Question banks';
+$string['qbanksettings'] = 'Column sort order';
 $string['manageqbanks'] = 'Manage question banks';
 $string['manageqbehaviours'] = 'Manage question behaviours';
 $string['manageqtypes'] = 'Manage question types';
