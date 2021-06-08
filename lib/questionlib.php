@@ -1818,15 +1818,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 
     }
 
-    $contexts = new question_edit_contexts($context);
-    foreach ($corenavigations as $key => $corenavigation) {
-        if ($contexts->have_one_edit_tab_cap($key)) {
-            $questionnode->add($corenavigation['title'], new moodle_url(
-                    $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
-        }
-    }
-
-    // Community plugins have navigation node.
+    // Community/additional plugins have navigation node.
     $pluginnavigations = array();
     foreach ($plugins as $componentname => $plugin) {
         $pluginentrypointobject = new $plugin();
@@ -1836,11 +1828,25 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
         }
         $pluginnavigations[$pluginentrypointobject->get_navigation_key()] = array(
                 'title' => $pluginentrypointobject->get_title(),
-                'url'   => $pluginentrypointobject->get_url()
+                'url'   => $pluginentrypointobject->get_url(),
+                'capabilities' => $pluginentrypointobject->get_capabilities()
         );
     }
 
+    $contexts = new question_edit_contexts($context);
+    foreach ($corenavigations as $key => $corenavigation) {
+        if ($contexts->have_one_edit_tab_cap($key)) {
+            $questionnode->add($corenavigation['title'], new moodle_url(
+                    $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
+        }
+    }
+
     foreach ($pluginnavigations as $key => $pluginnavigation) {
+        if (is_array($pluginnavigation['capabilities'])) {
+            if (!$contexts->have_one_cap($pluginnavigation['capabilities'])) {
+                continue;
+            }
+        }
         $questionnode->add($pluginnavigation['title'], new moodle_url(
                 $pluginnavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
     }
