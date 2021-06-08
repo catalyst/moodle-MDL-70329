@@ -2778,13 +2778,17 @@ function xmldb_main_upgrade($oldversion) {
             $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
 
             // Populate table question_versions.
-            $questionversions = new \stdClass();
-            $questionversions->questionbankentryid = $questionbankentry->id;
-            $questionversions->versionnumber = 1;
-            $questionversions->questionid = $question->id;
-            $DB->insert_record('question_versions', $questionversions);
+            $questionversion = new \stdClass();
+            $questionversion->questionbankentryid = $questionbankentry->id;
+            $questionversion->questionid = $question->id;
+            $questionversions[] = $questionversion;
         }
         $questions->close();
+
+        $qbankversionschunks = array_chunk($questionversions, 30000);
+        foreach ($qbankversionschunks as $qbankversionschunk) {
+            $DB->insert_records('question_versions', $qbankversionschunk);
+        }
 
         // TODO: Remove fields from question table.
 
