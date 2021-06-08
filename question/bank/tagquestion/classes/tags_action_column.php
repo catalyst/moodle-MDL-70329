@@ -43,6 +43,10 @@ class tags_action_column extends action_column_base implements menuable_action {
      */
     protected $managetags;
 
+    /**
+     * A chance for subclasses to initialise themselves, for example to load lang strings,
+     * without having to override the constructor.
+     */
     public function init(): void {
         parent::init();
         global $PAGE;
@@ -97,6 +101,12 @@ class tags_action_column extends action_column_base implements menuable_action {
         return [$url, $attributes];
     }
 
+    /**
+     * Gets the action menu link.
+     *
+     * @param \stdClass $question
+     * @return \action_menu_link|null
+     */
     public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
         if (!\core_tag_tag::is_enabled('core_question', 'question') ||
                 !question_has_capability_on($question, 'view')) {

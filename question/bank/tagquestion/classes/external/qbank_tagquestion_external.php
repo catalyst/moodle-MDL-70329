@@ -18,8 +18,7 @@
  * External qbank_tagquestion API.
  *
  * @package    qbank_tagquestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @copyright  2016 Pau Ferrer <pau@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,6 +38,14 @@ use external_single_structure;
 use external_value;
 use qbank_tagquestion\form\tags_form;
 
+/**
+ * Class qbank_tagquestion_external
+ *
+ * @package    qbank_tagquestion
+ * @copyright  2016 Pau Ferrer <pau@moodle.com>
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class qbank_tagquestion_external extends external_api {
     /**
      * Returns description of method parameters.
@@ -83,7 +90,7 @@ class qbank_tagquestion_external extends external_api {
                 FROM {question} q
                 JOIN {question_categories} qc ON qc.id = q.category
                 WHERE q.id = ?', [$questionid])) {
-            print_error('questiondoesnotexist', 'question');
+            throw new \moodle_exception('questiondoesnotexist', 'question');
         }
 
         require_once($CFG->libdir . '/questionlib.php');

@@ -26,7 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
-//require_once($CFG->dirroot . '/question/engine/tests/helpers.php');
 
 /**
  * Question external functions tests
@@ -74,7 +73,8 @@ class qbank_tagquestion_external_testcase extends externallib_advanced_testcase 
 
         // We should receive an exception if the question doesn't exist.
         $this->expectException('moodle_exception');
-        \qbank_tagquestion\external\qbank_tagquestion_external::submit_tags_form($missingquestionid, $editingcontext->id, $formdata);
+        \qbank_tagquestion\external\qbank_tagquestion_external::submit_tags_form(
+                $missingquestionid, $editingcontext->id, $formdata);
     }
 
     /**

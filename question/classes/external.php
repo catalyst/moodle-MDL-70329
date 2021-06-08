@@ -145,9 +145,6 @@ class core_question_external extends external_api {
      * @see \qbank_tagquestion\external\qbank_tagquestion_external
      */
     public static function submit_tags_form($questionid, $contextid, $formdata) {
-        debugging('API core_question_submit_tags_form is deprecated,
-         please use qbank_tagquestion_submit_tags_form instead.', DEBUG_DEVELOPER);
-
         return \qbank_tagquestion\external\qbank_tagquestion_external::submit_tags_form($questionid, $contextid, $formdata);
 
         global $DB, $CFG;
@@ -227,6 +224,15 @@ class core_question_external extends external_api {
         return new external_single_structure([
                 'status' => new external_value(PARAM_BOOL, 'status: true if success')
         ]);
+    }
+
+    /**
+     * Marking the method as deprecated.
+     *
+     * @return bool
+     */
+    public static function submit_tags_form_is_deprecated() {
+        return true;
     }
 
     /**
