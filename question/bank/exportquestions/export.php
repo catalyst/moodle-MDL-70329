@@ -30,8 +30,10 @@ require_once($CFG->dirroot . '/question/renderer.php');
 
 use qbank_exportquestions\exportquestions_helper;
 use qbank_exportquestions\form\question_export_form;
+use core_question\local\bank\helper;
 
 require_login();
+helper::check_qbank_status('qbank_exportquestions');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('export', '/question/bank/exportquestions/export.php');
