@@ -17,9 +17,10 @@
 /**
  * External services definition for qbank_tagquestion.
  *
- * @package   qbank_tagquestion
- * @copyright 2018 Simey Lameze <simey@moodle.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    qbank_tagquestion
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();

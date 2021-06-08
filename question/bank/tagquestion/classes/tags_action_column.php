@@ -34,6 +34,7 @@ use core_question\local\bank\menuable_action;
  *
  * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tags_action_column extends action_column_base implements menuable_action {
