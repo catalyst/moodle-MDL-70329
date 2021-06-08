@@ -29,12 +29,12 @@ require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/../../editlib.php');
 global $DB, $OUTPUT, $PAGE, $COURSE;
 
-use \core\output\notification;
-
 $deleteselected = optional_param('deleteselected', false, PARAM_BOOL);
 $returnurl = optional_param('returnurl', 0, PARAM_LOCALURL);
 $cmid = optional_param('cmid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
+
+\core_question\local\bank\helper::check_qbank_status('qbank_deletequestion');
 
 if ($cmid) {
     list($module, $cm) = get_module_from_cmid($cmid);
