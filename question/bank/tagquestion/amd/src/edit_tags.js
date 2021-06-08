@@ -16,7 +16,7 @@
 /**
  * A javascript module to handle question tags editing.
  *
- * @module     core_question/edit_tags
+ * @module     qbank_tagquestion/edit_tags
  * @copyright  2018 Simey Lameze <simey@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

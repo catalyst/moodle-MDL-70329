@@ -16,9 +16,9 @@
 /**
  * A javascript module to handle question ajax actions.
  *
- * @module     core_question/repository
+ * @module     qbank_tagquestion/repository
  * @class      repository
- * @package    core_question
+ * @package    qbank_tagquestion
  * @copyright  2017 Simey Lameze <lameze@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
