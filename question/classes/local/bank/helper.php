@@ -43,7 +43,7 @@ class helper {
     /**
      * Check the status of a plugin and throw exception if not enabled and called manually.
      *
-     * Any action plugin having a php script, should call this plugin for a safer enable/disable implementation.
+     * Any action plugin having a php script, should call this function for a safer enable/disable implementation.
      *
      * @param string $pluginname
      * @return bool
