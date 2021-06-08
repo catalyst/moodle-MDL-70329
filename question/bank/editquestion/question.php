@@ -39,6 +39,8 @@ $appendqnumstring = optional_param('appendqnumstring', '', PARAM_ALPHA);
 $inpopup = optional_param('inpopup', 0, PARAM_BOOL);
 $scrollpos = optional_param('scrollpos', 0, PARAM_INT);
 
+\core_question\local\bank\helper::check_qbank_status('qbank_editquestion');
+
 $url = new moodle_url('/question/bank/editquestion/question.php');
 if ($id !== 0) {
     $url->param('id', $id);

@@ -35,6 +35,8 @@ $returnurl = optional_param('returnurl', 0, PARAM_LOCALURL);
 $appendqnumstring = optional_param('appendqnumstring', '', PARAM_ALPHA);
 $validationerror = optional_param('validationerror', false, PARAM_BOOL);
 
+\core_question\local\bank\helper::check_qbank_status('qbank_editquestion');
+
 // Place to accumulate hidden params for the form we will print.
 $hiddenparams = array('category' => $categoryid);
 
