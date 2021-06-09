@@ -26,27 +26,17 @@
     Example context (json):
     {
         "name": "createcourse",
-        "header": "Column sort order",
-        "content-style" : "background-color: #fafafa;",
-        "dd-content-style" : "",
     }
 }}
-<h1>
-    {{header}}
-</h1>
-<div class="content">
-        <ul class="list list-group" id="sortable">
-            {{#name}}
-                <li class="item list-group-item list-group-item-action">
-                    <div>
-                        <i class="fa fa-arrows"></i>
-                        <span>                        
-                                <i>
-                                    {{.}}
-                                </i>
-                        </span>
-                    </div>
-                </li>
-            {{/name}}
-        </ul>
-</div>
+
+<ul class="list list-group" id="sortable">
+    {{#name}}
+        <li class="item list-group-item list-group-item-action">
+            <div class="fa fa-arrows">
+                <span>                                  
+                    {{.}}
+                </span>
+            </div>
+        </li>
+    {{/name}}
+</ul>
