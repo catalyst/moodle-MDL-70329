@@ -30,7 +30,10 @@ require_once($CFG->dirroot . '/question/format.php');
 require_once($CFG->dirroot . '/question/renderer.php');
 
 use qbank_importquestions\form\question_import_form;
+use core_question\local\bank\helper;
 
+require_login();
+helper::check_qbank_status('qbank_importquestions');
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('import', '/question/bank/importquestions/import.php');
 

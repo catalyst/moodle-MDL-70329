@@ -38,21 +38,21 @@ defined('MOODLE_INTERNAL') || die();
 class navigation extends \core_question\local\bank\navigation_plugin_base {
 
     /**
-     * @inheritDoc
+     * Get import plugin title for this node.
      */
-    public function get_title() {
+    public function get_title(): string {
         return get_string('import', 'question');
     }
 
     /**
-     * @inheritDoc
+     * Get import plugin key for this node.
      */
     public function get_navigation_key(): string {
         return 'import';
     }
 
     /**
-     * @inheritDoc
+     * Get import plugin URL for this node.
      */
     public function get_url(): \moodle_url {
         return new \moodle_url('/question/bank/importquestions/import.php');
