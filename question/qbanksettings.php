@@ -26,7 +26,8 @@ ini_set('display_errors', true);
 require_once(__DIR__ . '/../config.php');
 require_once($CFG->dirroot . '/question/classes/sort_form.php');
  
-//$PAGE->requires->js_call_amd('core_question/drag_drop', 'init');
+// $PAGE->requires->js_call_amd('core_question/drag_drop', 'init');
+$PAGE->requires->js_call_amd('core_question/drag_drop','init');
 $PAGE->requires->js(new moodle_url($CFG->wwwroot . '/question/amd/src/drag_drop.js'));
 $context = array();
 $context['header'] = get_string('qbanksettings', 'admin');
