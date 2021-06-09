@@ -1,53 +1,81 @@
-// const draggables = document.querySelectorAll('.item')
-// const containers = document.querySelectorAll('.list')
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// draggables.forEach(draggable => {
-//     draggable.addEventListener('dragstart', () => {
-//         draggable.classList.add('dragging');
-//         draggable.classList.add('active');
-//         draggable.style.opacity = '0.5'
-//     })
+/**
+ * Javascript for report card display and processing.
+ *
+ * @package    qbank_settingspage
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+*/
 
-//     draggable.addEventListener('dragend', () => {
-//         draggable.classList.remove('dragging')
-//         draggable.classList.remove('active');
-//         draggable.style.opacity = null
-//         getListItemPosition()
-//     })
-// })
+import Ajax from 'core/ajax';
 
-// containers.forEach(container => {
-//     container.addEventListener('dragover', e => {
-//         e.preventDefault();
-//         const afterElement = getDragAfterElement(container, e.clientY)
-//         const draggable = document.querySelector('.dragging')
-//         if (afterElement == null) {
-//             container.appendChild(draggable)
+const draggables = document.querySelectorAll('.item');
+const containers = document.querySelectorAll('.list');
 
-//         } else {
-//             container.insertBefore(draggable, afterElement)
-//         }
-//     })
-// })
+draggables.forEach(draggable => {
+    draggable.addEventListener('dragstart', () => {
+        draggable.classList.add('dragging');
+        draggable.classList.add('active');
+        draggable.style.opacity = '0.5';
+    });
 
-// function getDragAfterElement(container, y) {
-//     const draggableElements  = [...container.querySelectorAll('.item:not(.dragging)')];
+    draggable.addEventListener('dragend', () => {
+        draggable.classList.remove('dragging');
+        draggable.classList.remove('active');
+        draggable.style.opacity = null;
+        callphpfunc();
+    });
+});
 
-//     return draggableElements.reduce((closest, child) => {
-//         const box = child.getBoundingClientRect()
-//         const offset = y - box.top - box.height / 2
-//         if (offset < 0 && offset > closest.offset){
-//             return {offset : offset, element: child}
-//         } else {
-//             return closest
-//         }
-//     }, {offset: Number.NEGATIVE_INFINITY}).element;
-// }
+containers.forEach(container => {
+    container.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(container, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (!afterElement) {
+            container.appendChild(draggable);
 
-// function getListItemPosition() {
-//     const listitem = document.querySelectorAll('.item')
-//     console.log(Object.keys(listitem).length)
-// }
+        } else {
+            container.insertBefore(draggable, afterElement);
+        }
+    });
+});
+
+const getDragAfterElement = (container, y) => {
+const draggableElements  = [...container.querySelectorAll('.item:not(.dragging)')];
+
+return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset){
+        return {offset : offset, element: child};
+    } else {
+        return closest;
+    }
+}, {offset: Number.NEGATIVE_INFINITY}).element;
+};
+
+const callphpfunc = () => {
+    Ajax.call([{
+        methodname: 'function_alert',
+    }]);
+    console.log('php call function called in js');
+};
 
 export const init = () => {
     window.console.log('we have been started');
