@@ -71,10 +71,13 @@ return draggableElements.reduce((closest, child) => {
 };
 
 const callphpfunc = () => {
-    Ajax.call([{
-        methodname: 'function_alert',
+    const ajcall = Ajax.call([{
+        methodname: 'qbank_settingspage_get_order',
+        arg: {
+            order: 52
+        },
     }]);
-    console.log('php call function called in js');
+    console.log(ajcall);
 };
 
 export const init = () => {
