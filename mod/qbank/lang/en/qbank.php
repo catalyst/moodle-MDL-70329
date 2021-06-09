@@ -29,6 +29,10 @@ defined('MOODLE_INTERNAL') || die();
 $string['course_summary'] = 'This course has been created as part of the upgrade to Moodle 4.0.
 The question bank in this course category has been migrated to a question bank activity in this course.
 All the questions that were previously located in this course categories question bank have been migrated to the question bank activity in this course.';
+$string['coursenamebydefault'] = '{$a->context} Question bank: {$a->shortdescription}';
+$string['module_summary'] = 'This activity has been created as part of the upgrade to Moodle 4.0.
+The question bank has been migrated to this question bank activity.
+All the questions that were previously located in this course have been migrated to this question bank activity.';
 $string['modulename'] = 'Question bank';
 $string['modulename_help'] = 'This activity allows a teacher to create, preview, and edit questions in a database of question categories.
 
@@ -36,6 +40,7 @@ These questions are then used by the quiz activity, or by other plugins.
 
 Questions are given version control and statistics once they have been used, and other parameters.';
 $string['modulename_link'] = 'mod/qbank/view';
+$string['modulenamebydefault'] = '{$a->context} Question bank: {$a->instanceid} - {$a->shortdescription}';
 $string['modulenameplural'] = 'Question banks';
 $string['pluginadministration'] = 'Question bank administration';
 $string['pluginname'] = 'Question bank';
