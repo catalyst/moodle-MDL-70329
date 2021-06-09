@@ -39,40 +39,55 @@ function xmldb_qbank_install() {
     foreach ($questioncategories as $qcategory) {
         $contextlevel = (int)$qcategory->contextlevel;
 
-        // Initialize variables qbank name and course object that will be used in each case.
-        $qbankname = null;
-        $course = null;
+        $course = null; // Initialize course object that will be used in each case.
+        $context = null; // Initialize context description.
+        $shortdescription = null; // Initialize mod_qbank short description.
 
+        // Get the data required to migrate question_categories to new mod_qbank.
         switch ($contextlevel) {
             case CONTEXT_SYSTEM:
-                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' . get_string('coresystem'), 0, 254);
                 $course = get_course(SITEID);
+                $context = get_string('coresystem');
+                $shortdescription = $context;
                 break;
             case CONTEXT_COURSECAT:
-                $categoryname = helper::get_category_name($qcategory->instanceid);
-                $shortname = substr("Question bank: " . $qcategory->instanceid . '-' . $categoryname, 0, 254);
+                $context = get_string('category');
+                $shortdescription = helper::get_category_name($qcategory->instanceid);
+
+                // Create a new course for each category with questions.
+                $shortname = substr(get_string('coursenamebydefault', 'mod_qbank',
+                    [
+                        'context' => $context,
+                        'shortdescription' => $shortdescription,
+                    ]
+                ), 0, 254);
                 $course = helper::get_course($shortname, $qcategory->instanceid);
                 if (!$course) {
-                    // Create a new course for each category with questions.
                     $course = helper::create_category_course($shortname, $qcategory->instanceid);
                 }
-                $qbankname = $shortname;
                 break;
             case CONTEXT_COURSE:
                 $course = get_course($qcategory->instanceid);
-                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' . $course->shortname, 0, 254);
+                $context = get_string('course');
+                $shortdescription = $course->shortname;
                 break;
             case CONTEXT_MODULE:
                 $cm = helper::get_coursemodule($qcategory->instanceid);
                 $course = get_course($cm->course);
-                $qbankname = substr("Question bank: " . $qcategory->instanceid . '-' .$course->shortname, 0, 254);
+                $context = get_string('pluginname', 'mod_quiz');
+                $shortdescription = $cm->name;
                 break;
         }
 
         // Create the qbank module.
+        $namedata = ['context' => $context, 'instanceid' => $qcategory->instanceid,'shortdescription' => $shortdescription];
+        $qbankname = substr(get_string('modulenamebydefault', 'mod_qbank', $namedata), 0, 254);
         $qbank = helper::create_qbank_instance($qbankname, $course);
+
+        // Migrate the question_categories data to new mod_qbank.
         if ($qbank) {
             helper::migrate_question_categories($qbank, $qcategory->contextid);
         }
     }
+    $questioncategories->close();
 }

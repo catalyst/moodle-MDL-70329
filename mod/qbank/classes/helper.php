@@ -41,10 +41,10 @@ class helper {
     /**
      * Gets only course categories where question bank are populated.
      *
-     * @return array Return a moodle_recordset instance.
+     * @return \moodle_recordset Return a moodle_recordset instance.
      * @throws \dml_exception
      */
-    public static function get_categories_populated(): array {
+    public static function get_categories_populated(): \moodle_recordset {
         global $DB;
 
         $sql = "SELECT DISTINCT qc.contextid, ctx.contextlevel, ctx.instanceid
@@ -53,7 +53,7 @@ class helper {
                   JOIN {context} ctx ON ctx.id = qc.contextid
               ORDER BY ctx.contextlevel";
 
-        return $DB->get_records_sql($sql);
+        return $DB->get_recordset_sql($sql);
     }
 
     /**
@@ -95,7 +95,7 @@ class helper {
     }
 
     /**
-     * Get course id from course_modules table.
+     * Get data from course_modules and quiz tables.
      *
      * @param int $instanceid course_module instance id.
      * @return object|null Returns a course module object.
@@ -104,7 +104,12 @@ class helper {
     public static function get_coursemodule(int $instanceid): ?object {
         global $DB;
 
-        $coursemodule = $DB->get_record('course_modules', ['id' => $instanceid]);
+        $sql = "SELECT cm.course, q.name
+                  FROM {course_modules} cm
+                  JOIN {quiz} q ON q.id = cm.instance
+                 WHERE cm.id = :instanceid";
+
+        $coursemodule = $DB->get_record_sql($sql, ['instanceid' => $instanceid]);
         if (!$coursemodule) {
             return null;
         }
@@ -166,14 +171,17 @@ class helper {
             $moduleinfo = new stdClass();
             $moduleinfo->modulename = 'qbank';
             $moduleinfo->name = $name;
+            $moduleinfo->intro = get_string('module_summary', 'mod_qbank');
             if ($course->id === SITEID) {
                 if (!$DB->get_record('course_sections', ['course' => SITEID, 'section' => 1])) {
                     course_create_section(SITEID, 1);
                 }
                 $moduleinfo->section = 1;
             } else {
-                $section = course_create_section($course->id);
-                $moduleinfo->section = $section->section;
+                if (!$DB->get_record('course_sections', ['course' => $course->id, 'section' => 0])) {
+                    course_create_section($course->id);
+                }
+                $moduleinfo->section = 0;
             }
             $moduleinfo->course = $course->id;
             $moduleinfo->visible = false;
