@@ -54,5 +54,16 @@ abstract class navigation_plugin_base {
      */
     abstract public function get_url();
 
+    /**
+     * Tab capabilities.
+     *
+     * If it has capabilities to be checked, it will return the array of capabilities.
+     *
+     * @return bool|array
+     */
+    public function get_capabilities() {
+        return false;
+    }
+
 }
 

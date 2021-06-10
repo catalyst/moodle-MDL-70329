@@ -18,40 +18,17 @@
  * Question bank settings page class.
  *
  * @package    qbank_settingspage
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
-require_once(__DIR__ . '/../config.php');
-require_once($CFG->dirroot . '/question/classes/sort_form.php');
-
-$PAGE->set_title(get_string('qbanksettings', 'admin'));
-$PAGE->set_heading(get_string('qbanksettings', 'admin'));
-$PAGE->requires->js_call_amd('core_question/drag_drop','init');
-
-$context = array();
- 
-$corequestionbankcolumns = array(
-    'checkbox_column',
-    'question_type_column',
-    'question_name_idnumber_tags_column',
-    'edit_menu_column',
-    'edit_action_column',
-    'copy_action_column',
-    'tags_action_column',
-    'preview_action_column',
-    'delete_action_column',
-    'export_xml_action_column',
-    'creator_name_column',
-    'modifier_name_column'
+$functions = array(
+    'qbank_settingspage_get_order' => array(
+            'classname'   => 'qbank_settingspages_external',
+            'methodname'  => 'get_order',
+            'description' => 'Returns order of question columns',
+            'type'        => 'read',
+            'ajax'        => true
+    )
 );
-
-foreach ($corequestionbankcolumns as $columnname) {
-    $context['name'][] = $columnname;
-}
-
-echo $OUTPUT->header();
-
-echo $OUTPUT->render_from_template('question/setting_qbanksetting', $context);
-
-echo $OUTPUT->footer();

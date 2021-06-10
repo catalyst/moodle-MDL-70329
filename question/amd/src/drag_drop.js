@@ -23,7 +23,10 @@
 */
 
 import Ajax from 'core/ajax';
+<<<<<<< HEAD
 import Notification from 'core/notification';
+=======
+>>>>>>> fa8bbc6116d4e7c3359cc47db272beb0344c4c56
 
 const draggables = document.querySelectorAll('.item');
 const containers = document.querySelectorAll('.list');
