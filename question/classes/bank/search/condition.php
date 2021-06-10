@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * An abstract class for filtering/searching questions.
  *
- * See also {@link question_bank_view::init_search_conditions()}.
+ * See also {@see question_bank_view::init_search_conditions()}.
  * @copyright 2013 Ray Morris
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,7 +38,7 @@ abstract class condition {
      * Return an SQL fragment to be ANDed into the WHERE clause to filter which questions are shown.
      * @return string SQL fragment. Must use named parameters.
      */
-    public abstract function where();
+    abstract public function where();
 
     /**
      * Return parameters to be bound to the above WHERE clause fragment.

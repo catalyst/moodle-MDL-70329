@@ -95,10 +95,19 @@ class category_condition extends condition {
         $this->where = 'q.category ' . $catidtest;
     }
 
+    /**
+     * SQL fragment to add to the where clause.
+     *
+     * @return string
+     */
     public function where() {
         return  $this->where;
     }
 
+    /**
+     * Return parameters to be bound to the above WHERE clause fragment.
+     * @return array parameter name => value.
+     */
     public function params() {
         return $this->params;
     }

@@ -51,6 +51,11 @@ class hidden_condition extends condition {
         }
     }
 
+    /**
+     * SQL fragment to add to the where clause.
+     *
+     * @return string
+     */
     public function where() {
         return  $this->where;
     }

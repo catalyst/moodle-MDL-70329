@@ -150,11 +150,6 @@ class view {
     public $customfilterobjects = null;
 
     /**
-     * @var bool enable or disable question list while calling the api.
-     */
-    public $enablequestionlist = true;
-
-    /**
      * Constructor
      * @param \question_edit_contexts $contexts
      * @param \moodle_url $pageurl
