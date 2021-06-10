@@ -39,15 +39,17 @@ draggables.forEach(draggable => {
         draggable.classList.remove('dragging');
         draggable.classList.remove('active');
         draggable.style.opacity = null;
-        callphpfunc();
+        let updatedColumns = getColumnOrder();
+        callPhpFunc();
+        console.log(updatedColumns); 
     });
 });
 
 containers.forEach(container => {
     container.addEventListener('dragover', e => {
         e.preventDefault();
-        const afterElement = getDragAfterElement(container, e.clientY);
-        const draggable = document.querySelector('.dragging');
+        let afterElement = getDragAfterElement(container, e.clientY);
+        let draggable = document.querySelector('.dragging');
         if (!afterElement) {
             container.appendChild(draggable);
 
@@ -61,8 +63,8 @@ const getDragAfterElement = (container, y) => {
 const draggableElements  = [...container.querySelectorAll('.item:not(.dragging)')];
 
 return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
+    let box = child.getBoundingClientRect();
+    let offset = y - box.top - box.height / 2;
     if (offset < 0 && offset > closest.offset){
         return {offset : offset, element: child};
     } else {
@@ -71,17 +73,22 @@ return draggableElements.reduce((closest, child) => {
 }, {offset: Number.NEGATIVE_INFINITY}).element;
 };
 
-const callphpfunc = () => {
-    const ajcall = Ajax.call([{
+const callPhpFunc = () => {
+    let ajcall = Ajax.call([{
         methodname: 'core_question_get_order',
         args: { order: 52 },
         fail: Notification.exception
     }]);
-    console.log(ajcall[0].then((response) => {
-        console.log(JSON.parse(response));
-    }));
+    ajcall[0].then((response) => console.log(JSON.parse(response)));
 };
 
-export const init = () => {
-    window.console.log('we have been started');
+const getColumnOrder = () => {
+    let updated = [...document.querySelectorAll('.item')];
+    let columns = new Array(updated.length);
+    for (let i = 0; i < updated.length; i++) {
+        columns[i] = updated[i].childNodes[1].innerText.trim();
+    }
+    return columns;
 };
+
+export const init = () => window.console.log('we have been started');
