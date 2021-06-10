@@ -94,14 +94,14 @@ class view {
      * @var column_base[] these are the 'columns' that are
      * actually displayed as a column, in order. Array keys are the class name.
      */
-    protected $visiblecolumns;
+    public $visiblecolumns;
 
     /**
      * @var column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
-    protected $extrarows;
+    public $extrarows;
 
     /**
      * @var array list of column class names for which columns to sort on.
