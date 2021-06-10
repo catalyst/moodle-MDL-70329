@@ -24,7 +24,6 @@
  */
 
 namespace core_question\bank\search;
-use setasign\Fpdi\PdfReader\Page;
 
 defined('MOODLE_INTERNAL') || die();
 
