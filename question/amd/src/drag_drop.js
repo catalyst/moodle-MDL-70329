@@ -23,6 +23,7 @@
 */
 
 import Ajax from 'core/ajax';
+import Notification from 'core/notification';
 
 const draggables = document.querySelectorAll('.item');
 const containers = document.querySelectorAll('.list');
@@ -72,12 +73,13 @@ return draggableElements.reduce((closest, child) => {
 
 const callphpfunc = () => {
     const ajcall = Ajax.call([{
-        methodname: 'qbank_settingspage_get_order',
-        arg: {
-            order: 52
-        },
+        methodname: 'core_question_get_order',
+        args: { order: 52 },
+        fail: Notification.exception
     }]);
-    console.log(ajcall);
+    console.log(ajcall[0].then((response) => {
+        console.log(JSON.parse(response));
+    }));
 };
 
 export const init = () => {

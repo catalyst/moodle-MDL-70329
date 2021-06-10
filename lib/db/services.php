@@ -1585,6 +1585,13 @@ $functions = array(
         'type' => 'read',
         'ajax' => true,
     ),
+    'core_question_get_order' => array(
+        'classname'   => 'core_question_external',
+        'methodname'  => 'get_order',
+        'description' => 'Returns question columns order',
+        'type'        => 'read',
+        'ajax'        => true,
+    ),
     'core_rating_get_item_ratings' => array(
         'classname' => 'core_rating_external',
         'methodname' => 'get_item_ratings',
@@ -1843,7 +1850,6 @@ $functions = array(
         'capabilities' => 'moodle/user:manageownfiles',
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
     ),
-
     // Competencies functions.
     'core_competency_create_competency_framework' => array(
         'classname'    => 'core_competency\external',

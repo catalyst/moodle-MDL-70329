@@ -21,9 +21,12 @@
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
+error_reporting(-1);
+ini_set('display_errors', true);
 
 require_once(__DIR__ . '/../config.php');
 require_once($CFG->dirroot . '/question/classes/sort_form.php');
+require_once($CFG->dirroot . '/question/classes/external.php');
 
 $PAGE->set_title(get_string('qbanksettings', 'admin'));
 $PAGE->set_heading(get_string('qbanksettings', 'admin'));
