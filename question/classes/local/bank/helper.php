@@ -56,4 +56,33 @@ class helper {
         }
     }
 
+    /**
+     * Get the columns of the question list.
+     *
+     * @return array
+     */
+    public static function get_question_list_columns(): array {
+        $result = array();
+        $course = new \stdClass();
+        $course->id = 0;
+        $contexts = \context_system::instance();
+        // Dummy call to get the objects without error.
+        $questionbank = new view($contexts, new \moodle_url('/question/dummyurl.php'), $course, null);
+        foreach ($questionbank->visiblecolumns as $key => $column) {
+            if ($column->get_name() === 'checkbox') {
+                continue;
+            }
+            $element = new \stdClass();
+            $element->class = $key;
+            if (substr($key, 0, 5) === 'qbank') {
+                $classelements = explode('\\', $key);
+                $element->name = get_string('pluginname', $classelements[0]);
+            } else {
+                $element->name = ucfirst($column->get_name());
+            }
+            $result[] = $element;
+        }
+        return $result;
+    }
+
 }
