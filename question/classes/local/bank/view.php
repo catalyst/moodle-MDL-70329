@@ -140,6 +140,21 @@ class view {
     public $returnurl;
 
     /**
+     * @var bool enable or disable filters while calling the API.
+     */
+    public $enablefilters = true;
+
+    /**
+     * @var array to pass custom filters instead of the specified ones.
+     */
+    public $customfilterobjects = null;
+
+    /**
+     * @var bool enable or disable question list while calling the api.
+     */
+    public $enablequestionlist = true;
+
+    /**
      * Constructor
      * @param \question_edit_contexts $contexts
      * @param \moodle_url $pageurl
@@ -688,23 +703,9 @@ class view {
             return;
         }
         $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
-        list(, $contextid) = explode(',', $cat);
-        $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
-        // Category selection form.
-        $this->display_question_bank_header();
 
-        // Display tag filter if usetags setting is enabled.
-        if ($CFG->usetags) {
-            array_unshift($this->searchconditions,
-                    new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-            $PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);
-        }
-
-        array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-        array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
-        $this->display_options_form($showquestiontext);
+        // Show the filters and search options.
+        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
 
         // Continues with list of questions.
         $this->display_question_list($editcontexts,
@@ -712,6 +713,38 @@ class view {
                 null, $page, $perpage, $showhidden, $showquestiontext,
                 $this->contexts->having_cap('moodle/question:add'));
 
+    }
+
+    /**
+     * The filters for the question bank.
+     *
+     */
+    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext) {
+        global $CFG;
+        list(, $contextid) = explode(',', $cat);
+        $catcontext = \context::instance_by_id($contextid);
+        $thiscontext = $this->get_most_specific_context();
+        // Category selection form.
+        $this->display_question_bank_header();
+
+        // Display tag filter if usetags setting is enabled/enablefilters is true.
+        if ($this->enablefilters) {
+            if (is_array($this->customfilterobjects)) {
+                foreach ($this->customfilterobjects as $filterobjects) {
+                    $this->searchconditions[] = $filterobjects;
+                }
+            } else {
+                if ($CFG->usetags) {
+                    array_unshift($this->searchconditions,
+                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
+                }
+
+                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
+                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
+                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+            }
+        }
+        $this->display_options_form($showquestiontext);
     }
 
     /**
@@ -774,13 +807,21 @@ class view {
         }
         echo \html_writer::input_hidden_params($this->baseurl, $excludes);
 
+        $advancedsearch = array();
+
         foreach ($this->searchconditions as $searchcondition) {
+            if ($searchcondition->display_options_adv()) {
+                $advancedsearch[] = $searchcondition;
+            }
             echo $searchcondition->display_options();
         }
         if ($showtextoption) {
             $this->display_showtext_checkbox($showquestiontext);
         }
-        $this->display_advanced_search_form();
+        if (!empty($advancedsearch)) {
+            $this->display_advanced_search_form($advancedsearch);
+        }
+
         $go = \html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('go')));
         echo \html_writer::tag('noscript', \html_writer::div($go), array('class' => 'inline'));
         echo \html_writer::end_div();
@@ -791,10 +832,11 @@ class view {
     /**
      * Print the "advanced" UI elements for the form to select which questions. Hidden by default.
      */
-    protected function display_advanced_search_form(): void {
-        print_collapsible_region_start('', 'advancedsearch', get_string('advancedsearchoptions', 'question'),
+    protected function display_advanced_search_form($advancedsearch): void {
+        print_collapsible_region_start('', 'advancedsearch',
+                get_string('advancedsearchoptions', 'question'),
                 'question_bank_advanced_search');
-        foreach ($this->searchconditions as $searchcondition) {
+        foreach ($advancedsearch as $searchcondition) {
             echo $searchcondition->display_options_adv();
         }
         print_collapsible_region_end();

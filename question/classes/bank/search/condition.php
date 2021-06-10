@@ -52,19 +52,19 @@ abstract class condition {
      * Display GUI for selecting criteria for this condition. Displayed when Show More is open.
      *
      * Compare display_options(), which displays always, whether Show More is open or not.
-     * @return string HTML form fragment
+     * @return bool|string HTML form fragment
      */
     public function display_options_adv() {
-        return;
+        return false;
     }
 
     /**
      * Display GUI for selecting criteria for this condition. Displayed always, whether Show More is open or not.
      *
      * Compare display_options_adv(), which displays when Show More is open.
-     * @return string HTML form fragment
+     * @return bool|string HTML form fragment
      */
     public function display_options() {
-        return;
+        return false;
     }
 }

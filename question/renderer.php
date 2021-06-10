@@ -98,6 +98,36 @@ class core_question_bank_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render category condition.
+     *
+     * @param $displaydata
+     * @return bool|string
+     */
+    public function render_category_condition($displaydata) {
+        return $this->render_from_template('core_question/category_condition', $displaydata);
+    }
+
+    /**
+     * Render category condition advanced.
+     *
+     * @param $displaydata
+     * @return bool|string
+     */
+    public function render_category_condition_advanced($displaydata) {
+        return $this->render_from_template('core_question/category_condition_advanced', $displaydata);
+    }
+
+    /**
+     * Render hidden condition advanced.
+     *
+     * @param $displaydata
+     * @return bool|string
+     */
+    public function render_hidden_condition_advanced($displaydata) {
+        return $this->render_from_template('core_question/hidden_condition_advanced', $displaydata);
+    }
+
+    /**
      * Build the HTML for the question chooser javascript popup.
      *
      * @param array $real A set of real question types
