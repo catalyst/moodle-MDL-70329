@@ -73,12 +73,11 @@ return draggableElements.reduce((closest, child) => {
 };
 
 const callPhpFunc = (updatedcol) => {
-    let ajcall = Ajax.call([{
+    Ajax.call([{
         methodname: 'core_question_get_order',
         args: { columnarr: updatedcol },
         fail: Notification.exception
     }]);
-    ajcall[0].then((response) => console.log(JSON.parse(response)));
 };
 
 const getColumnOrder = () => {
@@ -87,7 +86,7 @@ const getColumnOrder = () => {
     for (let i = 0; i < updated.length; i++) {
         columns[i] = updated[i].childNodes[1].innerText.trim();
     }
-    return columns;
+    return columns.join();
 };
 
 export const init = () => window.console.log('we have been started');

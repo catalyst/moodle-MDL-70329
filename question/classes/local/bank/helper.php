@@ -85,4 +85,32 @@ class helper {
         return $result;
     }
 
+    /**
+     * Return an array where the keys are the internal names of the columns
+     * in preferred order and the values are a human-readable name.
+     *
+     * @param array $archetypes, array of columns
+     * @param string $orderlist, a comma separated list of column names
+     * @param string $current, current column name
+     * @return array model name => lang string for this column name.
+     */
+    public static function sort_columns($archetypes, $orderlist, $current=null) {
+
+        if ($orderlist) {
+            $order = explode(',', $orderlist);
+        } else {
+            $order = array();
+        }
+
+        // Get columns in preferred order
+        $columnorder = array();
+        foreach ($order as $column) {
+            if (array_key_exists($column, $archetypes)) {
+                $columnorder[$column] = $archetypes[$column];
+            }
+        }
+        // Set up the final order to be displayed
+        return $columnorder ;
+    }
+
 }
