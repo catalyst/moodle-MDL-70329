@@ -42,8 +42,8 @@ class tags_action_column extends action_column_base implements menuable_action {
     public function init() {
         parent::init();
         // Removed for conflicting js calls.
-        //global $PAGE;
-        //$PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);
+        // ...global $PAGE;.
+        // ...$PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);.
         $this->managetags = get_string('managetags', 'tag');
     }
 
