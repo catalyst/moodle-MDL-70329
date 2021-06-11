@@ -35,5 +35,5 @@ $functions =
                 'type' => 'write',
                 'ajax' => true,
             ),
-);
+    );
 
