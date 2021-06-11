@@ -27,6 +27,7 @@ namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
+require_once($CFG->dirroot . '/question/editlib.php');
 
 /**
  * This class prints a view of the question bank.
