@@ -20,24 +20,31 @@
  * @package    qbank_settingspage
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 use core_question\local\bank\helper;
 
 require_once(__DIR__ . '/../config.php');
 require_once($CFG->dirroot . '/question/classes/sort_form.php');
 
+require_login();
 $PAGE->set_title(get_string('qbanksettings', 'admin'));
 $PAGE->set_heading(get_string('qbanksettings', 'admin'));
-$PAGE->requires->js_call_amd('core_question/drag_drop','init');
+$PAGE->requires->js_call_amd('core_question/drag_drop', 'init');
 
 $context = array();
-$corequestionbankcolumns = helper::get_question_list_columns();
-
-foreach ($corequestionbankcolumns as $columnname) {
-    $context['name'][] = $columnname->name;
+$qbanksortorder = get_config('question', 'qbanksortorder');
+$sortorder = explode(',', $qbanksortorder);
+if (!$qbanksortorder) {
+    $corequestionbankcolumns = helper::get_question_list_columns();
+    foreach ($corequestionbankcolumns as $columnname) {
+        $context['name'][] = $columnname->name;
+    }
+} else {
+    foreach ($sortorder as $columnname) {
+        $context['name'][] = $columnname;
+    }
 }
-
 echo $OUTPUT->header();
 
 echo $OUTPUT->render_from_template('question/setting_qbanksetting', $context);

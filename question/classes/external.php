@@ -323,7 +323,7 @@ class core_question_external extends external_api {
     public static function get_order_parameters() {
         return new external_function_parameters(
             array(
-                'columnarr' => new external_value(PARAM_RAW, 'data encoded as json array')
+                'columnarr' => new external_value(PARAM_RAW, 'JSON String')
             )
         );
     }
@@ -333,17 +333,17 @@ class core_question_external extends external_api {
      * @return external_value
      */
     public static function get_order_returns() {
-        return new external_value(PARAM_RAW, 'Return value integer');
+        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
     }
 
     /**
      * Returns the columns plugin order
-     * @return 
+     * @return string
      */
     public static function get_order(string $columnarr) {
         $params = self::validate_parameters(self::get_order_parameters(), array('columnarr' => $columnarr));
         $columnarr = str_replace('"', "", $columnarr);
-        $val = set_config('qbanksortorder', $columnarr, 'question'); 
+        $val = set_config('qbanksortorder', $columnarr, 'question');
         return $columnarr;
     }
 }
