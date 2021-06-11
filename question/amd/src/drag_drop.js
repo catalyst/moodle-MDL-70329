@@ -40,7 +40,7 @@ draggables.forEach(draggable => {
         draggable.classList.remove('active');
         draggable.style.opacity = null;
         let updatedColumns = getColumnOrder();
-        callPhpFunc(updatedColumns);
+        callPhpFunc(JSON.stringify(updatedColumns));
     });
 });
 
@@ -87,7 +87,7 @@ const getColumnOrder = () => {
     for (let i = 0; i < updated.length; i++) {
         columns[i] = updated[i].childNodes[1].innerText.trim();
     }
-    return updated.length;
+    return columns;
 };
 
 export const init = () => window.console.log('we have been started');

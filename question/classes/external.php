@@ -315,30 +315,6 @@ class core_question_external extends external_api {
         ]);
     }
 
-    public static function get_length_parameters() {
-        return new external_function_parameters(
-            array(
-                'length' => new external_value(PARAM_INT, 'Column array length'),
-            )
-        );
-    }
-
-    /**
-     * Returns description of method result value
-     * @return external_value
-     */
-    public static function get_length_returns() {
-        return new external_value(PARAM_INT, 'Return value integer');
-    }
-
-    /**
-     * Returns the length of column array
-     * @return 
-     */
-    public static function get_length(int $length) {
-  
-        return $length;
-    }
     /**
      * Returns description of method parameters.
      *
@@ -347,9 +323,7 @@ class core_question_external extends external_api {
     public static function get_order_parameters() {
         return new external_function_parameters(
             array(
-                'columnarr' => new external_single_structure(
-                    self::get_order_parameters()
-                )
+                'columnarr' => new external_value(PARAM_RAW, 'data encoded as json array')
             )
         );
     }
@@ -366,10 +340,9 @@ class core_question_external extends external_api {
      * Returns the columns plugin order
      * @return 
      */
-    public static function get_order(array $column) {
-        //$params = parent::validate_parameters(self::get_order_parameters(), array('order' => $order));
-        //$params = self::validate_parameters(self::get_order_parameters(), array('column'=>$column));
-        //$test = $test + 2;
-        return $column;
+    public static function get_order(string $columnarr) {
+        $params = self::validate_parameters(self::get_order_parameters(), array('columnarr' => $columnarr));
+        $data = json_decode($columnarr, true);
+        return $columnarr;
     }
 }
