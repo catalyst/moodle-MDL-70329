@@ -45,14 +45,32 @@ class tags_action_column extends action_column_base implements menuable_action {
     protected $managetags;
 
     /**
+     * @var bool tags enabled or not from config.
+     */
+    protected $tagsenabled = true;
+
+    /**
      * A chance for subclasses to initialise themselves, for example to load lang strings,
      * without having to override the constructor.
      */
     public function init(): void {
         parent::init();
-        global $PAGE;
-        $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#questionscontainer']);
+        $this->check_tags_status();
+        if ($this->tagsenabled) {
+            global $PAGE;
+            $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#questionscontainer']);
+        }
         $this->managetags = get_string('managetags', 'tag');
+    }
+
+    /**
+     * Check if tags are enabled sitewide.
+     */
+    protected function check_tags_status(): void {
+        global $CFG;
+        if (!$CFG->usetags) {
+            $this->tagsenabled = false;
+        }
     }
 
     /**
@@ -74,7 +92,7 @@ class tags_action_column extends action_column_base implements menuable_action {
         global $OUTPUT;
 
         if (\core_tag_tag::is_enabled('core_question', 'question') &&
-                question_has_capability_on($question, 'view')) {
+                question_has_capability_on($question, 'view') && $this->tagsenabled) {
 
             [$url, $attributes] = $this->get_link_url_and_attributes($question);
             echo \html_writer::link($url, $OUTPUT->pix_icon('t/tags',
@@ -110,7 +128,7 @@ class tags_action_column extends action_column_base implements menuable_action {
      */
     public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
         if (!\core_tag_tag::is_enabled('core_question', 'question') ||
-                !question_has_capability_on($question, 'view')) {
+                !question_has_capability_on($question, 'view') || !$this->tagsenabled) {
             return null;
         }
 

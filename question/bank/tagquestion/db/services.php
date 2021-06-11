@@ -25,22 +25,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
-        'qbank_tagquestion_submit_tags_form' => array(
-                'classname'     => 'qbank_tagquestion\external\qbank_tagquestion_external',
-                'methodname'    => 'submit_tags_form',
-                'description'   => 'Update the question tags.',
-                'type'          => 'write',
+$functions =
+    array(
+        'qbank_tagquestion_submit_tags_form' =>
+            array(
+                'classname' => 'qbank_tagquestion\external\qbank_tagquestion_external',
+                'methodname' => 'submit_tags_form',
+                'description' => 'Update the question tags.',
+                'type' => 'write',
                 'ajax' => true,
-        ),
+            ),
 );
 
-$services = array(
-        'qbank_tagquestion' => array(
-                'functions' => array(),
-                'restrictedusers' => 0,
-                'enabled' => 0,
-                'downloadfiles' => 1,
-                'uploadfiles' => 1
-        )
-);

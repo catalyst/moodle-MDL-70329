@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_tagquestion';
-$plugin->version   = 2021060800;
+$plugin->version   = 2021061100;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;
 

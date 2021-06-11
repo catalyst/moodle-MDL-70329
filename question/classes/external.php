@@ -143,8 +143,6 @@ class core_question_external extends external_api {
      * @see \qbank_tagquestion\external\qbank_tagquestion_external
      */
     public static function submit_tags_form($questionid, $contextid, $formdata) {
-        return \qbank_tagquestion\external\qbank_tagquestion_external::submit_tags_form($questionid, $contextid, $formdata);
-
         global $DB, $CFG;
 
         $data = [];

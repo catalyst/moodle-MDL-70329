@@ -39,8 +39,6 @@ defined('MOODLE_INTERNAL') || die();
 function core_question_output_fragment_tags_form($args) {
     debugging('Function core_question_output_fragment_tags_form() is deprecated,
          please use core_question_output_fragment_tags_form() from qbank_tagquestion instead.', DEBUG_DEVELOPER);
-    require_once($CFG->dirroot . '/question/bank/qbank_tagquestion/lib.php');
-    return qbank_tagquestion_output_fragment_tags_form($args);
 
     if (!empty($args['id'])) {
         global $CFG, $DB;
