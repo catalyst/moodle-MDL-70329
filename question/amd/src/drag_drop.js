@@ -40,8 +40,7 @@ draggables.forEach(draggable => {
         draggable.classList.remove('active');
         draggable.style.opacity = null;
         let updatedColumns = getColumnOrder();
-        callPhpFunc();
-        console.log(updatedColumns); 
+        callPhpFunc(updatedColumns);
     });
 });
 
@@ -73,10 +72,10 @@ return draggableElements.reduce((closest, child) => {
 }, {offset: Number.NEGATIVE_INFINITY}).element;
 };
 
-const callPhpFunc = () => {
+const callPhpFunc = (updatedcol) => {
     let ajcall = Ajax.call([{
         methodname: 'core_question_get_order',
-        args: { order: 52 },
+        args: { columnarr: updatedcol },
         fail: Notification.exception
     }]);
     ajcall[0].then((response) => console.log(JSON.parse(response)));
@@ -88,7 +87,7 @@ const getColumnOrder = () => {
     for (let i = 0; i < updated.length; i++) {
         columns[i] = updated[i].childNodes[1].innerText.trim();
     }
-    return columns;
+    return updated.length;
 };
 
 export const init = () => window.console.log('we have been started');

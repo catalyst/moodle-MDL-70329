@@ -1592,6 +1592,13 @@ $functions = array(
         'type'        => 'read',
         'ajax'        => true,
     ),
+    'core_question_get_length' => array(
+        'classname'   => 'core_question_external',
+        'methodname'  => 'get_length',
+        'description' => 'Returns question columns array length',
+        'type'        => 'read',
+        'ajax'        => true,
+    ),
     'core_rating_get_item_ratings' => array(
         'classname' => 'core_rating_external',
         'methodname' => 'get_item_ratings',
