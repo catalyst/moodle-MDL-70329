@@ -38,7 +38,7 @@ $sortorder = explode(',', $qbanksortorder);
 if (!$qbanksortorder) {
     $corequestionbankcolumns = helper::get_question_list_columns();
     foreach ($corequestionbankcolumns as $columnname) {
-        $context['name'][] = $columnname->name;
+        $context['name'][] = $columnname->class;
     }
 } else {
     foreach ($sortorder as $columnname) {

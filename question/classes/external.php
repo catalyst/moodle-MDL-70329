@@ -342,8 +342,9 @@ class core_question_external extends external_api {
      */
     public static function get_order(string $columnarr) {
         $params = self::validate_parameters(self::get_order_parameters(), array('columnarr' => $columnarr));
+        $v = $columnarr;
         $columnarr = str_replace('"', "", $columnarr);
         $val = set_config('qbanksortorder', $columnarr, 'question');
-        return $columnarr;
+        return $v;
     }
 }

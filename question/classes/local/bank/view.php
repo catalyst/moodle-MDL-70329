@@ -256,7 +256,28 @@ class view {
             $questionbankclasscolumns[$key] = $newpluginclasscolumn;
         }
 
+        //Sorting done here
+        $this->get_neworder($questionbankclasscolumns);
         return $questionbankclasscolumns;
+    }
+
+    public function get_neworder(array $oldorder) {
+        $qbanksortorder = get_config('question', 'qbanksortorder');
+        $sortorder = explode(',', $qbanksortorder);
+        foreach ($sortorder as $key => $val) {
+            $sortorder[$key] = preg_replace('/\\\\{4}/', '\\', $val);
+        }
+        $ordered_array = array_replace(array_flip($sortorder), $oldorder);
+
+        // $somerar = array();
+        
+         $v = 0;
+        // foreach ($sortorder as $order){
+        //    if (preg_match('/('. $key .')/', $order) == 1){
+        //        $somerar[] = $key;
+        //    }
+        // }
+        // return $somerar[0];
     }
 
     /**

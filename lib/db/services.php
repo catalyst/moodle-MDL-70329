@@ -1589,7 +1589,7 @@ $functions = array(
         'classname'   => 'core_question_external',
         'methodname'  => 'get_order',
         'description' => 'Returns question columns order',
-        'type'        => 'read',
+        'type'        => 'write',
         'ajax'        => true,
     ),
     'core_rating_get_item_ratings' => array(
