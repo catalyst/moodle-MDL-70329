@@ -206,7 +206,13 @@ class helper {
         global $DB;
 
         $contextid = \context_module::instance($qbank->coursemodule)->id;
-        //Update new context id.
+
+        // Get the top category so that the child categories are migrated recursively.
+        $category = $DB->get_record('question_categories', ['contextid' => $oldcontextid, 'parent' => 0, 'sortorder' => 0]);
+        // Migrate question categories (top children).
+        question_move_category_to_context($category->id, $oldcontextid, $contextid);
+
+        // Migrate top categories to preserve the same parent category.
         $DB->set_field('question_categories', 'contextid', $contextid, ['contextid' => $oldcontextid]);
     }
 }
