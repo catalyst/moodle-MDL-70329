@@ -39,11 +39,17 @@ require_once($CFG->libdir.'/formslib.php');
  */
 class question_category_edit_form extends moodleform {
 
+    /**
+     * Build the form definition.
+     *
+     * This adds all the form fields that the manage categories feature needs.
+     * @throws \coding_exception
+     */
     protected function definition() {
-        $mform    = $this->_form;
+        $mform = $this->_form;
 
-        $contexts   = $this->_customdata['contexts'];
-        $currentcat   = $this->_customdata['currentcat'];
+        $contexts = $this->_customdata['contexts'];
+        $currentcat = $this->_customdata['currentcat'];
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
@@ -75,6 +81,12 @@ class question_category_edit_form extends moodleform {
         $mform->setType('id', PARAM_INT);
     }
 
+    /**
+     * Set data method.
+     *
+     * Add additional information to current data.
+     * @param \stdClass|array $current Object or array of default current data.
+     */
     public function set_data($current) {
         if (is_object($current)) {
             $current = (array) $current;
@@ -94,6 +106,7 @@ class question_category_edit_form extends moodleform {
      * @param array $data
      * @param array $files
      * @return array the errors that were found
+     * @throws \dml_exception|\coding_exception
      */
     public function validation($data, $files) {
         global $DB;

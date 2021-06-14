@@ -38,6 +38,13 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_move_form extends moodleform {
+
+    /**
+     * Build the form definition.
+     *
+     * This adds all the form fields that the question move feature needs.
+     * @throws \coding_exception
+     */
     protected function definition() {
         $mform = $this->_form;
 
