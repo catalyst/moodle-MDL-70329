@@ -31,6 +31,7 @@ use qbank_managecategories\managecategories_helper;
 use qbank_managecategories\question_category_object;
 
 require_login();
+core_question\local\bank\helper::check_qbank_status('qbank_managecategories');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
