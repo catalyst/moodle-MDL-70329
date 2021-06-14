@@ -25,9 +25,9 @@
 
 namespace qbank_managecategories;
 
-use context_system;
-
 defined('MOODLE_INTERNAL') || die();
+
+use context_system;
 
 /**
  * Unit tests for (some of) ../questionlib.php.
