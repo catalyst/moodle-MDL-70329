@@ -314,4 +314,39 @@ class core_question_external extends external_api {
             )
         ]);
     }
+
+    /**
+     * Returns description of method parameters.
+     *
+     * @return external_function_parameters
+     */
+    public static function set_columnbank_order_parameters() {
+        return new external_function_parameters(
+                ['columns' => new external_value(PARAM_RAW, 'JSON String containing column order to set in config_plugins table')]
+        );
+    }
+
+    /**
+     * Returns description of method result value.
+     * 
+     * @return external_value
+     */
+    public static function set_columnbank_order_returns() {
+        return new external_single_structure(
+            ['status' => new external_value(PARAM_BOOL, 'status: true if success')]
+        );
+    }
+
+    /**
+     * Returns the columns plugin order.
+     * 
+     * @return string
+     */
+    public static function set_columnbank_order(string $columns) {
+        $params = self::validate_parameters(self::set_columnbank_order_parameters(), ['columns' => $columns]);
+        self::validate_context(context_system::instance());
+        $status = set_config('qbanksortorder', $columns, 'question');
+        $result['status'] = $status;
+        return $result;
+    }
 }

@@ -411,10 +411,22 @@ if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) 
     $temp->add(new \core_question\admin\manage_qbank_plugins_page());
     $ADMIN->add('qbanksettings', $temp);
     $plugins = core_plugin_manager::instance()->get_plugins_of_type('qbank');
+    // Column sort order link in manageqbanks page.
+    $url = new moodle_url("/question/sortcolumns.php", ['section' => 'columnsortorder']);
+    $temp->add(new admin_setting_description(
+        'manageqbanksgotocolumnsort',
+        '',
+        new lang_string('qbankgotocolumnsort', 'question',
+            html_writer::link($url, get_string('qbankcolumnsortorder', 'question')))
+    ));
+
     foreach ($plugins as $plugin) {
         /** @var \core\plugininfo\qbank $plugin */
         $plugin->load_settings($ADMIN, 'qbanksettings', $hassiteconfig);
     }
+    // Column sort order.
+    $temp = new admin_externalpage('settingqbank', get_string('qbankcolumnsortorder', 'question'), $url);
+    $ADMIN->add('qbanksettings', $temp);
 }
 
 // Question type settings
