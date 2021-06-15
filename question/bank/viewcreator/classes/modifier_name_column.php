@@ -32,7 +32,7 @@ class modifier_name_column extends column_base {
         return 'modifiername';
     }
 
-    protected function get_title(): string {
+    public function get_title(): string {
         return get_string('lastmodifiedby', 'question');
     }
 
