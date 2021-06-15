@@ -25,6 +25,10 @@
 
 namespace core\plugininfo;
 
+use qbank_columnsortorder\column_sort_order_manager;
+
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Base class for qbank plugins.
  *
@@ -153,5 +157,19 @@ class qbank extends base {
         if ($settings) {
             $ADMIN->add($parentnodename, $settings);
         }
+    }
+
+    /**
+     * Pre-uninstall hook.
+     *
+     * This is intended for disabling of plugin, some DB table purging, etc.
+     *
+     * NOTE: to be called from uninstall_plugin() only.
+     * @private
+     */
+    public function uninstall_cleanup() {
+        $plugintoremove = $this->type . '_' . $this->name;
+        column_sort_order_manager::remove_unused_column_from_db($plugintoremove);
+        parent::uninstall_cleanup();
     }
 }

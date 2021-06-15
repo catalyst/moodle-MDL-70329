@@ -24,6 +24,7 @@
 
 namespace core_question\local\bank;
 
+require_once($CFG->dirroot . '/question/editlib.php');
 use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
@@ -156,12 +157,14 @@ class view {
      * @param \moodle_url $pageurl
      * @param object $course course settings
      * @param object $cm (optional) activity settings.
+     * @param column_sort_order $columnorder Column order.
      */
-    public function __construct($contexts, $pageurl, $course, $cm = null) {
+    public function __construct($contexts, $pageurl, $course, $cm = null, $columnorder = null) {
         $this->contexts = $contexts;
         $this->baseurl = $pageurl;
         $this->course = $course;
         $this->cm = $cm;
+        $this->columnorder = $columnorder;
 
         // Create the url of the new question page to forward to.
         $this->returnurl = $pageurl->out_as_local_url(false);
@@ -264,6 +267,10 @@ class view {
         // New plugins added at the end of the array, will change in sorting feature.
         foreach ($newpluginclasscolumns as $key => $newpluginclasscolumn) {
             $questionbankclasscolumns[$key] = $newpluginclasscolumn;
+        }
+
+        if ($this->columnorder) {
+            $questionbankclasscolumns = $this->columnorder->sort_columns($questionbankclasscolumns);
         }
 
         // Mitigate the error in case of any regression.
@@ -1301,4 +1308,11 @@ class view {
         $this->searchconditions[] = $searchcondition;
     }
 
+    /**
+     * Gets visible columns.
+     * @return array $this->visiblecolumns Visible columns.
+     */
+    public function get_visiblecolumns(): array {
+        return $this->visiblecolumns;
+    }
 }
