@@ -25,6 +25,8 @@
 
 namespace core\plugininfo;
 
+use qbank_columnsortorder\column_sort_order_manager;
+
 /**
  * Base class for qbank plugins.
  *
@@ -150,12 +152,21 @@ class qbank extends base {
 
         $settings = null;
         if (file_exists($this->full_path('settings.php'))) {
-            $settings = new \admin_settingpage($section, $this->displayname,
-                                  'moodle/site:config', $this->is_enabled() === false);
+            if ($this->name !== 'columnsortorder') {
+                $settings = new \admin_settingpage($section, $this->displayname,
+                                    'moodle/site:config', $this->is_enabled() === false);
+            }
             include($this->full_path('settings.php')); // This may also set $settings to null.
         }
         if ($settings) {
             $ADMIN->add($parentnodename, $settings);
         }
+    }
+
+    public function uninstall_cleanup() {
+        $plugintoremove = $this->type . '_' . $this->name;
+        $columnsortordermanager = new column_sort_order_manager();
+        $columnsortordermanager->remove_unused_column_from_db($plugintoremove);
+        parent::uninstall_cleanup();
     }
 }
