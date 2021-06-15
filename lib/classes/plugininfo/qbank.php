@@ -130,4 +130,35 @@ class qbank extends base {
             $ADMIN->add($parentnodename, $settings);
         }
     }
+
+    /**
+     * Pre-uninstall hook.
+     *
+     * This is intended for disabling of plugin, some DB table purging, etc.
+     *
+     * NOTE: to be called from uninstall_plugin() only.
+     * @private
+     */
+    public function uninstall_cleanup() {
+        $plugintoremove = $this->displayname;
+        self::remove_unused_column_from_db($plugintoremove);
+        parent::uninstall_cleanup();
+    }
+
+    /**
+     * Removes any uninstalled or disabled plugin column in the config_plugins 'qbanksortorder' in core_question.
+     *
+     * @param string $plugintoremove Plugin displayed name to remove.
+     */
+    public static function remove_unused_column_from_db(string $plugintoremove) : void {
+        $config = explode(',', json_decode(get_config('question', 'qbanksortorder')));
+
+        foreach ($config as $key => $displayedname) {
+            if (strpos($displayedname, $plugintoremove) !== false) {
+                unset($config[$key]);
+            }
+        }
+        $config = json_encode(implode(',', $config));
+        set_config('qbanksortorder', $config, 'question');
+    }
 }
