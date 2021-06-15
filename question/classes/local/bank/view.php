@@ -26,6 +26,7 @@ namespace core_question\local\bank;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/question/editlib.php');
 use core_question\bank\search\condition;
 
 /**
@@ -94,14 +95,14 @@ class view {
      * @var \question_bank_column_base[] these are the 'columns' that are
      * actually displayed as a column, in order. Array keys are the class name.
      */
-    protected $visiblecolumns;
+    public $visiblecolumns;
 
     /**
      * @var \question_bank_column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
-    protected $extrarows;
+    public $extrarows;
 
     /**
      * @var array list of column class names for which columns to sort on.
@@ -271,8 +272,39 @@ class view {
         foreach ($newpluginclasscolumns as $key => $newpluginclasscolumn) {
             $questionbankclasscolumns[$key] = $newpluginclasscolumn;
         }
-
+        $questionbankclasscolumns = $this->get_neworder($questionbankclasscolumns);
         return $questionbankclasscolumns;
+    }
+
+    /**
+     * Orders question columns.
+     *
+     * @param array $oldorder Old question bank colum order.
+     * @return array $oldorder|$properorder returns new proper order.
+     */
+    public function get_neworder(array $oldorder) : array {
+        // Get current column order.
+        $qbanksortorder = get_config('question', 'qbanksortorder');
+        $qbanksortorder = json_decode($qbanksortorder, true);
+        $matches = [];
+        preg_match_all('#\((.*?)\)#', $qbanksortorder, $matches);
+        // Check if db has order set.
+        if ($qbanksortorder) {
+            // Merge new order with old one.
+            $properorder = array_merge(array_flip($matches[1]), $oldorder);
+            // If plugin/column disabled unset the proper key.
+            $diffkey = array_diff_key($properorder, $oldorder);
+            foreach ($diffkey as $keytounset => $class) {
+                unset($properorder[$keytounset]);
+            }
+            // Always have the checkbox at first column position.
+            $checkboxfirstelement = $properorder['checkbox_column'];
+            unset($properorder['checkbox_column']);
+            $properorder = array_merge(['checkbox_column' => $checkboxfirstelement], $properorder);
+            return $properorder;
+        } else {
+            return $oldorder;
+        }
     }
 
     /**

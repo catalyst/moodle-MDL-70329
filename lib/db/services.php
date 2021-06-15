@@ -1599,6 +1599,13 @@ $functions = array(
         'type' => 'read',
         'ajax' => true,
     ),
+    'core_question_set_columnbank_order' => [
+        'classname'   => 'core_question_external',
+        'methodname'  => 'set_columnbank_order',
+        'description' => 'Sets question columns order in database',
+        'type'        => 'write',
+        'ajax'        => true,
+    ],
     'core_rating_get_item_ratings' => array(
         'classname' => 'core_rating_external',
         'methodname' => 'get_item_ratings',
