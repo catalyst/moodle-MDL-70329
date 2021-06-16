@@ -81,9 +81,9 @@ class comment_action_column extends \core_question\local\bank\menu_action_column
             return [null, null, null];
         }
 
-        if (question_has_capability_on($question, 'commentmine') || question_has_capability_on($question, 'commentall')) {
+        if (question_require_capability_on($question, 'comment')) {
             $context = $this->qbank->get_most_specific_context();
-            $url = new \moodle_url('/question/bank/comment/comment.php');
+            $url = comment_helper::question_comment_url($question->id, $context);
             return [$url, 't/messages', $this->strcomment];
         } else {
             return [null, null, null];
