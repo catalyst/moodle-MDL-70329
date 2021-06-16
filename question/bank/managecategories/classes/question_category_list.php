@@ -76,7 +76,7 @@ class question_category_list extends moodle_list {
      * Set the array of records of list items.
      */
     public function get_records() : void {
-        $this->records = get_categories_for_contexts($this->context->id, $this->sortby);
+        $this->records = helper::get_categories_for_contexts($this->context->id, $this->sortby);
     }
 
     /**

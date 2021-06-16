@@ -1152,8 +1152,12 @@ function sort_categories_by_tree(&$categories, $id = 0, $level = 1) {
  * @param int $id the category to start the indenting process from.
  * @param int $depth the indent depth. Used in recursive calls.
  * @return array a new array of categories, in the right order for the tree.
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function flatten_category_tree(&$categories, $id, $depth = 0, $nochildrenof = -1) {
+    debugging('Function flatten_category_tree() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::flatten_category_tree() instead.', DEBUG_DEVELOPER);
 
     // Indent the name of this category.
     $newcategories = array();
@@ -1180,8 +1184,12 @@ function flatten_category_tree(&$categories, $id, $depth = 0, $nochildrenof = -1
  *
  * @param array $categories An array of category objects, for example from the.
  * @return array The formatted list of categories.
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function add_indented_names($categories, $nochildrenof = -1) {
+    debugging('Function add_indented_names() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::add_indented_names() instead.', DEBUG_DEVELOPER);
 
     // Add an array to each category to hold the child category ids. This array
     // will be removed again by flatten_category_tree(). It should not be used
@@ -1224,9 +1232,13 @@ function add_indented_names($categories, $nochildrenof = -1) {
  * @param integer $only_editable if true, exclude categories this user is not allowed to edit.
  * @param integer $selected optionally, the id of a category to be selected by
  *      default in the dropdown.
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function question_category_select_menu($contexts, $top = false, $currentcat = 0,
         $selected = "", $nochildrenof = -1) {
+    debugging('Function question_category_select_menu() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::question_category_select_menu() instead.', DEBUG_DEVELOPER);
     $categoriesarray = question_category_options($contexts, $top, $currentcat,
             false, $nochildrenof, false);
     if ($selected) {
@@ -1372,8 +1384,12 @@ function question_make_default_categories($contexts) {
  * @param string $sortorder used as the ORDER BY clause in the select statement.
  * @param bool $top Whether to return the top categories or not.
  * @return array of category objects.
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function get_categories_for_contexts($contexts, $sortorder = 'parent, sortorder, name ASC', $top = false) {
+    debugging('Function get_categories_for_contexts() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::get_categories_for_contexts() instead.', DEBUG_DEVELOPER);
     global $DB;
     $topwhere = $top ? '' : 'AND c.parent <> 0';
     return $DB->get_records_sql("
@@ -1394,9 +1410,13 @@ function get_categories_for_contexts($contexts, $sortorder = 'parent, sortorder,
  * @param int $nochildrenof
  * @param boolean $escapecontextnames Whether the returned name of the thing is to be HTML escaped or not.
  * @return array
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function question_category_options($contexts, $top = false, $currentcat = 0,
         $popupform = false, $nochildrenof = -1, $escapecontextnames = true) {
+    debugging('Function question_category_options() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::question_category_options() instead.', DEBUG_DEVELOPER);
     global $CFG;
     $pcontexts = array();
     foreach ($contexts as $context) {
@@ -1461,7 +1481,13 @@ function question_category_options($contexts, $top = false, $currentcat = 0,
     }
 }
 
+/**
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
+ */
 function question_add_context_in_key($categories) {
+    debugging('Function question_add_context_in_key() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::question_add_context_in_key() instead.', DEBUG_DEVELOPER);
     $newcatarray = array();
     foreach ($categories as $id => $category) {
         $category->parent = "$category->parent,$category->contextid";
@@ -1477,8 +1503,12 @@ function question_add_context_in_key($categories) {
  * @param array $categories An array of question categories.
  * @param boolean $escape Whether the returned name of the thing is to be HTML escaped or not.
  * @return array The same question category list given to the function, with the top category names being translated.
+ * @deprecated since Moodle 4.0 MDL-71585
+ * @see qbank_managecategories\helper
  */
 function question_fix_top_names($categories, $escape = true) {
+    debugging('Function question_fix_top_names() has been deprecated and moved to qbank_managecategories plugin,
+    Please use qbank_managecategories\helper::question_fix_top_names() instead.', DEBUG_DEVELOPER);
 
     foreach ($categories as $id => $category) {
         if ($category->parent == 0) {
