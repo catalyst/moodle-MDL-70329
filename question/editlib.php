@@ -103,8 +103,8 @@ function get_questions_category( $category, $noparent=false, $recurse=true, $exp
  * @see qbank_managecategories\managecategories_helper
  */
 function question_is_only_child_of_top_category_in_context($categoryid) {
-    debugging('question_is_only_child_of_top_category_in_context()
-    has been deprecated and moved to qbank_exportquestions plugin,
+    debugging('Function question_is_only_child_of_top_category_in_context()
+    has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\managecategories_helper::question_is_only_child_of_top_category_in_context() instead.',
         DEBUG_DEVELOPER);
     global $DB;
@@ -125,7 +125,7 @@ function question_is_only_child_of_top_category_in_context($categoryid) {
  * @see qbank_managecategories\managecategories_helper
  */
 function question_is_top_category($categoryid) {
-    debugging('question_is_top_category() has been deprecated and moved to qbank_exportquestions plugin,
+    debugging('Function question_is_top_category() has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\managecategories_helper::question_is_top_category() instead.', DEBUG_DEVELOPER);
     global $DB;
     return 0 == $DB->get_field('question_categories', 'parent', array('id' => $categoryid));
@@ -139,7 +139,7 @@ function question_is_top_category($categoryid) {
  * @see qbank_managecategories\managecategories_helper
  */
 function question_can_delete_cat($todelete) {
-    debugging('question_can_delete_cat() has been deprecated and moved to qbank_exportquestions plugin,
+    debugging('Function question_can_delete_cat() has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\managecategories_helper::question_can_delete_cat() instead.', DEBUG_DEVELOPER);
     global $DB;
     if (question_is_top_category($todelete)) {
