@@ -39,6 +39,9 @@ $string['modulename_help'] = 'This activity allows a teacher to create, preview,
 These questions are then used by the quiz activity, or by other plugins.
 
 Questions are given version control and statistics once they have been used, and other parameters.';
+$string['noqbankinstances'] = 'There are no Question bank in this course.
+
+See the <a href="https://docs.moodle.org/40/en/Questionbank_activity">Question bank activity</a> for more information about how to create a Question bank correctly.';
 $string['modulename_link'] = 'mod/qbank/view';
 $string['modulenamebydefault'] = '{$a->context} Question bank: {$a->instanceid} - {$a->shortdescription}';
 $string['modulenameplural'] = 'Question banks';
