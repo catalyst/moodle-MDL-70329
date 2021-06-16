@@ -27,6 +27,9 @@
 
 namespace qbank_managecategories;
 
+use context;
+use moodle_exception;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -66,5 +69,53 @@ class managecategories_helper {
             question_delete_question($question->id);
         }
         $questions->close();
+    }
+
+    /**
+     * Checks whether this is the only child of a top category in a context.
+     *
+     * @param int $categoryid a category id.
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function question_is_only_child_of_top_category_in_context(int $categoryid): bool {
+        global $DB;
+        return 1 == $DB->count_records_sql("
+            SELECT count(*)
+              FROM {question_categories} c
+              JOIN {question_categories} p ON c.parent = p.id
+              JOIN {question_categories} s ON s.parent = c.parent
+             WHERE c.id = ? AND p.parent = 0", array($categoryid));
+    }
+
+    /**
+     * Checks whether the category is a "Top" category (with no parent).
+     *
+     * @param int $categoryid a category id.
+     * @return bool
+     * @throws \dml_exception
+     */
+    protected static function question_is_top_category(int $categoryid): bool {
+        global $DB;
+        return 0 == $DB->get_field('question_categories', 'parent', array('id' => $categoryid));
+    }
+
+    /**
+     * Ensures that this user is allowed to delete this category.
+     *
+     * @param int $todelete a category id.
+     * @throws \required_capability_exception
+     * @throws \dml_exception|moodle_exception
+     */
+    public static function question_can_delete_cat(int $todelete): void {
+        global $DB;
+        if (self::question_is_top_category($todelete)) {
+            throw new moodle_exception('cannotdeletetopcat', 'question');
+        } else if (self::question_is_only_child_of_top_category_in_context($todelete)) {
+            throw new moodle_exception('cannotdeletecate', 'question');
+        } else {
+            $contextid = $DB->get_field('question_categories', 'contextid', array('id' => $todelete));
+            require_capability('moodle/question:managecategory', context::instance_by_id($contextid));
+        }
     }
 }

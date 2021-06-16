@@ -25,6 +25,7 @@
 namespace qbank_managecategories\form;
 
 use moodleform;
+use qbank_managecategories\managecategories_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -56,7 +57,7 @@ class question_category_edit_form extends moodleform {
         $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
                 array('contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat));
         $mform->setType('parent', PARAM_SEQUENCE);
-        if (question_is_only_child_of_top_category_in_context($currentcat)) {
+        if (managecategories_helper::question_is_only_child_of_top_category_in_context($currentcat)) {
             $mform->hardFreeze('parent');
         }
         $mform->addHelpButton('parent', 'parentcategory', 'question');
