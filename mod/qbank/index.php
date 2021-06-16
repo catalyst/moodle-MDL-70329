@@ -49,7 +49,7 @@ echo $OUTPUT->heading($modulenameplural);
 $qbanks = get_all_instances_in_course('qbank', $course);
 
 if (empty($qbanks)) {
-    notice(get_string('thereareno', 'moodle', $modulenameplural), new moodle_url('/course/view.php', ['id' => $course->id]));
+    notice(get_string('noqbankinstances', 'mod_qbank'), new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
 $table = new html_table();
