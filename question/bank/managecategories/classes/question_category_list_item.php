@@ -108,7 +108,7 @@ class question_category_list_item extends \list_item {
                 array('context' => $this->parentlist->context, 'noclean' => true));
 
         // Don't allow delete if this is the top category, or the last editable category in this context.
-        if ($category->parent && !question_is_only_child_of_top_category_in_context($category->id)) {
+        if ($category->parent && !managecategories_helper::question_is_only_child_of_top_category_in_context($category->id)) {
             $deleteurl = new moodle_url($this->parentlist->pageurl, array('delete' => $this->id, 'sesskey' => sesskey()));
             $item .= html_writer::link($deleteurl,
                     $OUTPUT->pix_icon('t/delete', $str->delete),
