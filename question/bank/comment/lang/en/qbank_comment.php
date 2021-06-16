@@ -26,3 +26,4 @@
 $string['pluginname'] = 'Question bank comment';
 $string['privacy:metadata'] = 'Question bank comment helps to comment in a question, it does not store any user data (for now).';
 $string['comment'] = 'Comment';
+$string['commentplural'] = 'Comments';
