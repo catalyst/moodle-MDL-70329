@@ -242,7 +242,8 @@ function match_grade_options($gradeoptionsfull, $grade, $matchgrades = 'error') 
  * @see qbank_managecategories\managecategories_helper
  */
 function question_remove_stale_questions_from_category($categoryid) {
-    debugging('question_remove_stale_questions_from_category() has been deprecated and moved to qbank_exportquestions plugin,
+    debugging('Function question_remove_stale_questions_from_category()
+    has been deprecated and moved to qbank_exportquestions plugin,
     Please use qbank_managecategories\managecategories_helper::question_remove_stale_questions_from_category() instead.',
         DEBUG_DEVELOPER);
     global $DB;
