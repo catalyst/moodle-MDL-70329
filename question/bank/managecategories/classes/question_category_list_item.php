@@ -85,14 +85,14 @@ class question_category_list_item extends \list_item {
      * @return string Item html.
      */
     public function item_html($extraargs = array()) : string {
-        global $CFG, $OUTPUT;
+        global $PAGE, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
 
         $editqestions = get_string('editquestions', 'question');
-
+        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
         // Each section adds html to be displayed as part of this list item.
-        $questionbankurl = new moodle_url('/question/edit.php', $this->parentlist->pageurl->params());
+        $questionbankurl = new moodle_url($nodeparent->action->get_path(), $this->parentlist->pageurl->params());
         $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
         $item = '';
         $text = format_string($category->name, true, ['context' => $this->parentlist->context]);
