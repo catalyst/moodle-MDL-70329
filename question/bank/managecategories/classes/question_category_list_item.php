@@ -83,38 +83,44 @@ class question_category_list_item extends \list_item {
      *
      * @param array $extraargs
      * @return string Item html.
+     * @throws \moodle_exception
      */
     public function item_html($extraargs = array()) : string {
         global $PAGE, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
 
-        $editqestions = get_string('editquestions', 'question');
-        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
         // Each section adds html to be displayed as part of this list item.
+        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
         $questionbankurl = new moodle_url($nodeparent->action->get_path(), $this->parentlist->pageurl->params());
         $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
-        $item = '';
-        $text = format_string($category->name, true, ['context' => $this->parentlist->context]);
+        $categoryname = format_string($category->name, true, ['context' => $this->parentlist->context]);
+        $idnumber = null;
         if ($category->idnumber !== null && $category->idnumber !== '') {
-            $text .= ' ' . html_writer::span(
-                            html_writer::span(get_string('idnumber', 'question'), 'accesshide') .
-                            ' ' . $category->idnumber, 'badge badge-primary');
+            $idnumber = $category->idnumber;
         }
-        $text .= ' (' . $category->questioncount . ')';
-        $item .= html_writer::tag('b', html_writer::link($questionbankurl, $text,
-                        ['title' => $editqestions]) . ' ');
-        $item .= format_text($category->info, $category->infoformat,
-                array('context' => $this->parentlist->context, 'noclean' => true));
+        $questioncount = ' (' . $category->questioncount . ')';
+        $categorydesc = format_text($category->info, $category->infoformat,
+            ['context' => $this->parentlist->context, 'noclean' => true]);
 
         // Don't allow delete if this is the top category, or the last editable category in this context.
-        if ($category->parent && !managecategories_helper::question_is_only_child_of_top_category_in_context($category->id)) {
+        $deleteurl = null;
+        if ($category->parent && !helper::question_is_only_child_of_top_category_in_context($category->id)) {
             $deleteurl = new moodle_url($this->parentlist->pageurl, array('delete' => $this->id, 'sesskey' => sesskey()));
-            $item .= html_writer::link($deleteurl,
-                    $OUTPUT->pix_icon('t/delete', $str->delete),
-                    array('title' => $str->delete));
         }
 
-        return $item;
+        // Render each question category.
+        $data =
+            [
+                'questionbankurl' => $questionbankurl,
+                'categoryname' => $categoryname,
+                'idnumber' => $idnumber,
+                'questioncount' => $questioncount,
+                'categorydesc' => $categorydesc,
+                'deleteurl' => $deleteurl,
+                'deletetitle' => $str->delete
+            ];
+
+        return $OUTPUT->render_from_template(helper::PLUGINNAME . '/listitem', $data);
     }
 }
