@@ -15,10 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for (some of) ../questionlib.php.
+ * Unit tests for managecategories_helper class.
  *
- * @package    core_question
- * @category   phpunit
+ * @package    qbank_managecategories
  * @copyright  2006 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,12 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 use context_system;
 
 /**
- * Unit tests for (some of) ../questionlib.php.
+ * Unit tests for managecategories_helper class.
  *
+ * @package    qbank_managecategories
  * @copyright  2006 The Open University
+ * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class questionlib_test extends \advanced_testcase {
+class managecategories_helper_test extends \advanced_testcase {
 
     public function test_question_remove_stale_questions_from_category() {
         global $DB;

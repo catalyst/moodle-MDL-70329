@@ -17,9 +17,9 @@
 /**
  * Question category object tests.
  *
- * @package core_question
- * @copyright 2019 the Open University
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     qbank_managecategories
+ * @copyright   2019 the Open University
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace qbank_managecategories;
@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/question/editlib.php');
 
 use context;
 use context_course;
+use context_module;
 use moodle_url;
 use question_edit_contexts;
 use stdClass;
@@ -38,9 +39,10 @@ use stdClass;
 /**
  * Unit tests for qbank_managecategories\question_category_object.
  *
- * @package    qbank_managecategories
- * @copyright  2019 the Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     qbank_managecategories
+ * @copyright   2019 the Open University
+ * @author      2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_category_object_test extends \advanced_testcase {
 
@@ -59,6 +61,36 @@ class question_category_object_test extends \advanced_testcase {
      */
     protected $topcat;
 
+    /**
+     * @var stdClass course object.
+     */
+    protected $course;
+
+    /**
+     * @var stdClass quiz object.
+     */
+    protected $quiz;
+
+    /**
+     * @var question_edit_contexts
+     */
+    private $qcontexts;
+
+    /**
+     * @var false|object|stdClass|null
+     */
+    private $defaultcategoryobj;
+
+    /**
+     * @var string
+     */
+    private $defaultcategory;
+
+    /**
+     * @var question_category_object
+     */
+    private $qcobjectquiz;
+
     protected function setUp(): void {
         parent::setUp();
         self::setAdminUser();
@@ -70,6 +102,24 @@ class question_category_object_test extends \advanced_testcase {
             new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
             $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
             $contexts->having_cap('moodle/question:add'));
+
+        // Set up tests in a quiz context.
+        $this->course = $this->getDataGenerator()->create_course();
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
+        $this->qcontexts = new question_edit_contexts(context_module::instance($this->quiz->cmid));
+
+        $this->defaultcategoryobj = question_make_default_categories([$this->qcontexts->lowest()]);
+        $this->defaultcategory = $this->defaultcategoryobj->id . ',' . $this->defaultcategoryobj->contextid;
+
+        $this->qcobjectquiz = new question_category_object(
+            1,
+            new moodle_url('/mod/quiz/edit.php', ['cmid' => $this->quiz->cmid]),
+            $this->qcontexts->having_one_edit_tab_cap('categories'),
+            $this->defaultcategoryobj->id,
+            $this->defaultcategory,
+            null,
+            $this->qcontexts->having_cap('moodle/question:add'));
+
     }
 
     /**
@@ -187,5 +237,92 @@ class question_category_object_test extends \advanced_testcase {
         $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
         $this->assertSame('New name', $newcat->name);
         $this->assertNull($newcat->idnumber);
+    }
+
+    /**
+     * Test the question category created event.
+     */
+    public function test_question_category_created() {
+        // Trigger and capture the event.
+        $sink = $this->redirectEvents();
+        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+        $events = $sink->get_events();
+        $event = reset($events);
+
+        // Check that the event data is valid.
+        $this->assertInstanceOf('\core\event\question_category_created', $event);
+        $this->assertEquals(context_module::instance($this->quiz->cmid), $event->get_context());
+        $expected = array($this->course->id, 'quiz', 'addcategory', 'view.php?id=' . $this->quiz->cmid , $categoryid, $this->quiz->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
+    }
+
+    /**
+     * Test the question category deleted event.
+     */
+    public function test_question_category_deleted() {
+        // Create the category.
+        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+
+        // Trigger and capture the event.
+        $sink = $this->redirectEvents();
+        $this->qcobjectquiz->delete_category($categoryid);
+        $events = $sink->get_events();
+        $event = reset($events);
+
+        // Check that the event data is valid.
+        $this->assertInstanceOf('\core\event\question_category_deleted', $event);
+        $this->assertEquals(context_module::instance($this->quiz->cmid), $event->get_context());
+        $this->assertEquals($categoryid, $event->objectid);
+        $this->assertDebuggingNotCalled();
+    }
+
+    /**
+     * Test the question category updated event.
+     */
+    public function test_question_category_updated() {
+        // Create the category.
+        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+
+        // Trigger and capture the event.
+        $sink = $this->redirectEvents();
+        $this->qcobjectquiz->update_category($categoryid, $this->defaultcategory, 'updatedcategory', '', FORMAT_HTML, '', false);
+        $events = $sink->get_events();
+        $event = reset($events);
+
+        // Check that the event data is valid.
+        $this->assertInstanceOf('\core\event\question_category_updated', $event);
+        $this->assertEquals(context_module::instance($this->quiz->cmid), $event->get_context());
+        $this->assertEquals($categoryid, $event->objectid);
+        $this->assertDebuggingNotCalled();
+    }
+
+    /**
+     * Test the question category viewed event.
+     * There is no external API for viewing the category, so the unit test will simply
+     * create and trigger the event and ensure data is returned as expected.
+     */
+    public function test_question_category_viewed() {
+        // Create the category.
+        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+
+        // Log the view of this category.
+        $category = new stdClass();
+        $category->id = $categoryid;
+        $context = context_module::instance($this->quiz->cmid);
+        $event = \core\event\question_category_viewed::create_from_question_category_instance($category, $context);
+
+        // Trigger and capture the event.
+        $sink = $this->redirectEvents();
+        $event->trigger();
+        $events = $sink->get_events();
+        $event = reset($events);
+
+        // Check that the event data is valid.
+        $this->assertInstanceOf('\core\event\question_category_viewed', $event);
+        $this->assertEquals(context_module::instance($this->quiz->cmid), $event->get_context());
+        $this->assertEquals($categoryid, $event->objectid);
+        $this->assertDebuggingNotCalled();
+
     }
 }
