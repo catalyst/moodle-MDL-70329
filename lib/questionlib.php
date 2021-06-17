@@ -239,12 +239,12 @@ function match_grade_options($gradeoptionsfull, $grade, $matchgrades = 'error') 
  *
  * @param int $categoryid The category ID.
  * @deprecated since Moodle 4.0 MDL-71585
- * @see qbank_managecategories\managecategories_helper
+ * @see qbank_managecategories\helper
  */
 function question_remove_stale_questions_from_category($categoryid) {
     debugging('Function question_remove_stale_questions_from_category()
     has been deprecated and moved to qbank_managecategories plugin,
-    Please use qbank_managecategories\managecategories_helper::question_remove_stale_questions_from_category() instead.',
+    Please use qbank_managecategories\helper::question_remove_stale_questions_from_category() instead.',
         DEBUG_DEVELOPER);
     global $DB;
 

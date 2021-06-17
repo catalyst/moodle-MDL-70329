@@ -33,11 +33,16 @@ use moodle_exception;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class managecategories_helper contains all the library functions.
+ * Class helper contains all the library functions.
  *
- * @package managecategories_helper
+ * @package helper
  */
-class managecategories_helper {
+class helper {
+
+    /**
+     * Name of this plugin.
+     */
+    const PLUGINNAME = 'qbank_managecategories';
 
     /**
      * Remove stale questions from a category.

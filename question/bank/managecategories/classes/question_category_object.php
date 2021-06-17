@@ -281,7 +281,7 @@ class question_category_object {
      */
     public function delete_category(int $categoryid) : void {
         global $CFG, $DB;
-        managecategories_helper::question_can_delete_cat($categoryid);
+        helper::question_can_delete_cat($categoryid);
         if (!$category = $DB->get_record("question_categories", array("id" => $categoryid))) {  // Security.
             throw new moodle_exception('unknowcategory');
         }
@@ -305,7 +305,7 @@ class question_category_object {
      * @param int $newcat id of the new category.
      */
     public function move_questions_and_delete_category(int $oldcat, int $newcat) : void {
-        managecategories_helper::question_can_delete_cat($oldcat);
+        helper::question_can_delete_cat($oldcat);
         $this->move_questions($oldcat, $newcat);
         $this->delete_category($oldcat);
     }
@@ -427,7 +427,7 @@ class question_category_object {
 
         // Get the record we are updating.
         $oldcat = $DB->get_record('question_categories', array('id' => $updateid));
-        $lastcategoryinthiscontext = managecategories_helper::question_is_only_child_of_top_category_in_context($updateid);
+        $lastcategoryinthiscontext = helper::question_is_only_child_of_top_category_in_context($updateid);
 
         if (!empty($newparent) && !$lastcategoryinthiscontext) {
             list($parentid, $tocontextid) = explode(',', $newparent);

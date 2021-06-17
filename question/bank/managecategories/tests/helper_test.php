@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for managecategories_helper class.
+ * Unit tests for helper class.
  *
  * @package    qbank_managecategories
  * @copyright  2006 The Open University
@@ -29,14 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 use context_system;
 
 /**
- * Unit tests for managecategories_helper class.
+ * Unit tests for helper class.
  *
  * @package    qbank_managecategories
  * @copyright  2006 The Open University
  * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class managecategories_helper_test extends \advanced_testcase {
+class helper_test extends \advanced_testcase {
 
     public function test_question_remove_stale_questions_from_category() {
         global $DB;
@@ -79,19 +79,19 @@ class managecategories_helper_test extends \advanced_testcase {
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
 
         // Non-existing category, nothing will happen.
-        managecategories_helper::question_remove_stale_questions_from_category(0);
+        helper::question_remove_stale_questions_from_category(0);
         $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
 
         // First category, should be empty afterwards.
-        managecategories_helper::question_remove_stale_questions_from_category($qcat1->id);
+        helper::question_remove_stale_questions_from_category($qcat1->id);
         $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1a->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1b->id]));
 
         // Second category, used questions should be left untouched.
-        managecategories_helper::question_remove_stale_questions_from_category($qcat2->id);
+        helper::question_remove_stale_questions_from_category($qcat2->id);
         $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q2a->id]));
