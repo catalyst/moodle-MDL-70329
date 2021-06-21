@@ -103,3 +103,18 @@ function qbank_delete_instance($id) {
 
     return true;
 }
+
+/**
+ * This function extends the settings navigation block for the site.
+ *
+ * It is safe to rely on PAGE here as we will only ever be within the module
+ * context when this is called
+ *
+ * @param settings_navigation $settings
+ * @param navigation_node $quiznode
+ * @return void
+ */
+function qbank_extend_settings_navigation($settings, $quiznode) {
+    global $PAGE;
+    question_extend_settings_navigation($quiznode, $PAGE->cm->context, '/mod/qbank/view.php')->trim_if_empty();
+}
