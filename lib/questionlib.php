@@ -717,8 +717,9 @@ function question_move_questions_to_category($questionids, $newcategoryid) {
  * @param integer $categoryid the id of the category being moved.
  * @param integer $oldcontextid the old context id.
  * @param integer $newcontextid the new context id.
+ * @param bool $purgecache if calling this function will purge question from the cache or not.
  */
-function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid) {
+function question_move_category_to_context($categoryid, $oldcontextid, $newcontextid, $purgecache = true) {
     global $DB;
 
     $questions = [];
@@ -727,9 +728,10 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     foreach ($questionids as $questionid => $qtype) {
         question_bank::get_qtype($qtype)->move_files(
                 $questionid, $oldcontextid, $newcontextid);
-        // Purge this question from the cache.
-        question_bank::notify_question_edited($questionid);
-
+        if ($purgecache) {
+            // Purge this question from the cache.
+            question_bank::notify_question_edited($questionid);
+        }
         $questions[] = (object) [
             'id' => $questionid,
             'contextid' => $oldcontextid
