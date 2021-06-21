@@ -1932,7 +1932,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 function qbank_add_navigation(navigation_node $navigationnode, context $context): navigation_node {
 
     $qbanknode = $navigationnode->add(get_string('modulenameplural', 'mod_qbank'),
-        null, navigation_node::TYPE_CONTAINER, null, 'questionbank');
+        null, navigation_node::TYPE_CONTAINER, null, 'questionbankmodule');
 
     if (has_capability('mod/qbank:view', $context)) {
         $qbanknode->add(get_string('modulenameplural', 'mod_qbank'),
