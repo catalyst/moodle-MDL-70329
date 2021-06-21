@@ -25,19 +25,25 @@
 
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
+require_once($CFG->dirroot . '/question/editlib.php');
 
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
+$moduleid = optional_param('cmid', 0, PARAM_INT);
 
 // Activity instance id.
 $q = optional_param('q', 0, PARAM_INT);
+
+if ($moduleid) {
+    $id = $moduleid;
+}
 
 if ($id) {
     $cm = get_coursemodule_from_id('qbank', $id, 0, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
     $moduleinstance = $DB->get_record('qbank', array('id' => $cm->instance), '*', MUST_EXIST);
 } else if ($q) {
-    $moduleinstance = $DB->get_record('qbank', array('id' => $n), '*', MUST_EXIST);
+    $moduleinstance = $DB->get_record('qbank', array('id' => $q), '*', MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('qbank', $moduleinstance->id, $course->id, false, MUST_EXIST);
 } else {
@@ -45,9 +51,7 @@ if ($id) {
 }
 
 require_login($course, true, $cm);
-
 $modulecontext = context_module::instance($cm->id);
-
 require_capability('mod/qbank:view', $modulecontext);
 
 $event = \mod_qbank\event\course_module_viewed::create(array(
@@ -58,11 +62,27 @@ $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('qbank', $moduleinstance);
 $event->trigger();
 
-$PAGE->set_url('/mod/qbank/view.php', array('id' => $cm->id));
+list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
+        question_edit_setup('questions', '/mod/qbank/view.php', $cm->id);
+
+$PAGE->set_url(new moodle_url($thispageurl));
+
+$url = new moodle_url($thispageurl);
+// Qbank api call.
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
+
 $PAGE->set_title(format_string($moduleinstance->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 
+// Print horizontal nav if needed.
+$renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $OUTPUT->header();
+
+$qbankaction = new \core_question\output\qbank_actionbar($url);
+echo $renderer->qbank_action_menu($qbankaction);
+
+// Print the question area.
+$questionbank->display($pagevars, 'questions');
 
 echo $OUTPUT->footer();

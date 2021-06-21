@@ -78,3 +78,6 @@ loggedoff_help,core_message
 loggedoffdescription,core_message
 sendingvia,core_message
 sendingviawhen,core_message
+deletecoursecategorywithquestions,core_question
+errordeletingquestionsfromcategory,core_question
+questionsinthequestionbank,core

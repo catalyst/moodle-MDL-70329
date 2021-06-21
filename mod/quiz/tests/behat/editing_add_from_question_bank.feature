@@ -15,8 +15,9 @@ Feature: Adding questions to a quiz from the question bank
       | user | course | role |
       | teacher1 | C1 | editingteacher |
     And the following "activities" exist:
-      | activity   | name   | intro                           | course | idnumber |
-      | quiz       | Quiz 1 | Quiz 1 for testing the Add menu | C1     | quiz1    |
+      | activity   | name             | intro                           | course | idnumber |
+      | quiz       | Quiz 1           | Quiz 1 for testing the Add menu | C1     | quiz1    |
+      | qbank      | Test qbank name  | Test qbank description          | C1     | qbank1   |
     And the following "question categories" exist:
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
@@ -29,6 +30,7 @@ Feature: Adding questions to a quiz from the question bank
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     When I navigate to "Question bank" in current page administration
+    When I follow "Test qbank name"
     And I choose "Edit question" action for "question 01 name" in the question bank
     And I set the following fields to these values:
       | Tags | foo |

@@ -1987,7 +1987,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         global $CFG, $DB;
 
         require_once($CFG->libdir.'/gradelib.php');
-        require_once($CFG->libdir.'/questionlib.php');
         require_once($CFG->dirroot.'/cohort/lib.php');
 
         // Make sure we won't timeout when deleting a lot of courses.
@@ -2026,9 +2025,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         if (!$cb->delete_contents($this->get_context())) {
             throw new moodle_exception('errordeletingcontentfromcategory', 'contentbank', '', $this->get_formatted_name());
         }
-        if (!question_delete_course_category($this, null)) {
-            throw new moodle_exception('cannotdeletecategoryquestions', '', '', $this->get_formatted_name());
-        }
 
         // Delete all events in the category.
         $DB->delete_records('event', array('categoryid' => $this->id));
@@ -2061,7 +2057,7 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
     }
 
     /**
-     * Checks if user can delete this category and move content (courses, subcategories and questions)
+     * Checks if user can delete this category and move content (courses and subcategories)
      * to another category. If yes returns the array of possible target categories names
      *
      * If user can not manage this category or it is completely empty - empty array will be returned
@@ -2069,8 +2065,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      * @return array
      */
     public function move_content_targets_list() {
-        global $CFG;
-        require_once($CFG->libdir . '/questionlib.php');
         $context = $this->get_context();
         if (!$this->is_uservisible() ||
                 !has_capability('moodle/category:manage', $context)) {
@@ -2084,8 +2078,8 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         if ($this->has_courses()) {
             $testcaps[] = 'moodle/course:create';
         }
-        // If this category has subcategories or questions, user must have 'category:manage' capability in target category.
-        if ($this->has_children() || question_context_has_any_questions($context)) {
+        // If this category has subcategories, user must have 'category:manage' capability in target category.
+        if ($this->has_children()) {
             $testcaps[] = 'moodle/category:manage';
         }
         if (!empty($testcaps)) {
@@ -2105,9 +2099,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
      * @return bool
      */
     public function can_move_content_to($newcatid) {
-        global $CFG;
-        require_once($CFG->libdir . '/questionlib.php');
-
         if (!$this->has_manage_capability()) {
             return false;
         }
@@ -2117,8 +2108,8 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         if ($this->has_courses()) {
             $testcaps[] = 'moodle/course:create';
         }
-        // If this category has subcategories or questions, user must have 'category:manage' capability in target category.
-        if ($this->has_children() || question_context_has_any_questions($this->get_context())) {
+        // If this category has subcategories, user must have 'category:manage' capability in target category.
+        if ($this->has_children()) {
             $testcaps[] = 'moodle/category:manage';
         }
         if (!empty($testcaps) && !has_all_capabilities($testcaps, context_coursecat::instance($newcatid))) {
@@ -2140,7 +2131,7 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
     }
 
     /**
-     * Deletes a category and moves all content (children, courses and questions) to the new parent
+     * Deletes a category and moves all content (children and courses) to the new parent
      *
      * Note that this function does not check capabilities, {@link core_course_category::can_move_content_to()}
      * must be called prior
@@ -2153,7 +2144,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
         global $CFG, $DB, $OUTPUT;
 
         require_once($CFG->libdir.'/gradelib.php');
-        require_once($CFG->libdir.'/questionlib.php');
         require_once($CFG->dirroot.'/cohort/lib.php');
 
         // Get all objects and lists because later the caches will be reset so.
@@ -2216,12 +2206,6 @@ class core_course_category implements renderable, cacheable_object, IteratorAggr
                         'notifysuccess'
                 );
             }
-        }
-        if (!question_delete_course_category($this, $newparentcat)) {
-            if ($showfeedback) {
-                echo $OUTPUT->notification(get_string('errordeletingquestionsfromcategory', 'question', $catname), 'notifysuccess');
-            }
-            return false;
         }
 
         // Finally delete the category and it's context.

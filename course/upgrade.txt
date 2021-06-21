@@ -81,6 +81,11 @@ course formats don't have their own renderer.
   - Returns courses the user is enrolled in which contain at least one action event in the supplied time/text filtering parameters.
   - Provides a similar response to get_enrolled_courses_by_timeline_classification, but omits courses which have no matching
     action events.
+* The include question bank setting when backup and restore a course has been removed from:
+  - General defaults section.
+  - Import defaults section.
+  - Automated defaults section.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
 
 === 3.11 ===
 * A new callback xxx_coursemodule_definition_after_data that allows plugins to extend activity forms after the data is set.

@@ -14,15 +14,19 @@ Feature: A teacher can delete questions in the question bank
     And the following "course enrolments" exist:
       | user | course | role |
       | teacher1 | C1 | editingteacher |
+    And the following "activities" exist:
+      | activity   | name             | intro                   | course | idnumber |
+      | qbank      | Test qbank name  | Test qbank description  | C1     | qbank1   |
     And the following "question categories" exist:
-      | contextlevel | reference | name           |
-      | Course       | C1        | Test questions |
+      | contextlevel          | reference | name           |
+      | Activity module       | qbank1    | Test questions |
     And the following "questions" exist:
       | questioncategory | qtype | name                        | questiontext                  |
       | Test questions   | essay | Test question to be deleted | Write about whatever you want |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
+    And I follow "Test qbank name"
+    And I select "Test questions (1)" from the "category" singleselect
 
   @javascript
   Scenario: A question not used anywhere can really be deleted
@@ -53,7 +57,9 @@ Feature: A teacher can delete questions in the question bank
       | question                         | page | requireprevious |
       | Test used question to be deleted | 1    | 0               |
     When I am on "Course 1" course homepage
-    And I navigate to "Question bank" in current page administration
+    And I follow "Test qbank name"
+    And I click on "id_selectacategory" "select"
+    And I click on "Test questions (2)" "option"
     And I choose "Delete" action for "Test used question to be deleted" in the question bank
     And I press "Delete"
     Then I should not see "Test used question to be deleted"

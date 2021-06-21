@@ -164,7 +164,7 @@ function question_can_delete_cat($todelete) {
  * Common setup for all pages for editing questions.
  * @param string $baseurl the name of the script calling this funciton. For examle 'qusetion/edit.php'.
  * @param string $edittab code for this edit tab
- * @param bool $requirecmid require cmid? default false
+ * @param bool|int $requirecmid require cmid? default false
  * @param bool $unused no longer used, do no pass
  * @return array $thispageurl, $contexts, $cmid, $cm, $module, $pagevars
  */
@@ -178,7 +178,11 @@ function question_edit_setup($edittab, $baseurl, $requirecmid = false, $unused =
     $params = [];
 
     if ($requirecmid) {
-        $params['cmid'] = required_param('cmid', PARAM_INT);
+        if (is_bool($requirecmid)) {
+            $params['cmid'] = required_param('cmid', PARAM_INT);
+        } else {
+            $params['cmid'] = $requirecmid;
+        }
     } else {
         $params['cmid'] = optional_param('cmid', null, PARAM_INT);
     }

@@ -440,8 +440,11 @@ function question_delete_context($contextid): array {
  * @param stdClass $course an object representing the activity
  * @param bool $notused this argument is not used any more. Kept for backwards compatibility.
  * @return bool always true.
+ * @deprecated since MDL-71378 Moodle 4.0
  */
-function question_delete_course($course, $notused = false): bool {
+function question_delete_course($course, $notused = false) {
+    debugging('Function question_delete_course() is deprecated, without replacement.
+    Question banks in a course context feature has been removed.', DEBUG_DEVELOPER);
     $coursecontext = context_course::instance($course->id);
     question_delete_context($coursecontext->id);
     return true;
@@ -457,8 +460,11 @@ function question_delete_course($course, $notused = false): bool {
  *      category where content moved
  * @param bool $notused this argument is no longer used. Kept for backwards compatibility.
  * @return boolean
+ * @deprecated since MDL-71378 Moodle 4.0
  */
-function question_delete_course_category($category, $newcategory, $notused=false): bool {
+function question_delete_course_category($category, $newcategory, $notused=false) {
+    debugging('Function question_delete_course_category() is deprecated, without replacement.
+    Question banks in a catagory context feature has been removed.', DEBUG_DEVELOPER);
     global $DB;
 
     $context = context_coursecat::instance($category->id);
@@ -833,8 +839,9 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
 
     $subcatids = $DB->get_records_menu('question_categories', ['parent' => $categoryid], '', 'id,1');
     foreach ($subcatids as $subcatid => $notused) {
-        $DB->set_field('question_categories', 'contextid', $newcontextid, ['id' => $subcatid]);
-        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid);
+        $DB->set_field('question_categories', 'contextid', $newcontextid,
+                array('id' => $subcatid));
+        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid, $purgecache);
     }
 }
 
@@ -1532,36 +1539,50 @@ function question_edit_url($context) {
  * this method will help to autoload those nodes in the question bank navigation.
  *
  * @param navigation_node $navigationnode The navigation node to add the question branch to
- * @param object $context
+ * @param context $context
  * @param string $baseurl the url of the base where the api is implemented from
- * @return navigation_node Returns the question branch that was added
+ * @param bool $default If uses the default navigation or needs id as parameter.
+ * @return navigation_node|void Returns the question branch that was added
  */
-function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php') {
+function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php', $default = true) {
     global $PAGE;
 
-    if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = ['courseid' => $context->instanceid];
-    } else if ($context->contextlevel == CONTEXT_MODULE) {
+    if ($context->contextlevel == CONTEXT_MODULE) {
         $params = ['cmid' => $context->instanceid];
+        if ($default) {
+            $paramqbank = ['cmid' => $context->instanceid];
+        } else {
+            $paramqbank = ['id' => $context->instanceid];
+        }
     } else {
         return;
     }
 
     if (($cat = $PAGE->url->param('cat')) && preg_match('~\d+,\d+~', $cat)) {
         $params['cat'] = $cat;
+        $paramqbank['cat'] = $cat;
     }
 
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
-            new moodle_url($baseurl, $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
+            new moodle_url($baseurl, $paramqbank), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
     $corenavigations = [
             'questions' => [
-                    'title' => get_string('questions', 'question'),
-                    'url' => new moodle_url($baseurl)
+                'title' => get_string('questions', 'question'),
+                'url' => new moodle_url($baseurl)
             ],
-            'categories' => [],
-            'import' => [],
-            'export' => []
+            'categories' => [
+                'title' => get_string('categories', 'question'),
+                'url' => new moodle_url('/question/category.php')
+            ],
+            'import' => [
+                'title' => get_string('import', 'question'),
+                'url' => new moodle_url('/question/import.php')
+            ],
+            'export' => [
+                'title' => get_string('export', 'question'),
+                'url' => new moodle_url('/question/export.php')
+            ]
     ];
 
     $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
@@ -1644,7 +1665,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 function qbank_add_navigation(navigation_node $navigationnode, context $context): navigation_node {
 
     $qbanknode = $navigationnode->add(get_string('modulenameplural', 'mod_qbank'),
-        null, navigation_node::TYPE_CONTAINER, null, 'questionbank');
+        null, navigation_node::TYPE_CONTAINER, null, 'questionbankmodule');
 
     if (has_capability('mod/qbank:view', $context)) {
         $qbanknode->add(get_string('modulenameplural', 'mod_qbank'),
@@ -1972,8 +1993,11 @@ function question_page_type_list($pagetype, $parentcontext, $currentcontext): ar
  *
  * @param string $modname The name of the module (without mod_ prefix).
  * @return bool true if the module uses questions.
+ * @deprecated since MDL-71378 Moodle 4.0
  */
-function question_module_uses_questions($modname): bool {
+function question_module_uses_questions($modname) {
+    debugging('Function question_module_uses_questions() is deprecated, without replacement.
+    The backup and restore question banks as a group feature has been removed.', DEBUG_DEVELOPER);
     if (plugin_supports('mod', $modname, FEATURE_USES_QUESTIONS)) {
         return true;
     }
