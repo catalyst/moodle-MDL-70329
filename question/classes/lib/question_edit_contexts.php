@@ -77,7 +77,7 @@ class question_edit_contexts {
      * @param \context $thiscontext the current context.
      */
     public function __construct(\context $thiscontext) {
-        $this->allcontexts = array_values($thiscontext->get_parent_contexts(true));
+        $this->allcontexts[0] = $thiscontext;
     }
 
     /**

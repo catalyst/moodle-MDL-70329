@@ -25,7 +25,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/formslib.php');
-require_once($CFG->libdir . '/questionlib.php');
 
 /**
  * Delete category moodleform.
@@ -80,9 +79,6 @@ class core_course_deletecategory_form extends moodleform {
         }
         if ($this->coursecat->has_courses()) {
             $contents .= html_writer::tag('li', get_string('courses'));
-        }
-        if (question_context_has_any_questions($categorycontext)) {
-            $contents .= html_writer::tag('li', get_string('questionsinthequestionbank'));
         }
 
         // Check if plugins can provide more info.

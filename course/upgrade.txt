@@ -64,6 +64,11 @@ course formats don't have their own renderer.
 * New course_get_enrolled_courses_for_logged_in_user_from_search which hooks in with external\get_enrolled_courses_by_timeline_classification
   given COURSE_TIMELINE_SEARCH is set then get_enrolled_courses_by_timeline_classification will deviate to use a string search of enrolled courses.
 * Class core_course\output\course_module_name is deprecated. Now core_courseformat\output\local\cm\cmname controls inline edit.
+* The include question bank setting when backup and restore a course has been removed from:
+  - General defaults section.
+  - Import defaults section.
+  - Automated defaults section.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
 
 === 3.11 ===
 * A new callback xxx_coursemodule_definition_after_data that allows plugins to extend activity forms after the data is set.

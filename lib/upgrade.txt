@@ -121,6 +121,15 @@ check when and who has enabled/disabled plugins.
  During the upgrade, data from the question table will be copied to the new tables. After this process,
  the data copied will be removed from question table quiz_slot and finally the the quiz_slot_tags table will be removed.
 * Function question_hash() is deprecated without replacement.
+* Use mod_qbank module context in unit test to test question banks instead of course context.
+* Deprecation: Function question_module_uses_questions() has been deprecated without replacement
+  as the include question bank setting when backup and restore a course has been removed from core.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
+* Deprecation: Function question_delete_course() and question_delete_course_category() have been deprecated without replacement
+  as the Question banks in a catagory and course context features have been removed from core.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
+* The call to question_delete_course() function has been removed from remove_course_contents function in moodlelib.php
+  as the question banks in a course context features have been removed from core.
 
 === 3.11.2 ===
 * For security reasons, filelib has been updated so all requests now use emulated redirects.

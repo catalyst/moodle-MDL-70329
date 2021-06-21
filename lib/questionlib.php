@@ -439,57 +439,6 @@ function question_delete_context($contextid): array {
 }
 
 /**
- * All question categories and their questions are deleted for this course.
- *
- * @param stdClass $course an object representing the activity
- * @param bool $notused this argument is not used any more. Kept for backwards compatibility.
- * @return bool always true.
- */
-function question_delete_course($course, $notused = false): bool {
-    $coursecontext = context_course::instance($course->id);
-    question_delete_context($coursecontext->id);
-    return true;
-}
-
-/**
- * Category is about to be deleted,
- * 1/ All question categories and their questions are deleted for this course category.
- * 2/ All questions are moved to new category
- *
- * @param stdClass|core_course_category $category course category object
- * @param stdClass|core_course_category $newcategory empty means everything deleted, otherwise id of
- *      category where content moved
- * @param bool $notused this argument is no longer used. Kept for backwards compatibility.
- * @return boolean
- */
-function question_delete_course_category($category, $newcategory, $notused=false): bool {
-    global $DB;
-
-    $context = context_coursecat::instance($category->id);
-    if (empty($newcategory)) {
-        question_delete_context($context->id);
-
-    } else {
-        // Move question categories to the new context.
-        if (!$newcontext = context_coursecat::instance($newcategory->id)) {
-            return false;
-        }
-
-        // Only move question categories if there is any question category at all!
-        if ($topcategory = question_get_top_category($context->id)) {
-            $newtopcategory = question_get_top_category($newcontext->id, true);
-
-            question_move_category_to_context($topcategory->id, $context->id, $newcontext->id);
-            $DB->set_field('question_categories', 'parent', $newtopcategory->id, ['parent' => $topcategory->id]);
-            // Now delete the top category.
-            $DB->delete_records('question_categories', ['id' => $topcategory->id]);
-        }
-    }
-
-    return true;
-}
-
-/**
  * Creates a new category to save the questions in use.
  *
  * @param array $questionids of question ids
@@ -1546,25 +1495,30 @@ function question_edit_url($context) {
  * @param navigation_node $navigationnode The navigation node to add the question branch to
  * @param object $context
  * @param string $baseurl the url of the base where the api is implemented from
+ * @param bool $default If uses the default navigation or needs id as parameter.
  * @return navigation_node Returns the question branch that was added
  */
-function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php') {
+function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php', $default = true) {
     global $PAGE;
 
-    if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = ['courseid' => $context->instanceid];
-    } else if ($context->contextlevel == CONTEXT_MODULE) {
+    if ($context->contextlevel == CONTEXT_MODULE) {
         $params = ['cmid' => $context->instanceid];
+        if ($default) {
+            $paramqbank = ['cmid' => $context->instanceid];
+        } else {
+            $paramqbank = ['id' => $context->instanceid];
+        }
     } else {
         return;
     }
 
     if (($cat = $PAGE->url->param('cat')) && preg_match('~\d+,\d+~', $cat)) {
         $params['cat'] = $cat;
+        $paramqbank['cat'] = $cat;
     }
 
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
-        new moodle_url($baseurl, $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
+        new moodle_url($baseurl, $paramqbank), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
     $corenavigations = [
         'questions' => [
@@ -1627,8 +1581,12 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     $contexts = new core_question\lib\question_edit_contexts($context);
     foreach ($corenavigations as $key => $corenavigation) {
         if ($contexts->have_one_edit_tab_cap($key)) {
+            $nodeparam = $params;
+            if ($key === 'questions') {
+                $nodeparam = $paramqbank;
+            }
             $questionnode->add($corenavigation['title'], new moodle_url(
-                $corenavigation['url'], $params), navigation_node::TYPE_SETTING, null, $key);
+                $corenavigation['url'], $nodeparam), navigation_node::TYPE_SETTING, null, $key);
         }
     }
 
@@ -2108,7 +2066,7 @@ function is_latest(string $version, string $questionbankentryid) : bool {
 function qbank_add_navigation(navigation_node $navigationnode, context $context): navigation_node {
 
     $qbanknode = $navigationnode->add(get_string('modulenameplural', 'mod_qbank'),
-        null, navigation_node::TYPE_CONTAINER, null, 'questionbank');
+        null, navigation_node::TYPE_CONTAINER, null, 'questionbankmodule');
 
     if (has_capability('mod/qbank:view', $context)) {
         $qbanknode->add(get_string('modulenameplural', 'mod_qbank'),
@@ -2367,4 +2325,61 @@ function question_fix_top_names($categories, $escape = true) {
     debugging('Function question_fix_top_names() has been deprecated and moved to qbank_managecategories plugin,
     Please use qbank_managecategories\helper::question_fix_top_names() instead.', DEBUG_DEVELOPER);
     return \qbank_managecategories\helper::question_fix_top_names($categories, $escape);
+}
+
+/**
+ * All question categories and their questions are deleted for this course.
+ *
+ * @param stdClass $course an object representing the activity
+ * @param bool $notused this argument is not used any more. Kept for backwards compatibility.
+ * @return bool always true.
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
+ */
+function question_delete_course($course, $notused = false): bool {
+    debugging('Function question_delete_course() is deprecated, without replacement.
+    Question banks in a course context feature has been removed.', DEBUG_DEVELOPER);
+    $coursecontext = context_course::instance($course->id);
+    question_delete_context($coursecontext->id);
+    return true;
+}
+
+/**
+ * Category is about to be deleted,
+ * 1/ All question categories and their questions are deleted for this course category.
+ * 2/ All questions are moved to new category
+ *
+ * @param stdClass|core_course_category $category course category object
+ * @param stdClass|core_course_category $newcategory empty means everything deleted, otherwise id of
+ *      category where content moved
+ * @param bool $notused this argument is no longer used. Kept for backwards compatibility.
+ * @return boolean
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
+ */
+function question_delete_course_category($category, $newcategory, $notused=false): bool {
+    debugging('Function question_delete_course_category() is deprecated, without replacement.
+    Question banks in a catagory context feature has been removed.', DEBUG_DEVELOPER);
+    global $DB;
+
+    $context = context_coursecat::instance($category->id);
+    if (empty($newcategory)) {
+        question_delete_context($context->id);
+
+    } else {
+        // Move question categories to the new context.
+        if (!$newcontext = context_coursecat::instance($newcategory->id)) {
+            return false;
+        }
+
+        // Only move question categories if there is any question category at all!
+        if ($topcategory = question_get_top_category($context->id)) {
+            $newtopcategory = question_get_top_category($newcontext->id, true);
+
+            question_move_category_to_context($topcategory->id, $context->id, $newcontext->id);
+            $DB->set_field('question_categories', 'parent', $newtopcategory->id, ['parent' => $topcategory->id]);
+            // Now delete the top category.
+            $DB->delete_records('question_categories', ['id' => $topcategory->id]);
+        }
+    }
+
+    return true;
 }
