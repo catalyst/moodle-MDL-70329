@@ -82,8 +82,6 @@ $PAGE->set_context($modulecontext);
 echo $OUTPUT->header();
 
 // Print horizontal nav if needed.
-$nodeparent = $PAGE->settingsnav->find('questionbankmodule', \navigation_node::TYPE_CONTAINER);
-question_extend_settings_navigation($nodeparent, $modulecontext, '/mod/qbank/view.php');
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
