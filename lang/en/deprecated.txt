@@ -156,3 +156,6 @@ enableactivitychooser,core_admin
 coursepreferences,core
 yourprogress,core_completion
 importfrominstructions,core_calendar
+deletecoursecategorywithquestions,core_question
+errordeletingquestionsfromcategory,core_question
+questionsinthequestionbank,core

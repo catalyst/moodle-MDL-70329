@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/questionlib.php');
+
 /**
  * Return if the plugin supports $feature.
  *
@@ -103,4 +105,19 @@ function qbank_delete_instance($id) {
     $DB->delete_records('qbank', array('id' => $id));
 
     return true;
+}
+
+/**
+ * Adds module specific settings to the settings block.
+ *
+ * It is safe to rely on PAGE here as we will only ever be within the module
+ * context when this is called
+ *
+ * @param settings_navigation $settings The settings navigation object
+ * @param navigation_node $qbanknode The node to add module settings to
+ * @return void
+ */
+function qbank_extend_settings_navigation(settings_navigation $settings, navigation_node $qbanknode): void {
+    global $PAGE;
+    question_extend_settings_navigation($qbanknode, $PAGE->cm->context, '/mod/qbank/view.php', false)->trim_if_empty();
 }

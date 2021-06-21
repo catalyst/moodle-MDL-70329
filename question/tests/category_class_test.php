@@ -46,11 +46,19 @@ class core_question_category_class_testcase extends advanced_testcase {
      */
     protected $topcat;
 
+    /**
+     * Setup test data
+     *
+     * @throws moodle_exception
+     * @throws dml_exception
+     */
     protected function setUp(): void {
         parent::setUp();
         self::setAdminUser();
         $this->resetAfterTest();
-        $this->context = context_course::instance(SITEID);
+        $courseid = get_course(SITEID)->id;
+        $modqbank = $this->getDataGenerator()->create_module('qbank', ['course' => $courseid]);
+        $this->context = context_module::instance($modqbank->cmid);
         $contexts = new question_edit_contexts($this->context);
         $this->topcat = question_get_top_category($this->context->id, true);
         $this->qcobject = new question_category_object(null,

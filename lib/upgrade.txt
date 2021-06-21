@@ -56,6 +56,15 @@ information provided here is intended especially for developers.
   - completion_completion::mark_complete()
   which is needed to store id of completion record on successful update which is later beeing used by
   completion_info::internal_set_data() to reaggregate completions that have been marked for instant course completion.
+* Use mod_qbank module context in unit test to test question banks instead of course context.
+* Deprecation: Function question_module_uses_questions() has been deprecated without replacement
+  as the include question bank setting when backup and restore a course has been removed from core.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
+* Deprecation: Function question_delete_course() and question_delete_course_category() have been deprecated without replacement
+  as the Question banks in a catagory and course context features have been removed from core.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
+* The call to question_delete_course() function has been removed from remove_course_contents function in moodlelib.php
+  as the question banks in a course context features have been removed from core.
 
 === 3.11.2 ===
 * For security reasons, filelib has been updated so all requests now use emulated redirects.
