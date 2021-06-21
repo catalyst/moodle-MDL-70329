@@ -2777,19 +2777,41 @@ function xmldb_main_upgrade($oldversion) {
             $questionbankentry->ownerid = $question->createdby;
             $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
 
-            // Populate table question_versions.
+            // Create question_versions records to be added.
             $questionversion = new \stdClass();
             $questionversion->questionbankentryid = $questionbankentry->id;
             $questionversion->questionid = $question->id;
             $questionversions[] = $questionversion;
+
+            // Create question_references records to be added.
+            $quizslot = $DB->get_record('quiz_slots', ['questionid' => $question->id]);
+            if ($quizslot) {
+                $questionreference = new \stdClass();
+                var_dump($quizslot->quizid);
+                $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+                $questionreference->component = 'mod_quiz';
+                $questionreference->questionarea = 'slot';
+                $questionreference->itemid = $quizslot->id;
+                $questionreference->questionbankentryid = $questionbankentry->id;
+                $questionreference->versionnumber = 1;
+                $questionreferences[] = $questionreference;
+            }
         }
         $questions->close();
 
+        // Populate table question_versions.
         $qbankversionschunks = array_chunk($questionversions, 30000);
         foreach ($qbankversionschunks as $qbankversionschunk) {
             $DB->insert_records('question_versions', $qbankversionschunk);
         }
 
+        // Populate table question_references.
+        $qbankreferenceschunks = array_chunk($questionreferences, 30000);
+        foreach ($qbankreferenceschunks as $qbankreferenceschunk) {
+            $DB->insert_records('question_references', $qbankreferenceschunk);
+        }
+
+        // TODO: Populate table question_set_references.
         // TODO: Remove fields from question table.
 
         // Main savepoint reached.
