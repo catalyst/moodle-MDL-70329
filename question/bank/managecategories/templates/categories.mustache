@@ -1,0 +1,98 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template qbank_managecategories/categories
+
+    Template for displaying category view.
+
+    Context variables required for this template:
+    * helpstringhead - String header accompanied with it help button.
+    * hascapability - Boolean, true if user has capability to add categories.
+    * checkbox - Checkbox displaying descriptions.
+    * contextid - Context id for js init.
+    * categoriesrendered - Array representing categories data rendered.
+    * items - Categories data.
+    * heading - Category's heading for each context (ie: Course or Quiz).
+    * ctxlvl - Context level for categories section - context.
+
+    Example context (json):
+    {
+        "helpstringhead": "<h2> Edit categories <a href='someurl'>...</a></h2>",
+        "hascapability": true,
+        "checkbox": "<form id='qbshowdescr-form'>...</form>",
+        "contextid": "18",
+        "categoriesrendered": [{
+            "items": [{
+                "questionbankurl": "question/edit.php?cmid=123",
+                "categoryname": "Default for Miscellaneous",
+                "idnumber": "1",
+                "questioncount": " (1)",
+                "categorydesc": "The default category for questions shared in context Miscellaneous",
+                "editactionmenu": "<div class='action-menu moodle-actionmenu'>...</div>",
+                "handle": true,
+                "iconleft": "<img class='icon spacer' alt='iconleft' width='1' height='1' aria-hidden='true' src='http://someurl/theme/image.php/boost/core/1639662110/spacer' />",
+                "iconright": "<img class='icon spacer' alt='iconright' width='1' height='1' aria-hidden='true' src='http://someurl/theme/image.php/boost/core/00000/spacer' />",
+                "children": ""
+            }],
+            "heading": "Question categories for 'Quiz: qz'",
+            "ctxlvl": "contextlevel70"
+        }]
+    }
+}}
+{{#helpstringhead}}
+<div class="row">
+    <div class="pl-4">
+        {{{helpstringhead}}}
+    </div>
+</div>
+<br>
+<div class="row">
+    {{#hascapability}}
+        <div class="pl-4">
+            <button type="submit" data-action="addcategory" class="btn btn-primary">
+                {{# pix }} t/add, core, {{/ pix}}
+                {{# str}} addcategory, qbank_managecategories {{/ str}}
+            </button>
+        </div>
+    {{/hascapability}}
+    <div class="col-6 mt-2">
+        {{{checkbox}}}
+    </div>
+</div>
+<br>
+{{/helpstringhead}}
+<div id="categoriesrendered">
+    {{#categoriesrendered}}
+        <div class="box py-3 boxwidthwide boxaligncenter generalbox questioncategories {{ctxlvl}}">
+            <h3>
+                {{heading}}
+            </h3>
+            <ul class="category_list list-group">
+                {{#items}}
+                    {{> qbank_managecategories/item }}
+                {{/items}}
+            </ul>
+        </div>
+    {{/categoriesrendered}}
+    {{#contextid}}
+        {{#js}}
+            require(['qbank_managecategories/order_categories'], function(orderCategories) {
+                orderCategories.init({{contextid}});
+            });
+        {{/js}}
+    {{/contextid}}
+</div>

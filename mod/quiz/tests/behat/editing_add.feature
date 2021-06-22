@@ -17,7 +17,7 @@ Feature: Edit quiz page - adding things
     And the following "activities" exist:
       | activity   | name   | intro                           | course | idnumber |
       | quiz       | Quiz 1 | Quiz 1 for testing the Add menu | C1     | quiz1    |
-    And I am on the "Quiz 1" "mod_quiz > Edit" page logged in as "teacher1"
+    And I am on the "Quiz 1" "mod_quiz > Edit" page logged in as "admin"
 
   @javascript
   Scenario: Add some new question to the quiz using '+ a new question' options of the 'Add' menu.
@@ -103,16 +103,18 @@ Feature: Edit quiz page - adding things
     And I navigate to "Question bank" in current page administration
     And I select "Categories" from the "questionbankactionselect" singleselect
     Then I should see "Add category"
+    And I press "Add category"
     Then I set the field "Parent category" to "Default for C1"
     And I set the field "Name" to "Subcat 1"
     And I set the field "Category info" to "This is sub category 1"
-    And I press "id_submitbutton"
+    And I click on "Add category" button
     And I should see "Subcat 1"
 
+    And I press "Add category"
     Then I set the field "Parent category" to "Default for C1"
     And I set the field "Name" to "Subcat 2"
     And I set the field "Category info" to "This is sub category 2"
-    And I press "id_submitbutton"
+    And I click on "Add category" button
     And I should see "Subcat 2"
 
     And I select "Questions" from the "questionbankactionselect" singleselect
