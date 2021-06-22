@@ -26,11 +26,10 @@
         "idnumber": "1",
         "questioncount": "1",
         "categorydesc": "The default category for questions shared in context Miscellaneous",
-        "deleteurl": "url",
-        "deletetitle": "Advanced"
+        "editactionmenu": "<div class='action-menu moodle-actionmenu'>...</div>",
+        "handle": "<span tabindex='0' role='button' aria-haspopup='true' data-drag-type='move' title=''></span>"
     }
 }}
-
 <b>
     <a title="{{#str}}editquestions, question{{/str}}" href="{{{questionbankurl}}}">
         {{categoryname}}
@@ -50,8 +49,13 @@
     {{{categorydesc}}}
 </div>
 {{/categorydesc}}
-{{#deleteurl}}
-<a title="{{deletetitle}}" href="{{{deleteurl}}}">
-    {{# pix }} t/delete, core, {{deletetitle}} {{/ pix }}
-</a>
-{{/deleteurl}}
+<div class="float-right">
+    <div class="float-left">
+        {{{editactionmenu}}}
+    </div>
+    <div class="float-right">
+        <span class="pl-3" tabindex="0" role="button" aria-haspopup="true" data-drag-type="move" title="">
+             {{{handle}}}
+        </span>
+    </div>
+</div>

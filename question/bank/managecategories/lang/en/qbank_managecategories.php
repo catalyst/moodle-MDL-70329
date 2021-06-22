@@ -23,5 +23,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addcategory'] = 'Add category';
+$string['editcategory'] = 'Edit category';
+$string['idnumberexists'] = 'ID number already in use, please change it to move category';
+$string['movequestions'] = 'Move questions to category';
 $string['pluginname'] = 'Manage categories';
-$string['privacy:metadata'] = 'The Manage Categories plugin does not store any user data.';
+$string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
+$string['showcategorydescription'] = 'Show descriptions';
