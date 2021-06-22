@@ -24,6 +24,9 @@
  * @module moodle-question-preview
  */
 
+Y.log("The moodle-question-preview module has been deprecated. " +
+    "Please use moodle-qbank_previewquestion-preview instead.", 'moodle-core-notification', 'warn');
+
 M.question = M.question || {};
 M.question.preview = M.question.preview || {};
 
