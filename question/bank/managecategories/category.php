@@ -29,9 +29,12 @@ require_once($CFG->dirroot."/question/editlib.php");
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
+use qbank_managecategories\question_category_list_item;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
+//core_question\local\bank\helper::check_qbank_status(helper::PLUGINNAME);
+$PAGE->requires->js_call_amd('core_question/dd_categories', 'init');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
@@ -63,6 +66,9 @@ $PAGE->set_url($url);
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
+
+//Categories reordering here.
+$newcatorder = helper::categories_reorder($qcobject->editlists);
 
 if ($param->left || $param->right || $param->moveup || $param->movedown) {
     require_sesskey();

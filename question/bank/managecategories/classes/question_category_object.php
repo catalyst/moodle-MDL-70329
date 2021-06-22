@@ -130,7 +130,7 @@ class question_category_object {
         $lastlist = null;
         foreach ($contexts as $context) {
             $this->editlists[$context->id] =
-                new question_category_list('ul', '', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
+                new question_category_list('ul', 'class="list"', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
             $this->editlists[$context->id]->lastlist =& $lastlist;
             if ($lastlist !== null) {
                 $lastlist->nextlist =& $this->editlists[$context->id];
