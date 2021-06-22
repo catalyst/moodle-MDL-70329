@@ -14,14 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qbank_managecategories\output;
+
+use plugin_renderer_base;
+
 /**
- * A class for representing question categories.
+ * Class renderer.
  *
- * @package    moodlecore
- * @subpackage questionbank
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @package    qbank_managecategories
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \qbank_managecategories\question_category_object
- * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
+class renderer extends plugin_renderer_base {
+    /**
+     * Render categories in question bank.
+     *
+     * @param array $data
+     * @return string
+     */
+    public function render_qbank_categories($data) {
+        return $this->render_from_template('qbank_managecategories/categories', $data);
+    }
+}

@@ -14,14 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * A class for representing question categories.
- *
- * @package    moodlecore
- * @subpackage questionbank
- * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * qbank_managecategories external functions and service definitions.
+ * @package    qbank_managecategories
+ * @category   webservice
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0 MDL-71585
- * @see \qbank_managecategories\question_category_object
- * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
+
+defined('MOODLE_INTERNAL') || die();
+
+$functions = [
+    'qbank_managecategories_update_category_order' => [
+        'classname'    => 'qbank_managecategories\external\update_category_order',
+        'description'  => 'Update question category order',
+        'type'         => 'write',
+        'capabilities' => 'moodle/question:managecategory',
+        'ajax'         => true,
+    ],
+];

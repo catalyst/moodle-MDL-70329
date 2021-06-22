@@ -54,8 +54,7 @@
                     "value": "/question/bank/exportquestions/export.php?courseid=7"
                 }
             ]
-        },
-        "addcategory": "http://localhost/moodle/question/bank/managecategories/addcategory.php?cmid=71"
+        }
     }
 }}
 <div class="container-fluid tertiary-navigation">
@@ -65,10 +64,5 @@
                 {{>core/url_select}}
             </div>
         {{/questionbankselect}}
-        {{#addcategory}}
-            <div class="navitem">
-                <a class="btn btn-primary ml-2" href="{{ addcategory }}">{{#str}}addcategory, question {{/str}}</a>
-            </div>
-        {{/addcategory}}
     </div>
 </div>

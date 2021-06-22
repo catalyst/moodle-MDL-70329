@@ -21,12 +21,18 @@ namespace qbank_managecategories;
  */
 define('QUESTION_PAGE_LENGTH', 25);
 
+use action_menu;
+use action_menu_link;
 use context;
+use context_system;
+use \core\plugininfo\qbank;
 use moodle_exception;
 use moodle_url;
-use qbank_managecategories\form\question_category_edit_form;
+use pix_icon;
 use question_bank;
 use stdClass;
+use qbank_managecategories\form\question_category_edit_form;
+use qbank_managecategories\form\question_category_checkbox_form;
 
 /**
  * Class for performing operations on question categories.
@@ -38,24 +44,9 @@ use stdClass;
 class question_category_object {
 
     /**
-     * @var array common language strings.
-     */
-    public $str;
-
-    /**
      * @var array nested lists to display categories.
      */
     public $editlists = [];
-
-    /**
-     * @var string tab.
-     */
-    public $tab;
-
-    /**
-     * @var int tab size.
-     */
-    public $tabsize = 3;
 
     /**
      * @var moodle_url Object representing url for this page
@@ -68,6 +59,21 @@ class question_category_object {
     public $catform;
 
     /**
+     * @var question_category_checkbox_form Object representing form to display category description.
+     */
+    public $checkboxform;
+
+    /**
+     * @var int cmid.
+     */
+    public $cmid;
+
+    /**
+     * @var int courseid.
+     */
+    public $courseid;
+
+    /**
      * Constructor.
      *
      * @param int $page page number.
@@ -77,79 +83,276 @@ class question_category_object {
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
      * @param context[] $addcontexts contexts where the current user can add questions.
+     * @param int|null $cmid course module id for the current page.
+     * @param int|null $courseid course id for the current page.
+     * @param int $thiscontext integer representing course context.
      */
-    public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
-
-        $this->tab = str_repeat('&nbsp;', $this->tabsize);
+    public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
+                                $cmid = null, $courseid = null, $thiscontext = null) {
 
         $this->str = new stdClass();
-        $this->str->course         = get_string('course');
-        $this->str->category       = get_string('category', 'question');
-        $this->str->categoryinfo   = get_string('categoryinfo', 'question');
-        $this->str->questions      = get_string('questions', 'question');
-        $this->str->add            = get_string('add');
-        $this->str->delete         = get_string('delete');
-        $this->str->moveup         = get_string('moveup');
-        $this->str->movedown       = get_string('movedown');
-        $this->str->edit           = get_string('editthiscategory', 'question');
-        $this->str->hide           = get_string('hide');
-        $this->str->order          = get_string('order');
-        $this->str->parent         = get_string('parent', 'question');
-        $this->str->add            = get_string('add');
-        $this->str->action         = get_string('action');
-        $this->str->top            = get_string('top');
-        $this->str->addcategory    = get_string('addcategory', 'question');
-        $this->str->editcategory   = get_string('editcategory', 'question');
-        $this->str->cancel         = get_string('cancel');
-        $this->str->editcategories = get_string('editcategories', 'question');
-        $this->str->page           = get_string('page');
+        $this->str->edit = get_string('editthiscategory', 'question');
+        $this->cmid = $cmid;
+        $this->courseid = $courseid;
 
         $this->pageurl = $pageurl;
-
-        $this->initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts);
+        $this->contextid = $thiscontext;
+        $this->initialize($contexts, $currentcat, $defaultcategory, $todelete, $addcontexts, $cmid, $courseid);
     }
 
     /**
      * Initializes this classes general category-related variables
      *
-     * @param int $page page number.
      * @param context[] $contexts contexts where the current user can edit categories.
      * @param int $currentcat id of the category to be edited. 0 if none.
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
      * @param context[] $addcontexts contexts where the current user can add questions.
+     * @param int|null $cmid course module id for the current page.
+     * @param int|null $courseid course id for the current page.
      */
-    public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts): void {
-        $lastlist = null;
+    public function initialize($contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
+                               $cmid, $courseid): void {
+
         foreach ($contexts as $context) {
-            $this->editlists[$context->id] =
-                new question_category_list('ul', '', true, $this->pageurl, $page, 'cpage', QUESTION_PAGE_LENGTH, $context);
-            $this->editlists[$context->id]->lastlist =& $lastlist;
-            if ($lastlist !== null) {
-                $lastlist->nextlist =& $this->editlists[$context->id];
-            }
-            $lastlist =& $this->editlists[$context->id];
+            $items = helper::get_categories_for_contexts($context->id);
+            $items = helper::create_ordered_tree($items);
+            $this->editlists[$context->id] = (object)[
+                'items' => $items,
+                'context' => $context
+            ];
         }
 
-        $count = 1;
-        $paged = false;
-        foreach ($this->editlists as $key => $list) {
-            list($paged, $count) = $this->editlists[$key]->list_from_records($paged, $count);
-        }
-        $this->catform = new question_category_edit_form($this->pageurl,
-                ['contexts' => $contexts, 'currentcat' => $currentcat ?? 0]);
+        $this->catform = new question_category_edit_form($this->pageurl, compact('contexts', 'currentcat'));
         if (!$currentcat) {
             $this->catform->set_data(['parent' => $defaultcategory]);
         }
+        // Checkbox Form.
+        $checked = get_user_preferences('qbank_managecategories_showdescr');
+        $customdata = ['checked' => $checked, 'cmid' => $cmid, 'courseid' => $courseid];
+        $this->checkboxform = new question_category_checkbox_form(null, $customdata, 'post', null, ['id' => 'qbshowdescr-form']);
     }
 
     /**
-     * Displays the user interface.
+     * Returns data for categories.
      *
+     * @return array $data
      */
-    public function display_user_interface(): void {
-        // Interface for editing existing categories.
-        $this->output_edit_lists();
+    public function categories_data(): array {
+        global $OUTPUT;
+
+        $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        if (has_capability('moodle/question:managecategory', context::instance_by_id($this->contextid))) {
+            $hascapability = true;
+        } else {
+            $hascapability = false;
+        }
+
+        $categories = [];
+        foreach ($this->editlists as $contextid => $list) {
+            // Get list elements.
+            $context = context::instance_by_id($contextid);
+            $itemstab = [];
+            if (count($list->items)) {
+                $lastitem = '';
+                foreach ($list->items as $item) {
+                    $itemstab['items'][] = $this->item_data($list, $item, $context, $lastitem);
+                    $lastitem = $item;
+                }
+            }
+            if (isset($itemstab['items'])) {
+                $ctxlvl = "contextlevel" . $list->context->contextlevel;
+                $heading = get_string('questioncatsfor', 'question', $list->context->get_context_name());
+
+                // Get categories context.
+                $categories[] = [
+                    'ctxlvl' => $ctxlvl,
+                    'heading' => $heading,
+                    'items' => $itemstab['items']
+                ];
+            }
+        }
+        $data = [
+            'helpstringhead' => $helpstringhead,
+            'checkbox' => $this->checkboxform->render(),
+            'categoriesrendered' => $categories,
+            'hascapability' => $hascapability,
+            'contextid' => $this->contextid,
+            'cmid' => $this->cmid,
+            'courseid' => $this->courseid,
+        ];
+        return $data;
+    }
+
+    /**
+     * Creates and returns each item data.
+     *
+     * @param object $list
+     * @param object $category
+     * @param context $context
+     * @param object|string $lastitem page number
+     * @return array $itemdata item data
+     */
+    public function item_data(object $list, object $category, context $context, $lastitem): array {
+        global $OUTPUT, $PAGE;
+        if (has_capability('moodle/question:managecategory', $context)) {
+            $icons = $this->get_arrow_descendant($category, $lastitem);
+        }
+        $iconleft = isset($icons['left']) ? $icons['left'] : null;
+        $iconright = isset($icons['right']) ? $icons['right'] : null;
+        $params = $this->pageurl->params();
+        $cmid = $params['cmid'] ?? 0;
+        $courseid = $params['courseid'] ?? 0;
+
+        // Each section adds html to be displayed as part of this list item.
+        $questionbankurl = new moodle_url('/question/edit.php', $params);
+        $questionbankurl->param('cat', helper::combine_id_context($category));
+        $categoryname = format_string($category->name, true, ['context' => $list->context]);
+        $idnumber = null;
+        if ($category->idnumber !== null && $category->idnumber !== '') {
+            $idnumber = $category->idnumber;
+        }
+        $checked = get_user_preferences('qbank_managecategories_showdescr');
+        if ($checked) {
+            $categorydesc = format_text($category->info, $category->infoformat,
+                ['context' => $list->context, 'noclean' => true]);
+        } else {
+            $categorydesc = '';
+        }
+        $menu = new action_menu();
+        $menu->set_menu_trigger(get_string('edit'));
+
+        // Sets up edit link.
+        if (has_capability('moodle/question:managecategory', $context)) {
+            $thiscontext = (int)$category->contextid;
+            $editurl = new moodle_url('#');
+            $menu->add(new action_menu_link(
+                $editurl,
+                new pix_icon('t/edit', 'edit'),
+                get_string('editsettings'),
+                false,
+                [
+                    'data-action' => 'addeditcategory',
+                    'data-actiontype' => 'edit',
+                    'data-contextid' => $thiscontext,
+                    'data-categoryid' => $category->id,
+                    'data-cmid' => $cmid,
+                    'data-courseid' => $courseid,
+                ]
+            ));
+            // Don't allow delete if this is the top category, or the last editable category in this context.
+            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                // Sets up delete link.
+                $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
+                    ['delete' => $category->id, 'sesskey' => sesskey()]);
+                if ($courseid !== 0) {
+                    $deleteurl->param('courseid', $courseid);
+                } else {
+                    $deleteurl->param('cmid', $cmid);
+                }
+                $menu->add(new action_menu_link(
+                    $deleteurl,
+                    new pix_icon('t/delete', 'delete'),
+                    get_string('delete'),
+                    false
+                ));
+            }
+        }
+
+        // Sets up export to XML link.
+        if (qbank::is_plugin_enabled('qbank_exportquestions')) {
+            $exporturl = new moodle_url('/question/bank/exportquestions/export.php',
+                ['cat' => helper::combine_id_context($category)]);
+            if ($courseid !== 0) {
+                $exporturl->param('courseid', $courseid);
+            } else {
+                $exporturl->param('cmid', $cmid);
+            }
+
+            $menu->add(new action_menu_link(
+                $exporturl,
+                new pix_icon('t/download', 'download'),
+                get_string('exportasxml', 'question'),
+                false
+            ));
+        }
+
+        // Menu to string/html.
+        $menu = $OUTPUT->render($menu);
+        // Don't allow movement if only subcat.
+        $handle = false;
+        if (has_capability('moodle/question:managecategory', $context)) {
+            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                $handle = true;
+            } else {
+                $handle = false;
+            }
+        }
+
+        $children = [];
+        if (!empty($category->children)) {
+            $lastitem = '';
+            foreach ($category->children as $itm) {
+                $children[] = $this->item_data($list, $itm, $context, $lastitem);
+                $lastitem = $itm;
+            }
+        }
+        $itemdata =
+            [
+                'categoryid' => $category->id,
+                'contextid' => $category->contextid,
+                'questionbankurl' => $questionbankurl,
+                'categoryname' => $categoryname,
+                'idnumber' => $idnumber,
+                'questioncount' => $category->questioncount,
+                'categorydesc' => $categorydesc,
+                'editactionmenu' => $menu,
+                'handle' => $handle,
+                'iconleft' => $iconleft,
+                'iconright' => $iconright,
+                'children' => $children
+            ];
+        return $itemdata;
+    }
+
+    /**
+     * Gets the arrow for category.
+     *
+     * @param bool $category Is the first on the list.
+     * @param bool $lastitem Is the last on the list.
+     * @return array $icons.
+     */
+    public function get_arrow_descendant($category, $lastitem): array {
+        global $OUTPUT, $PAGE;
+        $icons = [];
+        $strmoveleft = get_string('maketoplevelitem', 'question');
+        // Exchange arrows on RTL.
+        if (right_to_left()) {
+            $rightarrow = 'left';
+            $leftarrow = 'right';
+        } else {
+            $rightarrow = 'right';
+            $leftarrow = 'left';
+        }
+
+        if (isset($category->parentitem)) {
+            if (isset($category->parentitem)) {
+                $action = get_string('makechildof', 'question', $category->parentitem->name);
+            } else {
+                $action = $strmoveleft;
+            }
+            $pix = new pix_icon('t/' . $leftarrow, $action);
+            $icons['left'] = $OUTPUT->action_icon('#', $pix, null,
+                ['data-tomove' => $category->id, 'data-tocategory' => $category->parentitem->parent]);
+        }
+
+        if (!empty($lastitem)) {
+            $makechildof = get_string('makechildof', 'question', $lastitem->name);
+            $pix = new pix_icon('t/' . $rightarrow, $makechildof);
+            $icons['right'] = $OUTPUT->action_icon('#', $pix, null,
+                ['data-tomove' => $category->id, 'data-tocategory' => $lastitem->id]);
+        }
+        return $icons;
     }
 
     /**
@@ -157,31 +360,6 @@ class question_category_object {
      */
     public function output_new_table(): void {
         $this->catform->display();
-    }
-
-    /**
-     * Outputs a list to allow editing/rearranging of existing categories.
-     *
-     * $this->initialize() must have already been called
-     *
-     */
-    public function output_edit_lists(): void {
-        global $OUTPUT;
-
-        echo $OUTPUT->heading_with_help(get_string('questioncategories', 'question'), 'editcategories', 'question');
-
-        foreach ($this->editlists as $context => $list) {
-            $listhtml = $list->to_html(0, ['str' => $this->str]);
-            if ($listhtml) {
-                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
-                    $list->context->contextlevel);
-                $fullcontext = context::instance_by_id($context);
-                echo $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
-                echo $listhtml;
-                echo $OUTPUT->box_end();
-            }
-        }
-        echo $list->display_page_numbers();
     }
 
     /**
@@ -205,8 +383,14 @@ class question_category_object {
      * Edit a category, or add a new one if the id is zero.
      *
      * @param int $categoryid Category id.
+     * @deprecated since Moodle 4.0 MDL-72397 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.4 MDL-72438.
+     * @see qbank_managecategories\form\question_category_edit_form::process_dynamic_submission()
      */
     public function edit_single_category(int $categoryid): void {
+        debugging('edit_single_category() is deprecated.
+            Please use qbank_managecategories\form\question_category_edit_form::process_dynamic_submission() instead.',
+            DEBUG_DEVELOPER);
         // Interface for adding a new category.
         global $DB;
 
@@ -344,7 +528,7 @@ class question_category_object {
      * @return bool|int New category id if successful, else false.
      */
     public function add_category($newparent, $newcategory, $newinfo, $return = false, $newinfoformat = FORMAT_HTML,
-            $idnumber = null): int {
+                                 $idnumber = null): int {
         global $DB;
         if (empty($newcategory)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
@@ -360,7 +544,7 @@ class question_category_object {
             }
         }
 
-        if ((string) $idnumber === '') {
+        if ((string)$idnumber === '') {
             $idnumber = null;
         } else if (!empty($contextid)) {
             // While this check already exists in the form validation, this is a backstop preventing unnecessary errors.
@@ -376,7 +560,7 @@ class question_category_object {
         $cat->name = $newcategory;
         $cat->info = $newinfo;
         $cat->infoformat = $newinfoformat;
-        $cat->sortorder = 999;
+        $cat->sortorder = helper::get_max_sortorder($contextid) + 1;
         $cat->stamp = make_unique_id_code();
         $cat->idnumber = $idnumber;
         $categoryid = $DB->insert_record("question_categories", $cat);
@@ -408,9 +592,15 @@ class question_category_object {
      * @param int|string $newinfoformat description format. One of the FORMAT_ constants.
      * @param int $idnumber the idnumber. '' is converted to null.
      * @param bool $redirect if true, will redirect once the DB is updated (default).
+     * @deprecated since Moodle 4.0 MDL-72397 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.4 MDL-72438.
+     * @see qbank_managecategories\form\question_category_edit_form::process_dynamic_submission()
      */
     public function update_category($updateid, $newparent, $newname, $newinfo, $newinfoformat = FORMAT_HTML,
-            $idnumber = null, $redirect = true): void {
+                                    $idnumber = null, $redirect = true): void {
+        debugging('update_category() is deprecated.
+            Please use qbank_managecategories\form\question_category_edit_form::process_dynamic_submission() instead.',
+            DEBUG_DEVELOPER);
         global $CFG, $DB;
         if (empty($newname)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
@@ -443,7 +633,7 @@ class question_category_object {
             }
         }
 
-        if ((string) $idnumber === '') {
+        if ((string)$idnumber === '') {
             $idnumber = null;
         } else if (!empty($tocontextid)) {
             // While this check already exists in the form validation, this is a backstop preventing unnecessary errors.
