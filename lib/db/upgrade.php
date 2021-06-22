@@ -2786,15 +2786,26 @@ function xmldb_main_upgrade($oldversion) {
             // Create question_references records to be added.
             $quizslot = $DB->get_record('quiz_slots', ['questionid' => $question->id]);
             if ($quizslot) {
-                $questionreference = new \stdClass();
-                var_dump($quizslot->quizid);
-                $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
-                $questionreference->component = 'mod_quiz';
-                $questionreference->questionarea = 'slot';
-                $questionreference->itemid = $quizslot->id;
-                $questionreference->questionbankentryid = $questionbankentry->id;
-                $questionreference->versionnumber = 1;
-                $questionreferences[] = $questionreference;
+                if ($question->qtype === 'random') {
+                    $questionsetreference = new \stdClass();
+                    $questionsetreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+                    $questionsetreference->component = 'mod_quiz';
+                    $questionsetreference->questionarea = 'slot';
+                    $questionsetreference->itemid = $quizslot->id;
+                    // TODO: questioncontextid and filtercondition.
+                    $questionsetreference->questioncontextid = context_module::instance($quizslot->quizid)->id;
+                    $questionsetreference->filtercondition = null;
+                    $questionsetreferences[] = $questionsetreference;
+                } else {
+                    $questionreference = new \stdClass();
+                    $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+                    $questionreference->component = 'mod_quiz';
+                    $questionreference->questionarea = 'slot';
+                    $questionreference->itemid = $quizslot->id;
+                    $questionreference->questionbankentryid = $questionbankentry->id;
+                    $questionreference->versionnumber = 1;
+                    $questionreferences[] = $questionreference;
+                }
             }
         }
         $questions->close();
@@ -2811,8 +2822,14 @@ function xmldb_main_upgrade($oldversion) {
             $DB->insert_records('question_references', $qbankreferenceschunk);
         }
 
-        // TODO: Populate table question_set_references.
+        // Populate table question_references.
+        $qbanksetreferenceschunks = array_chunk($questionsetreferences, 30000);
+        foreach ($qbanksetreferenceschunks as $qbanksetreferenceschunk) {
+            $DB->insert_records('question_set_references', $qbanksetreferenceschunk);
+        }
+
         // TODO: Remove fields from question table.
+        // TODO: Remove fields from quiz_slot table.
 
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2021061700.01);
