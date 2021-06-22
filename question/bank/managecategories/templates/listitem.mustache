@@ -32,23 +32,21 @@
 }}
 
 <b>
-    <div class="catitem">
-        <a title="{{#str}}editquestions, question{{/str}}" href="{{{questionbankurl}}}">
-            {{categoryname}}
-            {{#idnumber}}
-            <span class="badge badge-primary">
-                <span class="accesshide">
-                    {{#str}}idnumber, question{{/str}}
-                </span>
-                {{idnumber}}
+    <a title="{{#str}}editquestions, question{{/str}}" href="{{{questionbankurl}}}">
+        {{categoryname}}
+        {{#idnumber}}
+        <span class="badge badge-primary">
+            <span class="accesshide">
+                {{#str}}idnumber, question{{/str}}
             </span>
-            {{/idnumber}}
-            {{questioncount}}
-            <div class="float-right">
-                {{>core/drag_handle}}
-            </div>
-        </a>
-    </div>
+            {{idnumber}}
+        </span>
+        {{/idnumber}}
+        {{questioncount}}
+        <div class="float-right">
+            {{>core/drag_handle}}
+        </div>
+    </a>
 </b>
 {{#categorydesc}}
 <div class="text_to_html">

@@ -29,7 +29,6 @@ require_once($CFG->dirroot."/question/editlib.php");
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
-use qbank_managecategories\question_category_list_item;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);

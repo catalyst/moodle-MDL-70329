@@ -25,7 +25,7 @@
 // import Ajax from 'core/ajax';
 // import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
-// import jQuery from 'jquery';
+import jQuery from 'jquery';
 
 /**
  * Sets up sortable list in the column sort order page.
@@ -40,7 +40,7 @@ const setupSortableLists = () => {
         }
     );
 
-    jQuery('.catitem').on(SortableList.EVENTS.DROP, () => {
+    jQuery('.catitem').on(SortableList.EVENTS.DRAGSTART, () => {
         console.log('dropped');
     });
 };
