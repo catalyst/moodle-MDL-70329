@@ -27,6 +27,7 @@ namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
+use qbank_editquestion\editquestion_helper;
 
 /**
  * This class prints a view of the question bank.
@@ -164,7 +165,7 @@ class view {
 
         // Create the url of the new question page to forward to.
         $this->returnurl = $pageurl->out_as_local_url(false);
-        $this->editquestionurl = new \moodle_url('/question/question.php',
+        $this->editquestionurl = new \moodle_url('/question/bank/editquestion/question.php',
                 array('returnurl' => $this->returnurl));
         if ($this->cm !== null) {
             $this->editquestionurl->param('cmid', $this->cm->id);
@@ -665,8 +666,12 @@ class view {
      * Get the URL to preview a question.
      * @param \stdClass $questiondata the data defining the question.
      * @return \moodle_url the URL.
+     * @deprecated since Moodle 4.0
+     * @see \qbank_previewquestion\previewquestion_helper::question_preview_url()
      */
     public function preview_question_url($questiondata) {
+        debugging('Function preview_question_url() has been deprecated and moved to qbank_previewquestion plugin,
+         please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
         return question_preview_url($questiondata->id, null, null, null, null,
                 $this->get_most_specific_context());
     }
@@ -884,14 +889,11 @@ class view {
      * @param bool $canadd
      */
     protected function create_new_question_form($category, $canadd): void {
-        echo \html_writer::start_tag('div', array('class' => "createnewquestion"));
-        if ($canadd) {
-            create_new_question_button($category->id, $this->editquestionurl->params(),
-                    get_string('createnewquestion', 'question'));
-        } else {
-            print_string('nopermissionadd', 'question');
+        if (\core\plugininfo\qbank::check_qbank_status('qbank_editquestion')) {
+            echo editquestion_helper::create_new_question_button($category->id,
+                    $this->requiredcolumns['qbank_editquestion\edit_action_column']->editquestionurl->params(), $canadd);
         }
-        echo \html_writer::end_tag('div');
+
     }
 
     /**
