@@ -38,6 +38,8 @@ use question_bank;
  * @package    core_question
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_editquestion\qbank_chooser
  */
 class qbank_chooser extends \core\output\chooser {
 
@@ -51,6 +53,8 @@ class qbank_chooser extends \core\output\chooser {
      * @param context $context The relevant context.
      */
     public function __construct($real, $fake, $course, $hiddenparams, $context) {
+        debugging('Class qbank_chooser has been deprecated and moved to bank/editquestion,
+         please use qbank_editquestion\qbank_chooser instead.', DEBUG_DEVELOPER);
         $sections = [];
         $sections[] = new chooser_section('questions', new lang_string('questions', 'question'),
                 array_map(function($qtype) use ($context) {

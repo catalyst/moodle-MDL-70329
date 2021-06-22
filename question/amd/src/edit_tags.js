@@ -268,6 +268,8 @@ define([
 
     return {
         init: function(root) {
+            // eslint-disable-next-line no-console
+            console.log('warn: The core_question/edit_tags has been deprecated. Please use qbank_tagquestion/edit_tags instead.');
             root = $(root);
             registerEventListeners(root);
         }

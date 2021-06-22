@@ -30,6 +30,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_tagquestion\tags_action_column
  */
 class tags_action_column extends action_column_base implements menuable_action {
     /**
@@ -39,8 +41,9 @@ class tags_action_column extends action_column_base implements menuable_action {
 
     public function init() {
         parent::init();
-        global $PAGE;
-        $PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);
+        // Removed for conflicting js calls.
+        // ...global $PAGE;.
+        // ...$PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);.
         $this->managetags = get_string('managetags', 'tag');
     }
 

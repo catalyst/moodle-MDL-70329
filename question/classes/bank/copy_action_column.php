@@ -31,6 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2013 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_editquestion\copy_action_column
  */
 class copy_action_column extends menu_action_column_base {
     /** @var string avoids repeated calls to get_string('duplicate'). */

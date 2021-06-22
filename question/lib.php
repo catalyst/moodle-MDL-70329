@@ -33,8 +33,12 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param array $args Arguments to the form.
  * @return null|string The rendered form.
+ * @deprecated since Moodle 4.0
+ * @see /question/bank/qbank_tagquestion/lib.php
  */
 function core_question_output_fragment_tags_form($args) {
+    debugging('Function core_question_output_fragment_tags_form() is deprecated,
+         please use core_question_output_fragment_tags_form() from qbank_tagquestion instead.', DEBUG_DEVELOPER);
 
     if (!empty($args['id'])) {
         global $CFG, $DB;
