@@ -1939,7 +1939,7 @@ class core_plugin_manager {
             ),
 
             'qbank' => array(
-                'previewquestion',
+                'viewquestiontext', 'viewquestiontype', 'viewquestionname', 'viewcreator', 'previewquestion',
             ),
 
             'qbehaviour' => array(
