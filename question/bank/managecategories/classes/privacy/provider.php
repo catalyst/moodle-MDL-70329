@@ -16,6 +16,8 @@
 
 namespace qbank_managecategories\privacy;
 
+use core_privacy\local\request\writer;
+
 /**
  * Privacy Subsystem for qbank_managecategories implementing null_provider.
  *
@@ -34,5 +36,27 @@ class provider implements \core_privacy\local\metadata\null_provider {
      */
     public static function get_reason(): string {
         return 'privacy:metadata';
+    }
+
+    /**
+     * Export all user preferences for the plugin.
+     *
+     * @param int $userid The userid of the user whose data is to be exported.
+     */
+    public static function export_user_preferences(int $userid) {
+        $qbankmanagecategoriesshowdescr = get_user_preferences('qbank_managecategories_showdescr', null, $userid);
+        if ($qbankmanagecategoriesshowdescr !== null) {
+            switch ($qbankmanagecategoriesshowdescr) {
+                case 1:
+                    $showdescription = get_string('displaydescription', 'qbank_managecategories');
+                    break;
+                case 0:
+                default:
+                    $showdescription = get_string('descriptionnotdisplayed', 'qbank_managecategories');
+                    break;
+            }
+            writer::export_user_preference('qbank_managecategories', 'showdescr',
+                $qbankmanagecategoriesshowdescr, $showdescription);
+        }
     }
 }

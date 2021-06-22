@@ -44,8 +44,6 @@ Moodle 4.0 included the results of a major project to re-work the question bank.
        - question_add_context_in_key() => qbank_managecategories\helper::question_add_context_in_key()
        - question_fix_top_names() => qbank_managecategories\helper::question_fix_top_names()
        - class category_form => qbank_managecategories\form\category_form
-       - class question_category_list => qbank_managecategories\question_category_list
-       - class question_category_list_item => 'bank_managecategories\question_category_list_item
        - class question_category_object => qbank_managecategories\question_category_object
        - class question_category_edit_form => qbank_managecategories\form\category_form
        - class question_move_form => qbank_managecategories\form\question_move_form

@@ -23,7 +23,7 @@
  */
 
 use core_question\local\bank\question_version_status;
-
+use qbank_managecategories\helper;
 /**
  * Class core_question_generator for generating question data.
  *

@@ -16,6 +16,10 @@
 
 namespace qbank_managecategories;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . "/questionlib.php");
+
 use context;
 use core_question\local\bank\question_version_status;
 use moodle_exception;
@@ -257,7 +261,7 @@ class helper {
                                                        bool $top = false, int $showallversions = 0): array {
         global $DB;
         $topwhere = $top ? '' : 'AND c.parent <> 0';
-        $statuscondition = "AND (qv.status = '". question_version_status::QUESTION_STATUS_READY . "' " .
+        $statuscondition = "AND (qv.status = '" . question_version_status::QUESTION_STATUS_READY . "' " .
             " OR qv.status = '" . question_version_status::QUESTION_STATUS_DRAFT . "' )";
 
         $sql = "SELECT c.*,
@@ -396,5 +400,164 @@ class helper {
         }
 
         return $categories;
+    }
+
+    /**
+     * Gets all descendant(s) of a category.
+     *
+     * @param int $category category to check in.
+     * @param array $parents Array of categories with their appropriate parent,
+     * index is the child and value is the parent.
+     * @return array $keys Keys representing all descendants of moved category.
+     */
+    public static function get_children(int $category, array $parents): array {
+        $children = [];
+        // Check if the category is included in the child-parent array.
+        if (array_key_exists($category, $parents)) {
+            // Getting immediate children of the current category.
+            // In the array, key is the child, value is the parent.
+            // The array_keys will return all children (keys) having the current category as their parent (values).
+            $children = array_keys($parents, $category);
+            // Recursive call to get all children of each child.
+            foreach ($children as $child) {
+                $grandchildren = self::get_children($child, $parents);
+                $children = array_merge($children, $grandchildren);
+            }
+        }
+        return $children;
+    }
+
+    /**
+     * Create an ordered tree.
+     *
+     * @param array $items Unordered tree structure.
+     * @return array $items Items with proper tree descendant structure.
+     */
+    public static function create_ordered_tree(array $items): array {
+        foreach ($items as $item) {
+            if (array_key_exists((int)$item->parent, $items)) {
+                $item->parentitem = $items[$item->parent];
+                $items[$item->parent]->children[$item->id] = $item;
+            }
+        }
+        foreach ($items as $item) {
+            if (isset($item->children)) {
+                foreach ($item->children as $children) {
+                    unset($items[$children->id]);
+                }
+            }
+        }
+        return $items;
+    }
+
+    /**
+     * Move category to new location.
+     *
+     * @param int $origincategory Category id from dragged category.
+     * @param int $insertaftercategory Target category after which the 'origin category' will be inserted.
+     * @param int $newparentcategory New parent category.
+     */
+    public static function update_category_location(int $origincategory,
+                                                    int $insertaftercategory = 0,
+                                                    int $newparentcategory = 0) {
+        global $DB;
+
+        // Check permission for original and destination contexts.
+        if (!empty($origincontext)) {
+            require_capability('moodle/question:managecategory', context::instance_by_id($origincontext));
+        }
+
+        if (!empty($destinationcontext) && $destinationcontext != $origincontext) {
+            require_capability('moodle/question:managecategory', context::instance_by_id($destinationcontext));
+        }
+
+        // Change parent only.
+        if ($origincategory && $newparentcategory) {
+            $categorytomove = $DB->get_record('question_categories', ['id' => $origincategory]);
+            $categorytomove->parent = $newparentcategory;
+            $DB->update_record('question_categories', $categorytomove);
+            return;
+        }
+
+        // Otherwise, we will move question category to new position.
+
+        // Category to move.
+        $origincategory = $DB->get_record('question_categories', ['id' => $origincategory], '*', MUST_EXIST);
+
+        // Category to insert after.
+        $insertaftercategory = $DB->get_record('question_categories', ['id' => $insertaftercategory], '*', MUST_EXIST);
+
+        $transaction = $DB->start_delegated_transaction();
+
+        // Change to the same parent.
+        if ($origincategory->parent !== $insertaftercategory->parent) {
+            $DB->set_field('question_categories', 'parent', $insertaftercategory->parent,
+                ['id' => $origincategory->id]);
+        }
+
+        // Change to the same context.
+        if ($origincategory->contextid !== $insertaftercategory->contextid) {
+            // Check for duplicate idnumber.
+            if (!is_null($origincategory->idnumber)) {
+                $duplicateidnumber = $DB->record_exists('question_categories', [
+                    'idnumber' => $origincategory->idnumber,
+                    'contextid' => $insertaftercategory->contextid
+                ]);
+                if ($duplicateidnumber) {
+                    throw new moodle_exception('idnumberexists', 'qbank_managecategories');
+                }
+            }
+
+            $DB->set_field('question_categories', 'contextid', $insertaftercategory->contextid,
+                ['id' => $origincategory->id]);
+            // Make change to sub categories.
+            question_move_category_to_context($origincategory->id,
+                $origincategory->contextid, $insertaftercategory->contextid);
+        }
+
+        // Update sort order.
+        $sortorder = $insertaftercategory->sortorder + 1;
+        $DB->set_field('question_categories', 'sortorder', $sortorder, ['id' => $origincategory->id]);
+
+        // Get other categories  which are after '$insertaftercategory', and update their sort order.
+        $params = [
+            'contextid' => $insertaftercategory->contextid,
+            'sortorder' => $insertaftercategory->sortorder,
+            'origincategoryid' => $origincategory->id
+        ];
+        $select = "contextid = :contextid AND sortorder > :sortorder AND id <> :origincategoryid";
+        $sort = "sortorder ASC";
+        $toupdatesortorder = $DB->get_records_select('question_categories', $select, $params, $sort);
+        foreach ($toupdatesortorder as $category) {
+            $DB->set_field('question_categories', 'sortorder', ++$sortorder, ['id' => $category->id]);
+        }
+
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Combine id and context id for a question category
+     *
+     * @param \stdClass $category a category to extract its id and context id
+     * @return string the combined string
+     */
+    public static function combine_id_context(\stdClass $category): string {
+        return $category->id . ',' . $category->contextid;;
+    }
+
+
+    /**
+     * Get current max sort in a given context
+     *
+     * @param int $contextid context
+     * @return int current max sort order
+     */
+    public static function get_max_sortorder(int $contextid): int {
+        global $DB;
+        $sql = "SELECT MAX(sortorder)
+                  FROM {question_categories}
+                 WHERE contextid = :contextid";
+        $lastmax = $DB->get_field_sql($sql, ['contextid' => $contextid]);
+        return $lastmax ?? 0;
     }
 }
