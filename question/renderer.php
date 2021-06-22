@@ -92,8 +92,12 @@ class core_question_bank_renderer extends plugin_renderer_base {
      *
      * @param renderable $qbankchooser The chooser.
      * @return string
+     * @deprecated since Moodle 4.0
+     * @see \qbank_editquestion\output\renderer
      */
     public function render_qbank_chooser(renderable $qbankchooser) {
+        debugging('Function render_qbank_chooser() has been deprecated and moved to editquestion plugin, 
+        please use editquestion plugin renderer instead.', DEBUG_DEVELOPER);
         return $this->render_from_template('core_question/qbank_chooser', $qbankchooser->export_for_template($this));
     }
 

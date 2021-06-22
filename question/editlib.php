@@ -619,8 +619,12 @@ function require_login_in_context($contextorid = null){
  *      the qtype radio buttons.
  * @param $allowedqtypes optional list of qtypes that are allowed. If given, only
  *      those qtypes will be shown. Example value array('description', 'multichoice').
+ * @deprecated since Moodle 4.0
+ * @see \qbank_editquestion\editquestion_helper::print_choose_qtype_to_add_form()
  */
 function print_choose_qtype_to_add_form($hiddenparams, array $allowedqtypes = null, $enablejs = true) {
+    debugging('Function print_choose_qtype_to_add_form() has been deprecated and moved to bank/editquestion,
+     please use qbank_editquestion\editquestion_helper::print_choose_qtype_to_add_form() instead.', DEBUG_DEVELOPER);
     global $CFG, $PAGE, $OUTPUT;
 
     $chooser = core_question\output\qbank_chooser::get($PAGE->course, $hiddenparams, $allowedqtypes);
@@ -640,8 +644,12 @@ function print_choose_qtype_to_add_form($hiddenparams, array $allowedqtypes = nu
  * @param string $caption the text to display on the button.
  * @param string $tooltip a tooltip to add to the button (optional).
  * @param bool $disabled if true, the button will be disabled.
+ * @deprecated since Moodle 4.0
+ * @see \qbank_editquestion\editquestion_helper::create_new_question_button()
  */
 function create_new_question_button($categoryid, $params, $caption, $tooltip = '', $disabled = false) {
+    debugging('Function create_new_question_button() has been deprecated and moved to bank/editquestion,
+     please use qbank_editquestion\editquestion_helper::create_new_question_button() instead.', DEBUG_DEVELOPER);
     global $CFG, $PAGE, $OUTPUT;
     static $choiceformprinted = false;
     $params['category'] = $categoryid;
