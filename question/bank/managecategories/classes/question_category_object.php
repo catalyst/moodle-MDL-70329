@@ -24,9 +24,10 @@ define('QUESTION_PAGE_LENGTH', 25);
 use context;
 use moodle_exception;
 use moodle_url;
-use qbank_managecategories\form\question_category_edit_form;
 use question_bank;
 use stdClass;
+use qbank_managecategories\form\question_category_edit_form;
+use qbank_managecategories\form\question_category_checkbox_form;
 
 /**
  * Class for performing operations on question categories.
@@ -68,6 +69,11 @@ class question_category_object {
     public $catform;
 
     /**
+     * @var question_category_checkbox_form Object representing form to display category description.
+     */
+    public $checkboxform;
+
+    /**
      * Constructor.
      *
      * @param int $page page number.
@@ -76,9 +82,12 @@ class question_category_object {
      * @param int $currentcat id of the category to be edited. 0 if none.
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
+     * @param int|null $cmidorcourseid  course module id or course id for the current page.
+     * @param bool|null $iscmid boolean checking if cmidorcourseid is cmid.
      * @param context[] $addcontexts contexts where the current user can add questions.
      */
-    public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts) {
+    public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
+        $cmidorcourseid = null, $iscmid = null) {
 
         $this->tab = str_repeat('&nbsp;', $this->tabsize);
 
@@ -106,7 +115,7 @@ class question_category_object {
 
         $this->pageurl = $pageurl;
 
-        $this->initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts);
+        $this->initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts, $cmidorcourseid, $iscmid);
     }
 
     /**
@@ -117,9 +126,13 @@ class question_category_object {
      * @param int $currentcat id of the category to be edited. 0 if none.
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
+     * @param int|null $cmidorcourseid  course module id or course id for the current page.
+     * @param bool|null $iscmid boolean checking if cmidorcourseid is cmid.
      * @param context[] $addcontexts contexts where the current user can add questions.
      */
-    public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts): void {
+    public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
+        $cmidorcourseid, $iscmid): void {
+
         $lastlist = null;
         foreach ($contexts as $context) {
             $this->editlists[$context->id] =
@@ -140,22 +153,27 @@ class question_category_object {
         if (!$currentcat) {
             $this->catform->set_data(['parent' => $defaultcategory]);
         }
+        // Checkbox Form.
+        $checked = get_user_preferences('question_bank_qbshowdescr');
+        $customdata = ['checked' => $checked, 'cmidorcourseid' => $cmidorcourseid, 'iscmid' => $iscmid];
+        $this->checkboxform = new question_category_checkbox_form(null, $customdata, 'post', null, ['id' => 'qbshowdescr-form']);
     }
 
     /**
      * Displays the user interface.
      *
      */
-    public function display_user_interface(): void {
+    public function display_user_interface() {
+        global $OUTPUT, $PAGE;
 
-        // Interface for editing existing categories.
-        $this->output_edit_lists();
+        $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        $dat = [
+            'helpstringhead' => $helpstringhead,
+            'checkbox' => $this->checkboxform->render(),
+            'categoriesrendered' => $this->output_edit_lists(),
+        ];
 
-        echo \html_writer::empty_tag('br');
-        // Interface for adding a new category.
-        $this->output_new_table();
-        echo \html_writer::empty_tag('br');
-
+        return $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
     }
 
     /**
@@ -171,23 +189,28 @@ class question_category_object {
      * $this->initialize() must have already been called
      *
      */
-    public function output_edit_lists(): void {
+    public function output_edit_lists(): array {
         global $OUTPUT;
-
-        echo $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
-
+        $categoriesrendered = [];
         foreach ($this->editlists as $context => $list) {
             $listhtml = $list->to_html(0, ['str' => $this->str]);
             if ($listhtml) {
-                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
-                    $list->context->contextlevel);
+                $ctxlvl = $list->context->contextlevel;
                 $fullcontext = context::instance_by_id($context);
-                echo $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
-                echo $listhtml;
-                echo $OUTPUT->box_end();
+                $heading = get_string('questioncatsfor', 'question', $fullcontext->get_context_name());
+                $listdisplay = $listhtml;
             }
+            $data =
+            [
+                'ctxlvl' => $ctxlvl,
+                'heading' => $heading,
+                'list' => $listdisplay,
+            ];
+            $rendered = $OUTPUT->render_from_template(helper::PLUGINNAME . '/categoryobject', $data);
+            $categoriesrendered[] = ['category' => $rendered];
         }
-        echo $list->display_page_numbers();
+        $categoriesrendered[] = $list->display_page_numbers();
+        return $categoriesrendered;
     }
 
     /**

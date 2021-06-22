@@ -20,8 +20,9 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir. '/listlib.php');
 
-use stdClass;
 use moodle_list;
+use pix_icon;
+use stdClass;
 
 /**
  * Class representing a list of question categories.
@@ -111,25 +112,63 @@ class question_category_list extends moodle_list {
      *
      * @param integer $left id of item to move left
      * @param integer $right id of item to move right
-     * @param integer $moveup id of item to move up
-     * @param integer $movedown id of item to move down
-     * @return void
+     * @return bool
      */
-    public function process_actions($left, $right, $moveup, $movedown) : void {
-        $category = new stdClass();
-        if (!empty($left)) {
-            // Moved Left (In to another category).
-            $category->id = $left;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
-        } else if (!empty($right)) {
-            // Moved Right (Out of the current category).
-            $category->id = $right;
-            $category->contextid = $this->context->id;
-            $event = \core\event\question_category_moved::create_from_question_category_instance($category);
-            $event->trigger();
+    public function process_actions($left, $right, $moveup = null, $movedown = null) : bool {
+        // Should this action be processed by this list object?
+        if (!(array_key_exists($left, $this->records) || array_key_exists($right, $this->records))) {
+            return false;
         }
-        parent::process_actions($left, $right, $moveup, $movedown);
+        if (!empty($left)) {
+            $oldparentitem = $this->move_item_left($left);
+            if ($this->item_is_last_on_page($oldparentitem->id)) {
+                // Item has jumped onto the next page, change page when we redirect.
+                $this->page ++;
+                $this->pageurl->params([$this->pageparamname => $this->page]);
+            }
+        } else if (!empty($right)) {
+            $this->move_item_right($right);
+            if ($this->item_is_first_on_page($right)) {
+                // Item has jumped onto the previous page, change page when we redirect.
+                $this->page --;
+                $this->pageurl->params([$this->pageparamname => $this->page]);
+            }
+        } else {
+            return false;
+        }
+
+        redirect($this->pageurl);
+    }
+
+    /**
+     * Override to_html function.
+     *
+     * @param integer $indent depth of indentation.
+     */
+    public function to_html($indent=0, $extraargs=[]) {
+        global $OUTPUT;
+        $itemstab = [];
+        if (count($this->items)) {
+            $tabs = str_repeat("\t", $indent);
+            $first = true;
+            $itemiter = 1;
+            $lastitem = '';
+            foreach ($this->items as $item) {
+                $last = (count($this->items) == $itemiter);
+                if ($this->editable) {
+                    $item->set_icon_html($first, $last, $lastitem);
+                }
+                if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
+                    $itemtab = $tabs . $itemhtml;
+                    $itemstab['items'][] = ['item' => $itemtab];
+                }
+                $first = false;
+                $lastitem = $item;
+                $itemiter++;
+            }
+        }
+        if ($itemstab) {
+            return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $itemstab);
+        }
     }
 }
