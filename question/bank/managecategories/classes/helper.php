@@ -372,4 +372,63 @@ class helper {
 
         return $categories;
     }
+
+    /**
+     * Checks if idnumber exists in given context.
+     *
+     * @param string $idnumber Id number to check for.
+     * @param string $contextid Contextid to check in.
+     * @return mixed Returns false or id of existing idnumber.
+     */
+    public static function get_idnumber(string $idnumber, string $contextid) {
+        global $DB;
+
+        $record = $DB->get_record('question_categories', ['idnumber' => $idnumber, 'contextid' => $contextid]);
+        return ($record) ? (int)$record->id : false;
+    }
+
+    /**
+     * Gets all descendant(s) of a category.
+     *
+     * @param int $category category to check in.
+     * @param array $parents Array of categories with their appropriate parent, key is the id and value the parent.
+     * @return array $keys Keys representing all descendants of moved category.
+     */
+    public static function get_childs(int $category, array $parents): array {
+        static $keys = [];
+        foreach ($parents as $child => $parent) {
+            if ($child === $category) {
+                $keysfound = array_keys($parents, $child);
+                // Recursive call to get all childs.
+                foreach ($keysfound as $keyfound) {
+                    self::get_childs($keyfound, $parents);
+                    $keys[] = $keyfound;
+                }
+                return $keys;
+            }
+        }
+    }
+
+    /**
+     * Sets childs tree structure.
+     *
+     * @param array $items Unordered tree structure.
+     * @return array $items Items with proper tree descendance structure.
+     */
+    public static function set_childs(array $items): array {
+        foreach ($items as $id => $item) {
+            if (array_key_exists((int)$item->parent, $items)) {
+                $item->parentitem = $items[$item->parent];
+                $items[$item->parent]->children[] = $item;
+            }
+        }
+        foreach ($items as $itm) {
+            if (isset($itm->children)) {
+                foreach ($itm->children as $children) {
+                    unset($items[$children->id]);
+                }
+            }
+        }
+        return $items;
+    }
 }

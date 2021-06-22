@@ -1,7 +1,7 @@
 @qbank @qbank_managecategories @javascript
 Feature: A teacher can put questions in categories in the question bank
   In order to organize my questions
-  As a teacher
+  As an admin
   I create and edit categories and move questions between them
 
   Background:
@@ -23,48 +23,49 @@ Feature: A teacher can put questions in categories in the question bank
     And the following "questions" exist:
       | questioncategory | qtype | name                      | questiontext                  |
       | Used category    | essay | Test question to be moved | Write about whatever you want |
-    And I log in as "teacher1"
+    And I log in as "admin"
     And I am on "Course 1" course homepage
+    And I navigate to "Question bank" in current page administration
+    And I click on "jump" "select"
+    And I click on "Categories" "option"
 
   Scenario: A new question category can be created
-    When I navigate to "Question bank" in current page administration
-    And I select "Categories" from the "questionbankactionselect" singleselect
+    And I press "Add category"
     And I set the following fields to these values:
       | Name            | New Category 1    |
       | Parent category | Top               |
       | Category info   | Created as a test |
       | ID number       | newcatidnumber    |
-    And I press "submitbutton"
+    And I click on "//div[@class='modal-footer']/button[@data-action='save']" "xpath_element"
+    And I click on "Show descriptions" "checkbox"
     Then I should see "New Category 1"
     And I should see "ID number"
     And I should see "newcatidnumber"
     And I should see "(0)"
-    And I should see "Created as a test" in the "New Category 1" "list_item"
-    And "New Category 1 [newcatidnumber]" "option" should exist in the "Parent category" "select"
+    And I should see "Created as a test"
+    And "New Category 1" "list_item" should exist in the ".contextlevel50" "css_element"
 
   Scenario: A question category can be edited
-    When I navigate to "Question bank" in current page administration
-    And I select "Categories" from the "questionbankactionselect" singleselect
-    And I click on "Edit this category" "link" in the "Subcategory" "list_item"
-    And the field "parent" matches value "&nbsp;&nbsp;&nbsp;Default for C1"
-    And I set the following fields to these values:
-      | Name            | New name     |
-      | Category info   | I was edited |
-    And I press "Save changes"
+    And I press "Edit"
+    And I choose "Edit settings" in the open action menu
+    And I set the field "Name" to "New name"
+    And I set the field "Category info" to "I was edited"
+    And I click on "//button[@data-action='save']" "xpath_element"
+    And I click on "Show descriptions" "checkbox"
     Then I should see "New name"
-    And I should see "I was edited" in the "New name" "list_item"
+    And I should see "I was edited"
 
   Scenario: An empty question category can be deleted
-    When I navigate to "Question bank" in current page administration
-    And I select "Categories" from the "questionbankactionselect" singleselect
-    And I click on "Delete" "link" in the "Subcategory" "list_item"
-    Then I should not see "Subcategory"
+    Then I should see "Default for C1"
+    And I press "Edit"
+    And I choose "Delete" in the open action menu
+    Then I should not see "Default for C1"
 
   Scenario: An non-empty question category can be deleted if you move the contents elsewhere
-    When I navigate to "Question bank" in current page administration
-    And I select "Categories" from the "questionbankactionselect" singleselect
-    And I click on "Delete" "link" in the "Used category" "list_item"
+    When I click on "Used category" edit menu in the question category list
+    And I choose "Delete" in the open action menu
     And I should see "The category 'Used category' contains 1 questions"
     And I press "Save in category"
     Then I should not see "Used category"
-    And I should see "Default for C1 (1)"
+    And I should see "Default for C1"
+    And I should see "(1)"

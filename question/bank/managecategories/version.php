@@ -26,6 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_managecategories';
-$plugin->version = 2021070700;
+$plugin->version = 2021121600;
 $plugin->requires = 2021052500;
 $plugin->maturity = MATURITY_STABLE;
