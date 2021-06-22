@@ -27,11 +27,10 @@ namespace core_question\local\bank;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\bank\search\condition;
-<<<<<<< HEAD
+
 use qbank_managecategories\helper;
-=======
+
 use qbank_editquestion\editquestion_helper;
->>>>>>> MDL-71574 qbank_editquestion: Add Edit question plugin to core
 
 /**
  * This class prints a view of the question bank.
