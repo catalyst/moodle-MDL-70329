@@ -46,7 +46,8 @@ class columns extends column_plugin_base{
      */
     public function get_question_columns(): array {
         return array (
-                new preview_action_column($this->qbank)
+                new preview_action_column($this->qbank),
+                new comment_count_column($this->qbank)
         );
     }
 }

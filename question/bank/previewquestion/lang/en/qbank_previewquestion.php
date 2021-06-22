@@ -25,3 +25,5 @@
 
 $string['pluginname'] = 'Preview question';
 $string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+$string['commentheader'] = 'Question comments';
+$string['commentplural'] = 'Comments';
