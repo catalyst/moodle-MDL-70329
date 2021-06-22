@@ -17,34 +17,60 @@
 /**
  * The question tags column subclass.
  *
- * @package   core_question
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace core_question\bank;
+
+namespace qbank_tagquestion;
+
 defined('MOODLE_INTERNAL') || die();
 
+use core_question\local\bank\action_column_base;
+use core_question\local\bank\menuable_action;
 
 /**
  * Action to add and remove tags to questions.
  *
+ * @package   qbank_tagquestion
  * @copyright 2018 Simey Lameze <simey@moodle.com>
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated since Moodle 4.0
- * @see \qbank_tagquestion\tags_action_column
  */
 class tags_action_column extends action_column_base implements menuable_action {
+
     /**
      * @var string store this lang string for performance.
      */
     protected $managetags;
 
-    public function init() {
+    /**
+     * @var bool tags enabled or not from config.
+     */
+    protected $tagsenabled = true;
+
+    /**
+     * A chance for subclasses to initialise themselves, for example to load lang strings,
+     * without having to override the constructor.
+     */
+    public function init(): void {
         parent::init();
-        // Removed for conflicting js calls.
-        // ...global $PAGE;.
-        // ...$PAGE->requires->js_call_amd('core_question/edit_tags', 'init', ['#questionscontainer']);.
+        $this->check_tags_status();
+        if ($this->tagsenabled) {
+            global $PAGE;
+            $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#questionscontainer']);
+        }
         $this->managetags = get_string('managetags', 'tag');
+    }
+
+    /**
+     * Check if tags are enabled sitewide.
+     */
+    protected function check_tags_status(): void {
+        global $CFG;
+        if (!$CFG->usetags) {
+            $this->tagsenabled = false;
+        }
     }
 
     /**
@@ -52,7 +78,7 @@ class tags_action_column extends action_column_base implements menuable_action {
      *
      * @return string
      */
-    public function get_name() {
+    public function get_name(): string {
         return 'tagsaction';
     }
 
@@ -62,11 +88,11 @@ class tags_action_column extends action_column_base implements menuable_action {
      * @param object $question The question database record.
      * @param string $rowclasses
      */
-    protected function display_content($question, $rowclasses) {
+    protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
         if (\core_tag_tag::is_enabled('core_question', 'question') &&
-                question_has_capability_on($question, 'view')) {
+                question_has_capability_on($question, 'view') && $this->tagsenabled) {
 
             [$url, $attributes] = $this->get_link_url_and_attributes($question);
             echo \html_writer::link($url, $OUTPUT->pix_icon('t/tags',
@@ -81,8 +107,8 @@ class tags_action_column extends action_column_base implements menuable_action {
      * @return array with two elements, \moodle_url and
      *     an array or data $attributes needed to make the JavaScript work.
      */
-    protected function get_link_url_and_attributes($question) {
-        $url = new \moodle_url($this->qbank->edit_question_url($question->id));
+    protected function get_link_url_and_attributes($question): array {
+        $url = new \moodle_url($this->qbank->returnurl);
 
         $attributes = [
                 'data-action' => 'edittags',
@@ -94,9 +120,15 @@ class tags_action_column extends action_column_base implements menuable_action {
         return [$url, $attributes];
     }
 
+    /**
+     * Gets the action menu link.
+     *
+     * @param \stdClass $question
+     * @return \action_menu_link|null
+     */
     public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
         if (!\core_tag_tag::is_enabled('core_question', 'question') ||
-                !question_has_capability_on($question, 'view')) {
+                !question_has_capability_on($question, 'view') || !$this->tagsenabled) {
             return null;
         }
 
