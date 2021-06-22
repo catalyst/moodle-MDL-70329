@@ -31,6 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2009 Tim Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_viewquestiontype\question_type_column
  */
 class question_type_column extends column_base {
     public function get_name() {

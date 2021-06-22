@@ -31,6 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2019 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @deprecated since Moodle 4.0
+ * @see \qbank_viewquestionname\question_name_idnumber_tags_column
  */
 class question_name_idnumber_tags_column extends question_name_column {
     public function get_name() {
