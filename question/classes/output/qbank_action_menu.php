@@ -72,18 +72,11 @@ class qbank_action_menu implements templatable, renderable {
         $menu[$importlink->out(false)] = get_string('import', 'question');
         $menu[$exportlink->out(false)] = get_string('export', 'question');
 
-        $addcategory = null;
-        if (strpos($this->currenturl->get_path(), 'category.php') !== false &&
-                $this->currenturl->param('edit') === null) {
-            $addcategory = $this->currenturl->out(false, ['edit' => 0]);
-        }
-
         $urlselect = new url_select($menu, $this->currenturl->out(false), null, 'questionbankaction');
         $urlselect->set_label(get_string('questionbanknavigation', 'question'), ['class' => 'accesshide']);
 
         return [
-            'questionbankselect' => $urlselect->export_for_template($output),
-            'addcategory' => $addcategory
+            'questionbankselect' => $urlselect->export_for_template($output)
         ];
     }
 }

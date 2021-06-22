@@ -46,4 +46,14 @@ class renderer extends plugin_renderer_base {
     public function render_category_condition($displaydata) {
         return $this->render_from_template('qbank_managecategories/category_condition', $displaydata);
     }
+
+    /**
+     * Render categories in question bank.
+     *
+     * @param array $data
+     * @return string
+     */
+    public function render_qbank_categories($data) {
+        return $this->render_from_template('qbank_managecategories/categories', $data);
+    }
 }
