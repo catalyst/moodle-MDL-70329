@@ -46,6 +46,10 @@ class question_category_edit_form extends moodleform {
 
         $contexts = $this->_customdata['contexts'];
         $currentcat = $this->_customdata['currentcat'];
+        $modalid = null;
+        if (isset($this->_customdata['modalid'])) {
+            $modalid = $this->_customdata['modalid'];
+        }
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
@@ -63,7 +67,7 @@ class question_category_edit_form extends moodleform {
         $mform->setType('name', PARAM_TEXT);
 
         $mform->addElement('editor', 'info', get_string('categoryinfo', 'question'),
-                ['rows' => 10], ['noclean' => 1]);
+                ['id' => $modalid, 'rows' => 10], ['noclean' => 1, 'autosave' => false]);
         $mform->setDefault('info', '');
         $mform->setType('info', PARAM_RAW);
 
@@ -71,7 +75,7 @@ class question_category_edit_form extends moodleform {
         $mform->addHelpButton('idnumber', 'idnumber', 'question');
         $mform->setType('idnumber', PARAM_RAW);
 
-        $this->add_action_buttons(false, get_string('addcategory', 'question'));
+        $this->add_action_buttons(true, get_string('addcategory', 'question'));
 
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);

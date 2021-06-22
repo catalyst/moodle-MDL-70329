@@ -1,0 +1,13 @@
+ul.unmarkedlist {
+    list-style-type: none;
+    margin: 1rem 0;
+}
+
+li.liststyled {
+    padding: 1em;
+    border: 1px solid rgba(0, 0, 0, .125);
+}
+
+li.liststyled + li.liststyled {
+    border-top-width: 0;
+}
