@@ -314,4 +314,22 @@ class core_question_external extends external_api {
             )
         ]);
     }
+
+    public static function set_category_order_parameters() {
+        return new external_function_parameters(
+            array(
+                'categories' => new external_value(PARAM_RAW, 'JSON String')
+            )
+        );
+    }
+
+    public static function set_category_order(string $categories) {
+        $params = self::validate_parameters(self::set_category_order_parameters(), array('categories' => $categories));
+        $val = set_config('qbankcategoriesorder', $categories, 'question');
+        return $categories;
+    }
+
+    public static function set_category_order_returns() {
+        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
+    }
 }

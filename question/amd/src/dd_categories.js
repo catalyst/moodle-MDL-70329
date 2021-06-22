@@ -22,8 +22,8 @@
  *
 */
 
-// import Ajax from 'core/ajax';
-// import Notification from 'core/notification';
+import Ajax from 'core/ajax';
+import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
 import jQuery from 'jquery';
 
@@ -40,9 +40,23 @@ const setupSortableLists = () => {
         }
     );
 
-    jQuery('.catitem').on(SortableList.EVENTS.DRAGSTART, () => {
+    jQuery('.catitem').on(SortableList.EVENTS.DROP, () => {
         console.log('dropped');
+        setCatOrder(JSON.stringify('testing'));
     });
+};
+
+/**
+ * Call external function set_order - inserts the updated column in the config_plugins table.
+ *
+ * @returns {Void}
+ */
+ const setCatOrder = (updatedCat) => {
+    Ajax.call([{
+        methodname: 'core_question_set_category_order',
+        args: { categories: updatedCat },
+        fail: Notification.exception
+    }]);
 };
 
 export const init = () => {
