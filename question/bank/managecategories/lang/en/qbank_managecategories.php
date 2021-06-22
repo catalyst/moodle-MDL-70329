@@ -23,5 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addcategory'] = 'Add category';
+$string['alertcheckboxes'] = '<h4> Please check at least one category to delete</h4>';
+$string['deleteallquestions'] = 'Delete all questions';
+$string['deletecategoryformname'] = 'Delete category';
+$string['deletecategorylabel'] = 'Delete';
+$string['movequestions'] = 'Move questions to category';
 $string['pluginname'] = 'Manage question bank categories feature';
 $string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
+$string['showcategorydescription'] = 'Show descriptions';

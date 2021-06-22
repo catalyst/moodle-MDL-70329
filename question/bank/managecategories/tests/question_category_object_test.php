@@ -98,15 +98,16 @@ class question_category_object_test extends \advanced_testcase {
         $this->context = context_course::instance(SITEID);
         $contexts = new question_edit_contexts($this->context);
         $this->topcat = question_get_top_category($this->context->id, true);
-        $this->qcobject = new question_category_object(null,
-            new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
-            $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
-            $contexts->having_cap('moodle/question:add'));
 
         // Set up tests in a quiz context.
         $this->course = $this->getDataGenerator()->create_course();
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
         $this->qcontexts = new question_edit_contexts(context_module::instance($this->quiz->cmid));
+
+        $this->qcobject = new question_category_object(null,
+            new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
+            $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
+            $contexts->having_cap('moodle/question:add'), $this->quiz->cmid);
 
         $this->defaultcategoryobj = question_make_default_categories([$this->qcontexts->lowest()]);
         $this->defaultcategory = $this->defaultcategoryobj->id . ',' . $this->defaultcategoryobj->contextid;
@@ -118,7 +119,8 @@ class question_category_object_test extends \advanced_testcase {
             $this->defaultcategoryobj->id,
             $this->defaultcategory,
             null,
-            $this->qcontexts->having_cap('moodle/question:add'));
+            $this->qcontexts->having_cap('moodle/question:add'),
+            $this->quiz->cmid);
 
     }
 
