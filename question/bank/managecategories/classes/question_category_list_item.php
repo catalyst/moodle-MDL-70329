@@ -16,7 +16,14 @@
 
 namespace qbank_managecategories;
 
+use action_menu;
+use action_menu_link;
+use context_system;
+use list_item;
 use moodle_url;
+use navigation_node;
+use pix_icon;
+use \core\plugininfo\qbank;
 
 /**
  * An item in a list of question categories.
@@ -25,7 +32,7 @@ use moodle_url;
  * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class question_category_list_item extends \list_item {
+class question_category_list_item extends list_item {
 
     /**
      * Override set_icon_html function.
@@ -36,35 +43,35 @@ class question_category_list_item extends \list_item {
      */
     public function set_icon_html($first, $last, $lastitem) : void {
         global $CFG;
-        $category = $this->item;
-        $url = new moodle_url('/question/bank/managecategories/category.php',
-            ($this->parentlist->pageurl->params() + ['edit' => $category->id]));
-        $this->icons['edit'] = $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
-        parent::set_icon_html($first, $last, $lastitem);
-        $toplevel = ($this->parentlist->parentitem === null);// This is a top level item.
-        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items) > 1)) {
-            $url = new moodle_url($this->parentlist->pageurl,
-                [
-                    'movedowncontext' => $this->id,
-                    'tocontext' => $this->parentlist->nextlist->context->id,
-                    'sesskey' => sesskey()
-                ]
-            );
-            $this->icons['down'] = $this->image_icon(
-                    get_string('shareincontext', 'question',
-                        $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
+        $strmoveleft = get_string('maketoplevelitem', 'question');
+        // Exchange arrows on RTL.
+        if (right_to_left()) {
+            $rightarrow = 'left';
+            $leftarrow  = 'right';
+        } else {
+            $rightarrow = 'right';
+            $leftarrow  = 'left';
         }
-        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items) > 1)) {
-            $url = new moodle_url($this->parentlist->pageurl,
-                [
-                    'moveupcontext' => $this->id,
-                    'tocontext' => $this->parentlist->lastlist->context->id,
-                    'sesskey' => sesskey()
-                ]
-            );
-            $this->icons['up'] = $this->image_icon(
-                    get_string('shareincontext', 'question',
-                        $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
+
+        if (isset($this->parentlist->parentitem)) {
+            $parentitem = $this->parentlist->parentitem;
+            if (isset($parentitem->parentlist->parentitem)) {
+                $action = get_string('makechildof', 'question', $parentitem->parentlist->parentitem->name);
+            } else {
+                $action = $strmoveleft;
+            }
+            $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'left' => $this->id]));
+            $this->icons['left'] = $this->image_icon($action, $url, $leftarrow);
+        } else {
+            $this->icons['left'] = $this->image_spacer();
+        }
+
+        if (!empty($lastitem)) {
+            $makechildof = get_string('makechildof', 'question', $lastitem->name);
+            $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'right' => $this->id]));
+            $this->icons['right'] = $this->image_icon($makechildof, $url, $rightarrow);
+        } else {
+            $this->icons['right'] = $this->image_spacer();
         }
     }
 
@@ -79,10 +86,13 @@ class question_category_list_item extends \list_item {
         global $PAGE, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
+        $context = context_system::instance();
+        $params = $this->parentlist->pageurl->params();
+        $cmid = $params['cmid'] ?? 0;
+        $courseid = $params['courseid'] ?? 0;
 
         // Each section adds html to be displayed as part of this list item.
-        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
-        $questionbankurl = new moodle_url($nodeparent->action->get_path(), $this->parentlist->pageurl->params());
+        $questionbankurl = new moodle_url('/question/edit.php', $params);
         $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
         $categoryname = format_string($category->name, true, ['context' => $this->parentlist->context]);
         $idnumber = null;
@@ -90,15 +100,79 @@ class question_category_list_item extends \list_item {
             $idnumber = $category->idnumber;
         }
         $questioncount = ' (' . $category->questioncount . ')';
-        $categorydesc = format_text($category->info, $category->infoformat,
-            ['context' => $this->parentlist->context, 'noclean' => true]);
-
-        // Don't allow delete if this is the top category, or the last editable category in this context.
-        $deleteurl = null;
-        if ($category->parent && !helper::question_is_only_child_of_top_category_in_context($category->id)) {
-            $deleteurl = new moodle_url($this->parentlist->pageurl, ['delete' => $this->id, 'sesskey' => sesskey()]);
+        $checked = get_user_preferences('qbank_managecategories_showdescr');
+        if ($checked) {
+            $categorydesc = format_text($category->info, $category->infoformat,
+                ['context' => $this->parentlist->context, 'noclean' => true]);
+        } else {
+            $categorydesc = '';
+        }
+        $menu = new action_menu();
+        $menu->set_menu_trigger(get_string('edit'));
+        if ($this->children->editable) {
+            // Sets up edit link.
+            if (has_capability('moodle/category:manage', $context)) {
+                $thiscontext = (int)$this->item->contextid;
+                $editurl = new moodle_url('#');
+                $selector = '[data-action=editcategory-'. $category->id .']';
+                $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
+                        [$selector, $thiscontext, $category->id, $cmid, $courseid]);
+                $menu->add(new action_menu_link(
+                    $editurl,
+                    new pix_icon('t/edit', 'edit'),
+                    get_string('editsettings'),
+                    false,
+                    ['data-action' => "editcategory-{$category->id}"]
+                ));
+                // Don't allow delete if this is the top category, or the last editable category in this context.
+                if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                    // Sets up delete link.
+                    $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
+                        ['delete' => $category->id, 'sesskey' => sesskey()]);
+                    if ($courseid !== 0) {
+                        $deleteurl->param('courseid', $courseid);
+                    } else {
+                        $deleteurl->param('cmid', $cmid);
+                    }
+                    $menu->add(new action_menu_link(
+                        $deleteurl,
+                        new pix_icon('t/delete', 'delete'),
+                        get_string('delete'),
+                        false
+                    ));
+                }
+            }
         }
 
+        // Sets up export to XML link.
+        if (qbank::is_plugin_enabled('qbank_exportquestions')) {
+            $exporturl = new moodle_url('/question/bank/exportquestions/export.php',
+                ['cat' => $category->id . ',' . $category->contextid]);
+            if ($courseid !== 0) {
+                $exporturl->param('courseid', $courseid);
+            } else {
+                $exporturl->param('cmid', $cmid);
+            }
+
+            $menu->add(new action_menu_link(
+                $exporturl,
+                new pix_icon('t/download', 'download'),
+                get_string('exportasxml', 'question'),
+                false
+            ));
+        }
+
+        // Menu to string/html.
+        $menu = $OUTPUT->render($menu);
+        // Don't allow movement if only subcat.
+        $handle = false;
+        if (has_capability('moodle/category:manage', $context)) {
+            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                $handle = true;
+            } else {
+                $handle = false;
+            }
+        }
         // Render each question category.
         $data =
             [
@@ -107,8 +181,8 @@ class question_category_list_item extends \list_item {
                 'idnumber' => $idnumber,
                 'questioncount' => $questioncount,
                 'categorydesc' => $categorydesc,
-                'deleteurl' => $deleteurl,
-                'deletetitle' => $str->delete
+                'editactionmenu' => $menu,
+                'handle' => $handle,
             ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/listitem', $data);
