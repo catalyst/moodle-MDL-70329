@@ -83,7 +83,7 @@ echo $OUTPUT->header();
 
 // Print horizontal nav if needed.
 $renderer = $PAGE->get_renderer('core_question', 'bank');
-echo $renderer->extra_horizontal_navigation();
+echo $renderer->extra_horizontal_navigation('questions');
 
 // Print the question area.
 $questionbank->display($pagevars, 'questions');
