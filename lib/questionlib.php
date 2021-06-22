@@ -2363,8 +2363,12 @@ function question_make_export_url($contextid, $categoryid, $format, $withcategor
  *      question_bank::load_question_data() or question_bank::make_question().
  *      (Only ->id and ->contextid are used.)
  * @return moodle_url the requested URL.
+ * @deprecated since Moodle 4.0
+ * @see \qbank_exporttoxml\exporttoxml_helper::question_get_export_single_question_url()
  */
 function question_get_export_single_question_url($question) {
+    debugging('Function question_get_export_single_question_url() has been deprecated and moved to qbank_exporttoxml plugin,
+     please use qbank_exporttoxml\exporttoxml_helper::question_get_export_single_question_url() instead.', DEBUG_DEVELOPER);
     $params = ['id' => $question->id, 'sesskey' => sesskey()];
     $context = context::instance_by_id($question->contextid);
     switch ($context->contextlevel) {
