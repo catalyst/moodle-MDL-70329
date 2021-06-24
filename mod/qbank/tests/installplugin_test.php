@@ -138,27 +138,27 @@ class installplugin_test extends \advanced_testcase {
         $qbankquizcontext = helper::create_qbank_instance('Question bank Quiz context', $course);
 
         // Test that the categories of questions (system context) belong to the correct context before and after being migrated.
-        $this->assertCount(1, get_categories_for_contexts($systemcontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts($systemcontext));
         helper::migrate_question_categories($qbanksystemcontext, $systemcontext);
-        $this->assertCount(0, get_categories_for_contexts($systemcontext));
-        $this->assertCount(1, get_categories_for_contexts(\context_module::instance($qbanksystemcontext->coursemodule)->id));
+        $this->assertCount(0, \qbank_managecategories\helper::get_categories_for_contexts($systemcontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts(\context_module::instance($qbanksystemcontext->coursemodule)->id));
 
         // Test that the categories of questions (category context) belong to the correct context before and after being migrated.
-        $this->assertCount(1, get_categories_for_contexts($categorycontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts($categorycontext));
         helper::migrate_question_categories($qbankcategorycontext, $categorycontext);
-        $this->assertCount(0, get_categories_for_contexts($categorycontext));
-        $this->assertCount(1, get_categories_for_contexts(\context_module::instance($qbankcategorycontext->coursemodule)->id));
+        $this->assertCount(0, \qbank_managecategories\helper::get_categories_for_contexts($categorycontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts(\context_module::instance($qbankcategorycontext->coursemodule)->id));
 
         // Test that the categories of questions (course context) belong to the correct context before and after being migrated.
-        $this->assertCount(1, get_categories_for_contexts($coursecontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts($coursecontext));
         helper::migrate_question_categories($qbankcoursecontext, $coursecontext);
-        $this->assertCount(0, get_categories_for_contexts($coursecontext));
-        $this->assertCount(1, get_categories_for_contexts(\context_module::instance($qbankcoursecontext->coursemodule)->id));
+        $this->assertCount(0, \qbank_managecategories\helper::get_categories_for_contexts($coursecontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts(\context_module::instance($qbankcoursecontext->coursemodule)->id));
 
         // Test that the categories of questions (quiz context) belong to the correct context before and after being migrated.
-        $this->assertCount(1, get_categories_for_contexts($quizcontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts($quizcontext));
         helper::migrate_question_categories($qbankquizcontext, $quizcontext);
-        $this->assertCount(0, get_categories_for_contexts($quizcontext));
-        $this->assertCount(1, get_categories_for_contexts(\context_module::instance($qbankquizcontext->coursemodule)->id));
+        $this->assertCount(0, \qbank_managecategories\helper::get_categories_for_contexts($quizcontext));
+        $this->assertCount(1, \qbank_managecategories\helper::get_categories_for_contexts(\context_module::instance($qbankquizcontext->coursemodule)->id));
     }
 }
