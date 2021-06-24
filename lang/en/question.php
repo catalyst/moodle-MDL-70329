@@ -495,5 +495,5 @@ $string['withselected'] = 'With selected';
 $string['xoutofmax'] = '{$a->mark} out of {$a->max}';
 $string['yougotnright'] = 'You have correctly selected {$a->num}.';
 $string['questionbanks'] = 'Question bank plugins';
-$string['qbanknotfound'] = 'The \'{$a}\' question bank doesn\'t exist or is not recognised.';
+$string['qbanknotfound'] = 'The \'{$a}\' question bank plugin doesn\'t exist or is not recognised.';
 $string['noquestionbanks'] = 'No question bank plugin found.';
