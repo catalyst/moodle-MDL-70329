@@ -140,13 +140,13 @@ function question_can_delete_cat($todelete) {
 
 
 /**
- * Base class for representing a column in a {@link question_bank_view}.
+ * Base class for representing a column in a {@see question_bank_view}.
  *
  * @copyright  2009 Tim Hunt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\column_base', 'question_bank_column_base', true);
+class_alias('core_question\local\bank\column_base', 'question_bank_column_base', true);
 
 /**
  * A column with a checkbox for each question with name q{questionid}.
@@ -155,7 +155,7 @@ class_alias('core_question\bank\column_base', 'question_bank_column_base', true)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\checkbox_column', 'question_bank_checkbox_column', true);
+class_alias('core_question\local\bank\checkbox_column', 'question_bank_checkbox_column', true);
 
 /**
  * A column type for the name of the question type.
@@ -204,7 +204,7 @@ class_alias('core_question\bank\modifier_name_column', 'question_bank_modifier_n
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\action_column_base', 'question_bank_action_column_base', true);
+class_alias('core_question\local\bank\action_column_base', 'question_bank_action_column_base', true);
 
 
 /**
@@ -251,7 +251,7 @@ class_alias('core_question\bank\delete_action_column', 'question_bank_delete_act
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\row_base', 'question_bank_row_base', true);
+class_alias('core_question\local\bank\row_base', 'question_bank_row_base', true);
 
 /**
  * A column type for the name of the question name.
@@ -267,7 +267,7 @@ class_alias('core_question\bank\question_text_row', 'question_bank_question_text
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 2.7 MDL-40457
  */
-class_alias('core_question\bank\view', 'question_bank_view', true);
+class_alias('core_question\local\bank\view', 'question_bank_view', true);
 
 /**
  * Common setup for all pages for editing questions.
