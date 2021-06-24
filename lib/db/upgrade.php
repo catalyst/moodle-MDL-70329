@@ -2765,68 +2765,8 @@ function xmldb_main_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        // Split question table in two tables (question_bank_entry and question_versions).
-        $questions = $DB->get_recordset('question');
-        foreach ($questions as $question) {
-            // Populate table question_bank_entry.
-            $questionbankentry = new \stdClass();
-            $questionbankentry->questioncategoryid = $question->category;
-            $questionbankentry->name = $question->name;
-            $questionbankentry->idnumber = $question->idnumber;
-            $questionbankentry->hidden = $question->hidden;
-            $questionbankentry->ownerid = $question->createdby;
-            $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
-
-            // Create question_versions records to be added.
-            $questionversion = new \stdClass();
-            $questionversion->questionbankentryid = $questionbankentry->id;
-            $questionversion->questionid = $question->id;
-            $questionversions[] = $questionversion;
-
-            // Create question_references records to be added.
-            $quizslot = $DB->get_record('quiz_slots', ['questionid' => $question->id]);
-            if ($quizslot) {
-                if ($question->qtype === 'random') {
-                    $questionsetreference = new \stdClass();
-                    $questionsetreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
-                    $questionsetreference->component = 'mod_quiz';
-                    $questionsetreference->questionarea = 'slot';
-                    $questionsetreference->itemid = $quizslot->id;
-                    // TODO: questioncontextid and filtercondition.
-                    $questionsetreference->questioncontextid = context_module::instance($quizslot->quizid)->id;
-                    $questionsetreference->filtercondition = null;
-                    $questionsetreferences[] = $questionsetreference;
-                } else {
-                    $questionreference = new \stdClass();
-                    $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
-                    $questionreference->component = 'mod_quiz';
-                    $questionreference->questionarea = 'slot';
-                    $questionreference->itemid = $quizslot->id;
-                    $questionreference->questionbankentryid = $questionbankentry->id;
-                    $questionreference->versionnumber = 1;
-                    $questionreferences[] = $questionreference;
-                }
-            }
-        }
-        $questions->close();
-
-        // Populate table question_versions.
-        $qbankversionschunks = array_chunk($questionversions, 30000);
-        foreach ($qbankversionschunks as $qbankversionschunk) {
-            $DB->insert_records('question_versions', $qbankversionschunk);
-        }
-
-        // Populate table question_references.
-        $qbankreferenceschunks = array_chunk($questionreferences, 30000);
-        foreach ($qbankreferenceschunks as $qbankreferenceschunk) {
-            $DB->insert_records('question_references', $qbankreferenceschunk);
-        }
-
-        // Populate table question_references.
-        $qbanksetreferenceschunks = array_chunk($questionsetreferences, 30000);
-        foreach ($qbanksetreferenceschunks as $qbanksetreferenceschunk) {
-            $DB->insert_records('question_set_references', $qbanksetreferenceschunk);
-        }
+        // Split question table in 4 tables (question_bank_entry and question_versions).
+        upgrade_migrate_question_table();
 
         // TODO: Remove fields from question table.
         // TODO: Remove fields from quiz_slot table.

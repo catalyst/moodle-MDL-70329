@@ -1274,3 +1274,117 @@ function upgrade_calendar_override_events_fix(stdClass $info, bool $output = tru
     upgrade_calendar_events_mtrace('', $output);
     return $return;
 }
+
+/**
+ * Split question table in 4 new tables:
+ *
+ * question_bank_entry
+ * question_versions
+ * question_reference
+ * question_set_reference
+ *
+ * For more information: https://moodle.org/mod/forum/discuss.php?d=417599#p1688163
+ */
+function upgrade_migrate_question_table(): void {
+    global $DB;
+
+    /**
+     * @var int Maximum size of array.
+     */
+    $maxlength = 30000;
+
+    /**
+     * @var array Array of question_versions objects.
+     */
+    $questionversions = [];
+
+    /**
+     * @var array Array of question_set_references objects.
+     */
+    $questionsetreferences = [];
+
+    /**
+     * @var array Array of question_references objects.
+     */
+    $questionreferences = [];
+
+    // Get all records in question table.
+    $questions = $DB->get_recordset('question');
+    foreach ($questions as $question) {
+        // Populate table question_bank_entry.
+        $questionbankentry = new \stdClass();
+        $questionbankentry->questioncategoryid = $question->category;
+        $questionbankentry->name = $question->name;
+        $questionbankentry->idnumber = $question->idnumber;
+        $questionbankentry->hidden = $question->hidden;
+        $questionbankentry->ownerid = $question->createdby;
+        // Insert a question_bank_entry record here as the id is required to populate other tables.
+        $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+
+        // Create question_versions records to be added.
+        $questionversion = new \stdClass();
+        $questionversion->questionbankentryid = $questionbankentry->id;
+        $questionversion->questionid = $question->id;
+        $questionversions[] = $questionversion;
+
+        // Insert the records if the array limit is reached.
+        if (count($questionversions) >= $maxlength) {
+            $DB->insert_records('question_versions', $questionversions);
+            $questionversions = [];
+        }
+
+        // Create question_references records to be added.
+        $quizslot = $DB->get_record('quiz_slots', ['questionid' => $question->id]);
+        if ($quizslot) {
+            if ($question->qtype === 'random') {
+                $questionsetreference = new \stdClass();
+                $questionsetreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+                $questionsetreference->component = 'mod_quiz';
+                $questionsetreference->questionarea = 'slot';
+                $questionsetreference->itemid = $quizslot->id;
+                $catcontext = $DB->get_field('question_categories', 'contextid', ['id' => $question->category]);
+                $questionsetreference->questioncontextid = $catcontext;
+                // TODO: filtercondition.
+                $questionsetreference->filtercondition = null;
+                $questionsetreferences[] = $questionsetreference;
+
+                // Insert the records if the array limit is reached.
+                if (count($questionsetreferences) >= $maxlength) {
+                    $DB->insert_records('question_set_references', $questionsetreferences);
+                    $questionsetreferences = [];
+                }
+            } else {
+                $questionreference = new \stdClass();
+                $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+                $questionreference->component = 'mod_quiz';
+                $questionreference->questionarea = 'slot';
+                $questionreference->itemid = $quizslot->id;
+                $questionreference->questionbankentryid = $questionbankentry->id;
+                $questionreference->versionnumber = 1;
+                $questionreferences[] = $questionreference;
+
+                // Insert the records if the array limit is reached.
+                if (count($questionreferences) >= $maxlength) {
+                    $DB->insert_records('question_references', $questionreferences);
+                    $questionreferences = [];
+                }
+            }
+        }
+    }
+    $questions->close();
+
+    // Insert the remaining question_versions records.
+    if ($questionversions) {
+        $DB->insert_records('question_versions', $questionversions);
+    }
+
+    // Insert the remaining question_set_references records.
+    if ($questionsetreferences) {
+        $DB->insert_records('question_set_references', $questionsetreferences);
+    }
+
+    // Insert the remaining question_references records.
+    if ($questionreferences) {
+        $DB->insert_records('question_references', $questionreferences);
+    }
+}
