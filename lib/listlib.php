@@ -227,7 +227,7 @@ abstract class moodle_list {
             if ($this->parentitem !== null) {
                 $newattributes = $this->parentitem->attributes;
             } else {
-                $newattributes = 'class="catitem"';
+                $newattributes = '';
             }
 
             $this->items[$itemiter] = new $this->listitemclassname($record, $this, $newattributes, $inpage);

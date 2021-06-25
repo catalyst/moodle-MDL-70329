@@ -30,6 +30,7 @@ require_once("$CFG->libdir/externallib.php");
 require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/engine/datalib.php');
 require_once($CFG->libdir . '/questionlib.php');
+require_once($CFG->libdir . '/listlib.php');
 
 /**
  * Question external functions
@@ -325,7 +326,6 @@ class core_question_external extends external_api {
 
     public static function set_category_order(string $categories) {
         $params = self::validate_parameters(self::set_category_order_parameters(), array('categories' => $categories));
-        $val = set_config('qbankcategoriesorder', $categories, 'question');
         return $categories;
     }
 

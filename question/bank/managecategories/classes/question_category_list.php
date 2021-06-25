@@ -139,4 +139,46 @@ class question_category_list extends moodle_list {
         }
         parent::process_actions($left, $right, $moveup, $movedown);
     }
+
+    /**
+     * Override to_html function.
+     *
+     * @param integer $indent depth of indentation.
+     */
+    public function to_html($indent=0, $extraargs=array()) {
+        if (count($this->items)) {
+            $tabs = str_repeat("\t", $indent);
+            $first = true;
+            $itemiter = 1;
+            $lastitem = '';
+            $html = '';
+
+            foreach ($this->items as $item) {
+                $item->attributes = 'class="list_item"';
+                $last = (count($this->items) == $itemiter);
+                // if ($this->editable) {
+                //     $item->set_icon_html($first, $last, $lastitem);
+                // }
+                if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
+                    $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
+                    $html .= $itemhtml;
+                    $html .= "</li>\n";
+                }
+                $first = false;
+                $lastitem = $item;
+                $itemiter++;
+            }
+        } else {
+            $html = '';
+        }
+        if ($html) { //if there are list items to display then wrap them in ul / ol tag.
+            $this->attributes = 'class="category_list"';
+            $tabs = str_repeat("\t", $indent);
+            $html = $tabs.'<'.$this->type.((!empty($this->attributes))?(' '.$this->attributes):'').">\n".$html;
+            $html .= $tabs."</".$this->type.">\n";
+        } else {
+            $html ='';
+        }
+        return $html;
+    }
 }

@@ -34,15 +34,17 @@ import jQuery from 'jquery';
  */
 const setupSortableLists = () => {
     new SortableList(
-        '.list',
+        '.category_list',
         {
-            moveHandlerSelector: '.catitem',
+            moveHandlerSelector: '.list_item',
         }
     );
 
-    jQuery('.catitem').on(SortableList.EVENTS.DROP, () => {
-        console.log('dropped');
-        setCatOrder(JSON.stringify('testing'));
+    jQuery('.list_item').on(SortableList.EVENTS.DROP, () => {
+        let categoryListElements = jQuery('.list_item').parent();
+        jQuery('li.list_item[style]').remove();
+        let val = getParentCategoryList(categoryListElements);
+        setCatOrder(JSON.stringify(val));
     });
 };
 
@@ -51,15 +53,30 @@ const setupSortableLists = () => {
  *
  * @returns {Void}
  */
- const setCatOrder = (updatedCat) => {
-    Ajax.call([{
+ const setCatOrder = (updatedCategories) => {
+    const val = Ajax.call([{
         methodname: 'core_question_set_category_order',
-        args: { categories: updatedCat },
-        fail: Notification.exception
+        args: { categories: updatedCategories },
+        //fail: Notification.exception
     }]);
+    val[0].then((response) => console.log(JSON.parse(response)));
+};
+
+const getParentCategoryList = (categoryListElements) => {
+    let newcatorder = [];
+    for (let i = 0; i < categoryListElements.length; i++) {
+        let listItems = categoryListElements[i].querySelectorAll('li.list_item');
+        let listOrder = [];
+        for (let j = 0; j < listItems.length; j++) {
+            let categories = listItems[j].firstChild.innerText;
+            let propercatname = categories.substr(0, categories.lastIndexOf('('));
+            listOrder[j] = propercatname;
+        }
+    newcatorder[i] = listOrder;
+    }
+    return newcatorder;
 };
 
 export const init = () => {
-    window.console.log('we have been started');
     setupSortableLists();
 };
