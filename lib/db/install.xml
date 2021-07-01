@@ -1491,7 +1491,7 @@
         <FIELD NAME="questionarea" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Slot"/>
         <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID of a quiz_slots."/>
         <FIELD NAME="questionscontextid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Context questions come from."/>
-        <FIELD NAME="filtercondition" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="Filter expression."/>
+        <FIELD NAME="filtercondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Filter expression in json format"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

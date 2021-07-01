@@ -2752,7 +2752,7 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('questionscontextid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
-        $table->add_field('filtercondition', XMLDB_TYPE_CHAR, '1333', null, null, null, null);
+        $table->add_field('filtercondition', XMLDB_TYPE_TEXT, null, null, null, null, null);
 
         // Adding keys to table question_set_references.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);

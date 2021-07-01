@@ -1344,8 +1344,7 @@ function upgrade_migrate_question_table(): void {
                 $questionsetreference->itemid = $quizslot->id;
                 $catcontext = $DB->get_field('question_categories', 'contextid', ['id' => $question->category]);
                 $questionsetreference->questioncontextid = $catcontext;
-                // TODO: filtercondition.
-                $questionsetreference->filtercondition = null;
+                $questionsetreference->filtercondition = json_encode(['categoryid' => $question->category]);
                 $questionsetreferences[] = $questionsetreference;
 
                 // Insert the records if the array limit is reached.
