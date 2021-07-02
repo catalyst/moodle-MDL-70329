@@ -28,6 +28,7 @@ namespace qbank_comment;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\local\bank\column_base;
+use qbank_previewquestion\previewquestion_helper;
 
 /**
  * Class comment_count_column.
@@ -59,7 +60,7 @@ class comment_count_column extends column_base {
         if (question_has_capability_on($question, 'comment')) {
 
             $context = $this->qbank->get_most_specific_context();
-            $url = \qbank_previewquestion\previewquestion_helper::question_preview_url($question->id, null,
+            $url = previewquestion_helper::question_preview_url($question->id, null,
                     null, null, null, $context);
             $attr['href'] = $url;
             $link = new \action_menu_link_secondary($url, null,
