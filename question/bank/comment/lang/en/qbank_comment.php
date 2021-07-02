@@ -24,7 +24,7 @@
  */
 
 $string['pluginname'] = 'Question bank comment';
-$string['privacy:metadata'] = 'Question bank comment helps users with permission to comment in a question.';
+$string['privacy:metadata:qbank_comment'] = 'Question bank comment helps users with permission to comment in a question.';
 $string['comment'] = 'Comment';
 $string['commentplural'] = 'Comments';
 $string['commentheader'] = 'Question comments';
