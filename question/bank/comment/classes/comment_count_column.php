@@ -28,7 +28,6 @@ namespace qbank_comment;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\local\bank\column_base;
-use qbank_previewquestion\previewquestion_helper;
 
 /**
  * Class comment_count_column.
@@ -50,17 +49,15 @@ class comment_count_column extends column_base {
 
     protected function display_content($question, $rowclasses): void {
         global $DB, $OUTPUT;
-        $args = array (
+        $args = [
                 'component' => 'qbank_comment',
                 'commentarea' => 'core_question',
                 'itemid' => $question->id
-        );
+        ];
         $commentcount = $DB->count_records('comments', $args);
         if (question_has_capability_on($question, 'comment')) {
             $url = $this->qbank->base_url();
-            $link = new \action_menu_link_secondary($url, null,
-                    $commentcount, ['target' => 'questionpreview']);
-
+            $link = new \action_menu_link_secondary($url, null, $commentcount, ['target' => 'questionpreview']);
             echo $OUTPUT->render($link);
         } else {
             echo \html_writer::tag('a', $commentcount);
