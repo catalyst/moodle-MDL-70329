@@ -55,14 +55,9 @@ class comment_count_column extends column_base {
                 'commentarea' => 'core_question',
                 'itemid' => $question->id
         );
-        $attr = array();
         $commentcount = $DB->count_records('comments', $args);
         if (question_has_capability_on($question, 'comment')) {
-
-            $context = $this->qbank->get_most_specific_context();
-            $url = previewquestion_helper::question_preview_url($question->id, null,
-                    null, null, null, $context);
-            $attr['href'] = $url;
+            $url = $this->qbank->base_url();
             $link = new \action_menu_link_secondary($url, null,
                     $commentcount, ['target' => 'questionpreview']);
 

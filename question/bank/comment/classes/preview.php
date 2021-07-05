@@ -27,6 +27,8 @@ namespace qbank_comment;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/comment/lib.php');
+
 /**
  * Class preview_page_comment.
  *
@@ -39,6 +41,7 @@ class preview extends \qbank_previewquestion\preview_page_base {
 
     public function get_display_html() {
         if (question_has_capability_on($this->question, 'comment')) {
+            \comment::init();
             $args = new \stdClass;
             $args->context   = $this->context;
             $args->course    = $this->course;
