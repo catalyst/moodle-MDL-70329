@@ -318,15 +318,21 @@ class core_question_external extends external_api {
 
     public static function set_category_order_parameters() {
         return new external_function_parameters(
-            array(
-                'categories' => new external_value(PARAM_RAW, 'JSON String')
-            )
+                ['categories' => new external_value(PARAM_RAW, 'JSON String')]
         );
     }
 
     public static function set_category_order(string $categories) {
-        $params = self::validate_parameters(self::set_category_order_parameters(), array('categories' => $categories));
-        return $categories;
+        $params = self::validate_parameters(self::set_category_order_parameters(), ['categories' => $categories]);
+        $neworder = [];
+        $categories = json_decode($categories, true);
+        foreach ($categories as $outterarray) {
+            foreach ($outterarray as $sortorder => $innerarray) {
+                $neworder[] = $sortorder;
+            }
+        }
+        $neworder = json_encode($neworder);
+        return $neworder;
     }
 
     public static function set_category_order_returns() {
