@@ -42,14 +42,19 @@ const setupSortableLists = () => {
 
     jQuery('.list_item').on(SortableList.EVENTS.DROP, () => {
         let categoryListElements = jQuery('.list_item').parent();
+        // Get moved list item href URL.
         let href = jQuery('li.list_item[style]')[0].children[0].children[0].href;
+        // Get query string for that URL.
         let queryString = href.substr(href.search('\\?'));
         const params = new URLSearchParams(queryString);
         let cat = params.get('cat');
-        // Get old context id.
+        // Get old context and category id.
         let oldContextId = parseInt(cat.substr(cat.search(',')+1));
+        let oldCat = parseInt(cat.substr(0, cat.search(',')));
+        // Remove proxy created by sortable list.
         jQuery('li.list_item[style]').remove();
-        let val = getNewOrder(categoryListElements, oldContextId);
+        let val = getNewOrder(categoryListElements, oldContextId, oldCat);
+        // Call external function.
         setCatOrder(JSON.stringify(val));
     });
 };
@@ -57,6 +62,7 @@ const setupSortableLists = () => {
 /**
  * Call external function set_category_order - inserts the updated column in the question_categories table.
  *
+ * @param {String} updatedCategories String containing new sortorder.
  * @returns {Void}
  */
  const setCatOrder = (updatedCategories) => {
@@ -71,10 +77,15 @@ const setupSortableLists = () => {
 /**
  * Retrieving the the order on EVENT.DROP, also gets new parameter
  *
+ * @param {JQuery<HTMLElement>} categoryListElements List of HTML element to parse.
+ * @param {Number}              oldContextId Old context id to change.
  * @returns {Array}
  */
-const getNewOrder = (categoryListElements, oldContextId) => {
+const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
+    let ctxcat = oldContextId, oldCat;
+    console.log('CTX CAT ', ctxcat);
     let newcatorder = [];
+    let newcontextid = [];
     for (let i = 0; i < categoryListElements.length; i++) {
         let listItems = categoryListElements[i].querySelectorAll('li.list_item');
         let listOrder = [];
@@ -89,9 +100,14 @@ const getNewOrder = (categoryListElements, oldContextId) => {
             cat = parseInt(cat.substr(0, cat.search(',')));
             listOrder[j] = [contextid];
         }
+        const result = listOrder.filter((ctxid) => ctxid != oldContextId);
+        console.log(result);
         newcatorder[i] = listOrder;
     }
-    //console.log(newcatorder);
+    console.log('OLD CONTEXT ID ', oldContextId);
+    console.log('OLD CATEG ID ', oldCat);
+    // console.log(newcatorder);
+    //console.log(newcontextid);
     return newcatorder;
 };
 
