@@ -42,14 +42,20 @@ const setupSortableLists = () => {
 
     jQuery('.list_item').on(SortableList.EVENTS.DROP, () => {
         let categoryListElements = jQuery('.list_item').parent();
+        let href = jQuery('li.list_item[style]')[0].children[0].children[0].href;
+        let queryString = href.substr(href.search('\\?'));
+        const params = new URLSearchParams(queryString);
+        let cat = params.get('cat');
+        // Get old context id.
+        let oldContextId = parseInt(cat.substr(cat.search(',')+1));
         jQuery('li.list_item[style]').remove();
-        let val = getParentCategoryList(categoryListElements);
+        let val = getNewOrder(categoryListElements, oldContextId);
         setCatOrder(JSON.stringify(val));
     });
 };
 
 /**
- * Call external function set_order - inserts the updated column in the question_categories table.
+ * Call external function set_category_order - inserts the updated column in the question_categories table.
  *
  * @returns {Void}
  */
@@ -67,7 +73,7 @@ const setupSortableLists = () => {
  *
  * @returns {Array}
  */
-const getParentCategoryList = (categoryListElements) => {
+const getNewOrder = (categoryListElements, oldContextId) => {
     let newcatorder = [];
     for (let i = 0; i < categoryListElements.length; i++) {
         let listItems = categoryListElements[i].querySelectorAll('li.list_item');
@@ -78,18 +84,14 @@ const getParentCategoryList = (categoryListElements) => {
             let queryString = href.substr(href.search('\\?'));
             const params = new URLSearchParams(queryString);
             // Parameters.
-            let cmid = params.get('cmid');
             let cat = params.get('cat');
-            let contextid = cat.substr(cat.search(',')+1);
-            cat = cat.substr(0, cat.search(','));
-            console.log(cmid, contextid, cat);
-            let categories = listItems[j].firstChild.innerText;
-            let propercatname = categories.substr(0, categories.lastIndexOf('('));
-            //listOrder[j] = propercatname;
-            listOrder[j] = [cmid, cat, contextid];
+            let contextid = parseInt(cat.substr(cat.search(',')+1));
+            cat = parseInt(cat.substr(0, cat.search(',')));
+            listOrder[j] = [contextid];
         }
-    newcatorder[i] = listOrder;
+        newcatorder[i] = listOrder;
     }
+    //console.log(newcatorder);
     return newcatorder;
 };
 

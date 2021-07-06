@@ -324,15 +324,21 @@ class core_question_external extends external_api {
 
     public static function set_category_order(string $categories) {
         $params = self::validate_parameters(self::set_category_order_parameters(), ['categories' => $categories]);
-        $neworder = [];
+        $questioncategoryorder = [];
+        $parameters = [];
         $categories = json_decode($categories, true);
         foreach ($categories as $outterarray) {
+            $order = [];
             foreach ($outterarray as $sortorder => $innerarray) {
-                $neworder[] = $sortorder;
+                $order[] = $sortorder;
+                $parameters[] = $innerarray;
             }
+            $questioncategoryorder[] = $order;
+            unset($order);
         }
-        $neworder = json_encode($neworder);
-        return $neworder;
+        $questioncategoryorder = json_encode($questioncategoryorder);
+        $parameters = json_encode($parameters);
+        return $parameterss;
     }
 
     public static function set_category_order_returns() {
