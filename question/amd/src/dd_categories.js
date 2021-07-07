@@ -53,9 +53,9 @@ const setupSortableLists = () => {
         let oldCat = parseInt(cat.substr(0, cat.search(',')));
         // Remove proxy created by sortable list.
         jQuery('li.list_item[style]').remove();
-        let val = getNewOrder(categoryListElements, oldContextId, oldCat);
+        let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
-        setCatOrder(JSON.stringify(val));
+        setCatOrder(JSON.stringify(newOrder));
     });
 };
 
@@ -82,10 +82,9 @@ const setupSortableLists = () => {
  * @returns {Array}
  */
 const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
-    let ctxcat = oldContextId, oldCat;
-    console.log('CTX CAT ', ctxcat);
-    let newcatorder = [];
-    let newcontextid = [];
+    let oldCtxCat = oldContextId.toString() + ' ' + oldCat.toString();
+    let newCatOrder = [];
+    let newCtxCat = [];
     for (let i = 0; i < categoryListElements.length; i++) {
         let listItems = categoryListElements[i].querySelectorAll('li.list_item');
         let listOrder = [];
@@ -96,19 +95,21 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
             const params = new URLSearchParams(queryString);
             // Parameters.
             let cat = params.get('cat');
-            let contextid = parseInt(cat.substr(cat.search(',')+1));
+            let contextId = parseInt(cat.substr(cat.search(',')+1));
             cat = parseInt(cat.substr(0, cat.search(',')));
-            listOrder[j] = [contextid];
+            listOrder[j] = contextId.toString() + ' ' + cat.toString();
         }
-        const result = listOrder.filter((ctxid) => ctxid != oldContextId);
-        console.log(result);
-        newcatorder[i] = listOrder;
+        // New category order.
+        newCatOrder[i] = listOrder;
+        // TODO: New context id to append in db.
+        newCtxCat[i] = listOrder.filter((ctxId) => ctxId !== oldCtxCat);
     }
-    console.log('OLD CONTEXT ID ', oldContextId);
-    console.log('OLD CATEG ID ', oldCat);
-    // console.log(newcatorder);
-    //console.log(newcontextid);
-    return newcatorder;
+    console.log('newCatOrder: ', newCatOrder);
+    console.log('newCtxCat: ', newCtxCat);
+    var diff = newCtxCat.filter(function(obj) { return newCatOrder.indexOf(obj) == -1; });
+    console.log('diff : ', diff);
+    //console.log('OLD:', oldCtxCat);
+    return newCatOrder;
 };
 
 export const init = () => {
