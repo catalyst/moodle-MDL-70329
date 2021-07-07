@@ -323,22 +323,19 @@ class core_question_external extends external_api {
     }
 
     public static function set_category_order(string $categories) {
+        global $DB;
         $params = self::validate_parameters(self::set_category_order_parameters(), ['categories' => $categories]);
-        $questioncategoryorder = [];
-        $parameters = [];
+
         $categories = json_decode($categories, true);
-        foreach ($categories as $outterarray) {
-            $order = [];
-            foreach ($outterarray as $sortorder => $innerarray) {
-                $order[] = $sortorder;
-                $parameters[] = $innerarray;
-            }
-            $questioncategoryorder[] = $order;
-            unset($order);
-        }
-        $questioncategoryorder = json_encode($questioncategoryorder);
-        $parameters = json_encode($parameters);
-        return $parameterss;
+        $oldctxid = (int)explode(' ', $categories[2])[0];
+        $oldcatid = (int)explode(' ', $categories[2])[1];
+        $newctxid = (int)explode(' ', $categories[1])[0];
+        $newcatid = (int)explode(' ', $categories[1])[1];
+        //Retrieve cat parent first to add condition in following line.
+        //$DB->set_field('question_categories', 'contextid', $newctxid, [$fieldname=>requestedvalue]);
+        $categories = json_encode($categories);
+
+        return $parameters;
     }
 
     public static function set_category_order_returns() {

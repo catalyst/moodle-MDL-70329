@@ -107,7 +107,7 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     }
     destinationCtx = destinationCtx[0];
     destinationCtx = destinationCtx.filter((ctxId) => ctxId !== oldCtxCat);
-    return [newCatOrder, destinationCtx, oldCtxCat];
+    return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 
 export const init = () => {
