@@ -49,8 +49,8 @@ const setupSortableLists = () => {
         const params = new URLSearchParams(queryString);
         let cat = params.get('cat');
         // Get old context and category id.
-        let oldContextId = parseInt(cat.substr(cat.search(',')+1));
-        let oldCat = parseInt(cat.substr(0, cat.search(',')));
+        let oldContextId = cat.substr(cat.search(',')+1);
+        let oldCat = cat.substr(0, cat.search(','));
         // Remove proxy created by sortable list.
         jQuery('li.list_item[style]').remove();
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
@@ -82,9 +82,9 @@ const setupSortableLists = () => {
  * @returns {Array}
  */
 const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
-    let oldCtxCat = oldContextId.toString() + ' ' + oldCat.toString();
+    let oldCtxCat = oldContextId + ' ' + oldCat;
     let newCatOrder = [];
-    let newCtxCat = [];
+    let destinationCtx = [];
     for (let i = 0; i < categoryListElements.length; i++) {
         let listItems = categoryListElements[i].querySelectorAll('li.list_item');
         let listOrder = [];
@@ -95,21 +95,19 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
             const params = new URLSearchParams(queryString);
             // Parameters.
             let cat = params.get('cat');
-            let contextId = parseInt(cat.substr(cat.search(',')+1));
-            cat = parseInt(cat.substr(0, cat.search(',')));
-            listOrder[j] = contextId.toString() + ' ' + cat.toString();
+            let contextId = cat.substr(cat.search(',')+1);
+            cat = cat.substr(0, cat.search(','));
+            listOrder[j] = contextId + ' ' + cat;
+            if (listOrder[j] == oldCtxCat){
+                destinationCtx.push(listOrder);
+            }
         }
         // New category order.
         newCatOrder[i] = listOrder;
-        // TODO: New context id to append in db.
-        newCtxCat[i] = listOrder.filter((ctxId) => ctxId !== oldCtxCat);
     }
-    console.log('newCatOrder: ', newCatOrder);
-    console.log('newCtxCat: ', newCtxCat);
-    var diff = newCtxCat.filter(function(obj) { return newCatOrder.indexOf(obj) == -1; });
-    console.log('diff : ', diff);
-    //console.log('OLD:', oldCtxCat);
-    return newCatOrder;
+    destinationCtx = destinationCtx[0];
+    destinationCtx = destinationCtx.filter((ctxId) => ctxId !== oldCtxCat);
+    return [newCatOrder, destinationCtx, oldCtxCat];
 };
 
 export const init = () => {
