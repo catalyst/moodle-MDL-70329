@@ -56,7 +56,7 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        location.reload();
+        setTimeout(location.reload(), 5000);
     });
 };
 
