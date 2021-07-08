@@ -331,11 +331,17 @@ class core_question_external extends external_api {
         $oldcatid = (int)explode(' ', $categories[2])[1];
         $newctxid = (int)explode(' ', $categories[1])[0];
         //$newcatid = (int)explode(' ', $categories[1])[1];
-        //Retrieve cat parent first to add condition in following line.
-        $destparentcat = $DB->get_record_select('question_categories', 'contextid = :newcontextid AND parent = :parentcat',
-                ['newcontextid'=> $newctxid, 'parentcat' => 0]);
-        $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $oldcatid]);
-        $DB->set_field('question_categories', 'contextid', $newctxid, ['id'=> $oldcatid]);
+        if (!is_null($categories[1])){
+            $categories = 'not null';
+            // Retrieves top category parent where neighbor category is located.
+            $destparentcat = $DB->get_record_select('question_categories', 'contextid = :newcontextid AND parent = :parentcat',
+                    ['newcontextid'=> $newctxid, 'parentcat' => 0]);
+            // Sets new parent.
+            $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $oldcatid]);
+            // Sets new context id.
+            $DB->set_field('question_categories', 'contextid', $newctxid, ['id'=> $oldcatid]);
+            // TODO: set underlying question new category here.
+        }
         $categories = json_encode($categories);
         $destparentcat = json_encode($destparentcat->id);
         return $categories;
