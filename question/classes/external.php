@@ -330,12 +330,15 @@ class core_question_external extends external_api {
         $oldctxid = (int)explode(' ', $categories[2])[0];
         $oldcatid = (int)explode(' ', $categories[2])[1];
         $newctxid = (int)explode(' ', $categories[1])[0];
-        $newcatid = (int)explode(' ', $categories[1])[1];
+        //$newcatid = (int)explode(' ', $categories[1])[1];
         //Retrieve cat parent first to add condition in following line.
-        //$DB->set_field('question_categories', 'contextid', $newctxid, [$fieldname=>requestedvalue]);
+        $destparentcat = $DB->get_record_select('question_categories', 'contextid = :newcontextid AND parent = :parentcat',
+                ['newcontextid'=> $newctxid, 'parentcat' => 0]);
+        $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $oldcatid]);
+        $DB->set_field('question_categories', 'contextid', $newctxid, ['id'=> $oldcatid]);
         $categories = json_encode($categories);
-
-        return $parameters;
+        $destparentcat = json_encode($destparentcat->id);
+        return $categories;
     }
 
     public static function set_category_order_returns() {
