@@ -27,8 +27,6 @@ namespace qbank_comment;
 
 defined('MOODLE_INTERNAL') || die();
 
-use core_question\local\bank\column_plugin_base;
-
 /**
  * Class columns is the entrypoint for the columns.
  *
@@ -37,11 +35,11 @@ use core_question\local\bank\column_plugin_base;
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class columns extends column_plugin_base {
+class columns extends \core_question\local\bank\plugin_features_base {
 
-    public function get_question_columns(): array {
+    public function get_question_columns($qbank): array {
         return [
-                new comment_count_column($this->qbank)
+            new comment_count_column($qbank)
         ];
     }
 }

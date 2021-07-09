@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_comment, language 'en'
+ * Strings for component qbank_comment, language 'en'.
  *
  * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank comment';
+$string['pluginname'] = 'Question bank comment feature';
 $string['privacy:metadata:core_comment'] = 'Question bank comment helps users with permission to comment in a question.';
 $string['comment'] = 'Comment';
 $string['commentplural'] = 'Comments';
