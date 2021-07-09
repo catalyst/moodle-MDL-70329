@@ -55,7 +55,7 @@ class provider implements
      * @return collection
      */
     public static function get_metadata(collection $collection) : collection {
-        return $collection->add_subsystem_link('core_comment', [], 'privacy:metadata:qbank_comment');
+        return $collection->add_subsystem_link('core_comment', [], 'privacy:metadata:core_comment');
     }
 
     /**

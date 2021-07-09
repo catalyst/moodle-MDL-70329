@@ -109,9 +109,9 @@ class qbank_comment_privacy_testcase extends \core_privacy\tests\provider_testca
 
         $link = reset($itemcollection);
 
-        $this->assertEquals('qbank_comment', $link->get_name());
+        $this->assertEquals('core_comment', $link->get_name());
         $this->assertEmpty($link->get_privacy_fields());
-        $this->assertEquals('privacy:metadata:qbank_comment', $link->get_summary());
+        $this->assertEquals('privacy:metadata:core_comment', $link->get_summary());
     }
 
     /**
