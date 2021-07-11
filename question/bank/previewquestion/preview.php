@@ -23,11 +23,10 @@
  * than in the database.
  *
  * @package    qbank_previewquestion
- * @copyright  Alex Smith {@link http://maths.york.ac.uk/serving_maths} and
- *      numerous contributors.
+ * @copyright  Alex Smith {@link http://maths.york.ac.uk/serving_maths}
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net> and numerous contributors.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/questionlib.php');
@@ -39,6 +38,7 @@ use qbank_previewquestion\previewquestion_helper;
 /**
  * The maximum number of variants previewable. If there are more variants than this for a question
  * then we only allow the selection of the first x variants.
+ *
  * @var integer
  */
 define('QUESTION_PREVIEW_MAX_VARIANTS', 100);
@@ -47,6 +47,7 @@ define('QUESTION_PREVIEW_MAX_VARIANTS', 100);
 
 // Get and validate question id.
 $id = required_param('id', PARAM_INT);
+$returnurl = optional_param('returnurl', null, PARAM_RAW);
 $question = question_bank::load_question($id);
 
 // Were we given a particular context to run the question in?
@@ -90,7 +91,7 @@ if ($previewid) {
         // actually from the user point of view, it makes sense.
         throw new moodle_exception('submissionoutofsequencefriendlymessage', 'question',
                 previewquestion_helper::question_preview_url($question->id, $options->behaviour,
-                $options->maxmark, $options, $options->variant, $context), null, $e);
+                        $options->maxmark, $options, $options->variant, $context), null, $e);
     }
 
     if ($quba->get_owning_context()->instanceid != $USER->id) {
@@ -127,7 +128,9 @@ $options->behaviour = $quba->get_preferred_behaviour();
 $options->maxmark = $quba->get_question_max_mark($slot);
 
 // Create the settings form, and initialise the fields.
-$optionsform = new preview_options_form(previewquestion_helper::question_preview_form_url($question->id, $context, $previewid), ['quba' => $quba, 'maxvariant' => $maxvariant]);
+$optionsform = new preview_options_form(previewquestion_helper::
+question_preview_form_url($question->id, $context, $previewid, $returnurl),
+        ['quba' => $quba, 'maxvariant' => $maxvariant]);
 $optionsform->set_data($options);
 
 // Process change of settings, if that was requested.
@@ -138,12 +141,12 @@ if ($newoptions = $optionsform->get_submitted_data()) {
         $newoptions->variant = $options->variant;
     }
     if (isset($newoptions->saverestart)) {
-        previewquestion_helper::restart_preview($previewid, $question->id, $newoptions, $context);
+        previewquestion_helper::restart_preview($previewid, $question->id, $newoptions, $context, $returnurl);
     }
 }
 
 // Prepare a URL that is used in various places.
-$actionurl = previewquestion_helper::question_preview_action_url($question->id, $quba->get_id(), $options, $context);
+$actionurl = previewquestion_helper::question_preview_action_url($question->id, $quba->get_id(), $options, $context, $returnurl);
 
 // Process any actions from the buttons at the bottom of the form.
 if (data_submitted() && confirm_sesskey()) {
@@ -151,7 +154,7 @@ if (data_submitted() && confirm_sesskey()) {
     try {
 
         if (optional_param('restart', false, PARAM_BOOL)) {
-            previewquestion_helper::restart_preview($previewid, $question->id, $options, $context);
+            previewquestion_helper::restart_preview($previewid, $question->id, $options, $context, $returnurl);
 
         } else if (optional_param('fill', null, PARAM_BOOL)) {
             $correctresponse = $quba->get_correct_response($slot);
@@ -227,13 +230,13 @@ $qa = $quba->get_question_attempt($slot);
 $technical = [];
 $technical[] = get_string('behaviourbeingused', 'question',
         question_engine::get_behaviour_name($qa->get_behaviour_name()));
-$technical[] = get_string('technicalinfominfraction',     'question', $qa->get_min_fraction());
-$technical[] = get_string('technicalinfomaxfraction',     'question', $qa->get_max_fraction());
-$technical[] = get_string('technicalinfovariant',         'question', $qa->get_variant());
+$technical[] = get_string('technicalinfominfraction', 'question', $qa->get_min_fraction());
+$technical[] = get_string('technicalinfomaxfraction', 'question', $qa->get_max_fraction());
+$technical[] = get_string('technicalinfovariant', 'question', $qa->get_variant());
 $technical[] = get_string('technicalinfoquestionsummary', 'question', s($qa->get_question_summary()));
-$technical[] = get_string('technicalinforightsummary',    'question', s($qa->get_right_answer_summary()));
+$technical[] = get_string('technicalinforightsummary', 'question', s($qa->get_right_answer_summary()));
 $technical[] = get_string('technicalinforesponsesummary', 'question', s($qa->get_response_summary()));
-$technical[] = get_string('technicalinfostate',           'question', '' . $qa->get_state());
+$technical[] = get_string('technicalinfostate', 'question', '' . $qa->get_state());
 
 // Start output.
 $title = get_string('previewquestion', 'question', format_string($question->name));
@@ -259,33 +262,53 @@ foreach ($technical as $info) {
 }
 $previewdata['techinfo'] .= print_collapsible_region_end(true);
 
-echo $PAGE->get_renderer('qbank_previewquestion')->render_preview_page($previewdata);
-
 // Output a link to export this single question.
 if (question_has_capability_on($question, 'view')) {
     if (class_exists('qbank_exporttoxml\\exporttoxml_helper')) {
         if (\core\plugininfo\qbank::is_plugin_enabled('qbank_exporttoxml')) {
             $exportfunction = '\\qbank_exporttoxml\\exporttoxml_helper::question_get_export_single_question_url';
-            echo html_writer::link($exportfunction($question),
+            $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
                     get_string('exportonequestion', 'question'));
         }
     } else {
         $exportfunction = 'question_get_export_single_question_url';
-        echo html_writer::link($exportfunction($question),
+        $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
                 get_string('exportonequestion', 'question'));
     }
 }
+
+// Display the settings form.
+$previewdata['options'] = $optionsform->render();
+
+list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $context, $COURSE, $id);
+
+if (!empty($comment)) {
+    $previewdata['comments'] = $comment;
+}
+
+if (!empty($extraelements)) {
+    $elements = [];
+    foreach ($extraelements as $extraelement) {
+        $element = new stdClass();
+        $element->extrapreviewelements = $extraelement;
+        $elements[] = $element;
+    }
+    $previewdata['extrapreviewelements'] = $elements;
+}
+
+$previewdata['redirect'] = false;
+if (!is_null($returnurl)) {
+    $previewdata['redirect'] = true;
+    $previewdata['redirecturl'] = $returnurl;
+}
+
+echo $PAGE->get_renderer('qbank_previewquestion')->render_preview_page($previewdata);
 
 // Log the preview of this question.
 $event = \core\event\question_viewed::create_from_question_instance($question, $context);
 $event->trigger();
 
-// Display the settings form.
-$optionsform->display();
-
 $PAGE->requires->js_module('core_question_engine');
-$PAGE->requires->strings_for_js([
-    'closepreview',
-], 'question');
 $PAGE->requires->yui_module('moodle-qbank_previewquestion-preview', 'M.question.preview.init');
+$PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect']]);
 echo $OUTPUT->footer();

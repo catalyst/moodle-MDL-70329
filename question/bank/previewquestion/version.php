@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_previewquestion';
-$plugin->version   = 2021070700;
+$plugin->version   = 2021072100;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;
-

@@ -34,20 +34,9 @@ M.question.preview = M.question.preview || {};
  */
 M.question.preview.init = function() {
     M.core_question_engine.init_form(Y, '#responseform');
-
-    // Add a close button to the window.
-    var closebutton = Y.Node.create('<input type="button" class="btn btn-secondary"/>')
-            .set('value', M.util.get_string('closepreview', 'question'));
-
-    closebutton.on('click', function() {
-        window.close();
-    });
-    Y.one('#previewcontrols').append(closebutton);
-
     // Stop a question form being submitted more than once.
     Y.on('submit', M.core_question_engine.prevent_repeat_submission, '#mform1', null, Y);
 };
-
 
 
 }, '@VERSION@', {"requires": ["base", "dom", "event-delegate", "event-key", "core_question_engine"]});

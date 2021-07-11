@@ -100,10 +100,11 @@ class previewquestion_helper {
      * @param int $qubaid the id of the question usage for this preview.
      * @param question_preview_options $options the options in use.
      * @param context $context
+     * @param moodle_url $returnurl
      * @return moodle_url
      */
     public static function question_preview_action_url($questionid, $qubaid,
-            question_preview_options $options, $context): moodle_url {
+            question_preview_options $options, $context, $returnurl = null): moodle_url {
         $params = [
                 'id' => $questionid,
                 'previewid' => $qubaid,
@@ -112,6 +113,9 @@ class previewquestion_helper {
             $params['cmid'] = $context->instanceid;
         } else if ($context->contextlevel == CONTEXT_COURSE) {
             $params['courseid'] = $context->instanceid;
+        }
+        if (!empty($returnurl)) {
+            $params['returnurl'] = $returnurl;
         }
         $params = array_merge($params, $options->get_url_params());
         return new moodle_url('/question/bank/previewquestion/preview.php', $params);
@@ -122,9 +126,10 @@ class previewquestion_helper {
      * @param int $questionid the question being previewed.
      * @param context $context the current moodle context.
      * @param int $previewid optional previewid to sign post saved previewed answers.
+     * @param moodle_url $returnurl
      * @return moodle_url
      */
-    public static function question_preview_form_url($questionid, $context, $previewid = null): moodle_url {
+    public static function question_preview_form_url($questionid, $context, $previewid = null, $returnurl = null): moodle_url {
         $params = [
                 'id' => $questionid,
         ];
@@ -136,6 +141,9 @@ class previewquestion_helper {
         if ($previewid) {
             $params['previewid'] = $previewid;
         }
+        if (!empty($returnurl)) {
+            $params['returnurl'] = $returnurl;
+        }
         return new moodle_url('/question/bank/previewquestion/preview.php', $params);
     }
 
@@ -145,8 +153,9 @@ class previewquestion_helper {
      * @param int $questionid
      * @param object $displayoptions
      * @param object $context
+     * @param moodle_url $returnurl
      */
-    public static function restart_preview($previewid, $questionid, $displayoptions, $context): void {
+    public static function restart_preview($previewid, $questionid, $displayoptions, $context, $returnurl = null): void {
         global $DB;
 
         if ($previewid) {
@@ -155,7 +164,7 @@ class previewquestion_helper {
             $transaction->allow_commit();
         }
         redirect(self::question_preview_url($questionid, $displayoptions->behaviour,
-                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context));
+                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context, $returnurl));
     }
 
     /**
@@ -168,10 +177,11 @@ class previewquestion_helper {
      *      be picked randomly.
      * @param object $context context to run the preview in (affects things like
      *      filter settings, theme, lang, etc.) Defaults to $PAGE->context.
+     * @param moodle_url $returnurl
      * @return moodle_url the URL.
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
-            $maxmark = null, $displayoptions = null, $variant = null, $context = null): moodle_url {
+            $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null): moodle_url {
 
         $params = ['id' => $questionid];
 
@@ -203,6 +213,10 @@ class previewquestion_helper {
             $params['history']         = (bool) $displayoptions->history;
         }
 
+        if (!is_null($returnurl)) {
+            $params['returnurl'] = $returnurl;
+        }
+
         if ($variant) {
             $params['variant'] = $variant;
         }
@@ -219,5 +233,32 @@ class previewquestion_helper {
                 'height' => 600,
                 'width' => 800,
         ];
+    }
+
+    /**
+     * Get the extra elements for preview from qbank plugins.
+     *
+     * @param \question_definition $question
+     * @param context $context
+     * @param stdClass $course
+     * @param int $itemid
+     * @return array
+     */
+    public static function get_preview_extra_elements(\question_definition $question, \context $context,
+            \stdClass $course, int $itemid): array {
+        $plugintype = 'qbank';
+        $functionname = 'preview_display';
+        $extrahtml = [];
+        $comment = '';
+        $plugins = get_plugin_list_with_function($plugintype, $functionname);
+        foreach ($plugins as $componentname => $plugin) {
+            $pluginhtml = component_callback($componentname, $functionname, [$question, $context, $course, $itemid]);
+            if ($componentname === 'qbank_comment') {
+                $comment = $pluginhtml;
+                continue;
+            }
+            $extrahtml[] = $pluginhtml;
+        }
+        return [$comment, $extrahtml];
     }
 }
