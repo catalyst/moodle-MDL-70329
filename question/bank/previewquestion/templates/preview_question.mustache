@@ -45,7 +45,29 @@
         <input type="submit" name="save" value="{{#str}} save, question{{/str}}" class="btn btn-secondary" {{{finishdisabled}}}>
         <input type="submit" name="fill" value="{{#str}} fillincorrect, question{{/str}}" class="btn btn-secondary" {{{filldisabled}}}>
         <input type="submit" name="finish" value="{{#str}} submitandfinish, question{{/str}}" class="btn btn-secondary" {{{finishdisabled}}}>
+        {{^redirect}}
+            <input type="button" name="close" value="{{#str}} closepreview, question{{/str}}" class="btn btn-secondary" id="close-previewquestion-page">
+        {{/redirect}}
+        {{#redirect}}
+            <a href="{{{redirecturl}}}"><input type="button" name="close" value="{{#str}} closepreview, question{{/str}}" class="btn btn-secondary"></a>
+        {{/redirect}}
     </div>
 </form>
 {{{techinfo}}}
-
+{{{exporttoxml}}}
+{{#comments}}
+    <div class="row">
+        <div class="col-6 text-left">
+            {{{options}}}
+        </div>
+        <div class="col-6">
+            {{{comments}}}
+        </div>
+    </div>
+{{/comments}}
+{{^comments}}
+    {{{options}}}
+{{/comments}}
+{{#extrapreviewelements}}
+    {{{extrapreviewelements}}}
+{{/extrapreviewelements}}

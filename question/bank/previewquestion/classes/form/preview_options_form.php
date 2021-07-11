@@ -100,4 +100,3 @@ class preview_options_form extends moodleform {
     }
 
 }
-

@@ -13,25 +13,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/*
- * @copyright 2014 The Open University
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 /**
- * JavaScript required by the question preview pop-up.
+ * Javascript for preview.
  *
- * @module moodle-question-preview
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-M.question = M.question || {};
-M.question.preview = M.question.preview || {};
-
-/*
- * Initialise JavaScript-specific parts of the question preview popup.
- */
-M.question.preview.init = function() {
-    M.core_question_engine.init_form(Y, '#responseform');
-    // Stop a question form being submitted more than once.
-    Y.on('submit', M.core_question_engine.prevent_repeat_submission, '#mform1', null, Y);
+export const init = (redirect) => {
+    if (!redirect) {
+        let closeButton = document.getElementById('close-previewquestion-page');
+        closeButton.onclick = () => {
+            window.close();
+        };
+    }
 };
