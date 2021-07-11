@@ -50,7 +50,7 @@ class core_question_renderer extends plugin_renderer_base {
      *      If false, just show the icon.
      * @deprecated since Moodle 4.0
      * @see qbank_previewquestion\output\renderer
-     * @todo uncomment the debugging message after implementing the changes in mod_quiz
+     * @todo MDL-72004 uncomment the debugging message after implementing the changes in mod_quiz
      */
     public function question_preview_link($questionid, context $context, $showlabel) {
         // Debugging message will be re-added after implementing the changes in mod_quiz.
@@ -60,23 +60,6 @@ class core_question_renderer extends plugin_renderer_base {
         return $this->page->get_renderer('qbank_previewquestion')->question_preview_link(
                 $questionid, $context, $showlabel
         );
-
-        if ($showlabel) {
-            $alt = '';
-            $label = get_string('preview');
-            $attributes = array();
-        } else {
-            $alt = get_string('preview');
-            $label = '';
-            $attributes = array('title' => $alt);
-        }
-
-        $image = $this->pix_icon('t/preview', $alt, '', array('class' => 'iconsmall'));
-        $link = question_preview_url($questionid, null, null, null, null, $context);
-        $action = new popup_action('click', $link, 'questionpreview',
-                question_preview_popup_params());
-
-        return $this->action_link($link, $image . $label, $action, $attributes);
     }
 
     /**

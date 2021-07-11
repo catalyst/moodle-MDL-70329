@@ -80,8 +80,12 @@ M.core_scroll_manager.save_scroll_action = function(e) {
 
 /**
  * If there is a parameter like scrollpos=123 in the URL, scroll to that saved position.
+ * @todo MDL-72004
  */
 M.core_scroll_manager.scroll_to_saved_pos = function(Y) {
+    Y.log("The scroll_to_saved_pos function has been deprecated. " +
+        "Please use scrollToSavedPos() in qbank_preview/preview.js instead.", 'moodle-core-notification', 'warn');
+
     var matches = window.location.href.match(/^.*[?&]scrollpos=(\d*)(?:&|$|#).*$/, '$1');
     if (matches) {
         // onDOMReady is the effective one here. I am leaving the immediate call to
@@ -153,8 +157,12 @@ M.core_question_engine.init_submit_button = function(Y, button) {
  * 5. Prevent the user from repeatedly submitting the form.
  * @param Y the Yahoo object. Needs to have the DOM and Event modules loaded.
  * @param form something that can be passed to Y.one, to find the form element.
+ * @todo MDL-72004
  */
 M.core_question_engine.init_form = function(Y, form) {
+    Y.log("The core_question_engine.init_form function has been deprecated. " +
+        "Please use setupQuestionForm() in qbank_preview/preview.js instead.", 'moodle-core-notification', 'warn');
+
     Y.one(form).setAttribute('autocomplete', 'off');
 
     Y.on('submit', M.core_question_engine.prevent_repeat_submission, form, form, Y);
@@ -175,8 +183,12 @@ M.core_question_engine.init_form = function(Y, form) {
  * Event handler to stop a question form being submitted more than once.
  * @param e the form submit event.
  * @param form the form element.
+ * @todo MDL-72004
  */
 M.core_question_engine.prevent_repeat_submission = function(e, Y) {
+    Y.log("The prevent_repeat_submission function has been deprecated. " +
+        "Please use preventRepeatSubmission in qbank_preview/preview.js instead.", 'moodle-core-notification', 'warn');
+
     if (M.core_question_engine.questionformalreadysubmitted) {
         e.halt();
         return;

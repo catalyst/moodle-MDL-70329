@@ -25,8 +25,6 @@
 
 namespace qbank_previewquestion\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for qbank_previewquestion implementing null_provider.
  *

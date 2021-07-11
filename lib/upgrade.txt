@@ -63,6 +63,11 @@ information provided here is intended especially for developers.
 * New method \core_user::awaiting_action() has been introduced to check if the user is fully ready to use the site or
   whether there is an action (such as filling the missing profile field, changing password or agreeing to the site
   policy) needed.
+* Following methods are now deprecated in questionlib and moved to the new qbank_previewquestion plugin:
+  - question_preview_url() is moved to qbank_previewquestion\previewquestion_helper::question_preview_url()
+  - question_preview_popup_params() is moved to \qbank_previewquestion\previewquestion_helper::question_preview_popup_params()
+  Calling these functions in the question will point to the plugin, but the deprecation message will be activated in MDL-72004.
+  The deprecated codes are removed from the questionlib for those two methods.
 
 === 3.11.2 ===
 * For security reasons, filelib has been updated so all requests now use emulated redirects.
