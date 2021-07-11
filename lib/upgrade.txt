@@ -58,6 +58,11 @@ information provided here is intended especially for developers.
   completion_info::internal_set_data() to reaggregate completions that have been marked for instant course completion.
 * The following functions have been finally deprecated and can not be used anymore:
   - generate_uuid
+* Following methods are now deprecated in questionlib and moved to the new qbank_previewquestion plugin:
+  - question_preview_url() is moved to qbank_previewquestion\previewquestion_helper::question_preview_url()
+  - question_preview_popup_params() is moved to \qbank_previewquestion\previewquestion_helper::question_preview_popup_params()
+  Calling these functions in the question will point to the plugin, but the deprecation message will be activated in MDL-72004.
+  The deprecated codes are removed from the questionlib for those two methods.
 
 === 3.11.2 ===
 * For security reasons, filelib has been updated so all requests now use emulated redirects.

@@ -24,7 +24,6 @@ Feature: A teacher can preview questions in the question bank
     And I am on "Course 1" course homepage
     And I navigate to "Question bank > Questions" in current page administration
     When I choose "Preview" action for "Test question to be previewed" in the question bank
-    And I switch to "questionpreview" window
 
   Scenario: Question preview shows the question and other information
     Then the state of "What is pi to two d.p.?" question is shown as "Not yet answered"
