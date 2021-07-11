@@ -68,3 +68,26 @@ function qbank_comment_comment_display($comments, $args): array {
     }
     return $comments;
 }
+
+/**
+ * Comment content for callbacks.
+ *
+ * @param $question
+ * @param $context
+ * @param $course
+ * @param $itemid
+ * @return string
+ */
+function qbank_comment_preview_display($question, $context, $course, $itemid) {
+    return 'safat';
+}
+
+/**
+ * Question comment fragment callback.
+ *
+ * @param $args
+ * @return string rendered output
+ */
+function qbank_comment_output_fragment_tags_comment($args) {
+    return 'safat';
+}

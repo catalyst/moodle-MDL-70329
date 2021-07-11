@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin entrypoint for columns.
+ * Plugin entrypoint for qbank.
  *
  * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -28,14 +28,14 @@ namespace qbank_comment;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class columns is the entrypoint for the columns.
+ * Class plugin_features is the entrypoint for the columns.
  *
  * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class columns extends \core_question\local\bank\plugin_features_base {
+class plugin_feature extends \core_question\local\bank\plugin_features_base {
 
     public function get_question_columns($qbank): array {
         return [
