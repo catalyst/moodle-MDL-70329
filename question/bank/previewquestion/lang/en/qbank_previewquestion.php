@@ -23,5 +23,5 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Preview question bank feature';
-$string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+$string['pluginname'] = 'Preview question';
+$string['privacy:metadata'] = 'Preview question plugin does not store any user data.';

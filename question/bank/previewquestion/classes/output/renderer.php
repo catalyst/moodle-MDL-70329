@@ -14,18 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Renderer for qbank_previewquestion.
- *
- * @package    qbank_previewquestion
- * @copyright  2009 The Open University
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_previewquestion\output;
-
-defined('MOODLE_INTERNAL') || die();
 
 use context;
 use qbank_previewquestion\previewquestion_helper;
@@ -78,4 +67,3 @@ class renderer extends \plugin_renderer_base {
     }
 
 }
-

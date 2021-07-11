@@ -14,17 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Library functions used by question/preview.php.
- *
- * @package    qbank_previewquestion
- * @copyright  2010 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_previewquestion;
-
-defined('MOODLE_INTERNAL') || die();
 
 use question_display_options;
 
@@ -33,7 +23,9 @@ use question_display_options;
  *
  * Setting default, getting and setting user preferences in question preview options.
  *
+ * @package    qbank_previewquestion
  * @copyright  2010 The Open University
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_preview_options extends question_display_options {
@@ -139,7 +131,7 @@ class question_preview_options extends question_display_options {
     public function get_url_params(): array {
         $params = [];
         foreach ($this->get_field_types() as $field => $notused) {
-            if ($field == 'behaviour' || $field == 'maxmark' || is_null($this->$field)) {
+            if ($field === 'behaviour' || $field === 'maxmark' || is_null($this->$field)) {
                 continue;
             }
             $params[$field] = $this->$field;

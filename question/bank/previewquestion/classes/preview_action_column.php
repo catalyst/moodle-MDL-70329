@@ -14,23 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Question bank columns for the preview action icon.
- *
- * @package   qbank_previewquestion
- * @copyright 2009 Tim Hunt
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_previewquestion;
-
-defined('MOODLE_INTERNAL') || die();
 
 use core_question\local\bank\menu_action_column_base;
 
 /**
  * Question bank columns for the preview action icon.
  *
+ * @package   qbank_previewquestion
  * @copyright 2009 Tim Hunt
  * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -61,45 +52,11 @@ class preview_action_column extends menu_action_column_base {
 
         if (question_has_capability_on($question, 'use')) {
             $context = $this->qbank->get_most_specific_context();
-            $url = previewquestion_helper::question_preview_url($question->id, null, null, null, null, $context);
+            $url = previewquestion_helper::question_preview_url($question->id, null, null,
+                                                    null, null, $context, $this->qbank->returnurl);
             return [$url, 't/preview', $this->strpreview];
         } else {
             return [null, null, null];
         }
     }
-
-    protected function display_content($question, $rowclasses): void {
-        global $PAGE;
-
-        if (!\question_bank::is_qtype_installed($question->qtype)) {
-            // It sometimes happens that people end up with junk questions
-            // in their question bank of a type that is no longer installed.
-            // We cannot do most actions on them, because that leads to errors.
-            return;
-        }
-
-        if (question_has_capability_on($question, 'use')) {
-            echo $PAGE->get_renderer('qbank_previewquestion')->question_preview_link(
-                    $question->id, $this->qbank->get_most_specific_context(), false);
-        }
-    }
-
-    public function get_action_menu_link(\stdClass $question): ?\action_menu_link {
-        if (!\question_bank::is_qtype_installed($question->qtype)) {
-            // It sometimes happens that people end up with junk questions
-            // in their question bank of a type that is no longer installed.
-            // We cannot do most actions on them, because that leads to errors.
-            return null;
-        }
-
-        if (!question_has_capability_on($question, 'use')) {
-            return null;
-        }
-
-        $context = $this->qbank->get_most_specific_context();
-        $url = previewquestion_helper::question_preview_url($question->id, null, null, null, null, $context);
-        return new \action_menu_link_secondary($url, new \pix_icon('t/preview', ''),
-                $this->strpreview, ['target' => 'questionpreview']);
-    }
-
 }

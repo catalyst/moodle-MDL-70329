@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Settings form for the preview options.
- *
- * @package    qbank_previewquestion
- * @copyright  2010 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_previewquestion\form;
 
 defined('MOODLE_INTERNAL') || die();
@@ -35,7 +27,9 @@ use question_engine;
 /**
  * Settings form for the preview options.
  *
+ * @package    qbank_previewquestion
  * @copyright  2009 The Open University
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class preview_options_form extends moodleform {
@@ -43,7 +37,7 @@ class preview_options_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $hiddenofvisible = [
+        $hiddenorvisible = [
                 question_display_options::HIDDEN => get_string('notshown', 'question'),
                 question_display_options::VISIBLE => get_string('shown', 'question'),
         ];
@@ -71,7 +65,7 @@ class preview_options_form extends moodleform {
         $mform->addElement('header', 'displayoptionsheader', get_string('displayoptions', 'question'));
 
         $mform->addElement('select', 'correctness', get_string('whethercorrect', 'question'),
-                $hiddenofvisible);
+                $hiddenorvisible);
 
         $marksoptions = [
                 question_display_options::HIDDEN => get_string('notshown', 'question'),
@@ -84,20 +78,19 @@ class preview_options_form extends moodleform {
                 question_engine::get_dp_options());
 
         $mform->addElement('select', 'feedback',
-                get_string('specificfeedback', 'question'), $hiddenofvisible);
+                get_string('specificfeedback', 'question'), $hiddenorvisible);
 
         $mform->addElement('select', 'generalfeedback',
-                get_string('generalfeedback', 'question'), $hiddenofvisible);
+                get_string('generalfeedback', 'question'), $hiddenorvisible);
 
         $mform->addElement('select', 'rightanswer',
-                get_string('rightanswer', 'question'), $hiddenofvisible);
+                get_string('rightanswer', 'question'), $hiddenorvisible);
 
         $mform->addElement('select', 'history',
-                get_string('responsehistory', 'question'), $hiddenofvisible);
+                get_string('responsehistory', 'question'), $hiddenorvisible);
 
         $mform->addElement('submit', 'saveupdate',
                 get_string('updatedisplayoptions', 'question'));
     }
 
 }
-
