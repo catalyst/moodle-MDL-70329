@@ -25,8 +25,6 @@
 
 namespace qbank_previewquestion;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class columns is the entrypoint for the columns.
  *

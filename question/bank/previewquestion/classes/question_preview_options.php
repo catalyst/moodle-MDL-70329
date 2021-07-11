@@ -24,8 +24,6 @@
 
 namespace qbank_previewquestion;
 
-defined('MOODLE_INTERNAL') || die();
-
 use question_display_options;
 
 /**

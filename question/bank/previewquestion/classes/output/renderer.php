@@ -25,8 +25,6 @@
 
 namespace qbank_previewquestion\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 use context;
 use qbank_previewquestion\previewquestion_helper;
 
@@ -78,4 +76,3 @@ class renderer extends \plugin_renderer_base {
     }
 
 }
-
