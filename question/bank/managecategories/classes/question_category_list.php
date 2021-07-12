@@ -157,6 +157,7 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $item->attributes = 'class="list_item"';
                 $last = (count($this->items) == $itemiter);
+                $deleteurl = new \moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
                 if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
                     $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
                     $html .= $itemhtml;
@@ -173,7 +174,7 @@ class question_category_list extends moodle_list {
                         false
                     ));
                     $menu->add(new \action_menu_link(
-                        new \moodle_url('dropped'),
+                        $deleteurl,
                         new \pix_icon('t/delete', 'delete'),
                         get_string('delete'),
                         false
