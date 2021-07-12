@@ -376,9 +376,4 @@ class helper {
 
         return $categories;
     }
-
-    public static function categories_reorder(array $editlists): array {
-        $v = 0;
-        return $editlists;
-    }
 }

@@ -50,32 +50,6 @@ class question_category_list_item extends \list_item {
         $url = new moodle_url('/question/bank/managecategories/category.php',
             ($this->parentlist->pageurl->params() + ['edit' => $category->id]));
         $this->icons['edit'] = $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
-        parent::set_icon_html($first, $last, $lastitem);
-        $toplevel = ($this->parentlist->parentitem === null);// This is a top level item.
-        if (($this->parentlist->nextlist !== null) && $last && $toplevel && (count($this->parentlist->items) > 1)) {
-            $url = new moodle_url($this->parentlist->pageurl,
-                [
-                    'movedowncontext' => $this->id,
-                    'tocontext' => $this->parentlist->nextlist->context->id,
-                    'sesskey' => sesskey()
-                ]
-            );
-            $this->icons['down'] = $this->image_icon(
-                    get_string('shareincontext', 'question',
-                        $this->parentlist->nextlist->context->get_context_name()), $url, 'down');
-        }
-        if (($this->parentlist->lastlist !== null) && $first && $toplevel && (count($this->parentlist->items) > 1)) {
-            $url = new moodle_url($this->parentlist->pageurl,
-                [
-                    'moveupcontext' => $this->id,
-                    'tocontext' => $this->parentlist->lastlist->context->id,
-                    'sesskey' => sesskey()
-                ]
-            );
-            $this->icons['up'] = $this->image_icon(
-                    get_string('shareincontext', 'question',
-                        $this->parentlist->lastlist->context->get_context_name()), $url, 'up');
-        }
     }
 
     /**

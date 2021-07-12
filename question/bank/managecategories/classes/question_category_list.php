@@ -146,6 +146,7 @@ class question_category_list extends moodle_list {
      * @param integer $indent depth of indentation.
      */
     public function to_html($indent=0, $extraargs=array()) {
+        global $OUTPUT;
         if (count($this->items)) {
             $tabs = str_repeat("\t", $indent);
             $first = true;
@@ -156,13 +157,22 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $item->attributes = 'class="list_item"';
                 $last = (count($this->items) == $itemiter);
-                // if ($this->editable) {
-                //     $item->set_icon_html($first, $last, $lastitem);
-                // }
                 if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
                     $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
                     $html .= $itemhtml;
                     $html .= "</li>\n";
+                }
+                if ($this->editable) {
+                    $menu = new \action_menu();
+                    $menu->set_menu_trigger(get_string('edit'));
+                    $menu->set_alignment(\action_menu::TL, \action_menu::BL);
+                    $menu->add(new \action_menu_link(
+                        new \moodle_url('dropped'),
+                        null,
+                        'dropped item',
+                        false
+                    ));
+                    $html .= $OUTPUT->render($menu);
                 }
                 $first = false;
                 $lastitem = $item;
