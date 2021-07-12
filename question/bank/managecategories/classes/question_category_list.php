@@ -157,7 +157,6 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $item->attributes = 'class="list_item"';
                 $last = (count($this->items) == $itemiter);
-                $deleteurl = new \moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
                 if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
                     $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
                     $html .= $itemhtml;
@@ -173,12 +172,17 @@ class question_category_list extends moodle_list {
                         get_string('editsettings'),
                         false
                     ));
-                    $menu->add(new \action_menu_link(
-                        $deleteurl,
-                        new \pix_icon('t/delete', 'delete'),
-                        get_string('delete'),
-                        false
-                    ));
+
+                    // Don't allow delete if this is the top category, or the last editable category in this context.
+                    if (!helper::question_is_only_child_of_top_category_in_context($item->id)) {
+                        $deleteurl = new \moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
+                        $menu->add(new \action_menu_link(
+                            $deleteurl,
+                            new \pix_icon('t/delete', 'delete'),
+                            get_string('delete'),
+                            false
+                        ));
+                    }
                     $menu->add(new \action_menu_link(
                         new \moodle_url('dropped'),
                         new \pix_icon('t/download', 'download'),
