@@ -1,0 +1,4 @@
+[submodule "local/datacleaner"]
+	branch = master
+	path = local/datacleaner
+	url = git@github.com:catalyst/moodle-local_datacleaner.git
