@@ -165,13 +165,26 @@ class question_category_list extends moodle_list {
                 if ($this->editable) {
                     $menu = new \action_menu();
                     $menu->set_menu_trigger(get_string('edit'));
-                    $menu->set_alignment(\action_menu::TL, \action_menu::BL);
+                    //$menu->set_alignment(\action_menu::TR, \action_menu::BR);
                     $menu->add(new \action_menu_link(
                         new \moodle_url('dropped'),
-                        null,
-                        'dropped item',
+                        new \pix_icon('t/edit', 'edit'),
+                        get_string('editsettings'),
                         false
                     ));
+                    $menu->add(new \action_menu_link(
+                        new \moodle_url('dropped'),
+                        new \pix_icon('t/delete', 'delete'),
+                        get_string('delete'),
+                        false
+                    ));
+                    $menu->add(new \action_menu_link(
+                        new \moodle_url('dropped'),
+                        new \pix_icon('t/download', 'download'),
+                        get_string('exportasxml', 'question'),
+                        false
+                    ));
+                    $v = $OUTPUT->render($menu);
                     $html .= $OUTPUT->render($menu);
                 }
                 $first = false;
