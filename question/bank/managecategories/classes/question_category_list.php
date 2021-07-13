@@ -28,8 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir. '/listlib.php');
 
-use stdClass;
+use action_menu;
+use action_menu_link;
 use moodle_list;
+use moodle_url;
+use pix_icon;
+use stdClass;
 
 /**
  * Class representing a list of question categories.
@@ -163,29 +167,31 @@ class question_category_list extends moodle_list {
                     $html .= "</li>\n";
                 }
                 if ($this->editable) {
-                    $menu = new \action_menu();
+                    $menu = new action_menu();
                     $menu->set_menu_trigger(get_string('edit'));
                     //$menu->set_alignment(\action_menu::TR, \action_menu::BR);
-                    $menu->add(new \action_menu_link(
-                        new \moodle_url('dropped'),
-                        new \pix_icon('t/edit', 'edit'),
+                    $editurl = new moodle_url('/question/bank/managecategories/category.php',
+                    ($item->parentlist->pageurl->params() + ['edit' => $item->id]));
+                    $menu->add(new action_menu_link(
+                        $editurl,
+                        new pix_icon('t/edit', 'edit'),
                         get_string('editsettings'),
                         false
                     ));
 
                     // Don't allow delete if this is the top category, or the last editable category in this context.
                     if (!helper::question_is_only_child_of_top_category_in_context($item->id)) {
-                        $deleteurl = new \moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
-                        $menu->add(new \action_menu_link(
+                        $deleteurl = new moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
+                        $menu->add(new action_menu_link(
                             $deleteurl,
-                            new \pix_icon('t/delete', 'delete'),
+                            new pix_icon('t/delete', 'delete'),
                             get_string('delete'),
                             false
                         ));
                     }
-                    $menu->add(new \action_menu_link(
-                        new \moodle_url('dropped'),
-                        new \pix_icon('t/download', 'download'),
+                    $menu->add(new action_menu_link(
+                        new moodle_url('dropped'),
+                        new pix_icon('t/download', 'download'),
                         get_string('exportasxml', 'question'),
                         false
                     ));

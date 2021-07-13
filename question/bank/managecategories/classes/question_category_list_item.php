@@ -77,12 +77,6 @@ class question_category_list_item extends \list_item {
         $categorydesc = format_text($category->info, $category->infoformat,
             ['context' => $this->parentlist->context, 'noclean' => true]);
 
-        // Don't allow delete if this is the top category, or the last editable category in this context.
-        $deleteurl = null;
-        if ($category->parent && !helper::question_is_only_child_of_top_category_in_context($category->id)) {
-            $deleteurl = new moodle_url($this->parentlist->pageurl, ['delete' => $this->id, 'sesskey' => sesskey()]);
-        }
-
         // Render each question category.
         $data =
             [
@@ -91,8 +85,6 @@ class question_category_list_item extends \list_item {
                 'idnumber' => $idnumber,
                 'questioncount' => $questioncount,
                 'categorydesc' => $categorydesc,
-                'deleteurl' => $deleteurl,
-                'deletetitle' => $str->delete
             ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/listitem', $data);
