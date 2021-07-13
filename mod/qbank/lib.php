@@ -29,12 +29,13 @@ defined('MOODLE_INTERNAL') || die();
  * Return if the plugin supports $feature.
  *
  * @param string $feature Constant representing the feature.
- * @return true | null True if the feature is supported, null otherwise.
+ * @return bool|null True if the feature is supported, null otherwise.
  */
-function qbank_supports($feature) {
+function qbank_supports(string $feature): ?bool {
     switch ($feature) {
         case FEATURE_MOD_INTRO:
         case FEATURE_USES_QUESTIONS:
+        case FEATURE_BACKUP_MOODLE2:
             return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
         case FEATURE_GRADE_HAS_GRADE:
