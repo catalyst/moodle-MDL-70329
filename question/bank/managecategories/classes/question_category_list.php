@@ -161,15 +161,16 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $item->attributes = 'class="list_item"';
                 $last = (count($this->items) == $itemiter);
+                $menu = new action_menu();
                 if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
                     $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
                     $html .= $itemhtml;
                     $html .= "</li>\n";
                 }
                 if ($this->editable) {
-                    $menu = new action_menu();
                     $menu->set_menu_trigger(get_string('edit'));
                     //$menu->set_alignment(\action_menu::TR, \action_menu::BR);
+                    // Sets up edit link.
                     $editurl = new moodle_url('/question/bank/managecategories/category.php',
                     ($item->parentlist->pageurl->params() + ['edit' => $item->id]));
                     $menu->add(new action_menu_link(
@@ -181,6 +182,7 @@ class question_category_list extends moodle_list {
 
                     // Don't allow delete if this is the top category, or the last editable category in this context.
                     if (!helper::question_is_only_child_of_top_category_in_context($item->id)) {
+                        // Sets up delete link.
                         $deleteurl = new moodle_url($item->parentlist->pageurl, ['delete' => $item->id, 'sesskey' => sesskey()]);
                         $menu->add(new action_menu_link(
                             $deleteurl,
@@ -189,15 +191,17 @@ class question_category_list extends moodle_list {
                             false
                         ));
                     }
-                    $menu->add(new action_menu_link(
-                        new moodle_url('dropped'),
-                        new pix_icon('t/download', 'download'),
-                        get_string('exportasxml', 'question'),
-                        false
-                    ));
-                    $v = $OUTPUT->render($menu);
-                    $html .= $OUTPUT->render($menu);
                 }
+                //http://mdl71378.localhost/question/export.php?cmid=748&cat=93%2C1202
+                // Sets up export to XML link.
+                $exporturl = new moodle_url('/question/export.php', $item->parentlist->pageurl->params(['cat' => $item->id]));
+                $menu->add(new \action_menu_link(
+                    $exporturl,
+                    new \pix_icon('t/download', 'download'),
+                    get_string('exportasxml', 'question'),
+                    false
+                ));
+                $html .= $OUTPUT->render($menu);
                 $first = false;
                 $lastitem = $item;
                 $itemiter++;
