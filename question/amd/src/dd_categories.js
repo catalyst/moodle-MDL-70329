@@ -39,7 +39,6 @@ const setupSortableLists = () => {
             moveHandlerSelector: '.list_item',
         }
     );
-
     jQuery('.list_item').on(SortableList.EVENTS.DROP, () => {
         let categoryListElements = jQuery('.list_item').parent();
         // Get moved list item href URL.
@@ -56,7 +55,7 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        setTimeout(location.reload(), 20000);
+        setTimeout(location.reload(), 30000);
     });
 };
 

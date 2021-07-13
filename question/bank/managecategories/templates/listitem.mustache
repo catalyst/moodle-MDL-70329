@@ -43,9 +43,6 @@
         </span>
         {{/idnumber}}
         {{questioncount}}
-        <div class="float-right">
-            {{>core/drag_handle}}
-        </div>
     </a>
 </b>
 {{#categorydesc}}
@@ -53,3 +50,9 @@
     {{{categorydesc}}}
 </div>
 {{/categorydesc}}
+<div class="float-right" id="actionmenu">
+    {{{editactionmenu}}}
+</div>
+<div class="float-right"
+{{>core/drag_handle}}
+</div>

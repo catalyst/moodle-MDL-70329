@@ -26,8 +26,12 @@ namespace qbank_managecategories;
 
 defined('MOODLE_INTERNAL') || die();
 
+use action_menu;
+use action_menu_link;
 use html_writer;
+use moodle_list;
 use moodle_url;
+use pix_icon;
 
 /**
  * An item in a list of question categories.
@@ -63,7 +67,7 @@ class question_category_list_item extends \list_item {
         global $PAGE, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
-
+        $cmid = required_param('cmid', PARAM_INT);
         // Each section adds html to be displayed as part of this list item.
         $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
         $questionbankurl = new moodle_url($nodeparent->action->get_path(), $this->parentlist->pageurl->params());
@@ -77,6 +81,40 @@ class question_category_list_item extends \list_item {
         $categorydesc = format_text($category->info, $category->infoformat,
             ['context' => $this->parentlist->context, 'noclean' => true]);
 
+        $menu = new action_menu();
+        $menu->set_menu_trigger(get_string('edit'));
+        if ($this->children->editable) {
+            // Sets up edit link.
+            $editurl = new moodle_url('/question/bank/managecategories/category.php', 
+                ['cmid' => $cmid, 'edit' => $category->id]);
+            $menu->add(new action_menu_link(
+                $editurl,
+                new pix_icon('t/edit', 'edit'),
+                get_string('editsettings'),
+                false
+            ));
+            // Don't allow delete if this is the top category, or the last editable category in this context.
+            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                // Sets up delete link.
+                $deleteurl = new moodle_url('/question/bank/managecategories/category.php', 
+                    ['cmid' => $cmid, 'delete' => $category->id, 'sesskey' => sesskey()]);
+                $menu->add(new action_menu_link(
+                    $deleteurl,
+                    new pix_icon('t/delete', 'delete'),
+                    get_string('delete'),
+                    false
+                ));
+            }
+        }
+        // Sets up export to XML link.
+        $exporturl = new moodle_url('/question/export.php', 
+            ['cmid' => $cmid, 'cat' => $category->id . ',' . $category->contextid]);
+        $menu->add(new action_menu_link(
+            $exporturl,
+            new pix_icon('t/download', 'download'),
+            get_string('exportasxml', 'question'),
+            false
+        ));
         // Render each question category.
         $data =
             [
@@ -85,6 +123,7 @@ class question_category_list_item extends \list_item {
                 'idnumber' => $idnumber,
                 'questioncount' => $questioncount,
                 'categorydesc' => $categorydesc,
+                'editactionmenu' => $OUTPUT->render($menu),
             ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/listitem', $data);
