@@ -26,7 +26,6 @@
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-//require_once($CFG->libdor . '/questionlib.php');
 
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
@@ -66,11 +65,10 @@ $event->trigger();
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('questions', '/mod/qbank/view.php', $cm->id);
 
-//$PAGE->set_url('/mod/qbank/view.php', array('id' => $cm->id));
 $PAGE->set_url(new moodle_url($thispageurl));
 
 // Qbank api call.
-$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
 
 // This one will become redundant after implementing bulk actions plugin.
 $questionbank->process_actions();
