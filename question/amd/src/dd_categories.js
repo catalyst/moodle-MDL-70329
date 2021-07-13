@@ -67,12 +67,11 @@ const setupSortableLists = () => {
  * @returns {Void}
  */
  const setCatOrder = (updatedCategories) => {
-    const val = Ajax.call([{
+    Ajax.call([{
         methodname: 'core_question_set_category_order',
         args: {categories: updatedCategories},
         fail: Notification.exception
     }]);
-    val[0].then((response) => console.log(JSON.parse(response)));
 };
 
 /**
