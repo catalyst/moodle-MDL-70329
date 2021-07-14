@@ -36,10 +36,11 @@ const setupSortableLists = () => {
     new SortableList(
         '.category_list',
         {
-            moveHandlerSelector: '.list_item',
+            moveHandlerSelector: '.list_item [data-drag-type=move]',
         }
     );
-    jQuery('.list_item').on(SortableList.EVENTS.DROP, () => {
+    jQuery('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
+        evt.stopPropagation();
         let categoryListElements = jQuery('.list_item').parent();
         // Get moved list item href URL.
         let href = jQuery('li.list_item[style]')[0].children[0].children[0].href;
