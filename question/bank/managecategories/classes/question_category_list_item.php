@@ -85,7 +85,7 @@ class question_category_list_item extends \list_item {
         $menu->set_menu_trigger(get_string('edit'));
         if ($this->children->editable) {
             // Sets up edit link.
-            $editurl = new moodle_url('/question/bank/managecategories/category.php', 
+            $editurl = new moodle_url('/question/bank/managecategories/category.php',
                 ['cmid' => $cmid, 'edit' => $category->id]);
             $menu->add(new action_menu_link(
                 $editurl,
@@ -96,7 +96,7 @@ class question_category_list_item extends \list_item {
             // Don't allow delete if this is the top category, or the last editable category in this context.
             if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
                 // Sets up delete link.
-                $deleteurl = new moodle_url('/question/bank/managecategories/category.php', 
+                $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
                     ['cmid' => $cmid, 'delete' => $category->id, 'sesskey' => sesskey()]);
                 $menu->add(new action_menu_link(
                     $deleteurl,
@@ -107,7 +107,7 @@ class question_category_list_item extends \list_item {
             }
         }
         // Sets up export to XML link.
-        $exporturl = new moodle_url('/question/export.php', 
+        $exporturl = new moodle_url('/question/export.php',
             ['cmid' => $cmid, 'cat' => $category->id . ',' . $category->contextid]);
         $menu->add(new action_menu_link(
             $exporturl,

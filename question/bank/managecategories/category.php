@@ -32,8 +32,7 @@ use qbank_managecategories\question_category_object;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
-//core_question\local\bank\helper::check_qbank_status(helper::PLUGINNAME);
-$PAGE->requires->js_call_amd('core_question/dd_categories', 'init');
+$PAGE->requires->js_call_amd('core_question/order_categories', 'init');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');

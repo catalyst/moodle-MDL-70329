@@ -146,7 +146,7 @@ class question_category_list extends moodle_list {
      *
      * @param integer $indent depth of indentation.
      */
-    public function to_html($indent=0, $extraargs=array()) {
+    public function to_html($indent=0, $extraargs=[]) {
         global $OUTPUT;
         if (count($this->items)) {
             $tabs = str_repeat("\t", $indent);
@@ -157,8 +157,8 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $item->attributes = 'class="list_item"';
                 $last = (count($this->items) == $itemiter);
-                if ($itemhtml = $item->to_html($indent+1, $extraargs)) {
-                    $html .= "$tabs\t<li".((!empty($item->attributes))?(' '.$item->attributes):'').">";
+                if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
+                    $html .= "$tabs\t<li".((!empty($item->attributes)) ? (' '.$item->attributes) : '').">";
                     $html .= $itemhtml;
                     $html .= "</li>\n";
                 }
@@ -169,13 +169,14 @@ class question_category_list extends moodle_list {
         } else {
             $html = '';
         }
-        if ($html) { //if there are list items to display then wrap them in ul / ol tag.
+        // If there are list items to display then wrap them in ul / ol tag.
+        if ($html) {
             $this->attributes = 'class="category_list"';
             $tabs = str_repeat("\t", $indent);
-            $html = $tabs.'<'.$this->type.((!empty($this->attributes))?(' '.$this->attributes):'').">\n".$html;
+            $html = $tabs.'<'.$this->type.((!empty($this->attributes)) ? (' '.$this->attributes) : '').">\n".$html;
             $html .= $tabs."</".$this->type.">\n";
         } else {
-            $html ='';
+            $html = '';
         }
         return $html;
     }
