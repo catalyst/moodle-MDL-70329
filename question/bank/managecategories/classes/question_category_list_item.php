@@ -115,6 +115,10 @@ class question_category_list_item extends \list_item {
             get_string('exportasxml', 'question'),
             false
         ));
+        // Don't allow movement if only subcat.
+        if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+            $handle = $OUTPUT->render_from_template('core/drag_handle', []);
+        }
         // Render each question category.
         $data =
             [
@@ -124,6 +128,7 @@ class question_category_list_item extends \list_item {
                 'questioncount' => $questioncount,
                 'categorydesc' => $categorydesc,
                 'editactionmenu' => $OUTPUT->render($menu),
+                'handle' => $handle,
             ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/listitem', $data);
