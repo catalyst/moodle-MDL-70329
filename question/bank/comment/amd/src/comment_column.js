@@ -41,21 +41,21 @@ define([
         CustomEvents
     ) {
 
-        let selector = '[data-target="questioncommentpreview"]';
-
         /**
          * Event listeners for the module.
+         *
+         * @method clickEvent
+         * @param {object} root
+         * @param {string} selector
          */
-        var clickEvent = function (root) {
+        var clickEvent = function (root, selector) {
+            // Modal for the question comments.
             var modalPromise = ModalFactory.create(
                 {
                     type: ModalFactory.types.CANCEL,
                     large: true
                 }, [root, selector]
             ).then(function (modal) {
-                // All of this code only executes once, when the modal is
-                // first created. This allows us to add any code that should
-                // only be run once, such as adding event handlers to the modal.
                 Str.get_string('commentheader', 'qbank_comment')
                     .then(function (string) {
                         modal.setTitle(string);
@@ -64,27 +64,18 @@ define([
                     .fail(Notification.exception);
                 return modal;
             });
-
-            // We need to add an event handler to the tags link because there are
-            // multiple links on the page and without adding a listener we don't know
-            // which one the user clicked on the show the modal.
+            // Event listener.
             root.on(CustomEvents.events.activate, selector, function (e) {
                 e.preventDefault();
                 var currentTarget = e.target.parentElement;
-
                 var questionId = currentTarget.getAttribute('data-questionid'),
                     courseID = currentTarget.getAttribute('data-courseid'),
                     contextId = currentTarget.getAttribute('data-contextid');
-
-                // This code gets called each time the user clicks the tag link
-                // so we can use it to reload the contents of the tag modal.
                 modalPromise.then(function (modal) {
-
                     var args = {
                         questionid: questionId,
                         courseid: courseID
                     };
-
                     var commentFragment = Fragment.loadFragment('qbank_comment', 'question_comment', contextId, args);
                     modal.setBody(commentFragment);
                     modal.getRoot().on(ModalEvents.cancel, function (e) {
@@ -92,17 +83,19 @@ define([
                         location.reload();
                         modal.hide();
                     });
-
+                    modal.getRoot().on(ModalEvents.hide, function (e) {
+                        e.preventDefault();
+                        location.reload();
+                        modal.hide();
+                    });
                     return modal;
                 }).fail(Notification.exception);
-
-
             });
         };
 
         return {
-            init: function (root) {
-                clickEvent($(root));
+            init: function (root, questionSelector) {
+                clickEvent($(root), questionSelector);
             }
         };
     });

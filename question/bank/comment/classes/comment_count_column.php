@@ -61,7 +61,9 @@ class comment_count_column extends column_base {
 
     protected function display_content($question, $rowclasses): void {
         global $DB, $OUTPUT, $PAGE;
-        $PAGE->requires->js_call_amd('qbank_comment/comment_column', 'init', ['#questionscontainer']);
+        $target = 'questioncommentpreview_' . $question->id;
+        $datatarget = '[data-target="' . $target . '"]';
+        $PAGE->requires->js_call_amd('qbank_comment/comment_column', 'init', ['#questionscontainer', $datatarget]);
         $args = [
                 'component' => 'qbank_comment',
                 'commentarea' => 'core_question',
@@ -71,7 +73,7 @@ class comment_count_column extends column_base {
         if (question_has_capability_on($question, 'comment')) {
             $url = $this->qbank->base_url();
             $attributes = [
-                'data-target' => 'questioncommentpreview',
+                'data-target' => $target,
                 'data-contextid' => $this->qbank->get_most_specific_context()->id,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id
