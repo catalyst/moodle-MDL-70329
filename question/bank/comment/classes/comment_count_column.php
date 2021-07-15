@@ -39,6 +39,18 @@ use core_question\local\bank\column_base;
  */
 class comment_count_column extends column_base {
 
+    /**
+     * @var bool $commentenabled comment enabled or not.
+     */
+    protected $commentenabled = true;
+
+    protected function check_comment_status(): void {
+        global $CFG;
+        if (!$CFG->usecomments) {
+            $this->commentenabled = false;
+        }
+    }
+
     public function get_name(): string {
         return 'commentcount';
     }
@@ -48,7 +60,8 @@ class comment_count_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        global $DB, $OUTPUT;
+        global $DB, $OUTPUT, $PAGE;
+        $PAGE->requires->js_call_amd('qbank_comment/comment_column', 'init', ['#questionscontainer']);
         $args = [
                 'component' => 'qbank_comment',
                 'commentarea' => 'core_question',
@@ -57,7 +70,13 @@ class comment_count_column extends column_base {
         $commentcount = $DB->count_records('comments', $args);
         if (question_has_capability_on($question, 'comment')) {
             $url = $this->qbank->base_url();
-            $link = new \action_menu_link_secondary($url, null, $commentcount, ['target' => 'questionpreview']);
+            $attributes = [
+                'data-target' => 'questioncommentpreview',
+                'data-contextid' => $this->qbank->get_most_specific_context()->id,
+                'data-questionid' => $question->id,
+                'data-courseid' => $this->qbank->course->id
+            ];
+            $link = new \action_menu_link_secondary($url, null, $commentcount, $attributes);
             echo $OUTPUT->render($link);
         } else {
             echo \html_writer::tag('a', $commentcount);

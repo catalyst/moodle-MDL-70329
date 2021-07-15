@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_comment, language 'en'.
+ * qbank_comment renderer.
  *
  * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,16 +23,27 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank comment feature';
-$string['privacy:metadata:core_comment'] = 'Question bank comment helps users with permission to comment in a question.';
-$string['comment'] = 'Comment';
-$string['commentplural'] = 'Comments';
-$string['commentheader'] = 'Question comments';
-$string['commentdisabled'] = 'Comment feature is disabled sitewide, 
-please ask your administrator to enable comments in advanced settings in order to comment in this question.';
+namespace qbank_comment\output;
 
-//events
-$string['comment_added'] = 'The user with id \'{$a->userid}\' added the comment with id \'{$a->objectid}\' 
-to the \'{$a->component}\' for the question with id \'{$a->itemid}\'.';
-$string['comment_removed'] = 'The user with id \'{$a->userid}\' deleted the comment with id \'{$a->objectid}\' 
-to the \'{$a->component}\' for the question with id \'{$a->itemid}\'.';
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Class renderer
+ *
+ * @package qbank_comment
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class renderer extends \plugin_renderer_base {
+
+    /**
+     * Render the html fragment for comment modal.
+     *
+     * @param $displaydata
+     * @return string
+     */
+    public function render_comment_fragment($displaydata): string {
+        return $this->render_from_template('qbank_comment/comment_modal', $displaydata);
+    }
+}

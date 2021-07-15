@@ -60,7 +60,7 @@ function qbank_comment_comment_permissions($args): array {
  *
  * @param stdClass $comments
  * @param stdClass $args
- * @return array
+ * @return stdClass
  */
 function qbank_comment_comment_display($comments, $args): array {
     if ($args->commentarea != 'core_question' && $args->component != 'qbank_comment') {
@@ -69,17 +69,43 @@ function qbank_comment_comment_display($comments, $args): array {
     return $comments;
 }
 
+function qbank_comment_test($question, $context, $course) {
+    $args['questionid'] = $question->id;
+    $args['context'] = $context;
+    $args['courseid'] = $course->id;
+    return qbank_comment_output_fragment_question_comment($args);
+}
+
 /**
  * Comment content for callbacks.
  *
- * @param $question
- * @param $context
- * @param $course
- * @param $itemid
+ * @param stdClass $question
+ * @param context $context
+ * @param stdClass $course
+ * @param int $itemid
  * @return string
  */
-function qbank_comment_preview_display($question, $context, $course, $itemid) {
-    return 'safat';
+function qbank_comment_preview_display($question, $context, $course, $itemid): string {
+    global $CFG;
+    if (question_has_capability_on($question, 'comment') && $CFG->usecomments) {
+        \comment::init();
+        $args = new \stdClass;
+        $args->context   = $context;
+        $args->course    = $course;
+        $args->area      = 'core_question';
+        $args->itemid    = $itemid;
+        $args->component = 'qbank_comment';
+        $args->notoggle  = true;
+        $args->autostart = true;
+        $args->displaycancel = false;
+        $args->linktext = get_string('commentheader', 'qbank_comment');
+        $comment = new \comment($args);
+        $comment->set_view_permission(true);
+        $comment->set_fullwidth();
+        return $comment->output();
+    } else {
+        return '';
+    }
 }
 
 /**
@@ -87,7 +113,31 @@ function qbank_comment_preview_display($question, $context, $course, $itemid) {
  *
  * @param $args
  * @return string rendered output
+ * @todo cleanup after classrenaming to remove check for previewlib.php
  */
-function qbank_comment_output_fragment_tags_comment($args) {
-    return 'safat';
+function qbank_comment_output_fragment_question_comment($args): string {
+    global $USER, $PAGE, $CFG;
+    $displaydata = [];
+    $question = question_bank::load_question($args['questionid']);
+    $quba = question_engine::make_questions_usage_by_activity(
+            'core_question_preview', context_user::instance($USER->id));
+
+    if (class_exists('\\qbank_previewquestion\\question_preview_options')) {
+        $options = new \qbank_previewquestion\question_preview_options($question);
+    } else {
+        require_once($CFG->dirroot . '/question/previewlib.php');
+        $options = new question_preview_options($question);
+    }
+
+    $options->load_user_defaults();
+    $options->set_from_request();
+    $quba->set_preferred_behaviour($options->behaviour);
+    $slot = $quba->add_question($question, $options->maxmark);
+    $quba->start_question($slot, $options->variant);
+    $displaydata['question'] = $quba->render_question($slot, $options, '1');
+    $course = get_course($args['courseid']);
+    $context = context_course::instance($args['courseid']);
+    $displaydata['comment'] = qbank_comment_preview_display($question, $context, $course, $args['questionid']);
+
+    return $PAGE->get_renderer('qbank_comment')->render_comment_fragment($displaydata);
 }
