@@ -39,18 +39,6 @@ use core_question\local\bank\column_base;
  */
 class comment_count_column extends column_base {
 
-    /**
-     * @var bool $commentenabled comment enabled or not.
-     */
-    protected $commentenabled = true;
-
-    protected function check_comment_status(): void {
-        global $CFG;
-        if (!$CFG->usecomments) {
-            $this->commentenabled = false;
-        }
-    }
-
     public function get_name(): string {
         return 'commentcount';
     }
@@ -60,7 +48,7 @@ class comment_count_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        global $DB, $OUTPUT, $PAGE;
+        global $DB, $OUTPUT, $PAGE, $CFG;
         $target = 'questioncommentpreview_' . $question->id;
         $datatarget = '[data-target="' . $target . '"]';
         $PAGE->requires->js_call_amd('qbank_comment/comment_column', 'init', ['#questionscontainer', $datatarget]);

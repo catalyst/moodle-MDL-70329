@@ -83,7 +83,7 @@ define([
                         location.reload();
                         modal.hide();
                     });
-                    modal.getRoot().on(ModalEvents.hide, function (e) {
+                    $('button[data-action="hide"]').click(function(){
                         e.preventDefault();
                         location.reload();
                         modal.hide();

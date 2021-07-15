@@ -63,11 +63,6 @@ const clickEvent = (root, selector) => {
                 location.reload();
                 modal.hide();
             });
-            modal.getRoot().on(ModalEvents.hide, (e) => {
-                e.preventDefault();
-                location.reload();
-                modal.hide();
-            });
             return modal;
         }).fail(Notification.exception);
     });

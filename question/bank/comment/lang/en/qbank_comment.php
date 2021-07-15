@@ -29,7 +29,7 @@ $string['comment'] = 'Comment';
 $string['commentplural'] = 'Comments';
 $string['commentheader'] = 'Question comments';
 $string['commentdisabled'] = 'Comment feature is disabled sitewide, 
-please ask your administrator to enable comments in advanced settings in order to comment in this question.';
+please ask your administrator to enable comments from advanced settings in order to comment in this question.';
 
 //events
 $string['comment_added'] = 'The user with id \'{$a->userid}\' added the comment with id \'{$a->objectid}\' 

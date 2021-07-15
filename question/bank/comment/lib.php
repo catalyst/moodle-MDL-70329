@@ -138,6 +138,10 @@ function qbank_comment_output_fragment_question_comment($args): string {
     $course = get_course($args['courseid']);
     $context = context_course::instance($args['courseid']);
     $displaydata['comment'] = qbank_comment_preview_display($question, $context, $course, $args['questionid']);
+    $displaydata['commenstdisabled'] = false;
+    if (empty($displaydata['comment']) && !$CFG->usecomments) {
+        $displaydata['commenstdisabled'] = true;
+    }
 
     return $PAGE->get_renderer('qbank_comment')->render_comment_fragment($displaydata);
 }

@@ -32,4 +32,9 @@
 </div>
 <div id="question-comment-view">
     {{{comment}}}
+    {{#commenstdisabled}}
+        <a class="alert-danger">
+            {{#str}} commentdisabled, qbank_comment{{/str}}
+        </a>
+    {{/commenstdisabled}}
 </div>
