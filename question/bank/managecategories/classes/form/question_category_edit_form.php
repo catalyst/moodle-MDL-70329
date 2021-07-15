@@ -38,7 +38,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class question_category_edit_form extends moodleform {
+class question_category_edit_form extends \core_form\dynamic_form {
 
     /**
      * Build the form definition.
@@ -128,5 +128,23 @@ class question_category_edit_form extends moodleform {
         }
 
         return $errors;
+    }
+
+    protected function get_context_for_dynamic_submission(): \context {
+        $cmid = $this->optional_param('cmid', 0, PARAM_INT);
+        return \context_module::instance($cmid);
+    }
+
+    protected function check_access_for_dynamic_submission() : void {
+    }
+
+    public function process_dynamic_submission(){
+    }
+
+    public function set_data_for_dynamic_submission(): void{
+    }
+
+    function get_page_url_for_dynamic_submission(): \moodle_url {
+        return \moodle_url('#');
     }
 }

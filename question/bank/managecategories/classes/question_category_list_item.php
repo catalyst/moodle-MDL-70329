@@ -118,6 +118,8 @@ class question_category_list_item extends \list_item {
         // Don't allow movement if only subcat.
         if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
             $handle = $OUTPUT->render_from_template('core/drag_handle', []);
+        } else {
+            $handle = '';
         }
         // Render each question category.
         $data =

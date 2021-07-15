@@ -25,7 +25,8 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
-
+error_reporting(-1);
+ini_set('display_errors', true);
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
@@ -33,6 +34,12 @@ use qbank_managecategories\question_category_object;
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
 $PAGE->requires->js_call_amd('core_question/order_categories', 'init');
+$v = \core_question\form\question_category_edit_form::class;
+$PAGE->requires->js_call_amd(
+    'core_question/addcategory_dialogue',
+    'initModal',
+    ['[data-action=addcategory]']
+);
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
@@ -153,7 +160,10 @@ echo $OUTPUT->header();
 // Print horizontal nav if needed.
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
-
+echo html_writer::link(
+    '#',
+    'add category',
+    ['data-action' => 'addcategory']);
 // Display the UI.
 if (!empty($param->edit)) {
     $qcobject->edit_single_category($param->edit);

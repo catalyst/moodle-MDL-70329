@@ -348,8 +348,6 @@ class core_question_external extends external_api {
                 }
             }
         }
-
-        $categories = json_encode($categories);
         $sortorder = json_encode($sortorder);
         return $sortorder;
     }
