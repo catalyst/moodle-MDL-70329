@@ -28,8 +28,8 @@ $string['privacy:metadata:core_comment'] = 'Question bank comment helps users wi
 $string['comment'] = 'Comment';
 $string['commentplural'] = 'Comments';
 $string['commentheader'] = 'Question comments';
-$string['commentdisabled'] = 'Comment feature is disabled sitewide, 
-please ask your administrator to enable comments from advanced settings in order to comment in this question.';
+$string['commentdisabled'] = 'Comment feature is disabled "sitewide", 
+please ask your "Site administrator" to enable "usecomments" from "Advanced settings" in order to comment in this question.';
 
 //events
 $string['comment_added'] = 'The user with id \'{$a->userid}\' added the comment with id \'{$a->objectid}\' 
