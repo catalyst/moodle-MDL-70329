@@ -38,7 +38,7 @@ $v = \core_question\form\question_category_edit_form::class;
 $PAGE->requires->js_call_amd(
     'core_question/addcategory_dialogue',
     'initModal',
-    ['[data-action=addcategory]']
+    ['[data-action=addcategory]', \qbank_managecategories\form\question_category_edit_form::class]
 );
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
@@ -59,6 +59,7 @@ $param->cancel = optional_param('cancel', '', PARAM_ALPHA);
 $param->move = optional_param('move', 0, PARAM_INT);
 $param->moveto = optional_param('moveto', 0, PARAM_INT);
 $param->edit = optional_param('edit', 0, PARAM_INT);
+$cmid = required_param('cmid', PARAM_INT);
 
 $url = new moodle_url($thispageurl);
 foreach ((array)$param as $key => $value) {
@@ -161,7 +162,7 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 echo html_writer::link(
-    '#',
+    new moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]),
     'add category',
     ['data-action' => 'addcategory']);
 // Display the UI.

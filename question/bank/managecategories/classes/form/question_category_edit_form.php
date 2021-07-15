@@ -145,6 +145,7 @@ class question_category_edit_form extends \core_form\dynamic_form {
     }
 
     function get_page_url_for_dynamic_submission(): \moodle_url {
-        return \moodle_url('#');
+        $cmid = $this->optional_param('cmid', 0, PARAM_INT);
+        return new \moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]);
     }
 }

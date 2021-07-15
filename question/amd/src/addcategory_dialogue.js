@@ -28,12 +28,12 @@ import ModalForm from 'core_form/modalform';
  *
  * @param {String} elementSelector
  */
-export const initModal = (elementSelector) => {
+export const initModal = (elementSelector, formClass) => {
     const element = document.querySelector(elementSelector);
     element.addEventListener('click', function(e) {
         e.preventDefault();
         const form = new ModalForm({
-            formClass: 'qbank_managecategories\\form\\question_category_edit_form',
+            formClass,
             modalConfig: {title: 'addcategory'},
             returnFocus: e.target,
         });
