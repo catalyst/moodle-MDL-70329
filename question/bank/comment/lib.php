@@ -80,7 +80,8 @@ function qbank_comment_comment_display($comments, $args): array {
  */
 function qbank_comment_preview_display($question, $context, $course, $itemid): string {
     global $CFG;
-    if (question_has_capability_on($question, 'comment') && $CFG->usecomments) {
+    if (question_has_capability_on($question, 'comment') && $CFG->usecomments
+            && core\plugininfo\qbank::is_plugin_enabled('qbank_comment')) {
         \comment::init();
         $args = new \stdClass;
         $args->context   = $context;
