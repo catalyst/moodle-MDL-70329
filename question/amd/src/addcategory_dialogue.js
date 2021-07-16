@@ -28,18 +28,18 @@ import ModalForm from 'core_form/modalform';
  *
  * @param {String} elementSelector
  */
-export const initModal = (elementSelector, formClass) => {
+export const initModal = (elementSelector, formClass, cmid) => {
     const element = document.querySelector(elementSelector);
     element.addEventListener('click', function(e) {
         e.preventDefault();
         const form = new ModalForm({
-            formClass,
+            formClass: formClass,
+            args: {cmid: cmid},
             modalConfig: {title: 'addcategory'},
             returnFocus: e.target,
         });
         form.addEventListener(form.events.FORM_SUBMITTED, (event) => {
-            document.location = event.detail.returnurl;
-            console.log(event.detail.returnurl);
+            window.console.log(event.detail);
         });
         form.show();
     });

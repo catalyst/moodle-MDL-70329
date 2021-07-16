@@ -34,12 +34,6 @@ use qbank_managecategories\question_category_object;
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
 $PAGE->requires->js_call_amd('core_question/order_categories', 'init');
-$v = \core_question\form\question_category_edit_form::class;
-$PAGE->requires->js_call_amd(
-    'core_question/addcategory_dialogue',
-    'initModal',
-    ['[data-action=addcategory]', \qbank_managecategories\form\question_category_edit_form::class]
-);
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
@@ -69,6 +63,11 @@ foreach ((array)$param as $key => $value) {
 }
 $PAGE->set_url($url);
 
+$PAGE->requires->js_call_amd(
+    'core_question/addcategory_dialogue',
+    'initModal',
+    ['[data-action=addcategory]', \qbank_managecategories\form\question_category_edit_form::class, $cmid]
+);
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
@@ -161,11 +160,6 @@ echo $OUTPUT->header();
 // Print horizontal nav if needed.
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
-// echo html_writer::link(
-//     new moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]),
-//     'add category',
-//     ['data-action' => 'addcategory']);
-// Display the UI.
 if (!empty($param->edit)) {
     $objectdisplay = $qcobject->edit_single_category($param->edit);
 } else if ($questionstomove) {

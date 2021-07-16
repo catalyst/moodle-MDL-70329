@@ -54,13 +54,13 @@ class question_category_edit_form extends \core_form\dynamic_form {
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
-        $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
-                ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
-        $mform->setType('parent', PARAM_SEQUENCE);
-        if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
-            $mform->hardFreeze('parent');
-        }
-        $mform->addHelpButton('parent', 'parentcategory', 'question');
+        // $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
+        //         ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
+        // $mform->setType('parent', PARAM_SEQUENCE);
+        // if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
+        //     $mform->hardFreeze('parent');
+        // }
+        //$mform->addHelpButton('parent', 'parentcategory', 'question');
 
         $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
@@ -75,8 +75,6 @@ class question_category_edit_form extends \core_form\dynamic_form {
         $mform->addElement('text', 'idnumber', get_string('idnumber', 'question'), 'maxlength="100"  size="10"');
         $mform->addHelpButton('idnumber', 'idnumber', 'question');
         $mform->setType('idnumber', PARAM_RAW);
-
-        $this->add_action_buttons(false, get_string('addcategory', 'question'));
 
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);
