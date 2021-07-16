@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Class renderer
  *
- * @package qbank_comment
+ * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,7 +40,7 @@ class renderer extends \plugin_renderer_base {
     /**
      * Render the html fragment for comment modal.
      *
-     * @param $displaydata
+     * @param array $displaydata
      * @return string
      */
     public function render_comment_fragment($displaydata): string {

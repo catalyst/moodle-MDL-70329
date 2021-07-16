@@ -24,30 +24,33 @@
 
 import $ from 'jquery';
 import Fragment from 'core/fragment';
-import Str from 'core/str';
+import * as Str from 'core/str';
 import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
 import Notification from 'core/notification';
 import CustomEvents from 'core/custom_interaction_events';
 
+/**
+ * Event listeners for the module.
+ *
+ * @method clickEvent
+ * @param {object} root
+ * @param {string} selector
+ */
 const clickEvent = (root, selector) => {
+    // Modal for the question comments.
     let modalPromise = ModalFactory.create(
         {
             type: ModalFactory.types.CANCEL,
+            title: Str.get_string('commentheader', 'qbank_comment'),
             large: true
         }, [root, selector]
-    ).then((modal) => {
-        Str.get_string('commentheader', 'qbank_comment')
-            .then((string) => {
-                modal.setTitle(string);
-                return string;
-            })
-            .fail(Notification.exception);
-        return modal;
-    });
+    );
+    // Event listener.
     root.on(CustomEvents.events.activate, selector, (e) => {
         e.preventDefault();
         let currentTarget = e.target.parentElement;
+        // Get the required data for the selected row.
         let questionId = currentTarget.getAttribute('data-questionid'),
             courseID = currentTarget.getAttribute('data-courseid'),
             contextId = currentTarget.getAttribute('data-contextid');
@@ -58,7 +61,14 @@ const clickEvent = (root, selector) => {
             };
             let commentFragment = Fragment.loadFragment('qbank_comment', 'question_comment', contextId, args);
             modal.setBody(commentFragment);
+            // Because we need to reload the page after adding or removing comments to update the count.
             modal.getRoot().on(ModalEvents.cancel, (e) => {
+                e.preventDefault();
+                location.reload();
+                modal.hide();
+            });
+            // Listed for the x button in modal in case user uses this instead of close.
+            $('button[data-action="hide"]').click(function() {
                 e.preventDefault();
                 location.reload();
                 modal.hide();
@@ -68,6 +78,14 @@ const clickEvent = (root, selector) => {
     });
 };
 
+/**
+ * Entrypoint of the js.
+ *
+ * @method init
+ * @param {string} root the root element selector for the table.
+ * @param {string} questionSelector the question comment identifier.
+ */
 export const init = (root, questionSelector) => {
+    // Call for the event listener to listed for clicks in any comment count row.
     clickEvent($(root), questionSelector);
 };

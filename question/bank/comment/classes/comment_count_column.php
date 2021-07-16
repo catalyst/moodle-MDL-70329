@@ -51,7 +51,7 @@ class comment_count_column extends column_base {
         global $DB, $OUTPUT, $PAGE, $CFG;
         $target = 'questioncommentpreview_' . $question->id;
         $datatarget = '[data-target="' . $target . '"]';
-        $PAGE->requires->js_call_amd('qbank_comment/comment_column', 'init', ['#questionscontainer', $datatarget]);
+        $PAGE->requires->js_call_amd('qbank_comment/comment', 'init', ['#questionscontainer', $datatarget]);
         $args = [
                 'component' => 'qbank_comment',
                 'commentarea' => 'core_question',

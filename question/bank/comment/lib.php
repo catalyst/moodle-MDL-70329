@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Validate comment parameter before perform other comments actions.
  *
- * @param stdClass $comment_param
+ * @param stdClass $commentparam
  * {
  * context     => context the context object
  * courseid    => int course id
@@ -38,8 +38,8 @@ defined('MOODLE_INTERNAL') || die();
  * }
  * @return boolean
  */
-function qbank_comment_comment_validate($comment_param): bool {
-    if ($comment_param->commentarea != 'core_question' && $comment_param->component != 'qbank_comment') {
+function qbank_comment_comment_validate($commentparam): bool {
+    if ($commentparam->commentarea != 'core_question' && $commentparam->component != 'qbank_comment') {
         throw new comment_exception('invalidcommentarea');
     }
     return true;
@@ -52,7 +52,7 @@ function qbank_comment_comment_validate($comment_param): bool {
  * @return array
  */
 function qbank_comment_comment_permissions($args): array {
-    return array('post'=>true, 'view'=>true);
+    return array('post' => true, 'view' => true);
 }
 
 /**
@@ -67,13 +67,6 @@ function qbank_comment_comment_display($comments, $args): array {
         throw new comment_exception('core_question');
     }
     return $comments;
-}
-
-function qbank_comment_test($question, $context, $course) {
-    $args['questionid'] = $question->id;
-    $args['context'] = $context;
-    $args['courseid'] = $course->id;
-    return qbank_comment_output_fragment_question_comment($args);
 }
 
 /**
@@ -111,7 +104,7 @@ function qbank_comment_preview_display($question, $context, $course, $itemid): s
 /**
  * Question comment fragment callback.
  *
- * @param $args
+ * @param array $args
  * @return string rendered output
  * @todo cleanup after classrenaming to remove check for previewlib.php
  */
