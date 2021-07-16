@@ -36,6 +36,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comment_deleted extends \core\event\comment_deleted {
+
     public function get_url() {
         return null;
     }
