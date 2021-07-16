@@ -166,6 +166,22 @@ class question_category_object {
     }
 
     /**
+     * Returns the user interface.
+     *
+     */
+    public function get_user_interface(): string {
+
+        // Interface for editing existing categories.
+        $editlists = $this->output_edit_lists();
+
+        $editlists .= \html_writer::empty_tag('br');
+        // Interface for adding a new category.
+        $editlists .= \html_writer::empty_tag('br');
+
+        return $editlists;
+    }
+
+    /**
      * Outputs a table to allow entry of a new category
      */
     public function output_new_table(): void {
@@ -178,23 +194,23 @@ class question_category_object {
      * $this->initialize() must have already been called
      *
      */
-    public function output_edit_lists(): void {
+    public function output_edit_lists(): string {
         global $OUTPUT;
-
-        echo $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
-
+        $htmleditlists = '';
+        $htmleditlists .= $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
         foreach ($this->editlists as $context => $list) {
             $listhtml = $list->to_html(0, ['str' => $this->str]);
             if ($listhtml) {
-                echo $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
+                $htmleditlists .= $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
                     $list->context->contextlevel);
                 $fullcontext = context::instance_by_id($context);
-                echo $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
-                echo $listhtml;
-                echo $OUTPUT->box_end();
+                $htmleditlists .= $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
+                $htmleditlists .= $listhtml;
+                $htmleditlists .= $OUTPUT->box_end();
             }
         }
-        echo $list->display_page_numbers();
+        $htmleditlists .= $list->display_page_numbers();
+        return $htmleditlists;
     }
 
     /**

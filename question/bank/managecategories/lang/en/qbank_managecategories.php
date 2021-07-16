@@ -24,4 +24,5 @@
  */
 
 $string['pluginname'] = 'Manage question bank categories feature';
+$string['addcategory'] = 'Add category';
 $string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
