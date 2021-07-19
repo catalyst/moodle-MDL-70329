@@ -231,4 +231,14 @@ class restore_course_task extends restore_task {
         $this->add_setting($keep_groups);
 
     }
+
+    /**
+     * Given a commment area, return the itemname that contains the itemid mappings.
+     *
+     * @param string $commentarea Comment area name e.g. database_entry.
+     * @return string name of the mapping used to determine the itemid.
+     */
+    public function get_comment_mapping_itemname($commentarea) {
+        return false;
+    }
 }

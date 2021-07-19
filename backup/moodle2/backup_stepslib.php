@@ -799,7 +799,7 @@ class backup_comments_structure_step extends backup_structure_step {
         $comments = new backup_nested_element('comments');
 
         $comment = new backup_nested_element('comment', array('id'), array(
-            'commentarea', 'itemid', 'content', 'format',
+            'component', 'commentarea', 'itemid', 'content', 'format',
             'userid', 'timecreated'));
 
         // Build the tree

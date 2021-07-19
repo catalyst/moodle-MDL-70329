@@ -72,7 +72,7 @@ function qbank_comment_comment_display($comments, $args): array {
 /**
  * Comment content for callbacks.
  *
- * @param stdClass $question
+ * @param question_definition $question
  * @param context $context
  * @param stdClass $course
  * @param int $itemid
@@ -130,7 +130,7 @@ function qbank_comment_output_fragment_question_comment($args): string {
     $quba->start_question($slot, $options->variant);
     $displaydata['question'] = $quba->render_question($slot, $options, '1');
     $course = get_course($args['courseid']);
-    $context = context_course::instance($args['courseid']);
+    $context = context::instance_by_id($question->contextid);
     $displaydata['comment'] = qbank_comment_preview_display($question, $context, $course, $args['questionid']);
     $displaydata['commenstdisabled'] = false;
     if (empty($displaydata['comment']) && !$CFG->usecomments) {
