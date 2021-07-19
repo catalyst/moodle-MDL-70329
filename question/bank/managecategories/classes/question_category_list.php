@@ -148,36 +148,17 @@ class question_category_list extends moodle_list {
      */
     public function to_html($indent=0, $extraargs=[]) {
         global $OUTPUT;
-        if (count($this->items)) {
-            $tabs = str_repeat("\t", $indent);
-            $first = true;
-            $itemiter = 1;
-            $lastitem = '';
-            $html = '';
-            foreach ($this->items as $item) {
-                $item->attributes = 'class="list_item"';
-                $last = (count($this->items) == $itemiter);
-                if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
-                    $html .= "$tabs\t<li".((!empty($item->attributes)) ? (' '.$item->attributes) : '').">";
-                    $html .= $itemhtml;
-                    $html .= "</li>\n";
-                }
-                $first = false;
-                $lastitem = $item;
-                $itemiter++;
+
+        $itemstab = [];
+        foreach ($this->items as $item) {
+            if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
+                $itemstab[]= $itemhtml;
             }
-        } else {
-            $html = '';
         }
-        // If there are list items to display then wrap them in ul / ol tag.
-        if ($html) {
-            $this->attributes = 'class="category_list"';
-            $tabs = str_repeat("\t", $indent);
-            $html = $tabs.'<'.$this->type.((!empty($this->attributes)) ? (' '.$this->attributes) : '').">\n".$html;
-            $html .= $tabs."</".$this->type.">\n";
-        } else {
-            $html = '';
-        }
-        return $html;
+        $data =
+        [
+            'listitem' => $itemstab,
+        ];
+        return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $data);
     }
 }

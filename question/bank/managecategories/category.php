@@ -161,18 +161,12 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 if (!empty($param->edit)) {
-    $objectdisplay = $qcobject->edit_single_category($param->edit);
+    $qcobject->edit_single_category($param->edit);
 } else if ($questionstomove) {
-    $objectdisplay = $qcobject->display_move_form($questionstomove, $category);
+    $qcobject->display_move_form($questionstomove, $category);
 } else {
     // Display the user interface.
-    $objectdisplay = $qcobject->get_user_interface();
+    $qcobject->display_user_interface();
 }
-
-$context = [
-    'objecttodisplay' => $objectdisplay,
-];
-
-echo $OUTPUT->render_from_template('qbank_managecategories/category', $context);
 
 echo $OUTPUT->footer();

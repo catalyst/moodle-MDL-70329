@@ -166,22 +166,6 @@ class question_category_object {
     }
 
     /**
-     * Returns the user interface.
-     *
-     */
-    public function get_user_interface(): string {
-
-        // Interface for editing existing categories.
-        $editlists = $this->output_edit_lists();
-
-        $editlists .= \html_writer::empty_tag('br');
-        // Interface for adding a new category.
-        $editlists .= \html_writer::empty_tag('br');
-
-        return $editlists;
-    }
-
-    /**
      * Outputs a table to allow entry of a new category
      */
     public function output_new_table(): void {
@@ -194,23 +178,30 @@ class question_category_object {
      * $this->initialize() must have already been called
      *
      */
-    public function output_edit_lists(): string {
+    public function output_edit_lists(): void {
         global $OUTPUT;
-        $htmleditlists = '';
-        $htmleditlists .= $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        $dat = [
+            'helpstringhead' => $helpstringhead,
+        ];
+        echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
         foreach ($this->editlists as $context => $list) {
             $listhtml = $list->to_html(0, ['str' => $this->str]);
             if ($listhtml) {
-                $htmleditlists .= $OUTPUT->box_start('boxwidthwide boxaligncenter generalbox questioncategories contextlevel' .
-                    $list->context->contextlevel);
+                $ctxlvl = $list->context->contextlevel;
                 $fullcontext = context::instance_by_id($context);
-                $htmleditlists .= $OUTPUT->heading(get_string('questioncatsfor', 'question', $fullcontext->get_context_name()), 3);
-                $htmleditlists .= $listhtml;
-                $htmleditlists .= $OUTPUT->box_end();
+                $heading = get_string('questioncatsfor', 'question', $fullcontext->get_context_name());
+                $listdisplay = $listhtml;
             }
+            $data =
+            [
+                'ctxlvl' => $ctxlvl,
+                'heading' => $heading,
+                'list' => $listdisplay,
+            ];
+            echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/categoryobject', $data);
         }
-        $htmleditlists .= $list->display_page_numbers();
-        return $htmleditlists;
+        echo $list->display_page_numbers();
     }
 
     /**

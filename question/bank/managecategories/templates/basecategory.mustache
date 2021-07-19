@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template qbank_managecategories/category
+    @template qbank_managecategories/categorylist
 
     This template renders the list item for each category.
 
@@ -23,10 +23,11 @@
     {
     }
 }}
+
+{{{helpstringhead}}}
 <br>
 <div class="float-left">
     <button type="submit" data-action="addcategory" class="btn btn-primary">{{#str}}addcategory, qbank_managecategories{{/str}}</button>
 </div>
 <br>
 <br>
-{{{objecttodisplay}}}
