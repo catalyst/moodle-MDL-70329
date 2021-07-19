@@ -52,7 +52,7 @@ function qbank_comment_comment_validate($commentparam): bool {
  * @return array
  */
 function qbank_comment_comment_permissions($args): array {
-    return array('post' => true, 'view' => true);
+    return ['post' => true, 'view' => true];
 }
 
 /**

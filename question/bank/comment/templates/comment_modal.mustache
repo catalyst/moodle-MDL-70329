@@ -19,13 +19,9 @@
 
     Example context (json):
     {
-        "previewdata": [
-          {
-                "question": "question html",
-                "comment": "comment html",
-                "commenstdisabled": bool
-          }
-        ]
+        "question": "question html",
+        "comment": "comment html",
+        "commenstdisabled": bool
     }
 }}
 
@@ -36,7 +32,7 @@
     {{{comment}}}
     {{#commenstdisabled}}
         <a class="alert-danger">
-            {{#str}} commentdisabled, qbank_comment{{/str}}
+            {{#str}} commentdisabled, qbank_comment {{/str}}
         </a>
     {{/commenstdisabled}}
 </div>

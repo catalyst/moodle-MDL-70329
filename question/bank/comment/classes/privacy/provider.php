@@ -34,7 +34,7 @@ use core_privacy\local\request\userlist;
 use core_privacy\local\request\approved_userlist;
 
 /**
- * Privacy Subsystem for qbank_comment implementing null_provider (for now).
+ * Privacy Subsystem for qbank_comment.
  *
  * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -68,9 +68,9 @@ class provider implements
         $contextlist = new contextlist();
 
         $sql = "SELECT contextid
-                FROM {comments}
-                WHERE component = :component
-                AND userid = :userid";
+                  FROM {comments}
+                 WHERE component = :component
+                       AND userid = :userid";
         $params = [
                 'area' => 'core_question',
                 'component' => 'qbank_comment',
@@ -96,9 +96,9 @@ class provider implements
         ];
 
         $sql = "SELECT userid as userid
-                FROM {comments}
-                WHERE component = :component
-                AND contextid = :contextid";
+                  FROM {comments}
+                 WHERE component = :component
+                       AND contextid = :contextid";
 
         $userlist->add_from_sql('userid', $sql, $params);
     }
