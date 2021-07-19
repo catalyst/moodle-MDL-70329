@@ -33,7 +33,7 @@ use qbank_managecategories\question_category_object;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
-$PAGE->requires->js_call_amd('core_question/order_categories', 'init');
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
@@ -64,7 +64,7 @@ foreach ((array)$param as $key => $value) {
 $PAGE->set_url($url);
 
 $PAGE->requires->js_call_amd(
-    'core_question/addcategory_dialogue',
+    'qbank_managecategories/addcategory_dialogue',
     'initModal',
     ['[data-action=addcategory]', \qbank_managecategories\form\question_category_edit_form::class, $cmid]
 );
