@@ -128,21 +128,21 @@ class question_category_edit_form extends \core_form\dynamic_form {
         return $errors;
     }
 
-    protected function get_context_for_dynamic_submission(): \context {
+    public function get_context_for_dynamic_submission(): \context {
         $cmid = $this->optional_param('cmid', 0, PARAM_INT);
         return \context_module::instance($cmid);
     }
 
-    protected function check_access_for_dynamic_submission() : void {
+    public function check_access_for_dynamic_submission() : void {
     }
 
-    public function process_dynamic_submission(){
+    public function process_dynamic_submission(): void {
     }
 
-    public function set_data_for_dynamic_submission(): void{
+    public function set_data_for_dynamic_submission(): void {
     }
 
-    function get_page_url_for_dynamic_submission(): \moodle_url {
+    public function get_page_url_for_dynamic_submission(): \moodle_url {
         $cmid = $this->optional_param('cmid', 0, PARAM_INT);
         return new \moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]);
     }

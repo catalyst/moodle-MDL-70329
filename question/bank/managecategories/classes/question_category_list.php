@@ -90,7 +90,7 @@ class question_category_list extends moodle_list {
      */
     public function __construct($type='ul', $attributes='', $editable = false, $pageurl=null,
                                 $page = 0, $pageparamname = 'page', $itemsperpage = 20, $context = null) {
-        parent::__construct('ul', $attributes, $editable, $pageurl, $page, 'cpage', $itemsperpage);
+        parent::__construct('ul', '', $editable, $pageurl, $page, 'cpage', $itemsperpage);
         $this->context = $context;
     }
 
@@ -152,7 +152,7 @@ class question_category_list extends moodle_list {
         $itemstab = [];
         foreach ($this->items as $item) {
             if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
-                $itemstab[]= $itemhtml;
+                $itemstab[] = $itemhtml;
             }
         }
         $data =

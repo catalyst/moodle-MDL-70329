@@ -22,11 +22,14 @@
  *
 */
 import ModalForm from 'core_form/modalform';
+import * as Str from 'core/str';
 
 /**
  * Initialize add category to the category view as Modal form.
  *
- * @param {String} elementSelector
+ * @param {string} elementSelector Element triggering modal form.
+ * @param {string} formClass Path to class used to display modal form.
+ * @param {int} cmid course module id parameter.
  */
 export const initModal = (elementSelector, formClass, cmid) => {
     const element = document.querySelector(elementSelector);
@@ -35,7 +38,7 @@ export const initModal = (elementSelector, formClass, cmid) => {
         const form = new ModalForm({
             formClass: formClass,
             args: {cmid: cmid},
-            modalConfig: {title: 'addcategory'},
+            modalConfig: {title: Str.get_string('addcategory', 'qbank_managecategories')},
             returnFocus: e.target,
         });
         form.addEventListener(form.events.FORM_SUBMITTED, (event) => {

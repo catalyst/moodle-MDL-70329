@@ -16,9 +16,9 @@
 
 
 /**
- * External question API
+ * External qbank_managecategories API
  *
- * @package    qbank/managecategories
+ * @package    qbank_managecategories
  * @category   external
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
@@ -48,14 +48,14 @@ class qbank_managecategories_external extends external_api {
         $newctxid = (int)explode(' ', $categories[1])[0];
 
         // Question_categories table modifications.
-        if (!is_null($categories[1])){
+        if (!is_null($categories[1])) {
             // Retrieves top category parent where neighbor category is located.
             $destparentcat = $DB->get_record_select('question_categories', 'contextid = :newcontextid AND parent = :parentcat',
                     ['newcontextid' => $newctxid, 'parentcat' => 0]);
             // Sets new parent.
             $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $catid]);
             // Sets new context id.
-            $DB->set_field('question_categories', 'contextid', $newctxid, ['id'=> $catid]);
+            $DB->set_field('question_categories', 'contextid', $newctxid, ['id' => $catid]);
             // Sets sortorder field.
             foreach ($neworder as $order => $category) {
                 foreach ($category as $innerorder => $innervalue) {

@@ -30,7 +30,6 @@ require_once("$CFG->libdir/externallib.php");
 require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/engine/datalib.php');
 require_once($CFG->libdir . '/questionlib.php');
-require_once($CFG->libdir . '/listlib.php');
 
 /**
  * Question external functions

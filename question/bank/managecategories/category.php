@@ -25,8 +25,7 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
-error_reporting(-1);
-ini_set('display_errors', true);
+
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
@@ -168,5 +167,4 @@ if (!empty($param->edit)) {
     // Display the user interface.
     $qcobject->display_user_interface();
 }
-
 echo $OUTPUT->footer();

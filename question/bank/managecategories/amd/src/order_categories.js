@@ -25,12 +25,12 @@
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
-import jQuery from 'jquery';
+import $ from 'jquery';
 
 /**
  * Sets up sortable list in the column sort order page.
  *
- * @returns {Void}
+ * @returns {void}
  */
 const setupSortableLists = () => {
     new SortableList(
@@ -39,11 +39,11 @@ const setupSortableLists = () => {
             moveHandlerSelector: '.list_item [data-drag-type=move]',
         }
     );
-    jQuery('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
+    $('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
         evt.stopPropagation();
-        let categoryListElements = jQuery('.list_item').parent();
+        let categoryListElements = $('.list_item').parent();
         // Get moved list item href URL.
-        let href = jQuery('li.list_item[style]')[0].children[0].children[0].href;
+        let href = $('li.list_item[style]')[0].children[0].children[0].href;
         // Get query string for that URL.
         let queryString = href.substr(href.search('\\?'));
         const params = new URLSearchParams(queryString);
@@ -52,7 +52,7 @@ const setupSortableLists = () => {
         let oldContextId = cat.substr(cat.search(',')+1);
         let oldCat = cat.substr(0, cat.search(','));
         // Remove proxy created by sortable list.
-        jQuery('li.list_item[style]').remove();
+        $('li.list_item[style]').remove();
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
@@ -63,8 +63,8 @@ const setupSortableLists = () => {
 /**
  * Call external function set_category_order - inserts the updated column in the question_categories table.
  *
- * @param {String} updatedCategories String containing new sortorder.
- * @returns {Void}
+ * @param {string} updatedCategories String containing new sortorder.
+ * @returns {void}
  */
  const setCatOrder = (updatedCategories) => {
     Ajax.call([{
@@ -78,8 +78,9 @@ const setupSortableLists = () => {
  * Retrieving the the order on EVENT.DROP, also gets new parameter
  *
  * @param {JQuery<HTMLElement>} categoryListElements List of HTML element to parse.
- * @param {Number}              oldContextId Old context id to change.
- * @returns {Array}
+ * @param {int} oldContextId Old context id to change.
+ * @param {int} oldCat Old category.
+ * @returns {array}
  */
 const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     let oldCtxCat = oldContextId + ' ' + oldCat;
@@ -95,10 +96,10 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
             const params = new URLSearchParams(queryString);
             // Parameters.
             let cat = params.get('cat');
-            let contextId = cat.substr(cat.search(',')+1);
+            let contextId = cat.substr(cat.search(',') + 1);
             cat = cat.substr(0, cat.search(','));
             listOrder[j] = contextId + ' ' + cat;
-            if (listOrder[j] == oldCtxCat){
+            if (listOrder[j] === oldCtxCat){
                 destinationCtx.push(listOrder);
             }
         }
