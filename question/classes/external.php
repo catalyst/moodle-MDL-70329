@@ -315,44 +315,4 @@ class core_question_external extends external_api {
             )
         ]);
     }
-
-    public static function set_category_order_parameters() {
-        return new external_function_parameters(
-                ['categories' => new external_value(PARAM_RAW, 'JSON String')]
-        );
-    }
-
-    public static function set_category_order(string $categories) {
-        global $DB;
-        $params = self::validate_parameters(self::set_category_order_parameters(), ['categories' => $categories]);
-
-        $categories = json_decode($categories, true);
-        $neworder = $categories[0];
-        $catid = (int)explode(' ', $categories[2])[1];
-        $oldctxid = (int)explode(' ', $categories[2])[0];
-        $newctxid = (int)explode(' ', $categories[1])[0];
-
-        // Question_categories table modifications.
-        if (!is_null($categories[1])){
-            // Retrieves top category parent where neighbor category is located.
-            $destparentcat = $DB->get_record_select('question_categories', 'contextid = :newcontextid AND parent = :parentcat',
-                    ['newcontextid' => $newctxid, 'parentcat' => 0]);
-            // Sets new parent.
-            $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $catid]);
-            // Sets new context id.
-            $DB->set_field('question_categories', 'contextid', $newctxid, ['id'=> $catid]);
-            // Sets sortorder field.
-            foreach ($neworder as $order => $category) {
-                foreach ($category as $innerorder => $innervalue) {
-                    $DB->set_field('question_categories', 'sortorder', $innerorder, ['id' => explode(' ', $innervalue)[1]]);
-                }
-            }
-        }
-        $sortorder = json_encode($sortorder);
-        return $sortorder;
-    }
-
-    public static function set_category_order_returns() {
-        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
-    }
 }

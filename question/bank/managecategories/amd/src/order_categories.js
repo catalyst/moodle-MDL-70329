@@ -68,7 +68,7 @@ const setupSortableLists = () => {
  */
  const setCatOrder = (updatedCategories) => {
     Ajax.call([{
-        methodname: 'core_question_set_category_order',
+        methodname: 'qbank_managecategories_set_category_order',
         args: {categories: updatedCategories},
         fail: Notification.exception
     }]);
