@@ -39,10 +39,6 @@ list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
 
 // Get values from form for actions on this page.
 $param = new stdClass();
-$param->moveup = optional_param('moveup', 0, PARAM_INT);
-$param->movedown = optional_param('movedown', 0, PARAM_INT);
-$param->moveupcontext = optional_param('moveupcontext', 0, PARAM_INT);
-$param->movedowncontext = optional_param('movedowncontext', 0, PARAM_INT);
 $param->tocontext = optional_param('tocontext', 0, PARAM_INT);
 $param->left = optional_param('left', 0, PARAM_INT);
 $param->right = optional_param('right', 0, PARAM_INT);
@@ -71,12 +67,12 @@ $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
 
-if ($param->left || $param->right || $param->moveup || $param->movedown) {
+if ($param->left || $param->right) {
     require_sesskey();
 
     foreach ($qcobject->editlists as $list) {
         // Processing of these actions is handled in the method where appropriate and page redirects.
-        $list->process_actions($param->left, $param->right, $param->moveup, $param->movedown);
+        $list->process_actions($param->left, $param->right);
     }
 }
 

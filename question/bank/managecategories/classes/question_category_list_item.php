@@ -50,11 +50,36 @@ class question_category_list_item extends \list_item {
      */
     public function set_icon_html($first, $last, $lastitem) : void {
         global $CFG;
-        $category = $this->item;
-        $url = new moodle_url('/question/bank/managecategories/category.php',
-            ($this->parentlist->pageurl->params() + ['edit' => $category->id]));
-        $this->icons['edit'] = $this->image_icon(get_string('editthiscategory', 'question'), $url, 'edit');
-    }
+        $strmoveleft = get_string('maketoplevelitem', 'question');
+        if (right_to_left()) {   // Exchange arrows on RTL
+            $rightarrow = 'left';
+            $leftarrow  = 'right';
+        } else {
+            $rightarrow = 'right';
+            $leftarrow  = 'left';
+        }
+
+        if (isset($this->parentlist->parentitem)) {
+            $parentitem = $this->parentlist->parentitem;
+            if (isset($parentitem->parentlist->parentitem)) {
+                $action = get_string('makechildof', 'question', $parentitem->parentlist->parentitem->name);
+            } else {
+                $action = $strmoveleft;
+            }
+            $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'left' => $this->id]));
+            $this->icons['left'] = $this->image_icon($action, $url, $leftarrow);
+        } else {
+            $this->icons['left'] =  $this->image_spacer();
+        }
+
+        if (!empty($lastitem)) {
+            $makechildof = get_string('makechildof', 'question', $lastitem->name);
+            $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'right' => $this->id]));
+            $this->icons['right'] = $this->image_icon($makechildof, $url, $rightarrow);
+        } else {
+            $this->icons['right'] =  $this->image_spacer();
+        }
+}
 
     /**
      * Override item_html function.

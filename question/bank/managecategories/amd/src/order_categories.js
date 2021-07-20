@@ -56,8 +56,17 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        setTimeout(location.reload(), 30000);
+        pageReload();
     });
+};
+
+/**
+ * Reloads page after 3s if element is dropped.
+ *
+ * @returns {void}
+ */
+const pageReload = () => {
+    setTimeout(location.reload(), 30000);
 };
 
 /**
