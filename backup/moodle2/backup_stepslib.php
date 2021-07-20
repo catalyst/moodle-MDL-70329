@@ -808,7 +808,12 @@ class backup_comments_structure_step extends backup_structure_step {
 
         // Define sources
 
-        $comment->set_source_table('comments', array('contextid' => backup::VAR_CONTEXTID));
+        //$comment->set_source_table('comments', array('contextid' => backup::VAR_CONTEXTID));
+
+        $comment->set_source_sql("SELECT c.*
+                                        FROM {comments} c
+                                       WHERE c.contextid = ?
+                                         AND c.commentarea != 'core_question'", [backup::VAR_CONTEXTID]);
 
         // Define id annotations
 
@@ -2368,6 +2373,11 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $tag = new backup_nested_element('tag', array('id', 'contextid'), array('name', 'rawname'));
 
+        $comments = new backup_nested_element('comments');
+
+        $comment = new backup_nested_element('comment', ['id'], ['component', 'commentarea', 'itemid', 'contextid',
+                                                                        'content', 'format', 'userid', 'timecreated']);
+
         // Build the tree
 
         $qcategories->add_child($qcategory);
@@ -2378,6 +2388,9 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $question->add_child($tags);
         $tags->add_child($tag);
+
+        $question->add_child($comments);
+        $comments->add_child($comment);
 
         // Define the sources
 
@@ -2407,6 +2420,14 @@ class backup_questions_structure_step extends backup_structure_step {
             [
                 backup::VAR_PARENTID
             ]);
+
+        $comment->set_source_sql("SELECT c.*
+                                        FROM {comments} c
+                                       WHERE c.commentarea = 'core_question'
+                                         AND c.component = 'qbank_comment'
+                                         AND c.itemid = ?", [backup::VAR_PARENTID]);
+
+        $comment->annotate_ids('user', 'userid');
 
         // don't need to annotate ids nor files
         // (already done by {@link backup_annotate_all_question_files}

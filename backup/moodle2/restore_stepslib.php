@@ -4748,13 +4748,16 @@ class restore_create_categories_and_questions extends restore_structure_step {
 
         $tag = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
 
+        $comment = new restore_path_element('comment',
+                '/question_categories/question_category/questions/question/comments/comment');
+
         // Apply for 'qtype' plugins optional paths at question level
         $this->add_plugin_structure('qtype', $question);
 
         // Apply for 'local' plugins optional paths at question level
         $this->add_plugin_structure('local', $question);
 
-        return array($category, $question, $hint, $tag);
+        return array($category, $question, $hint, $tag, $comment);
     }
 
     protected function process_question_category($data) {
@@ -4994,12 +4997,54 @@ class restore_create_categories_and_questions extends restore_structure_step {
                     $this->cachedcategory = $DB->get_record('question_categories', array('id' => $categoryid));
                 }
                 $tagcontextid = $this->cachedcategory->contextid;
+                var_dump($tagcontextid);
             }
             // Add the tag to the question.
             core_tag_tag::add_item_tag('core_question', 'question', $newquestion,
                     context::instance_by_id($tagcontextid),
                     $tagname);
         }
+    }
+
+    protected function process_comment($data) {
+        global $DB, $CFG;
+
+        $data = (object)$data;
+
+        $newquestionid = $this->get_new_parentid('question');
+        $questioncreated = (bool) $this->get_mappingid('question_created', $this->get_old_parentid('question'));
+        if (!$questioncreated) {
+            // This question already exists in the question bank. Nothing for us to do.
+            return;
+        }
+
+        if ($CFG->usecomments) {
+            //if (!empty($data->contextid) && $newcontextid = $this->get_mappingid('context', $data->contextid)) {
+            //    $commentcontextid = $newcontextid;
+            //    var_dump($commentcontextid);
+            //    var_dump('came');
+            //} else {
+            //    // Get the category, so we can then later get the context.
+            //    $categoryid = $this->get_new_parentid('question_category');
+            //    if (empty($this->cachedcategory) || $this->cachedcategory->id != $categoryid) {
+            //        $this->cachedcategory = $DB->get_record('question_categories', array('id' => $categoryid));
+            //    }
+            //    $commentcontextid = $this->cachedcategory->contextid;
+            //    var_dump($commentcontextid);die;
+            //}
+            $question = question_bank::load_question($newquestionid);
+            $data->contextid = $question->contextid;
+            $data->itemid = $newquestionid;
+            $data->userid = $this->get_mappingid('user', $data->userid);
+
+            // Only if there is another comment with same context/user/timecreated
+            $params = array('contextid' => $data->contextid, 'userid' => $data->userid, 'timecreated' => $data->timecreated,
+                    'itemid' => $data->itemid);
+            if (!$DB->record_exists('comments', $params)) {
+                $DB->insert_record('comments', $data);
+            }
+        }
+
     }
 
     protected function after_execute() {

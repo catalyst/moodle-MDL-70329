@@ -28,6 +28,7 @@ namespace qbank_comment;
 defined('MOODLE_INTERNAL') || die();
 
 use core_question\local\bank\column_base;
+use question_bank;
 
 /**
  * Class comment_count_column.
@@ -48,11 +49,13 @@ class comment_count_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        global $DB, $OUTPUT, $PAGE, $CFG;
+        global $DB, $OUTPUT, $PAGE;
         $target = 'questioncommentpreview_' . $question->id;
         $datatarget = '[data-target="' . $target . '"]';
         $PAGE->requires->js_call_amd('qbank_comment/comment', 'init', ['#questionscontainer', $datatarget]);
+        $question = question_bank::load_question($question->id);
         $args = [
+                'contextid' => $question->contextid,
                 'component' => 'qbank_comment',
                 'commentarea' => 'core_question',
                 'itemid' => $question->id
@@ -62,7 +65,7 @@ class comment_count_column extends column_base {
             $url = $this->qbank->base_url();
             $attributes = [
                 'data-target' => $target,
-                'data-contextid' => $this->qbank->get_most_specific_context()->id,
+                'data-contextid' => $question->contextid,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id
             ];
