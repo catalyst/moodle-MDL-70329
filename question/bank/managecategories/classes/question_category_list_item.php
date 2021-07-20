@@ -140,9 +140,12 @@ class question_category_list_item extends \list_item {
             get_string('exportasxml', 'question'),
             false
         ));
+        // Menu to  string/html.
+        $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
         if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
-            $handle = $OUTPUT->render_from_template('core/drag_handle', []);
+            $handle = $OUTPUT->pix_icon('grip-vertical-solid', 'gripvsol', 'qbank_managecategories');
+            //$handle = $OUTPUT->render_from_template('core/drag_handle', []);
         } else {
             $handle = '';
         }
@@ -154,7 +157,7 @@ class question_category_list_item extends \list_item {
                 'idnumber' => $idnumber,
                 'questioncount' => $questioncount,
                 'categorydesc' => $categorydesc,
-                'editactionmenu' => $OUTPUT->render($menu),
+                'editactionmenu' => $menu,
                 'handle' => $handle,
             ];
 
