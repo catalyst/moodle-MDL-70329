@@ -4757,7 +4757,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Apply for 'local' plugins optional paths at question level
         $this->add_plugin_structure('local', $question);
 
-        return array($category, $question, $hint, $tag, $comment);
+        return [$category, $question, $hint, $tag, $comment];
     }
 
     protected function process_question_category($data) {
@@ -5019,27 +5019,13 @@ class restore_create_categories_and_questions extends restore_structure_step {
         }
 
         if ($CFG->usecomments) {
-            //if (!empty($data->contextid) && $newcontextid = $this->get_mappingid('context', $data->contextid)) {
-            //    $commentcontextid = $newcontextid;
-            //    var_dump($commentcontextid);
-            //    var_dump('came');
-            //} else {
-            //    // Get the category, so we can then later get the context.
-            //    $categoryid = $this->get_new_parentid('question_category');
-            //    if (empty($this->cachedcategory) || $this->cachedcategory->id != $categoryid) {
-            //        $this->cachedcategory = $DB->get_record('question_categories', array('id' => $categoryid));
-            //    }
-            //    $commentcontextid = $this->cachedcategory->contextid;
-            //    var_dump($commentcontextid);die;
-            //}
             $question = question_bank::load_question($newquestionid);
             $data->contextid = $question->contextid;
             $data->itemid = $newquestionid;
             $data->userid = $this->get_mappingid('user', $data->userid);
 
-            // Only if there is another comment with same context/user/timecreated
-            $params = array('contextid' => $data->contextid, 'userid' => $data->userid, 'timecreated' => $data->timecreated,
-                    'itemid' => $data->itemid);
+            $params = array('contextid' => $data->contextid, 'userid' => $data->userid,
+                            'timecreated' => $data->timecreated, 'itemid' => $data->itemid);
             if (!$DB->record_exists('comments', $params)) {
                 $DB->insert_record('comments', $data);
             }

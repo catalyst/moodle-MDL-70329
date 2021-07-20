@@ -107,7 +107,7 @@ function qbank_comment_preview_display($question, $context, $course, $itemid): s
  *
  * @param array $args
  * @return string rendered output
- * @todo cleanup after classrenaming to remove check for previewlib.php
+ * @todo cleanup after class renaming to remove check for previewlib.php
  */
 function qbank_comment_output_fragment_question_comment($args): string {
     global $USER, $PAGE, $CFG;
