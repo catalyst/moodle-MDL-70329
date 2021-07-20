@@ -112,7 +112,7 @@ function qbank_comment_preview_display($question, $context, $course, $itemid): s
 function qbank_comment_output_fragment_question_comment($args): string {
     global $USER, $PAGE, $CFG;
     $displaydata = [];
-    //require_once($CFG->dirroot . '/question/engine/bank/php');
+    require_once($CFG->dirroot . '/question/engine/bank.php');
     $question = question_bank::load_question($args['questionid']);
     $quba = question_engine::make_questions_usage_by_activity(
             'core_question_preview', context_user::instance($USER->id));
