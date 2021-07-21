@@ -308,7 +308,5 @@ echo $PAGE->get_renderer('qbank_previewquestion')->render_preview_page($previewd
 $event = \core\event\question_viewed::create_from_question_instance($question, $context);
 $event->trigger();
 
-$PAGE->requires->js_module('core_question_engine');
-$PAGE->requires->yui_module('moodle-qbank_previewquestion-preview', 'M.question.preview.init');
 $PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect']]);
 echo $OUTPUT->footer();
