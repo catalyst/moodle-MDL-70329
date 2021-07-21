@@ -50,10 +50,11 @@ const clickEvent = (root, selector) => {
     root.on(CustomEvents.events.activate, selector, (e) => {
         e.preventDefault();
         let currentTarget = e.target.parentElement;
+        // Dummy contextid.
+        let contextId = 1;
         // Get the required data for the selected row.
         let questionId = currentTarget.getAttribute('data-questionid'),
-            courseID = currentTarget.getAttribute('data-courseid'),
-            contextId = currentTarget.getAttribute('data-contextid');
+            courseID = currentTarget.getAttribute('data-courseid');
         modalPromise.then((modal) => {
             let args = {
                 questionid: questionId,

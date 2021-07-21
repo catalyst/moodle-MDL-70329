@@ -54,16 +54,16 @@ class comment_count_column extends column_base {
         $datatarget = '[data-target="' . $target . '"]';
         $PAGE->requires->js_call_amd('qbank_comment/comment', 'init', ['#questionscontainer', $datatarget]);
         $args = [
-                'component' => 'qbank_comment',
-                'commentarea' => 'core_question',
-                'itemid' => $question->id
+            'component' => 'qbank_comment',
+            'commentarea' => 'core_question',
+            'itemid' => $question->id,
+            'contextid' => 1
         ];
         $commentcount = $DB->count_records('comments', $args);
         if (question_has_capability_on($question, 'comment')) {
             $url = $this->qbank->base_url();
             $attributes = [
                 'data-target' => $target,
-                'data-contextid' => $question->contextid,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id
             ];

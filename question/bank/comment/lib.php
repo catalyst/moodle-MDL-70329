@@ -73,21 +73,19 @@ function qbank_comment_comment_display($comments, $args): array {
  * Comment content for callbacks.
  *
  * @param question_definition $question
- * @param context $context
- * @param stdClass $course
- * @param int $itemid
+ * @param int $courseid
  * @return string
  */
-function qbank_comment_preview_display($question, $context, $course, $itemid): string {
-    global $CFG;
+function qbank_comment_preview_display($question, $courseid): string {
+    global $CFG, $PAGE;
     if (question_has_capability_on($question, 'comment') && $CFG->usecomments
             && core\plugininfo\qbank::is_plugin_enabled('qbank_comment')) {
-        \comment::init();
+        \comment::init($PAGE);
         $args = new \stdClass;
-        $args->context   = $context;
-        $args->course    = $course;
+        $args->contextid = 1; // dummy data to bypass comment sql as context is not needed.
+        $args->courseid  = $courseid;
         $args->area      = 'core_question';
-        $args->itemid    = $itemid;
+        $args->itemid    = $question->id;
         $args->component = 'qbank_comment';
         $args->notoggle  = true;
         $args->autostart = true;
@@ -130,9 +128,7 @@ function qbank_comment_output_fragment_question_comment($args): string {
     $slot = $quba->add_question($question, $options->maxmark);
     $quba->start_question($slot, $options->variant);
     $displaydata['question'] = $quba->render_question($slot, $options, '1');
-    $course = get_course($args['courseid']);
-    $context = context::instance_by_id($question->contextid);
-    $displaydata['comment'] = qbank_comment_preview_display($question, $context, $course, $args['questionid']);
+    $displaydata['comment'] = qbank_comment_preview_display($question, $args['courseid']);
     $displaydata['commenstdisabled'] = false;
     if (empty($displaydata['comment']) && !$CFG->usecomments) {
         $displaydata['commenstdisabled'] = true;

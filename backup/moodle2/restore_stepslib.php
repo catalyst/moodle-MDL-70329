@@ -5018,16 +5018,8 @@ class restore_create_categories_and_questions extends restore_structure_step {
         }
 
         if ($CFG->usecomments) {
-            $question = question_bank::load_question($newquestionid);
-            $data->contextid = $question->contextid;
             $data->itemid = $newquestionid;
-            $data->userid = $this->get_mappingid('user', $data->userid);
-
-            $params = ['contextid' => $data->contextid, 'userid' => $data->userid,
-                        'timecreated' => $data->timecreated, 'itemid' => $data->itemid];
-            if (!$DB->record_exists('comments', $params)) {
-                $DB->insert_record('comments', $data);
-            }
+            $DB->insert_record('comments', $data);
         }
 
     }
