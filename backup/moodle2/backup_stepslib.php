@@ -787,39 +787,31 @@ class backup_filters_structure_step extends backup_structure_step {
 }
 
 /**
- * structure step in charge of constructing the comments.xml file for all the comments found
- * in a given context
+ * Structure step in charge of constructing the comments.xml file for all the comments found in a given context.
  */
 class backup_comments_structure_step extends backup_structure_step {
 
     protected function define_structure() {
-
-        // Define each element separated
-
+        // Define each element separated.
         $comments = new backup_nested_element('comments');
 
         $comment = new backup_nested_element('comment', array('id'), array(
             'component', 'commentarea', 'itemid', 'content', 'format',
             'userid', 'timecreated'));
 
-        // Build the tree
-
+        // Build the tree.
         $comments->add_child($comment);
 
-        // Define sources
-
-        //$comment->set_source_table('comments', array('contextid' => backup::VAR_CONTEXTID));
-
+        // Define sources.
         $comment->set_source_sql("SELECT c.*
                                         FROM {comments} c
                                        WHERE c.contextid = ?
                                          AND c.commentarea != 'core_question'", [backup::VAR_CONTEXTID]);
 
-        // Define id annotations
-
+        // Define id annotations.
         $comment->annotate_ids('user', 'userid');
 
-        // Return the root element (comments)
+        // Return the root element (comments).
         return $comments;
     }
 }
