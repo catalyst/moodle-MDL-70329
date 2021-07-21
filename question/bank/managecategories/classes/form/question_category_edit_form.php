@@ -49,6 +49,11 @@ class question_category_edit_form extends \core_form\dynamic_form {
     protected function definition() {
         $mform = $this->_form;
 
+        // if (!($this->_customdata['contexts'])) {
+        //     $contexts = $this->_ajaxformdata['contexts'];
+        // } else {
+        //     $contexts = $this->_customdata['contexts'];
+        // }
         $contexts = $this->_customdata['contexts'];
         $currentcat = $this->_customdata['currentcat'];
 
@@ -78,7 +83,6 @@ class question_category_edit_form extends \core_form\dynamic_form {
 
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);
-        $this->add_action_buttons();
     }
 
     /**
@@ -130,17 +134,21 @@ class question_category_edit_form extends \core_form\dynamic_form {
     }
 
     public function get_context_for_dynamic_submission(): \context {
-        $cmid = $this->optional_param('cmid', 0, PARAM_INT);
-        return \context_module::instance($cmid);
+        global $USER;
+        $context = \context_user::instance($USER->id);
+        return $context;
     }
 
     public function check_access_for_dynamic_submission() : void {
+        return;
     }
 
     public function process_dynamic_submission(): void {
+        return;
     }
 
     public function set_data_for_dynamic_submission(): void {
+        return;
     }
 
     public function get_page_url_for_dynamic_submission(): \moodle_url {
