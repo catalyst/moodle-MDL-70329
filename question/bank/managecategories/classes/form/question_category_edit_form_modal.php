@@ -30,7 +30,7 @@ use qbank_managecategories\helper;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
-
+require_once($CFG->dirroot."/question/editlib.php");
 
 /**
  * Form for editing qusetions categories (name, description, etc.)
@@ -49,17 +49,24 @@ class question_category_edit_form_modal extends \core_form\dynamic_form {
     protected function definition() {
         $mform = $this->_form;
 
-        $contexts = $this->_ajaxformdata['contexts'];
+        $cmid = (int)$this->_ajaxformdata['cmid'];
+        $defaultcategory = $this->_ajaxformdata['defaultcategory'];
 
+        // $this->set_data(['parent' => $defaultcategory]);
+
+        $thiscontext = \context_module::instance($cmid);
+        $contexts = new \question_edit_contexts($thiscontext);
+        $contexts = $contexts->having_one_edit_tab_cap('categories');
+        
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
-        // $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
-        //         ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0]);
-        // $mform->setType('parent', PARAM_SEQUENCE);
-        // if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
-        //     $mform->hardFreeze('parent');
-        // }
-        // $mform->addHelpButton('parent', 'parentcategory', 'question');
+        $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
+                ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0]);
+       $mform->setType('parent', PARAM_SEQUENCE);
+        if (helper::question_is_only_child_of_top_category_in_context(0)) {
+            $mform->hardFreeze('parent');
+        }
+        $mform->addHelpButton('parent', 'parentcategory', 'question');
 
         $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
@@ -127,17 +134,18 @@ class question_category_edit_form_modal extends \core_form\dynamic_form {
         return $errors;
     }
 
+    public function check_access_for_dynamic_submission() : void {
+        require_capability('moodle/question:add', $this->get_context_for_dynamic_submission());
+    }
+
     public function get_context_for_dynamic_submission(): \context {
         global $USER;
-        $context = \context_user::instance($USER->id);
-        return $context;
+        return \context_user::instance($USER->id);;
     }
 
-    public function check_access_for_dynamic_submission() : void {
-        return;
-    }
-
-    public function process_dynamic_submission(): void {
+    public function process_dynamic_submission() {
+        $catformdata = $this->get_data();
+        $v = 0;
         return;
     }
 
@@ -146,7 +154,7 @@ class question_category_edit_form_modal extends \core_form\dynamic_form {
     }
 
     public function get_page_url_for_dynamic_submission(): \moodle_url {
-        $cmid = $this->optional_param('cmid', 0, PARAM_INT);
+        $cmid = (int)$this->_ajaxformdata['cmid'];
         return new \moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]);
     }
 }
