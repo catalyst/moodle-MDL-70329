@@ -161,7 +161,7 @@ M.core_question_engine.init_submit_button = function(Y, button) {
  */
 M.core_question_engine.init_form = function(Y, form) {
     Y.log("The core_question_engine.init_form function has been deprecated. " +
-        "Please use functions in qbank_preview/preview.js instead.", 'moodle-core-notification', 'warn');
+        "Please use setupQuestionForm() in qbank_preview/preview.js instead.", 'moodle-core-notification', 'warn');
 
     Y.one(form).setAttribute('autocomplete', 'off');
 
