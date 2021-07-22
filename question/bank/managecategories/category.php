@@ -48,8 +48,8 @@ $PAGE->set_url($url);
 $PAGE->requires->js_call_amd(
     'qbank_managecategories/addcategory_dialogue', 'initModal',
     ['[data-action=addcategory]', 
-    \qbank_managecategories\form\question_category_edit_form::class, 
-    $contexts->having_one_edit_tab_cap('categories')]
+    \qbank_managecategories\form\question_category_edit_form_modal::class, 
+    $contexts->having_one_edit_tab_cap('categories')],
 );
 
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,

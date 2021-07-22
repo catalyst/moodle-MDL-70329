@@ -38,7 +38,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class question_category_edit_form extends moodleform {
+class question_category_edit_form_modal extends \core_form\dynamic_form {
 
     /**
      * Build the form definition.
@@ -49,18 +49,17 @@ class question_category_edit_form extends moodleform {
     protected function definition() {
         $mform = $this->_form;
 
-        $contexts = $this->_customdata['contexts'];
-        $currentcat = $this->_customdata['currentcat'];
+        $contexts = $this->_ajaxformdata['contexts'];
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
-        $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
-                ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
-        $mform->setType('parent', PARAM_SEQUENCE);
-        if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
-            $mform->hardFreeze('parent');
-        }
-        $mform->addHelpButton('parent', 'parentcategory', 'question');
+        // $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
+        //         ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0]);
+        // $mform->setType('parent', PARAM_SEQUENCE);
+        // if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
+        //     $mform->hardFreeze('parent');
+        // }
+        // $mform->addHelpButton('parent', 'parentcategory', 'question');
 
         $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
@@ -75,8 +74,6 @@ class question_category_edit_form extends moodleform {
         $mform->addElement('text', 'idnumber', get_string('idnumber', 'question'), 'maxlength="100"  size="10"');
         $mform->addHelpButton('idnumber', 'idnumber', 'question');
         $mform->setType('idnumber', PARAM_RAW);
-
-        $this->add_action_buttons(false, get_string('addcategory', 'question'));
 
         $mform->addElement('hidden', 'id', 0);
         $mform->setType('id', PARAM_INT);
@@ -128,5 +125,28 @@ class question_category_edit_form extends moodleform {
         }
 
         return $errors;
+    }
+
+    public function get_context_for_dynamic_submission(): \context {
+        global $USER;
+        $context = \context_user::instance($USER->id);
+        return $context;
+    }
+
+    public function check_access_for_dynamic_submission() : void {
+        return;
+    }
+
+    public function process_dynamic_submission(): void {
+        return;
+    }
+
+    public function set_data_for_dynamic_submission(): void {
+        return;
+    }
+
+    public function get_page_url_for_dynamic_submission(): \moodle_url {
+        $cmid = $this->optional_param('cmid', 0, PARAM_INT);
+        return new \moodle_url('/question/bank/managecategories/category.php', ['cmid' => $cmid]);
     }
 }

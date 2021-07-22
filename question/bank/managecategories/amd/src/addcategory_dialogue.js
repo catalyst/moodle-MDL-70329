@@ -31,12 +31,13 @@ import * as Str from 'core/str';
  * @param {string} formClass Path to class used to display modal form.
  * @param {int} cmid course module id parameter.
  */
-export const initModal = (elementSelector, formClass) => {
+export const initModal = (elementSelector, formClass, contexts) => {
     const element = document.querySelector(elementSelector);
     element.addEventListener('click', function(e) {
         e.preventDefault();
         const form = new ModalForm({
             formClass: formClass,
+            args: {contexts: contexts},
             modalConfig: {title: Str.get_string('addcategory', 'qbank_managecategories')},
             returnFocus: e.target,
         });
