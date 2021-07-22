@@ -26,6 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_comment';
-$plugin->version   = 2021071600;
+$plugin->version   = 2021072200;
 $plugin->requires  = 2021052500;
 $plugin->maturity  = MATURITY_STABLE;

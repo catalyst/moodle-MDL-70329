@@ -1,8 +1,8 @@
-@qbank_comment @javascript
+@qbank @qbank_comment @javascript
 Feature: A Teacher can comment in a question
   In order to change my comment
   As a Teacher
-  I delete and add a new comment
+  I need to delete and add a new comment
 
   Background:
     Given the following "users" exist:
@@ -28,7 +28,7 @@ Feature: A Teacher can comment in a question
     And I follow "Test quiz"
     And I navigate to "Question bank > Questions" in current page administration
     And I set the field "Select a category" to "Test questions"
-#    And "Test questions" row "Comments" column of "categoryquestions" table should contain "0" comment
+    And I should see "0" on the "Comments" column
 
   @javascript
   Scenario: Add a comment in question
@@ -36,8 +36,17 @@ Feature: A Teacher can comment in a question
     Then I add "Super test comment 01" comment to question
     Then I should see "Super test comment 01"
     And I click on "Cancel" "button" in the ".modal-dialog" "css_element"
+    Then I should see "1" on the "Comments" column
 
-
-
-
-
+  @javascript
+  Scenario: Delete a comment from question
+    When I click "0" on the row containing "Test questions"
+    Then I add "Super test comment 01 to be deleted" comment to question
+    Then I should see "Super test comment 01 to be deleted"
+    And I click on "Cancel" "button" in the ".modal-dialog" "css_element"
+    Then I should see "1" on the "Comments" column
+    When I click "1" on the row containing "Test questions"
+    And I delete "Super test comment 01 to be deleted" comment from question
+    Then I should not see "Super test comment 01 to be deleted"
+    Then I click on "Cancel" "button" in the ".modal-dialog" "css_element"
+    Then I should see "0" on the "Comments" column

@@ -17,7 +17,7 @@
 /**
  * Commenting system steps definitions for question.
  *
- * @package    core_question
+ * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -33,7 +33,7 @@ use Behat\Mink\Exception\ExpectationException as ExpectationException,
 /**
  * Steps definitions to deal with the commenting system in question.
  *
- * @package    core_question
+ * @package    qbank_comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,19 +44,34 @@ class behat_qbank_comment extends behat_question_base {
      * Looks for a table, then looks for a row that contains the given text.
      * Once it finds the right row, it clicks a link in that row.
      *
-     * @param string $linkName
-     * @param string $rowText
+     * @When I click :arg1 on the row containing :arg2
+     * @param string $linkname
+     * @param string $rowtext
      */
-    public function i_click_on_the_row_containing($linkName, $rowText) {
+    public function i_click_on_the_row_containing($linkname, $rowtext) {
         $exception = new ElementNotFoundException($this->getSession(),
-                'Cannot find any row on the page containing the text' . $rowText);
-        $row = $this->find('css', sprintf('table tbody tr td a span:contains("%s")', $rowText), $exception);
-        $row->clickLink($linkName);
+                'Cannot find any row on the page containing the text ' . $rowtext);
+        $row = $this->find('css', sprintf('table tbody tr td a span:contains("%s")', $linkname), $exception);
+        $row->click();
+    }
+
+    /**
+     * Looks for the appropriate comment count in the column.
+     *
+     * @Then I should see :arg1 on the :arg2 column
+     * @param string $linkdata
+     * @param string $column
+     */
+    public function i_should_see_on_the_column($linkdata, $column) {
+        $exception = new ElementNotFoundException($this->getSession(),
+                'Cannot find any row with the comment count of ' . $linkdata . ' on the column named  ' . $column);
+        $this->find('css', sprintf('table tbody tr td a span:contains("%s")', $linkdata), $exception);
     }
 
     /**
      * Adds the specified option to the question comments of the current modal.
      *
+     * @Then I add :arg1 comment to question
      * @param string $comment
      */
     public function i_add_comment_to_question($comment) {
@@ -81,6 +96,7 @@ class behat_qbank_comment extends behat_question_base {
     /**
      * Deletes the specified comment from the current question comment modal.
      *
+     * @Then I delete :arg comment from question
      * @param string $comment
      */
     public function i_delete_comment_from_question($comment) {
