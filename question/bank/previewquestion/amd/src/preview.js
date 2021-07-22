@@ -37,15 +37,28 @@ export const init = (redirect) => {
         };
     }
 
-    let form = document.getElementById('responseform');
-    // Turning off browser autocomplete.
-    autocompleteOff(form);
-    // Stop a question form being submitted more than once.
-    preventRepeatSubmission(form);
-    // Removes any '.questionflagsavebutton's, since we have JavaScript to toggle.
-    removeClass('.questionflagsavebutton', form);
-    // Scroll to the position indicated by scrollpos= in the URL, if it is there.
-    scrollToSavedPos(form);
+    // Set up the form to be displayed.
+    setupQuestionForm('responseform');
+};
+
+/**
+ * Set up the form element to be displayed.
+ *
+ * @method setupQuestionForm
+ * @param {string} formElement The form element.
+ */
+const setupQuestionForm = (formElement) => {
+    let form = document.getElementById(formElement);
+    if (form) {
+        // Turning off browser autocomplete.
+        autocompleteOff(form);
+        // Stop a question form being submitted more than once.
+        preventRepeatSubmission(form);
+        // Removes any '.questionflagsavebutton's, since we have JavaScript to toggle.
+        removeClass('.questionflagsavebutton', form);
+        // Scroll to the position indicated by scrollpos= in the URL, if it is there.
+        scrollToSavedPos(form);
+    }
 };
 
 /**
