@@ -746,7 +746,7 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     foreach ($subcatids as $subcatid => $notused) {
         $DB->set_field('question_categories', 'contextid', $newcontextid,
                 array('id' => $subcatid));
-        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid);
+        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid, $purgecache);
     }
 }
 
