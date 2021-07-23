@@ -21,30 +21,33 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
 */
-import ModalForm from 'core_form/modalform';
-import * as Str from 'core/str';
 
-/**
- * Initialize add category to the category view as Modal form.
- *
- * @param {string} elementSelector Element triggering modal form.
- * @param {string} formClass Path to class used to display modal form.
- * @param {int} cmid course module id parameter.
- */
-export const initModal = (elementSelector, formClass, cmid, defaultcategory) => {
-    const element = document.querySelector(elementSelector);
-    element.addEventListener('click', function(e) {
-        e.preventDefault();
-        const form = new ModalForm({
-            formClass: formClass,
-            args: {cmid: cmid, defaultcategory: defaultcategory},
-            saveButtonText: Str.get_string('addcategory', 'question'),
-            modalConfig: {title: Str.get_string('addcategory', 'qbank_managecategories')},
-            returnFocus: e.target,
-        });
-        form.addEventListener(form.events.FORM_SUBMITTED, (event) => {
-            window.console.log(event.detail);
-        });
-        form.show();
+import $ from 'jquery';
+import * as Str from 'core/str';
+import ModalFactory from 'core/modal_factory';
+import ModalEvents from 'core/modal_events';
+import Fragment from 'core/fragment';
+import Ajax from'core/ajax';
+import Y from 'core/yui';
+
+const displayModal = (selector, contextid, cmid) => {
+    let trigger = $(selector);
+    ModalFactory.create({
+      title: Str.get_string('addcategory', 'question'),
+      body: getBody(contextid, cmid),
+      footer: 'test footer content',
+    }, trigger)
+    .done(function(modal) {
+      // Do what you want with your new modal.
     });
+};
+
+const getBody = (contextid, cmid) => {
+    let params = {cmid: JSON.stringify(cmid)};
+    let htmlBody = Fragment.loadFragment('qbank_managecategories', 'new_category_form', contextid, params);
+    return htmlBody;
+};
+
+export const initModal = (selector, contextid, cmid) => {
+    displayModal(selector, contextid, cmid);
 };
