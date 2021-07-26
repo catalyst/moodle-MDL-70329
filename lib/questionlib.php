@@ -746,7 +746,7 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     foreach ($subcatids as $subcatid => $notused) {
         $DB->set_field('question_categories', 'contextid', $newcontextid,
                 array('id' => $subcatid));
-        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid);
+        question_move_category_to_context($subcatid, $oldcontextid, $newcontextid, $purgecache);
     }
 }
 
@@ -2425,8 +2425,11 @@ function question_page_type_list($pagetype, $parentcontext, $currentcontext) {
  *
  * @param string $modname The name of the module (without mod_ prefix).
  * @return bool true if the module uses questions.
+ * @deprecated since MDL-71378 Moodle 4.0
  */
 function question_module_uses_questions($modname) {
+    debugging('Function question_module_uses_questions() is deprecated, without replacement.
+    The backup and restore question banks as a group feature has been removed.', DEBUG_DEVELOPER);
     if (plugin_supports('mod', $modname, FEATURE_USES_QUESTIONS)) {
         return true;
     }

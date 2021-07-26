@@ -1,6 +1,12 @@
 This files describes API changes in /backup/*,
 information provided here is intended especially for developers.
 
+=== 4.0 ===
+
+* The include question bank setting when backup and restore a course has been removed from core.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
+  To backup and restore a question bank the user has to select the activity as per usual.
+
 === 3.11 ===
 
  * New setting called "Include permission overrides" has been implemented. The default

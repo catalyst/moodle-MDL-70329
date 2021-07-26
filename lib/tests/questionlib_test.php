@@ -217,19 +217,19 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(8, $DB->count_records('tag_instance', array('component' => 'core_question',
             'contextid' => $questioncat2->contextid)));
 
-        // Create a course.
+        // Create a course and question bank activity.
         $course = $this->getDataGenerator()->create_course();
+        $modqbank = $this->getDataGenerator()->create_module('qbank', ['course' => $course->id]);
 
         // Create some question categories and questions in this course.
-        $coursecontext = context_course::instance($course->id);
-        $questioncat = $questiongenerator->create_question_category(array('contextid' =>
-            $coursecontext->id));
+        $modcontext = context_module::instance($modqbank->cmid);
+        $questioncat = $questiongenerator->create_question_category(['contextid' => $modcontext->id]);
         $question1 = $questiongenerator->create_question('shortanswer', null, array('category' => $questioncat->id));
         $question2 = $questiongenerator->create_question('shortanswer', null, array('category' => $questioncat->id));
 
         // Add some tags to these questions.
-        core_tag_tag::set_item_tags('core_question', 'question', $question1->id, $coursecontext, array('tag 1', 'tag 2'));
-        core_tag_tag::set_item_tags('core_question', 'question', $question2->id, $coursecontext, array('tag 1', 'tag 2'));
+        core_tag_tag::set_item_tags('core_question', 'question', $question1->id, $modcontext, ['tag 1', 'tag 2']);
+        core_tag_tag::set_item_tags('core_question', 'question', $question2->id, $modcontext, ['tag 1', 'tag 2']);
 
         // Create a course that we are going to restore the other course to.
         $course2 = $this->getDataGenerator()->create_course();
@@ -252,8 +252,9 @@ class core_questionlib_testcase extends advanced_testcase {
         $rc->execute_plan();
 
         // Get the created question category.
+        $cm = $DB->get_record('course_modules', ['course' => $course2->id], '*', MUST_EXIST);
         $restoredcategory = $DB->get_record_select('question_categories', 'contextid = ? AND parent <> 0',
-                array(context_course::instance($course2->id)->id), '*', MUST_EXIST);
+                [context_module::instance($cm->id)->id], '*', MUST_EXIST);
 
         // Check that there are two questions in the restored to course's context.
         $this->assertEquals(2, $DB->count_records('question', array('category' => $restoredcategory->id)));
