@@ -28,7 +28,7 @@ import ModalFactory from 'core/modal_factory';
 import ModalEvents from 'core/modal_events';
 import Fragment from 'core/fragment';
 import Ajax from'core/ajax';
-import Y from 'core/yui';
+import Notification from 'core/notification';
 
 const displayModal = (selector, contextid, cmid) => {
     let trigger = $(selector);
@@ -36,9 +36,14 @@ const displayModal = (selector, contextid, cmid) => {
       title: Str.get_string('addcategory', 'question'),
       body: getBody(contextid, cmid),
       footer: 'test footer content',
+      large: true,
     }, trigger)
-    .done(function(modal) {
+    .done((modal) => {
       // Do what you want with your new modal.
+      modal.getRoot().on(ModalEvents.hidden, () => {
+        modal.setBody(getBody(contextid, cmid));
+      });
+      modal.getRoot().on('submit', 'form', submitFormAjax(modal, contextid));
     });
 };
 
@@ -46,6 +51,15 @@ const getBody = (contextid, cmid) => {
     let params = {cmid: JSON.stringify(cmid)};
     let htmlBody = Fragment.loadFragment('qbank_managecategories', 'new_category_form', contextid, params);
     return htmlBody;
+};
+
+const submitFormAjax = (modal, contextid) => {
+  let formData =  modal.getRoot().find('form').serialize();
+  Ajax.call([{
+    methodname: 'qbank_managecategories_submit_add_category_form',
+    args: {contextid: contextid, jsonformdata: JSON.stringify(formData)},
+    fail: Notification.exception
+  }]);
 };
 
 export const initModal = (selector, contextid, cmid) => {

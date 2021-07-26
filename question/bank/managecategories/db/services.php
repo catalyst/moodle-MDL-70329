@@ -34,5 +34,13 @@ $functions = [
         'description' => 'Returns question category order',
         'type'        => 'write',
         'ajax'        => true,
+    ],    
+    'qbank_managecategories_submit_add_category_form' => [
+        'classname'   => 'qbank_managecategories_external',
+        'methodname'  => 'submit_add_category_form',
+        'classpath'   => 'question/bank/managecategories/classes/external/external.php',
+        'description' => 'Adds a new question category',
+        'type'        => 'write',
+        'ajax'        => true,
     ],
 ];

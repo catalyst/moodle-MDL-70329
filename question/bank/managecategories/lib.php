@@ -39,6 +39,7 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     $thiscontext = \context_module::instance((int)$args->cmid);
     $contexts = new \question_edit_contexts($thiscontext);
     $contexts = $contexts->having_one_edit_tab_cap('categories');
-    $mform = new question_category_edit_form(null, $contexts);
+    $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
+    $mform = new question_category_edit_form(null, $customdata);
     return $mform->render();
 }

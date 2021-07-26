@@ -54,13 +54,13 @@ class question_category_edit_form extends moodleform {
 
         $mform->addElement('header', 'categoryheader', get_string('addcategory', 'question'));
 
-        // $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
-        //         ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
-        // $mform->setType('parent', PARAM_SEQUENCE);
-        // if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
-        //     $mform->hardFreeze('parent');
-        // }
-        // $mform->addHelpButton('parent', 'parentcategory', 'question');
+        $mform->addElement('questioncategory', 'parent', get_string('parentcategory', 'question'),
+                ['contexts' => $contexts, 'top' => true, 'currentcat' => $currentcat, 'nochildrenof' => $currentcat]);
+        $mform->setType('parent', PARAM_SEQUENCE);
+        if (helper::question_is_only_child_of_top_category_in_context($currentcat)) {
+            $mform->hardFreeze('parent');
+        }
+        $mform->addHelpButton('parent', 'parentcategory', 'question');
 
         $mform->addElement('text', 'name', get_string('name'), 'maxlength="254" size="50"');
         $mform->setDefault('name', '');
