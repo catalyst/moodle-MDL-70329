@@ -52,6 +52,11 @@ course formats don't have their own renderer.
 * New external function core_course_update_course runs given action to edit course status.
 * The `\core\event\course_category_deleted` event is now created with a snapshot of the category record being deleted,
   available inside event observers via `$event->get_record_snapshot`
+* The include question bank setting when backup and restore a course has been removed from:
+  - General defaults section.
+  - Import defaults section.
+  - Automated defaults section.
+  The mod_qbank activity will manage the questions banks from Moodle 4.0.
 
 === 3.11 ===
 * A new callback xxx_coursemodule_definition_after_data that allows plugins to extend activity forms after the data is set.
