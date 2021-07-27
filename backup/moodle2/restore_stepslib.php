@@ -5031,6 +5031,15 @@ class restore_create_categories_and_questions extends restore_structure_step {
                     $DB->set_field('question_categories', 'parent', $topcat->id, array('id' => $dbcat->id));
                 }
             }
+            // Get the parentid to remove extra top category created for course context.
+            $coursecontext = 0;
+            if ($qcat->parentitemid) {
+               $coursecontext = $qcat->parentitemid;
+            }
+        }
+        // Remove course top category created before due mapping.
+        if ($coursecontext) {
+            $DB->delete_records('question_categories', ['contextid' => $coursecontext, 'name' => 'top']);
         }
 
         // Now, recode all the created question->parent fields
