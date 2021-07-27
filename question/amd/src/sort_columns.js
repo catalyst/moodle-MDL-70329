@@ -41,6 +41,11 @@ const setupSortableLists = () => {
     jQuery('.item').on(SortableList.EVENTS.DROP, () => {
         let columnorder = getColumnOrder();
         setOrder(JSON.stringify(columnorder));
+        jQuery('.item').removeClass('active');
+    });
+
+    jQuery('.item').on(SortableList.EVENTS.DRAGSTART, (event) => {
+        jQuery(event.currentTarget).addClass('active');
     });
 };
 
