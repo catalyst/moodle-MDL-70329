@@ -329,7 +329,7 @@ class core_question_external extends external_api {
     /**
      * Returns description of method result value.
      * 
-     * @return external_value
+     * @return external_value_structure
      */
     public static function set_columnbank_order_returns() {
         return new external_single_structure(
@@ -340,7 +340,7 @@ class core_question_external extends external_api {
     /**
      * Returns the columns plugin order.
      * 
-     * @return string
+     * @return array
      */
     public static function set_columnbank_order(string $columns) {
         $params = self::validate_parameters(self::set_columnbank_order_parameters(), ['columns' => $columns]);
