@@ -70,7 +70,7 @@ class view {
     protected $editquestionurl;
 
     /**
-     * @var \question_edit_contexts
+     * @var \core_question\lib\question_edit_contexts
      */
     protected $contexts;
 
@@ -150,9 +150,8 @@ class view {
     public $customfilterobjects = null;
 
     /**
-     * Constructor for view.
-     *
-     * @param \question_edit_contexts $contexts
+     * Constructor.
+     * @param \core_question\lib\question_edit_contexts $contexts
      * @param \moodle_url $pageurl
      * @param object $course course settings
      * @param object $cm (optional) activity settings.
@@ -531,7 +530,7 @@ class view {
     protected function build_query(): void {
         // Get the required tables and fields.
         $joins = [];
-        $fields = ['qv.status', 'qc.id'];
+        $fields = ['qv.status', 'qc.id', 'qv.version', 'qv.id as versionid', 'qbe.id as questionbankentryid'];
         if (!empty($this->requiredcolumns)) {
             foreach ($this->requiredcolumns as $column) {
                 $extrajoins = $column->get_extra_joins();
