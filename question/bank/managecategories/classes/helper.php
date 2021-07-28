@@ -66,14 +66,19 @@ class helper {
     public static function question_remove_stale_questions_from_category(int $categoryid): void {
         global $DB;
 
-        $select = 'category = :categoryid AND (qtype = :qtype OR hidden = :hidden)';
-        $params = ['categoryid' => $categoryid, 'qtype' => 'random', 'hidden' => 1];
-        $questions = $DB->get_recordset_select("question", $select, $params, '', 'id');
+        $sql = 'SELECT q.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = :categoryid
+                   AND (q.qtype = :qtype OR qv.status = :status)';
+
+        $params = ['categoryid' => $categoryid, 'qtype' => 'random', 'status' => 1];
+        $questions = $DB->get_records_sql($sql, $params);
         foreach ($questions as $question) {
             // The function question_delete_question does not delete questions in use.
             question_delete_question($question->id);
         }
-        $questions->close();
     }
 
     /**
@@ -125,7 +130,7 @@ class helper {
     }
 
     /**
-     * Private method, only for the use of add_indented_names().
+     * Only for the use of add_indented_names().
      *
      * Recursively adds an indentedname field to each category, starting with the category
      * with id $id, and dealing with that category and all its children, and
@@ -139,7 +144,7 @@ class helper {
      * @param int $nochildrenof
      * @return array a new array of categories, in the right order for the tree.
      */
-    protected static function flatten_category_tree(array &$categories, $id, int $depth = 0, int $nochildrenof = -1): array {
+    public static function flatten_category_tree(array &$categories, $id, int $depth = 0, int $nochildrenof = -1): array {
 
         // Indent the name of this category.
         $newcategories = [];
@@ -168,7 +173,7 @@ class helper {
      * @param int $nochildrenof
      * @return array The formatted list of categories.
      */
-    protected static function add_indented_names(array $categories, int $nochildrenof = -1): array {
+    public static function add_indented_names(array $categories, int $nochildrenof = -1): array {
 
         // Add an array to each category to hold the child category ids. This array
         // will be removed again by flatten_category_tree(). It should not be used
@@ -253,13 +258,21 @@ class helper {
     public static function get_categories_for_contexts($contexts, string $sortorder = 'parent, sortorder, name ASC',
                                                        bool $top = false): array {
         global $DB;
-        $topwhere = $top ? '' : 'AND c.parent <> 0';
-        return $DB->get_records_sql("
-            SELECT c.*, (SELECT count(1) FROM {question} q
-                        WHERE c.id = q.category AND q.hidden='0' AND q.parent='0') AS questioncount
-              FROM {question_categories} c
-             WHERE c.contextid IN ($contexts) $topwhere
-          ORDER BY $sortorder");
+        $topwhere = $top ? '' : 'AND qc.parent <> 0';
+
+        $sql = "SELECT qc.*,
+                   (SELECT count(1)
+                      FROM {question} q
+                      JOIN {question_versions} qv ON qv.questionid = q.id
+                      JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                     WHERE qc.id = qbe.questioncategoryid
+                       AND qv.status = '0'
+                       AND q.parent = '0') AS questioncount
+                  FROM {question_categories} qc
+                 WHERE qc.contextid IN ($contexts) $topwhere
+              ORDER BY $sortorder";
+
+        return $DB->get_records_sql($sql);
     }
 
     /**
@@ -347,7 +360,7 @@ class helper {
      * @param array $categories The list of categories.
      * @return array
      */
-    protected static function question_add_context_in_key(array $categories): array {
+    public static function question_add_context_in_key(array $categories): array {
         $newcatarray = [];
         foreach ($categories as $id => $category) {
             $category->parent = "$category->parent,$category->contextid";
@@ -365,7 +378,7 @@ class helper {
      * @return array The same question category list given to the function, with the top category names being translated.
      * @throws \coding_exception
      */
-    protected static function question_fix_top_names(array $categories, bool $escape = true): array {
+    public static function question_fix_top_names(array $categories, bool $escape = true): array {
 
         foreach ($categories as $id => $category) {
             if ($category->parent == 0) {

@@ -52,13 +52,13 @@ class helper_test extends \advanced_testcase {
 
         $qcat1 = $qgen->create_question_category(['contextid' => $context->id]);
         $q1a = $qgen->create_question('shortanswer', null, ['category' => $qcat1->id]);     // Will be hidden.
-        $DB->set_field('question', 'hidden', 1, ['id' => $q1a->id]);
+        $DB->set_field('question_versions', 'status', 1, ['questionid' => $q1a->id]);
 
         $qcat2 = $qgen->create_question_category(['contextid' => $context->id]);
         $q2a = $qgen->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden.
         $q2b = $qgen->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden but used.
-        $DB->set_field('question', 'hidden', 1, ['id' => $q2a->id]);
-        $DB->set_field('question', 'hidden', 1, ['id' => $q2b->id]);
+        $DB->set_field('question_versions', 'status', 1, ['questionid' => $q2a->id]);
+        $DB->set_field('question_versions', 'status', 1, ['questionid' => $q2b->id]);
         quiz_add_quiz_question($q2b->id, $quiz);
         quiz_add_random_questions($quiz, 0, $qcat2->id, 1, false);
 
