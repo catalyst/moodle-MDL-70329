@@ -156,7 +156,7 @@ function questions_in_use($questionids) {
 }
 
 /**
- * Determine whether there arey any questions belonging to this context, that is whether any of its
+ * Determine whether there are any questions belonging to this context, that is whether any of its
  * question categories contain any questions. This will return true even if all the questions are
  * hidden.
  *
@@ -171,12 +171,12 @@ function question_context_has_any_questions($context) {
     } else if (is_numeric($context)) {
         $contextid = $context;
     } else {
-        print_error('invalidcontextinhasanyquestions', 'question');
+        throw new moodle_exception('invalidcontextinhasanyquestions', 'question');
     }
     return $DB->record_exists_sql("SELECT *
-                                     FROM {question} q
-                                     JOIN {question_categories} qc ON qc.id = q.category
-                                    WHERE qc.contextid = ? AND q.parent = 0", array($contextid));
+                                     FROM {question_bank_entry} qbe
+                                     JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                    WHERE qc.contextid = ?", [$contextid]);
 }
 
 /**
@@ -238,6 +238,7 @@ function match_grade_options($gradeoptionsfull, $grade, $matchgrades = 'error') 
  * - random questions
  *
  * @param int $categoryid The category ID.
+ * @todo make changes after #235 is done.
  */
 function question_remove_stale_questions_from_category($categoryid) {
     global $DB;
@@ -262,16 +263,16 @@ function question_remove_stale_questions_from_category($categoryid) {
  */
 function question_category_delete_safe($category) {
     global $DB;
-    $criteria = array('category' => $category->id);
+    $criteria = ['questioncategoryid' => $category->id];
     $context = context::instance_by_id($category->contextid, IGNORE_MISSING);
     $rescue = null; // See the code around the call to question_save_from_deletion.
 
     // Deal with any questions in the category.
-    if ($questions = $DB->get_records('question', $criteria, '', 'id,qtype')) {
+    if ($questionentries = $DB->get_records('question_bank_entry', $criteria, '', 'id,qtype')) {
 
         // Try to delete each question.
-        foreach ($questions as $question) {
-            question_delete_question($question->id);
+        foreach ($questionentries as $questionentry) {
+            question_delete_question($questionentry->id);
         }
 
         // Check to see if there were any questions that were kept because
