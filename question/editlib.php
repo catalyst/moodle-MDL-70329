@@ -322,7 +322,7 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     }
 
     if ($thiscontext){
-        $contexts = new question_edit_contexts($thiscontext);
+        $contexts = new core_question\lib\question_edit_contexts($thiscontext);
         $contexts->require_one_edit_tab_cap($edittab);
     } else {
         $contexts = null;

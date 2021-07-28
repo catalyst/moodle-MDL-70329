@@ -309,12 +309,14 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $q2 = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
 
         $this->setUser($otheruser);
-        $questiongenerator->update_question($q2);
+        // When we update a question, a new question/version is created.
+        $q2updated = $questiongenerator->update_question($q2);
         $q3 = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
         $q4 = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
 
         $this->setUser($user);
-        $questiongenerator->update_question($q3);
+        // When we update a question, a new question/version is created.
+        $q3updated = $questiongenerator->update_question($q3);
         $q5 = $questiongenerator->create_question('shortanswer', null, array('category' => $othercat->id));
 
         $approvedcontextlist = new \core_privacy\tests\request\approved_contextlist(
@@ -336,12 +338,12 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(0, $qrecord->createdby);
         $this->assertEquals(0, $qrecord->modifiedby);
 
-        $qrecord = $DB->get_record('question', ['id' => $q2->id]);
-        $this->assertEquals(0, $qrecord->createdby);
+        $qrecord = $DB->get_record('question', ['id' => $q2updated->id]);
+        $this->assertEquals($otheruser->id, $qrecord->createdby);
         $this->assertEquals($otheruser->id, $qrecord->modifiedby);
 
-        $qrecord = $DB->get_record('question', ['id' => $q3->id]);
-        $this->assertEquals($otheruser->id, $qrecord->createdby);
+        $qrecord = $DB->get_record('question', ['id' => $q3updated->id]);
+        $this->assertEquals(0, $qrecord->createdby);
         $this->assertEquals(0, $qrecord->modifiedby);
 
         $qrecord = $DB->get_record('question', ['id' => $q4->id]);
