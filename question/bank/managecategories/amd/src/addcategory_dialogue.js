@@ -35,7 +35,6 @@ const displayModal = (selector, contextid, cmid) => {
     ModalFactory.create({
       title: Str.get_string('addcategory', 'question'),
       body: getBody(contextid, cmid),
-      footer: 'test footer content',
       large: true,
     }, trigger)
     .done((modal) => {
@@ -43,7 +42,13 @@ const displayModal = (selector, contextid, cmid) => {
       modal.getRoot().on(ModalEvents.hidden, () => {
         modal.setBody(getBody(contextid, cmid));
       });
-      modal.getRoot().on('submit', 'form', submitFormAjax(modal, contextid));
+      modal.getRoot().on('submit', 'form', (e) => {
+        submitFormAjax(modal);
+        modal.hide();
+        e.preventDefault();
+        e.stopPropagation();
+        $('#region-main-box').load(document.URL + ' #region-main-box');
+      });
     });
 };
 
@@ -53,11 +58,11 @@ const getBody = (contextid, cmid) => {
     return htmlBody;
 };
 
-const submitFormAjax = (modal, contextid) => {
+const submitFormAjax = (modal) => {
   let formData =  modal.getRoot().find('form').serialize();
   Ajax.call([{
     methodname: 'qbank_managecategories_submit_add_category_form',
-    args: {contextid: contextid, jsonformdata: JSON.stringify(formData)},
+    args: {jsonformdata: JSON.stringify(formData)},
     fail: Notification.exception
   }]);
 };

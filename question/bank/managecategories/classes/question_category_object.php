@@ -160,7 +160,6 @@ class question_category_object {
 
         echo \html_writer::empty_tag('br');
         // Interface for adding a new category.
-        //$this->output_new_table();
         echo \html_writer::empty_tag('br');
 
     }

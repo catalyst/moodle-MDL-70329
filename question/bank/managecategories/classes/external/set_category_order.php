@@ -25,21 +25,36 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace qbank_managecategories\external;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . "/externallib.php");
 
-class qbank_managecategories_external extends external_api {
+use external_api;
+use external_function_parameters;
+use external_value;
 
-    public static function set_category_order_parameters() {
+class set_category_order extends external_api {
+    /**
+     * Describes the parameters for set_category_order webservice.
+     * @return external_function_parameters
+     */
+    public static function execute_parameters() {
         return new external_function_parameters(
                 ['categories' => new external_value(PARAM_RAW, 'JSON String')]
         );
     }
 
-    public static function set_category_order(string $categories) {
+    /**
+     * Set category order the add category form.
+     *
+     * @param string $categories Category order, encoded as a json array.
+     * @return string $sortorder sororder.
+     */
+    public static function execute(string $categories) {
         global $DB;
-        $params = self::validate_parameters(self::set_category_order_parameters(), ['categories' => $categories]);
+        $params = self::validate_parameters(self::execute_parameters(), ['categories' => $categories]);
 
         $categories = json_decode($categories, true);
         $neworder = $categories[0];
@@ -67,53 +82,12 @@ class qbank_managecategories_external extends external_api {
         return $sortorder;
     }
 
-    public static function set_category_order_returns() {
-        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
-    }
-
-    /**
-     * Describes the parameters for submit_add_category_form webservice.
-     * @return external_function_parameters
-     */
-    public static function submit_add_category_form_parameters() {
-        return new external_function_parameters(
-            [
-                'contextid' => new external_value(PARAM_INT, 'The context id for the course'),
-                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create group form, encoded as a json array')
-            ]);
-    }
-
-    /**
-     * Submit the add category form.
-     *
-     * @param int $contextid The context id for the course.
-     * @param string $jsonformdata The data from the form, encoded as a json array.
-     * @return int new group id.
-     */
-    public static function submit_add_category_form($contextid, $jsonformdata) {
-        global $CFG, $USER;
-
-        // We always must pass webservice params through validate_parameters.
-        $params = self::validate_parameters(self::submit_add_category_form_parameters(),
-                                            ['contextid' => $contextid, 'jsonformdata' => $jsonformdata]);
-
-        $context = context::instance_by_id($params['contextid'], MUST_EXIST);
-
-        // We always must call validate_context in a webservice.
-        self::validate_context($context);
-        require_capability('moodle/course:managegroups', $context);
-
-        $serialiseddata = json_decode($params['jsonformdata']);
-        return 0;
-    }
-
     /**
      * Returns description of method result value.
      *
-     * @return external_description
-     * @since Moodle 3.0
+     * @return external_value
      */
-    public static function submit_add_category_form_returns() {
-        return new external_value(PARAM_INT, 'group id');
+    public static function execute_returns() {
+        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
     }
 }

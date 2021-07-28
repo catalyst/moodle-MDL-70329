@@ -36,7 +36,7 @@ $PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
-        
+
 $thiscontext = \context_module::instance($cmid)->id;
 // Get values from form for actions on this page.
 $param = new stdClass();
@@ -48,9 +48,9 @@ $PAGE->set_url($url);
 
 $PAGE->requires->js_call_amd(
     'qbank_managecategories/addcategory_dialogue', 'initModal',
-    ['[data-action=addcategory]', 
+    ['[data-action=addcategory]',
     $thiscontext,
-    $cmid,],
+    $cmid, ],
 );
 
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,

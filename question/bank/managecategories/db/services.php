@@ -28,19 +28,19 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
     'qbank_managecategories_set_category_order' => [
-        'classname'   => 'qbank_managecategories_external',
-        'methodname'  => 'set_category_order',
-        'classpath'   => 'question/bank/managecategories/classes/external/external.php',
-        'description' => 'Returns question category order',
-        'type'        => 'write',
-        'ajax'        => true,
-    ],    
+        'classname'    => 'qbank_managecategories\external\set_category_order',
+        'classpath'    => '',
+        'description'  => 'Returns question category order',
+        'type'         => 'write',
+        'capabilities' => 'moodle/question:managecategory',
+        'ajax'         => true,
+    ],
     'qbank_managecategories_submit_add_category_form' => [
-        'classname'   => 'qbank_managecategories_external',
-        'methodname'  => 'submit_add_category_form',
-        'classpath'   => 'question/bank/managecategories/classes/external/external.php',
-        'description' => 'Adds a new question category',
-        'type'        => 'write',
-        'ajax'        => true,
+        'classname'    => 'qbank_managecategories\external\submit_add_category_form',
+        'classpath'    => '',
+        'description'  => 'Adds a new question category',
+        'type'         => 'write',
+        'capabilities' => 'moodle/question:add',
+        'ajax'         => true,
     ],
 ];

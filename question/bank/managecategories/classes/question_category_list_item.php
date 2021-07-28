@@ -69,7 +69,7 @@ class question_category_list_item extends \list_item {
             $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'left' => $this->id]));
             $this->icons['left'] = $this->image_icon($action, $url, $leftarrow);
         } else {
-            $this->icons['left'] =  $this->image_spacer();
+            $this->icons['left'] = $this->image_spacer();
         }
 
         if (!empty($lastitem)) {
@@ -77,9 +77,9 @@ class question_category_list_item extends \list_item {
             $url = new moodle_url($this->parentlist->pageurl, (['sesskey' => sesskey(), 'right' => $this->id]));
             $this->icons['right'] = $this->image_icon($makechildof, $url, $rightarrow);
         } else {
-            $this->icons['right'] =  $this->image_spacer();
+            $this->icons['right'] = $this->image_spacer();
         }
-}
+    }
 
     /**
      * Override item_html function.
@@ -140,12 +140,11 @@ class question_category_list_item extends \list_item {
             get_string('exportasxml', 'question'),
             false
         ));
-        // Menu to  string/html.
+        // Menu to string/html.
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
         if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
             $handle = $OUTPUT->pix_icon('grip-vertical-solid', 'gripvsol', 'qbank_managecategories');
-            //$handle = $OUTPUT->render_from_template('core/drag_handle', []);
         } else {
             $handle = '';
         }

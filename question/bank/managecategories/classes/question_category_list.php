@@ -140,8 +140,7 @@ class question_category_list extends moodle_list {
                 $this->page --;
                 $this->pageurl->params([$this->pageparamname => $this->page]);
             }
-        }
-        else {
+        } else {
             return false;
         }
 
