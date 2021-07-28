@@ -70,7 +70,7 @@ class view {
     protected $editquestionurl;
 
     /**
-     * @var \question_edit_contexts
+     * @var \core_question\lib\question_edit_contexts
      */
     protected $contexts;
 
@@ -150,9 +150,8 @@ class view {
     public $customfilterobjects = null;
 
     /**
-     * Constructor for view.
-     *
-     * @param \question_edit_contexts $contexts
+     * Constructor.
+     * @param \core_question\lib\question_edit_contexts $contexts
      * @param \moodle_url $pageurl
      * @param object $course course settings
      * @param object $cm (optional) activity settings.
