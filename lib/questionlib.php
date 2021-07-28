@@ -427,8 +427,11 @@ function question_delete_context($contextid) {
  * @param stdClass $course an object representing the activity
  * @param bool $notused this argument is not used any more. Kept for backwards compatibility.
  * @return bool always true.
+ * @deprecated since MDL-71378 Moodle 4.0
  */
 function question_delete_course($course, $notused = false) {
+    debugging('Function question_delete_course() is deprecated, without replacement.
+    Question banks in a course context feature has been removed.', DEBUG_DEVELOPER);
     $coursecontext = context_course::instance($course->id);
     question_delete_context($coursecontext->id);
     return true;
@@ -444,8 +447,11 @@ function question_delete_course($course, $notused = false) {
  *      category where content moved
  * @param bool $notused this argument is no longer used. Kept for backwards compatibility.
  * @return boolean
+ * @deprecated since MDL-71378 Moodle 4.0
  */
 function question_delete_course_category($category, $newcategory, $notused=false) {
+    debugging('Function question_delete_course_category() is deprecated, without replacement.
+    Question banks in a catagory context feature has been removed.', DEBUG_DEVELOPER);
     global $DB;
 
     $context = context_coursecat::instance($category->id);
