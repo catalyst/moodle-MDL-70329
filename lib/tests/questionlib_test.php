@@ -109,6 +109,25 @@ class core_questionlib_testcase extends advanced_testcase {
         return array($category, $course, $quiz, $qcat, $questions);
     }
 
+    /**
+     * Get all questions that belong to a category.
+     *
+     * @param $categoryid int Category id.
+     * @return null|array Questions in a category.
+     * @throws dml_exception
+     */
+    function get_questions_in_category(int $categoryid): ?array {
+        global $DB;
+
+        $sql = "SELECT DISTINCT q.*
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = ?";
+
+        return $DB->get_records_sql($sql, [$categoryid]);
+    }
+
     public function test_question_reorder_qtypes() {
         $this->assertEquals(
             array(0 => 't2', 1 => 't1', 2 => 't3'),
@@ -327,8 +346,8 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $criteria = array('category' => $qcat->id);
-        $this->assertEquals(0, $DB->count_records('question', $criteria));
+        $questionscat = $this->get_questions_in_category($qcat->id);
+        $this->assertEquals(0, count($questionscat));
 
         // Verify question not deleted.
         $criteria = array('id' => $questions[0]->id);
@@ -355,8 +374,8 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $criteria = array('category' => $qcat->id);
-        $this->assertEquals(0, $DB->count_records('question', $criteria));
+        $questions = $this->get_questions_in_category($qcat->id);
+        $this->assertEquals(0, count($questions));
     }
 
     /**
@@ -377,8 +396,8 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $criteria = array('category' => $qcat->id);
-        $this->assertEquals(0, $DB->count_records('question', $criteria));
+        $questions = $this->get_questions_in_category($qcat->id);
+        $this->assertEquals(0, count($questions));
     }
 
     /**
@@ -399,8 +418,8 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $criteria = array('category' => $qcat->id);
-        $this->assertEquals(0, $DB->count_records('question', $criteria));
+        $questions = $this->get_questions_in_category($qcat->id);
+        $this->assertEquals(0, count($questions));
     }
 
     /**
@@ -421,8 +440,8 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $criteria = array('category' => $qcat->id);
-        $this->assertEquals(0, $DB->count_records('question', $criteria));
+        $questions = $this->get_questions_in_category($qcat->id);
+        $this->assertEquals(0, count($questions));
     }
 
     /**
@@ -1728,15 +1747,10 @@ class core_questionlib_testcase extends advanced_testcase {
         $qtype = 'truefalse';
         $overrides = [
             'category' => $questioncat->id,
+            'createdby' => ($isowner) ? $user->id : $otheruser->id,
         ];
 
         $question = $questiongenerator->create_question($qtype, null, $overrides);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = ($isowner) ? $user->id : $otheruser->id;
-        $fromform = test_question_maker::get_question_form_data($qtype, null);
-        $fromform = (object) $generator->combine_defaults_and_record((array) $fromform, $overrides);
-        question_bank::get_qtype($qtype)->save_question($question, $fromform);
 
         $this->setUser($user);
         $result = question_has_capability_on($question, $capability);
@@ -1779,15 +1793,10 @@ class core_questionlib_testcase extends advanced_testcase {
         $qtype = 'truefalse';
         $overrides = [
             'category' => $questioncat->id,
+            'createdby' => ($isowner) ? $user->id : $otheruser->id,
         ];
 
         $question = $questiongenerator->create_question($qtype, null, $overrides);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = ($isowner) ? $user->id : $otheruser->id;
-        $fromform = test_question_maker::get_question_form_data($qtype, null);
-        $fromform = (object) $generator->combine_defaults_and_record((array) $fromform, $overrides);
-        question_bank::get_qtype($qtype)->save_question($question, $fromform);
 
         $this->setUser($user);
         $result = question_has_capability_on($question->id, $capability);
@@ -1830,15 +1839,10 @@ class core_questionlib_testcase extends advanced_testcase {
         $qtype = 'truefalse';
         $overrides = [
             'category' => $questioncat->id,
+            'createdby' => ($isowner) ? $user->id : $otheruser->id,
         ];
 
         $question = $questiongenerator->create_question($qtype, null, $overrides);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = ($isowner) ? $user->id : $otheruser->id;
-        $fromform = test_question_maker::get_question_form_data($qtype, null);
-        $fromform = (object) $generator->combine_defaults_and_record((array) $fromform, $overrides);
-        question_bank::get_qtype($qtype)->save_question($question, $fromform);
 
         $this->setUser($user);
         $result = question_has_capability_on((string) $question->id, $capability);
@@ -1887,15 +1891,10 @@ class core_questionlib_testcase extends advanced_testcase {
         $qtype = 'truefalse';
         $overrides = [
             'category' => $questioncat->id,
+            'createdby' => ($isowner) ? $user->id : $otheruser->id,
         ];
 
         $question = $questiongenerator->create_question($qtype, null, $overrides);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = ($isowner) ? $user->id : $otheruser->id;
-        $fromform = test_question_maker::get_question_form_data($qtype, null);
-        $fromform = (object) $generator->combine_defaults_and_record((array) $fromform, $overrides);
-        question_bank::get_qtype($qtype)->save_question($question, $fromform);
 
         // Move the question.
         question_move_questions_to_category([$question->id], $newquestioncat->id);
@@ -1941,11 +1940,9 @@ class core_questionlib_testcase extends advanced_testcase {
         // Create the question.
         $question = $questiongenerator->create_question('truefalse', null, [
             'category' => $questioncat->id,
+            'createdby' => ($isowner) ? $user->id : $otheruser->id,
         ]);
         $question = question_bank::load_question_data($question->id);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = ($isowner) ? $user->id : $otheruser->id;
 
         $this->setUser($user);
         $result = question_has_capability_on($question, $capability);
@@ -1970,11 +1967,9 @@ class core_questionlib_testcase extends advanced_testcase {
         // Create the question.
         $question = $questiongenerator->create_question('truefalse', null, [
             'category' => $questioncat->id,
+            'createdby' => $user->id,
         ]);
         $question = question_bank::load_question_data($question->id);
-
-        // The question generator does not support setting of the createdby for some reason.
-        $question->createdby = $user->id;
 
         $this->setUser($user);
         $result = question_has_capability_on((string)$question->id, 'tag');
@@ -2056,5 +2051,61 @@ class core_questionlib_testcase extends advanced_testcase {
 
         $this->assertSame('id11', core_question_find_next_unused_idnumber('id9', $category->id));
         $this->assertSame('id11', core_question_find_next_unused_idnumber('id8', $category->id));
+    }
+
+    /**
+     * Tests for the question_move_questions_to_category function.
+     */
+    public function test_question_move_questions_to_category() {
+        $this->resetAfterTest();
+
+        // Create the test data.
+        list($category1, $course1, $quiz1, $questioncat1, $questions1) = $this->setup_quiz_and_questions();
+        list($category2, $course2, $quiz2, $questioncat2, $questions2) = $this->setup_quiz_and_questions();
+
+        $this->assertCount(2, $questions1);
+        $this->assertCount(2, $questions2);
+        $questionsidtomove = [];
+        foreach ($questions1 as $question1) {
+            $questionsidtomove[] = $question1->id;
+        }
+
+        // Move the question from quiz 1 to quiz 2.
+        question_move_questions_to_category($questionsidtomove, $questioncat2->id);
+        $questionsmoved = $this->get_questions_in_category($questioncat2->id);
+        $this->assertCount(4, $questionsmoved);
+    }
+
+    /**
+     * Tests for the idnumber_exist_in_question_category function.
+     */
+    public function test_idnumber_exist_in_question_category() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        // Create the test data.
+        list($category1, $course1, $quiz1, $questioncat1, $questions1) = $this->setup_quiz_and_questions();
+        list($category2, $course2, $quiz2, $questioncat2, $questions2) = $this->setup_quiz_and_questions();
+
+        $DB->set_field('question', 'idnumber', 1, ['id' => $questions1[0]->id]);
+        $DB->set_field('question', 'idnumber', 1, ['id' => $questions2[0]->id]);
+
+        $question = $DB->get_record('question', ['id' => $questions1[0]->id]);
+
+        // Validate that a first stage of an idnumber exists (this format: xxxx_x).
+        list($response, $record) = idnumber_exist_in_question_category($question->idnumber, $questioncat1->id);
+        $this->assertEquals([], $record);
+        $this->assertEquals(true, $response);
+
+        // Move the question to a category that has a question with the same idnumber.
+        question_move_questions_to_category($questions1[0]->id, $questioncat2->id);
+
+        // Validate that function return the last record used for the idnumber.
+        list($response, $record) = idnumber_exist_in_question_category($question->idnumber, $questioncat2->id);
+        $record = reset($record);
+        $idnumber = $record->idnumber;
+        $this->assertEquals($idnumber, '1_1');
+        $this->assertEquals(true, $response);
     }
 }

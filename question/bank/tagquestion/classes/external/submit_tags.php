@@ -87,7 +87,7 @@ class submit_tags extends external_api {
 
         $cantag = question_has_capability_on($question, 'tag');
         $questioncontext = \context::instance_by_id($question->contextid);
-        $contexts = new \question_edit_contexts($editingcontext);
+        $contexts = new \core_question\lib\question_edit_contexts($editingcontext);
 
         $formoptions = [
                 'editingcontext' => $editingcontext,
