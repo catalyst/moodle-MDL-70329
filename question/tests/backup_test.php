@@ -173,6 +173,12 @@ class core_question_backup_testcase extends advanced_testcase {
         delete_course($courseid2, false);
         foreach ($questions as $question) {
             question_delete_question($question->id);
+
+            // TODO: Remove this assert when restore a question is fixed (create version and bank entry).
+            $this->assertDebuggingCalled('Deleting question ' . $question->id .
+                ' which is no longer linked to a context. Assuming system context ' .
+                'to avoid errors, but this may mean that some data like ' .
+                'files, tags, are not cleaned up.');
         }
         $category1->delete_full(false);
 
