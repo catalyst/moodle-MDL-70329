@@ -183,7 +183,7 @@ class qtype_multianswer extends question_type {
             $question->id = $authorizedquestion->id;
         }
 
-        $question->category = $authorizedquestion->category;
+        $question->category = $form->category;
         $form->defaultmark = $question->defaultmark;
         $form->questiontext = $question->questiontext;
         $form->questiontextformat = 0;

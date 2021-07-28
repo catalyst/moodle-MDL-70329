@@ -60,14 +60,19 @@ class helper {
     public static function question_remove_stale_questions_from_category(int $categoryid): void {
         global $DB;
 
-        $select = 'category = :categoryid AND (qtype = :qtype OR hidden = :hidden)';
-        $params = ['categoryid' => $categoryid, 'qtype' => 'random', 'hidden' => 1];
-        $questions = $DB->get_recordset_select("question", $select, $params, '', 'id');
+        $sql = 'SELECT q.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = :categoryid
+                   AND (q.qtype = :qtype OR qv.status = :status)';
+
+        $params = ['categoryid' => $categoryid, 'qtype' => 'random', 'status' => 1];
+        $questions = $DB->get_records_sql($sql, $params);
         foreach ($questions as $question) {
             // The function question_delete_question does not delete questions in use.
             question_delete_question($question->id);
         }
-        $questions->close();
     }
 
     /**
@@ -249,13 +254,21 @@ class helper {
     public static function get_categories_for_contexts($contexts, string $sortorder = 'parent, sortorder, name ASC',
                                                        bool $top = false): array {
         global $DB;
-        $topwhere = $top ? '' : 'AND c.parent <> 0';
-        return $DB->get_records_sql("
-            SELECT c.*, (SELECT count(1) FROM {question} q
-                        WHERE c.id = q.category AND q.hidden='0' AND q.parent='0') AS questioncount
-              FROM {question_categories} c
-             WHERE c.contextid IN ($contexts) $topwhere
-          ORDER BY $sortorder");
+        $topwhere = $top ? '' : 'AND qc.parent <> 0';
+
+        $sql = "SELECT qc.*,
+                   (SELECT count(1)
+                      FROM {question} q
+                      JOIN {question_versions} qv ON qv.questionid = q.id
+                      JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                     WHERE qc.id = qbe.questioncategoryid
+                       AND qv.status = '0'
+                       AND q.parent = '0') AS questioncount
+                  FROM {question_categories} qc
+                 WHERE qc.contextid IN ($contexts) $topwhere
+              ORDER BY $sortorder";
+
+        return $DB->get_records_sql($sql);
     }
 
     /**

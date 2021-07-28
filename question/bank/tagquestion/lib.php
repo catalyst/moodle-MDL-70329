@@ -55,7 +55,7 @@ function qbank_tagquestion_output_fragment_tags_form($args) {
 
         $category = $DB->get_record('question_categories', ['id' => $question->category]);
         $questioncontext = \context::instance_by_id($category->contextid);
-        $contexts = new \question_edit_contexts($editingcontext);
+        $contexts = new \core_question\lib\question_edit_contexts($editingcontext);
 
         // Load the question tags and filter the course tags by the current course.
         if (core_tag_tag::is_enabled('core_question', 'question')) {
