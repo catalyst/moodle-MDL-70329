@@ -1766,15 +1766,13 @@ function question_edit_url($context) {
  * @param navigation_node $navigationnode The navigation node to add the question branch to
  * @param context $context
  * @param string $baseurl the url of the base where the api is implemented from
- * @param bool $default If use the default navigation or needs id as parameter.
- * @return navigation_node Returns the question branch that was added
+ * @param bool $default If uses the default navigation or needs id as parameter.
+ * @return navigation_node|void Returns the question branch that was added
  */
 function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php', $default = true) {
     global $PAGE;
 
-    if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = ['courseid' => $context->instanceid];
-    } else if ($context->contextlevel == CONTEXT_MODULE) {
+    if ($context->contextlevel == CONTEXT_MODULE) {
         $params = ['cmid' => $context->instanceid];
         if ($default) {
             $paramqbank = ['cmid' => $context->instanceid];
@@ -1787,6 +1785,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 
     if (($cat = $PAGE->url->param('cat')) && preg_match('~\d+,\d+~', $cat)) {
         $params['cat'] = $cat;
+        $paramqbank['cat'] = $cat;
     }
 
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
@@ -1852,7 +1851,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 
     if ($contexts->have_one_edit_tab_cap('questions')) {
         $questionnode->add(get_string('questions', 'question'), new moodle_url(
-            new moodle_url($baseurl), $paramqbank), navigation_node::TYPE_CONTAINER, null, 'questions');
+            new moodle_url($baseurl), $paramqbank), navigation_node::TYPE_SETTING, null, 'questions');
     }
 
     foreach ($corenavigations as $key => $corenavigation) {
