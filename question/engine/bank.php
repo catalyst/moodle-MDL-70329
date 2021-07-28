@@ -419,8 +419,10 @@ abstract class question_bank {
 
         list($categorysql, $params) = $DB->get_in_or_equal($categories);
         $sql = "SELECT DISTINCT q.qtype
-                FROM {question} q
-                WHERE q.category $categorysql";
+                           FROM {question} q
+                           JOIN {question_versions} qv ON qv.questionid = q.id
+                           JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                          WHERE qbe.questioncategoryid $categorysql";
 
         $qtypes = $DB->get_fieldset_sql($sql, $params);
         return $qtypes;
@@ -454,7 +456,7 @@ class question_finder implements cache_data_source {
     }
 
     /**
-     * @return get the question definition cache we are using.
+     * @return cache_application|cache_session|cache_store the question definition cache we are using.
      */
     protected function get_data_cache() {
         // Do not double cache here because it may break cache resetting.
@@ -589,11 +591,16 @@ class question_finder implements cache_data_source {
     /* See cache_data_source::load_for_cache. */
     public function load_for_cache($questionid) {
         global $DB;
-        $questiondata = $DB->get_record_sql('
-                                    SELECT q.*, qc.contextid
-                                    FROM {question} q
-                                    JOIN {question_categories} qc ON q.category = qc.id
-                                    WHERE q.id = :id', array('id' => $questionid), MUST_EXIST);
+
+        $sql = 'SELECT q.*,
+                       qc.contextid
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                 WHERE q.id = :id';
+
+        $questiondata = $DB->get_record_sql($sql, ['id' => $questionid], MUST_EXIST);
         get_question_options($questiondata);
         return $questiondata;
     }
@@ -602,15 +609,19 @@ class question_finder implements cache_data_source {
     public function load_many_for_cache(array $questionids) {
         global $DB;
         list($idcondition, $params) = $DB->get_in_or_equal($questionids);
-        $questiondata = $DB->get_records_sql('
-                                            SELECT q.*, qc.contextid
-                                            FROM {question} q
-                                            JOIN {question_categories} qc ON q.category = qc.id
-                                            WHERE q.id ' . $idcondition, $params);
+        $sql = 'SELECT q.*,
+                       qc.contextid
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                 WHERE q.id ';
+
+        $questiondata = $DB->get_records_sql($sql . $idcondition, $params);
 
         foreach ($questionids as $id) {
             if (!array_key_exists($id, $questiondata)) {
-                throw new dml_missing_record_exception('question', '', array('id' => $id));
+                throw new dml_missing_record_exception('question', '', ['id' => $id]);
             }
             get_question_options($questiondata[$id]);
         }

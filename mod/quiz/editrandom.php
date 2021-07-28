@@ -67,7 +67,7 @@ if (!$category = $DB->get_record('question_categories', array('id' => $question-
 question_require_capability_on($question, 'edit');
 
 $thiscontext = context_module::instance($cm->id);
-$contexts = new question_edit_contexts($thiscontext);
+$contexts = new core_question\lib\question_edit_contexts($thiscontext);
 
 // Create the question editing form.
 $mform = new mod_quiz\form\randomquestion_form(new moodle_url('/mod/quiz/editrandom.php'),

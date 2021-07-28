@@ -428,8 +428,16 @@ class question_type {
                 } else {
                     $category = $form->category;
                 }
-                if (!$DB->record_exists('question',
-                        ['idnumber' => $form->idnumber, 'category' => $category])) {
+                $sql = "SELECT q.id
+                          FROM {question} q
+                          JOIN {question_versions} qv ON qv.questionid = q.id
+                          JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                          JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                         WHERE q.idnumber = :idnumber
+                           AND qc.id = :categoryid";
+
+                if (!$DB->record_exists_sql($sql,
+                        ['idnumber' => $form->idnumber, 'categoryid' => $category])) {
                     $question->idnumber = $form->idnumber;
                 }
             }
