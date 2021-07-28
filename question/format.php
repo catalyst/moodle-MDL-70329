@@ -136,7 +136,7 @@ class qformat_default {
      */
     public function setContexts($contexts) {
         $this->contexts = $contexts;
-        $this->translator = new context_to_string_translator($this->contexts);
+        $this->translator = new core_question\lib\context_to_string_translator($this->contexts);
     }
 
     /**
