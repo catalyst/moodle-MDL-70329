@@ -43,6 +43,15 @@ abstract class backup_task extends base_task {
         return $this->plan->get_backupid();
     }
 
+    /**
+     * Gets the controller instance id of the item being backed up.
+     *
+     * @return int
+     */
+    public function get_id() {
+        return $this->plan->get_id();
+    }
+
     public function is_excluding_activities() {
         return $this->plan->is_excluding_activities();
     }

@@ -45,6 +45,19 @@ abstract class backup_step extends base_step {
         }
         return $this->task->get_backupid();
     }
+
+    /**
+     * Gets the controller instance id of the item being backed up.
+     *
+     * @return mixed
+     * @throws backup_step_exception
+     */
+    protected function get_id() {
+        if (is_null($this->task)) {
+            throw new backup_step_exception('not_specified_backup_task');
+        }
+        return $this->task->get_id();
+    }
 }
 
 /*

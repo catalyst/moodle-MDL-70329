@@ -40,24 +40,62 @@ abstract class backup_question_dbops extends backup_dbops {
     public static function calculate_question_categories($backupid, $contextid) {
         global $DB;
 
+        // Validate if the module uses questions to back up only this questions used in the question banks.
+        $sql = "SELECT m.name
+                  FROM {modules} m                  
+                  JOIN {course_modules} cm ON cm.module = m.id
+                  JOIN {context} ct ON ct.instanceid = cm.instance
+                 WHERE ct.id = ?";
+        $module = $DB->get_record_sql($sql, [$contextid]);
+        $validatemodule = false;
+        if ($module) {
+            if (plugin_supports('mod', $module->name, FEATURE_USES_QUESTIONS)) {
+                $validatemodule = true;
+            } else {
+                $validatemodule = false;
+            }
+        }
+
+        if ($validatemodule) {
+            $sqlinsert = "INSERT INTO {backup_ids_temp} (backupid, itemname, itemid)
+                      SELECT DISTINCT ?, 'question_category', qc2.id
+                                 FROM {question_categories} qc2
+                                 JOIN {question} q ON q.category = qc2.id
+                                 JOIN {quiz_slots} qzs ON qzs.questionid = q.id
+                                WHERE contextid = ?";
+
+            $sqlcontext = "SELECT DISTINCT qc2.contextid
+                                      FROM {question_categories} qc2
+                                      JOIN {question} q ON q.category = qc2.id
+                                      JOIN {quiz_slots} qzs ON qzs.questionid = q.id
+                                      JOIN {backup_ids_temp} bi ON bi.itemid = q.id
+                                     WHERE bi.backupid = ?
+                                       AND bi.itemname = 'question'
+                                       AND qc2.contextid != ?";
+        } else {
+            $sqlinsert = "INSERT INTO {backup_ids_temp} (backupid, itemname, itemid)
+                               SELECT ?, 'question_category', id
+                                 FROM {question_categories}
+                                WHERE contextid = ?";
+
+            $sqlcontext = "SELECT DISTINCT qc2.contextid
+                                      FROM {question_categories} qc2
+                                      JOIN {question} q ON q.category = qc2.id
+                                      JOIN {backup_ids_temp} bi ON bi.itemid = q.id
+                                     WHERE bi.backupid = ?
+                                       AND bi.itemname = 'question'
+                                       AND qc2.contextid != ?";
+        }
+
         // First step, annotate all the categories for the given context (course/module)
         // i.e. the whole context questions bank
-        $DB->execute("INSERT INTO {backup_ids_temp} (backupid, itemname, itemid)
-                      SELECT ?, 'question_category', id
-                        FROM {question_categories}
-                       WHERE contextid = ?", array($backupid, $contextid));
+        $DB->execute($sqlinsert, array($backupid, $contextid));
 
         // Now, based in the annotated questions, annotate all the categories they
         // belong to (whole context question banks too)
         // First, get all the contexts we are going to save their question bank (no matter
         // where they are in the contexts hierarchy, transversals... whatever)
-        $contexts = $DB->get_fieldset_sql("SELECT DISTINCT qc2.contextid
-                                             FROM {question_categories} qc2
-                                             JOIN {question} q ON q.category = qc2.id
-                                             JOIN {backup_ids_temp} bi ON bi.itemid = q.id
-                                            WHERE bi.backupid = ?
-                                              AND bi.itemname = 'question'
-                                              AND qc2.contextid != ?", array($backupid, $contextid));
+        $contexts = $DB->get_fieldset_sql($sqlcontext, array($backupid, $contextid));
         // And now, simply insert all the question categories (complete question bank)
         // for those contexts if we have found any
         if ($contexts) {
