@@ -154,12 +154,14 @@ class question_category_list extends moodle_list {
      */
     public function to_html($indent=0, $extraargs=[]) {
         global $OUTPUT;
+        $itemstab = [];
         if (count($this->items)) {
             $tabs = str_repeat("\t", $indent);
             $first = true;
+            $itemiter = 1;
             $lastitem = '';
-            $itemstab = [];
             foreach ($this->items as $item) {
+                $last = (count($this->items) == $itemiter);
                 if ($this->editable) {
                     $item->set_icon_html($first, $last, $lastitem);
                 }
@@ -168,12 +170,15 @@ class question_category_list extends moodle_list {
                 }
                 $first = false;
                 $lastitem = $item;
+                $itemiter++;
             }
         }
-        $data =
-        [
-            'listitem' => $itemstab,
-        ];
-        return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $data);
+        if ($itemstab) {
+            $data =
+            [
+                'listitem' => $itemstab,
+            ];
+            return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $data);
+        }
     }
 }
