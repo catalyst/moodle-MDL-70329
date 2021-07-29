@@ -1316,7 +1316,6 @@ function upgrade_migrate_question_table(): void {
         $questionbankentry->questioncategoryid = $question->category;
         $questionbankentry->name = $question->name;
         $questionbankentry->idnumber = $question->idnumber;
-        $questionbankentry->hidden = $question->hidden;
         $questionbankentry->ownerid = $question->createdby;
         // Insert a question_bank_entry record here as the id is required to populate other tables.
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
@@ -1325,6 +1324,7 @@ function upgrade_migrate_question_table(): void {
         $questionversion = new \stdClass();
         $questionversion->questionbankentryid = $questionbankentry->id;
         $questionversion->questionid = $question->id;
+        $questionversion->status = $question->hidden;
         $questionversions[] = $questionversion;
 
         // Insert the records if the array limit is reached.
@@ -1333,40 +1333,24 @@ function upgrade_migrate_question_table(): void {
             $questionversions = [];
         }
 
-        // Create question_references records to be added.
+        // Create question_set_references records to be added.
+        // Only if the question type is random and the question is used in a quiz.
         $quizslot = $DB->get_record('quiz_slots', ['questionid' => $question->id]);
-        if ($quizslot) {
-            if ($question->qtype === 'random') {
-                $questionsetreference = new \stdClass();
-                $questionsetreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
-                $questionsetreference->component = 'mod_quiz';
-                $questionsetreference->questionarea = 'slot';
-                $questionsetreference->itemid = $quizslot->id;
-                $catcontext = $DB->get_field('question_categories', 'contextid', ['id' => $question->category]);
-                $questionsetreference->questioncontextid = $catcontext;
-                $questionsetreference->filtercondition = json_encode(['categoryid' => $question->category]);
-                $questionsetreferences[] = $questionsetreference;
+        if ($quizslot && $question->qtype === 'random') {
+            $questionsetreference = new \stdClass();
+            $questionsetreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
+            $questionsetreference->component = 'mod_quiz';
+            $questionsetreference->questionarea = 'slot';
+            $questionsetreference->itemid = $quizslot->id;
+            $catcontext = $DB->get_field('question_categories', 'contextid', ['id' => $question->category]);
+            $questionsetreference->questioncontextid = $catcontext;
+            $questionsetreference->filtercondition = json_encode(['categoryid' => $question->category]);
+            $questionsetreferences[] = $questionsetreference;
 
-                // Insert the records if the array limit is reached.
-                if (count($questionsetreferences) >= $maxlength) {
-                    $DB->insert_records('question_set_references', $questionsetreferences);
-                    $questionsetreferences = [];
-                }
-            } else {
-                $questionreference = new \stdClass();
-                $questionreference->usingcontextid = context_module::instance($quizslot->quizid)->id;
-                $questionreference->component = 'mod_quiz';
-                $questionreference->questionarea = 'slot';
-                $questionreference->itemid = $quizslot->id;
-                $questionreference->questionbankentryid = $questionbankentry->id;
-                $questionreference->versionnumber = 1;
-                $questionreferences[] = $questionreference;
-
-                // Insert the records if the array limit is reached.
-                if (count($questionreferences) >= $maxlength) {
-                    $DB->insert_records('question_references', $questionreferences);
-                    $questionreferences = [];
-                }
+            // Insert the records if the array limit is reached.
+            if (count($questionsetreferences) >= $maxlength) {
+                $DB->insert_records('question_set_references', $questionsetreferences);
+                $questionsetreferences = [];
             }
         }
     }
@@ -1381,6 +1365,48 @@ function upgrade_migrate_question_table(): void {
     if ($questionsetreferences) {
         $DB->insert_records('question_set_references', $questionsetreferences);
     }
+
+    // Create question_references record for each question.
+    // Except if qtype is random. That case is handled by question_set_reference.
+    // This is done apart because we need the version id.
+    $sql = "SELECT qc.contextid AS qccontextid, qs.id AS qzitemid, qv.questionbankentryid, qv.id AS versionid, qs.quizid
+              FROM {question} q
+              JOIN {question_categories} qc ON q.category = qc.id
+              JOIN {question_versions} qv ON q.id = qv.questionid
+              LEFT JOIN {quiz_slots} qs ON q.id = qs.questionid
+             WHERE qtype <> 'random'";
+
+    $referencerecords = $DB->get_recordset_sql($sql);
+
+    foreach ($referencerecords as $referencerecord) {
+        if ($referencerecord->quizid) {
+            // Insert a record for each question used in a quiz except random question type.
+            $questionreference = new \stdClass();
+            $questionreference->usingcontextid = context_module::instance($referencerecord->quizid)->id;
+            $questionreference->component = 'mod_quiz';
+            $questionreference->questionarea = 'slot';
+            $questionreference->itemid = $referencerecord->qzitemid;
+            $questionreference->questionbankentryid = $referencerecord->questionbankentryid;
+            $questionreference->versionid = $referencerecord->versionid;
+            $questionreferences[] = $questionreference;
+        }
+        // Insert a record for each question in a question bank.
+        $questionreference = new \stdClass();
+        $questionreference->usingcontextid = $referencerecord->qccontextid;
+        $questionreference->component = 'core_question';
+        $questionreference->questionarea = 'qbank';
+        $questionreference->itemid = 0;
+        $questionreference->questionbankentryid = $referencerecord->questionbankentryid;
+        $questionreference->versionid = $referencerecord->versionid;
+        $questionreferences[] = $questionreference;
+
+        // Insert the records if the array limit is reached.
+        if (count($questionreferences) >= $maxlength) {
+            $DB->insert_records('question_references', $questionreferences);
+            $questionreferences = [];
+        }
+    }
+    $referencerecords->close();
 
     // Insert the remaining question_references records.
     if ($questionreferences) {
