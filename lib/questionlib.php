@@ -1764,33 +1764,34 @@ function question_edit_url($context) {
  * this method will help to autoload those nodes in the question bank navigation.
  *
  * @param navigation_node $navigationnode The navigation node to add the question branch to
- * @param object $context
+ * @param context $context
  * @param string $baseurl the url of the base where the api is implemented from
- * @return navigation_node Returns the question branch that was added
+ * @param bool $default If uses the default navigation or needs id as parameter.
+ * @return navigation_node|void Returns the question branch that was added
  */
-function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php') {
+function question_extend_settings_navigation(navigation_node $navigationnode, $context, $baseurl = '/question/edit.php', $default = true) {
     global $PAGE;
 
-    if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = ['courseid' => $context->instanceid];
-    } else if ($context->contextlevel == CONTEXT_MODULE) {
+    if ($context->contextlevel == CONTEXT_MODULE) {
         $params = ['cmid' => $context->instanceid];
+        if ($default) {
+            $paramqbank = ['cmid' => $context->instanceid];
+        } else {
+            $paramqbank = ['id' => $context->instanceid];
+        }
     } else {
         return;
     }
 
     if (($cat = $PAGE->url->param('cat')) && preg_match('~\d+,\d+~', $cat)) {
         $params['cat'] = $cat;
+        $paramqbank['cat'] = $cat;
     }
 
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
-            new moodle_url($baseurl, $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
+            new moodle_url($baseurl, $paramqbank), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
     $corenavigations = [
-            'questions' => [
-                    'title' => get_string('questions', 'question'),
-                    'url' => new moodle_url($baseurl)
-            ],
             'categories' => [
                     'title' => get_string('categories', 'question'),
                     'url' => new moodle_url('/question/category.php')
@@ -1847,6 +1848,12 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     }
 
     $contexts = new question_edit_contexts($context);
+
+    if ($contexts->have_one_edit_tab_cap('questions')) {
+        $questionnode->add(get_string('questions', 'question'), new moodle_url(
+            new moodle_url($baseurl), $paramqbank), navigation_node::TYPE_SETTING, null, 'questions');
+    }
+
     foreach ($corenavigations as $key => $corenavigation) {
         if ($contexts->have_one_edit_tab_cap($key)) {
             $questionnode->add($corenavigation['title'], new moodle_url(

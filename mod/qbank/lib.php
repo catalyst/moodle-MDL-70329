@@ -119,5 +119,5 @@ function qbank_delete_instance($id) {
  */
 function qbank_extend_settings_navigation(settings_navigation $settings, navigation_node $qbanknode): void {
     global $PAGE;
-    question_extend_settings_navigation($qbanknode, $PAGE->cm->context, '/mod/qbank/view.php')->trim_if_empty();
+    question_extend_settings_navigation($qbanknode, $PAGE->cm->context, '/mod/qbank/view.php', false)->trim_if_empty();
 }
