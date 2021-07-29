@@ -38,6 +38,12 @@ list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
 
 $thiscontext = \context_module::instance($cmid)->id;
+$PAGE->requires->js_call_amd(
+    'qbank_managecategories/addcategory_dialogue', 'initModal',
+    ['[data-action=addcategory]',
+    $thiscontext,
+    $cmid, ],
+);
 // Get values from form for actions on this page.
 $param = new stdClass();
 $param->left = optional_param('left', 0, PARAM_INT);
@@ -48,16 +54,12 @@ $param->edit = optional_param('edit', 0, PARAM_INT);
 $url = new moodle_url($thispageurl);
 $PAGE->set_url($url);
 
-$PAGE->requires->js_call_amd(
-    'qbank_managecategories/addcategory_dialogue', 'initModal',
-    ['[data-action=addcategory]',
-    $thiscontext,
-    $cmid, ],
-);
-
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
+
+$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
+
 
 if ($param->left || $param->right) {
     require_sesskey();

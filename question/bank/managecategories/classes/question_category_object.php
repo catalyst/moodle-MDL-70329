@@ -178,10 +178,15 @@ class question_category_object {
      *
      */
     public function output_edit_lists(): void {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
         $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        $displaydata = [
+            'checked' => false,
+        ];
+        $checkbox = $PAGE->get_renderer('core_question', 'bank')->render_showtext_checkbox($displaydata);
         $dat = [
             'helpstringhead' => $helpstringhead,
+            'checkbox' => $checkbox,
         ];
         echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
         foreach ($this->editlists as $context => $list) {

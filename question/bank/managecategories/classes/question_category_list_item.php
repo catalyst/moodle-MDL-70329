@@ -103,9 +103,12 @@ class question_category_list_item extends \list_item {
             $idnumber = $category->idnumber;
         }
         $questioncount = ' (' . $category->questioncount . ')';
-        $categorydesc = format_text($category->info, $category->infoformat,
-            ['context' => $this->parentlist->context, 'noclean' => true]);
-
+        // if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
+            $categorydesc = format_text($category->info, $category->infoformat,
+                ['context' => $this->parentlist->context, 'noclean' => true]);
+        // } else {
+        //     $categorydesc = '';
+        // }
         $menu = new action_menu();
         $menu->set_menu_trigger(get_string('edit'));
         if ($this->children->editable) {

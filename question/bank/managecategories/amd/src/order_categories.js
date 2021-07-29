@@ -56,7 +56,9 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        pageReload();
+        setTimeout(() => {
+            pageReload();
+        }, 500);
     });
 };
 
@@ -66,7 +68,8 @@ const setupSortableLists = () => {
  * @returns {void}
  */
 const pageReload = () => {
-    setTimeout(location.reload(), 30000);
+    let url = window.location.href;
+    window.location.href = url;
 };
 
 /**
