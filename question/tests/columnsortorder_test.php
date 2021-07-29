@@ -17,6 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 use core_question\local\bank\helper;
 use core_question\local\bank\view;
+
 global $CFG;
 require_once($CFG->dirroot . '/question/tests/fixtures/testable_core_question_column.php');
 require_once($CFG->dirroot . '/question/classes/external.php');
@@ -24,18 +25,57 @@ require_once($CFG->dirroot . '/question/classes/external.php');
 /**
  * Question bank settings page class.
  *
- * @package    qbank_columnsortorder
+ * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class qbank_columnsortorder_test extends advanced_testcase {
+class columnsortorder_test extends advanced_testcase {
+
+    /**
+     * Test function get_question_list_columns in helper class, that proper data is returned.
+     *
+     */
+    public function test_getcolumn_function() {
+        $questionlistcolumns = helper::get_question_list_columns();
+        $this->assertIsArray($questionlistcolumns);
+        foreach ($questionlistcolumns as $columnnobject) {
+            $this->assertObjectHasAttribute('class', $columnnobject);
+            $this->assertObjectHasAttribute('name', $columnnobject);
+            $this->assertObjectHasAttribute('colname', $columnnobject);
+        }
+    }
+
+    /**
+     * Test that external call core_question_external::set_columnbank_order($oldorder) sets proper
+     * data in config_plugins table.
+     *
+     */
+    public function test_columnorder_external() {
+        $this->resetAfterTest(true);
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $questionlistcolumns = helper::get_question_list_columns();
+        $columnclasses = [];
+        foreach ($questionlistcolumns as $columnnobject) {
+            $classelements = explode('\\', $columnnobject->class);
+            $columnclasses[] = end($classelements);
+        }
+        shuffle($columnclasses);
+        $jsontoappend = json_encode($columnclasses);
+        core_question_external::set_columnbank_order($jsontoappend);
+
+        $currentconfig = get_config('question', 'qbanksortorder');
+        $this->assertEquals($jsontoappend, $currentconfig);
+    }
+
     /**
      * Test function proper order is set in the question bank view.
      *
      */
-    public function test_ordering() {
+    public function test_view_ordering() {
         $this->resetAfterTest(true);
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
@@ -51,14 +91,9 @@ class qbank_columnsortorder_test extends advanced_testcase {
         // Get current view columns.
         $name = [];
         foreach ($questionbank->visiblecolumns as $columnn) {
-            $classname = new \ReflectionClass(get_class($columnn));
+            $classname = new ReflectionClass(get_class($columnn));
             $name[] = $classname->getShortName();
         }
-
-        shuffle($name);
-        $oldorder = implode(',', $questionbank->get_neworder($name));   
-        core_question_external::set_columnbank_order($oldorder);
-        $currentoldorder = get_config('question', 'qbanksortorder');
 
         shuffle($name);
         $neworder = implode(',', $questionbank->get_neworder($name));
@@ -66,45 +101,5 @@ class qbank_columnsortorder_test extends advanced_testcase {
         $currentorder = get_config('question', 'qbanksortorder');
 
         $this->assertEquals($neworder, $currentorder);
-        $this->assertEquals($oldorder, $currentoldorder);
-    }
-
-     /**
-     * Test function get_question_list_columns in helper class, that proper data is returned.
-     *
-     */
-    public function test_helper() {
-        $questionlistcolumns = helper::get_question_list_columns();
-        $this->assertIsArray($questionlistcolumns);
-        foreach ($questionlistcolumns as $columnnobject) {
-            $this->assertObjectHasAttribute('class', $columnnobject);
-            $this->assertObjectHasAttribute('name', $columnnobject);
-            $this->assertObjectHasAttribute('colname', $columnnobject);
-        }
-    }
-
-    /**
-     * Test that external call core_question_external::set_columnbank_order($oldorder) sets proper 
-     * data in config_plugins table.
-     *
-     */
-    public function test_external() {
-        $this->resetAfterTest(true);
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-
-        $questionlistcolumns = helper::get_question_list_columns();
-        $columnclasses = [];
-        foreach($questionlistcolumns as $columnnobject) {
-            $classelements = explode('\\', $columnnobject->class);
-            $columnclasses[] = end($classelements);
-        }
-        $originalorderjson = json_encode($columnclasses);
-        shuffle($columnclasses);
-        $jsontoappend = json_encode($columnclasses);
-        core_question_external::set_columnbank_order($jsontoappend);
-
-        $currentconfig = get_config('question', 'qbanksortorder');
-        $this->assertEquals($jsontoappend, $currentconfig);
     }
 }
