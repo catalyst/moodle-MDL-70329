@@ -215,7 +215,8 @@ abstract class backup_questions_activity_structure_step extends backup_activity_
 class backup_calculate_question_categories extends backup_execution_step {
 
     protected function define_execution() {
-        backup_question_dbops::calculate_question_categories($this->get_backupid(), $this->task->get_contextid());
+        backup_question_dbops::calculate_question_categories($this->get_backupid(), $this->task->get_contextid(),
+            $this->task->get_modulename());
     }
 }
 
@@ -2335,7 +2336,7 @@ class backup_annotate_all_question_files extends backup_execution_step {
 class backup_questions_structure_step extends backup_structure_step {
 
     protected function define_structure() {
-
+        global $DB;
         // Define each element separated
 
         $qcategories = new backup_nested_element('question_categories');
@@ -2380,8 +2381,15 @@ class backup_questions_structure_step extends backup_structure_step {
         $tags->add_child($tag);
 
         // Define the sources
-
-        $qcategory->set_source_sql("
+        $sql = "SELECT m.name
+                  FROM {modules} m
+                  JOIN {course_modules} cm ON cm.module = m.id
+                 WHERE cm.id = ?";
+        $module = $DB->get_record_sql($sql, [$this->get_id()]);
+        var_dump($module);
+        sleep(10);
+        if (!plugin_supports('mod', $module->name, FEATURE_USES_QUESTIONS)) {
+            $qcategory->set_source_sql("
             SELECT gc.*, contextlevel, instanceid AS contextinstanceid
               FROM {question_categories} gc
               JOIN {backup_ids_temp} bi ON bi.itemid = gc.id
@@ -2389,14 +2397,32 @@ class backup_questions_structure_step extends backup_structure_step {
              WHERE bi.backupid = ?
                AND bi.itemname = 'question_categoryfinal'", array(backup::VAR_BACKUPID));
 
-        $question->set_source_table('question', array('category' => backup::VAR_PARENTID));
+            $question->set_source_table('question', array('category' => backup::VAR_PARENTID));
+        } else {
+            $qcategory->set_source_sql("
+            SELECT gc.*, contextlevel, instanceid AS contextinstanceid
+              FROM {question_categories} gc
+              JOIN {question} q ON q.category = gc.id
+              JOIN {backup_ids_temp} bi ON bi.itemid = gc.id
+              JOIN {context} co ON co.id = gc.contextid
+              JOIN {quiz_slots} qzs ON qzs.questionid = q.id
+              JOIN {course_modules} cm ON cm.instance = qzs.quizid
+             WHERE bi.backupid = ?
+               AND cm.id = ?
+               AND bi.itemname = 'question_categoryfinal'", [backup::VAR_BACKUPID, ['sqlparam' => $this->get_id()]]);
 
+            $question->set_source_sql("
+                      SELECT DISTINCT q.*
+                                 FROM {question} q
+                                 JOIN {quiz_slots} qzs ON qzs.questionid = q.id
+                                WHERE q.category = ?", array(backup::VAR_PARENTID));
+        }
         $qhint->set_source_sql('
                 SELECT *
                 FROM {question_hints}
                 WHERE questionid = :questionid
                 ORDER BY id',
-                array('questionid' => backup::VAR_PARENTID));
+            array('questionid' => backup::VAR_PARENTID));
 
         $tag->set_source_sql("SELECT t.id, ti.contextid, t.name, t.rawname
                               FROM {tag} t

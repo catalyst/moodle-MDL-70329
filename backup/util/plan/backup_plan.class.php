@@ -76,6 +76,15 @@ class backup_plan extends base_plan implements loggable {
         return $this->controller->get_type();
     }
 
+    /**
+     * Gets the controller instance id of the item being backed up.
+     *
+     * @return int
+     */
+    public function get_id() {
+        return $this->controller->get_id();
+    }
+
     public function get_mode() {
         return $this->controller->get_mode();
     }
