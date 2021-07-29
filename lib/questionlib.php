@@ -268,11 +268,10 @@ function question_category_delete_safe($category) {
     $rescue = null; // See the code around the call to question_save_from_deletion.
 
     // Deal with any questions in the category.
-    if ($questionentries = $DB->get_records('question_bank_entry', $criteria, '', 'id,qtype')) {
+    if ($questionentries = $DB->get_records('question_bank_entry', $criteria, '', 'id')) {
 
-        // Try to delete each question.
-        foreach ($questionentries as $questionentry) {
-            question_delete_question($questionentry->id);
+        foreach($questionentries as $questionentry) {
+            question_delete_question_bank_entry_questions($questionentry);
         }
 
         // Check to see if there were any questions that were kept because
@@ -280,7 +279,10 @@ function question_category_delete_safe($category) {
         // in this category will already have been deleted. This could
         // happen, for example, if questions are added to a course,
         // and then that course is moved to another category (MDL-14802).
-        $questionids = $DB->get_records_menu('question', $criteria, '', 'id, 1');
+        $questionids = [];
+        foreach($questionentries as $questionentry) {
+            array_merge($questionids, $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id'));
+        }
         if (!empty($questionids)) {
             $parentcontextid = SYSCONTEXTID;
             $name = get_string('unknown', 'question');
@@ -296,7 +298,22 @@ function question_category_delete_safe($category) {
     }
 
     // Now delete the category.
-    $DB->delete_records('question_categories', array('id' => $category->id));
+    $DB->delete_records('question_categories', ['id' => $category->id]);
+}
+
+/**
+ * Goes through the question entryid and deletes all the questions for that entry.
+ *
+ * @param $questionentry
+ */
+function question_delete_question_bank_entry_questions($questionentry) {
+    global $DB;
+    $questionids = $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id');
+
+    // Try to delete each question.
+    foreach ($questionids as $questionid) {
+        question_delete_question($questionid->id);
+    }
 }
 
 /**
@@ -310,9 +327,13 @@ function question_category_in_use($categoryid, $recursive = false) {
     global $DB;
 
     //Look at each question in the category
-    if ($questions = $DB->get_records_menu('question',
-            array('category' => $categoryid), '', 'id, 1')) {
-        if (questions_in_use(array_keys($questions))) {
+    $questionentries = $DB->get_records('question_bank_entry', ['questioncategoryid' => $categoryid], '', 'id');
+    $questionids = [];
+    foreach($questionentries as $questionentry) {
+        array_merge($questionids, $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id, 1'));
+    }
+    if ($questionids) {
+        if (questions_in_use(array_keys($questionids))) {
             return true;
         }
     }
@@ -322,7 +343,7 @@ function question_category_in_use($categoryid, $recursive = false) {
 
     //Look under child categories recursively
     if ($children = $DB->get_records('question_categories',
-            array('parent' => $categoryid), '', 'id, 1')) {
+            ['parent' => $categoryid], '', 'id, 1')) {
         foreach ($children as $child) {
             if (question_category_in_use($child->id, $recursive)) {
                 return true;
@@ -334,21 +355,30 @@ function question_category_in_use($categoryid, $recursive = false) {
 }
 
 /**
+ * Check if there is more versions left for the entry.
+ * If not delete the entry.
+ *
+ * @param $entryid
+ */
+function delete_question_bank_entry($entryid) {
+    global $DB;
+    if ($DB->count_records('question_version', ['bankentryid' => $entryid]) == 0) {
+        $DB->delete_records('question_bank_entry', ['id' => $entryid]);
+    }
+}
+
+/**
  * Deletes question and all associated data from the database
  *
- * It will not delete a question if it is used somewhere.
+ * It will not delete a question if it is used somewhere, instead it will just delete the reference.
  *
- * @param object $question  The question being deleted
+ * @param int $questionid The id of the question being deleted
+ * @param int $referencecontextid the id of the context its trying to delete from
  */
-function question_delete_question($questionid) {
+function question_delete_question($questionid, $referencecontextid = 0) {
     global $DB;
 
-    $question = $DB->get_record_sql('
-            SELECT q.*, ctx.id AS contextid
-            FROM {question} q
-            LEFT JOIN {question_categories} qc ON qc.id = q.category
-            LEFT JOIN {context} ctx ON ctx.id = qc.contextid
-            WHERE q.id = ?', array($questionid));
+    $question = $DB->get_record('question', ['id'=> $questionid]);
     if (!$question) {
         // In some situations, for example if this was a child of a
         // Cloze question that was previously deleted, the question may already
@@ -361,42 +391,49 @@ function question_delete_question($questionid) {
         return;
     }
 
-    // This sometimes happens in old sites with bad data.
-    if (!$question->contextid) {
-        debugging('Deleting question ' . $question->id . ' which is no longer linked to a context. ' .
-                'Assuming system context to avoid errors, but this may mean that some data like files, ' .
-                'tags, are not cleaned up.');
-        $question->contextid = context_system::instance()->id;
-    }
-
     // Delete previews of the question.
     $dm = new question_engine_data_mapper();
-    $dm->delete_previews($questionid);
+    $dm->delete_previews($question->id);
 
     // delete questiontype-specific data
-    question_bank::get_qtype($question->qtype, false)->delete_question(
-            $questionid, $question->contextid);
+    $sql = 'SELECT qv.id as versionid,
+                   qbe.id as entryid,
+                   qc.id as categoryid,
+                   qc.contextid as contextid
+              FROM {question_version} qv
+              JOIN {question_bank_entry} qbe
+                ON qbe.id = qv.bankentryid
+              JOIN {question_categories} qc
+                ON qc.id = qbe.questioncategoryid
+             WHERE qv.questionid = ?';
+    $questiondata = $DB->get_record_sql($sql, [$question->id]);
+    question_bank::get_qtype($question->qtype, false)->delete_question($question->id, $questiondata->contextid);
 
     // Delete all tag instances.
     core_tag_tag::remove_all_item_tags('core_question', 'question', $question->id);
 
-    // Now recursively delete all child questions
-    if ($children = $DB->get_records('question',
-            array('parent' => $questionid), '', 'id, qtype')) {
-        foreach ($children as $child) {
-            if ($child->id != $questionid) {
-                question_delete_question($child->id);
-            }
-        }
-    }
+    // Now recursively delete all child questions, removed as its handled by set_reference, kept the commented code for now.
+    //if ($children = $DB->get_records('question',
+    //        array('parent' => $questionid), '', 'id, qtype')) {
+    //    foreach ($children as $child) {
+    //        if ($child->id != $questionid) {
+    //            question_delete_question($child->id);
+    //        }
+    //    }
+    //}
 
     // Finally delete the question record itself
-    $DB->delete_records('question', array('id' => $questionid));
-    question_bank::notify_question_edited($questionid);
+    $DB->delete_records('question', ['id' => $question->id]);
+    $DB->delete_records('question_version', ['id' => $questiondata->versionid]);
+    delete_question_bank_entry($questiondata->entryid);
+    question_bank::notify_question_edited($question->id);
 
     // Log the deletion of this question.
+    $question->category = $questiondata->categoryid;
+    $question->contextid = $questiondata->contextid;
     $event = \core\event\question_deleted::create_from_question_instance($question);
-    $event->add_record_snapshot('question', $question);
+    // Need to understand the reason for this.
+    //$event->add_record_snapshot('question', $question);
     $event->trigger();
 }
 
@@ -482,6 +519,7 @@ function question_delete_course_category($category, $newcategory, $notused=false
  *      e.g. from get_context_name
  * @param object $newcategory
  * @return mixed false on
+ * @todo possible deprecation
  */
 function question_save_from_deletion($questionids, $newcontextid, $oldplace,
         $newcategory = null) {
