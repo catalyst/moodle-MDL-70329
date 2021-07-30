@@ -14,7 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace core_question;
+
 defined('MOODLE_INTERNAL') || die();
+
+use advanced_testcase;
+use question_edit_contexts;
+use core_question_external;
+use context_course;
+use moodle_url;
+use ReflectionClass;
 use core_question\local\bank\helper;
 use core_question\local\bank\view;
 
@@ -23,7 +32,7 @@ require_once($CFG->dirroot . '/question/tests/fixtures/testable_core_question_co
 require_once($CFG->dirroot . '/question/classes/external.php');
 
 /**
- * Question bank settings page class.
+ * Test class for columnsortorder feature.
  *
  * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
