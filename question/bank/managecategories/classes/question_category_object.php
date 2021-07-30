@@ -154,9 +154,18 @@ class question_category_object {
      *
      */
     public function display_user_interface(): void {
+        global $OUTPUT, $PAGE;
 
-        // Interface for editing existing categories.
-        $this->output_edit_lists();
+        $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        $displaydata = ['checked' => false];
+        $checkbox = $PAGE->get_renderer('core_question', 'bank')->render_showtext_checkbox($displaydata);
+        $dat = [
+            'helpstringhead' => $helpstringhead,
+            'checkbox' => $checkbox,
+            'categoriesrendered' => $this->output_edit_lists(),
+        ];
+
+        echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
 
         echo \html_writer::empty_tag('br');
         // Interface for adding a new category.
@@ -177,18 +186,9 @@ class question_category_object {
      * $this->initialize() must have already been called
      *
      */
-    public function output_edit_lists(): void {
-        global $OUTPUT, $PAGE;
-        $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
-        $displaydata = [
-            'checked' => false,
-        ];
-        $checkbox = $PAGE->get_renderer('core_question', 'bank')->render_showtext_checkbox($displaydata);
-        $dat = [
-            'helpstringhead' => $helpstringhead,
-            'checkbox' => $checkbox,
-        ];
-        echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
+    public function output_edit_lists(): array {
+        global $OUTPUT;
+        $categoriesrendered = [];
         foreach ($this->editlists as $context => $list) {
             $listhtml = $list->to_html(0, ['str' => $this->str]);
             if ($listhtml) {
@@ -203,9 +203,11 @@ class question_category_object {
                 'heading' => $heading,
                 'list' => $listdisplay,
             ];
-            echo $OUTPUT->render_from_template(helper::PLUGINNAME . '/categoryobject', $data);
+            $rendered = $OUTPUT->render_from_template(helper::PLUGINNAME . '/categoryobject', $data);
+            $categoriesrendered[] = ['category' => $rendered];
         }
-        echo $list->display_page_numbers();
+        $categoriesrendered[] = $list->display_page_numbers();
+        return $categoriesrendered;
     }
 
     /**

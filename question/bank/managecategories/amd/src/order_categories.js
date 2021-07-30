@@ -25,6 +25,7 @@
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
+import Templates from 'core/templates';
 import $ from 'jquery';
 
 /**
@@ -56,20 +57,26 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        setTimeout(() => {
-            pageReload();
-        }, 500);
+        // setTimeout(() => {
+        //     pageReload();
+        // }, 500);
     });
 };
 
 /**
- * Reloads page after 3s if element is dropped.
+ * Reloads page.
  *
  * @returns {void}
  */
 const pageReload = () => {
     let url = window.location.href;
     window.location.href = url;
+};
+
+const templateRender = (context) => {
+    Templates.render('qbank_managecategories/categoryobject', context).done((html) => {
+        $('#categoriesrendered').replaceWith(html);
+    });
 };
 
 /**
@@ -79,15 +86,21 @@ const pageReload = () => {
  * @returns {void}
  */
  const setCatOrder = (updatedCategories) => {
-    Ajax.call([{
+    let response = Ajax.call([{
         methodname: 'qbank_managecategories_set_category_order',
         args: {categories: updatedCategories},
         fail: Notification.exception
     }]);
+    response[0].then((resp) => console.log(JSON.parse(resp)));
+    let context = {
+        listitem: "somedat"
+    };
+
+    //templateRender(context);
 };
 
 /**
- * Retrieving the the order on EVENT.DROP, also gets new parameter
+ * Retrieving the order on EVENT.DROP, also gets new parameter
  *
  * @param {JQuery<HTMLElement>} categoryListElements List of HTML element to parse.
  * @param {int} oldContextId Old context id to change.

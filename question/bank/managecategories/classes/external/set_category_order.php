@@ -78,7 +78,7 @@ class set_category_order extends external_api {
                 }
             }
         }
-        $sortorder = json_encode($sortorder);
+        $sortorder = json_encode($categories);
         return $sortorder;
     }
 

@@ -166,7 +166,8 @@ class question_category_list extends moodle_list {
                     $item->set_icon_html($first, $last, $lastitem);
                 }
                 if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
-                    $itemstab[] = $tabs . $itemhtml;
+                    $itemtab = $tabs . $itemhtml;
+                    $itemstab['items'][] = ['item' => $itemtab];
                 }
                 $first = false;
                 $lastitem = $item;
@@ -174,11 +175,7 @@ class question_category_list extends moodle_list {
             }
         }
         if ($itemstab) {
-            $data =
-            [
-                'listitem' => $itemstab,
-            ];
-            return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $data);
+            return $OUTPUT->render_from_template(helper::PLUGINNAME . '/categorylist', $itemstab);
         }
     }
 }

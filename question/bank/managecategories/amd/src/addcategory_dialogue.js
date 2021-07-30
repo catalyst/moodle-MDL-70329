@@ -47,7 +47,7 @@ const displayModal = (selector, contextid, cmid) => {
         modal.hide();
         e.preventDefault();
         e.stopPropagation();
-        $('.questioncategories').load(document.URL + ' .questioncategories');
+        $('.questioncategories').load(' .questioncategories > *');
         //$('head').load(document.URL);
       });
     });
