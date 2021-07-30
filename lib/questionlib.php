@@ -271,7 +271,7 @@ function question_category_delete_safe($category) {
     if ($questionentries = $DB->get_records('question_bank_entry', $criteria, '', 'id')) {
 
         foreach($questionentries as $questionentry) {
-            question_delete_question_bank_entry_questions($questionentry);
+            question_delete_question_bank_entry_questions($questionentry, $context->id);
         }
 
         // Check to see if there were any questions that were kept because
@@ -305,14 +305,15 @@ function question_category_delete_safe($category) {
  * Goes through the question entryid and deletes all the questions for that entry.
  *
  * @param $questionentry
+ * @param $contextid
  */
-function question_delete_question_bank_entry_questions($questionentry) {
+function question_delete_question_bank_entry_questions($questionentry, $contextid) {
     global $DB;
     $questionids = $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id');
 
     // Try to delete each question.
     foreach ($questionids as $questionid) {
-        question_delete_question($questionid->id);
+        question_delete_question($questionid->id, $contextid);
     }
 }
 
@@ -373,9 +374,9 @@ function delete_question_bank_entry($entryid) {
  * It will not delete a question if it is used somewhere, instead it will just delete the reference.
  *
  * @param int $questionid The id of the question being deleted
- * @param int $referencecontextid the id of the context its trying to delete from
+ * @param int $usingcontextid the id of the context its trying to delete from
  */
-function question_delete_question($questionid, $referencecontextid = 0) {
+function question_delete_question($questionid, $usingcontextid = 0) {
     global $DB;
 
     $question = $DB->get_record('question', ['id'=> $questionid]);
@@ -387,7 +388,10 @@ function question_delete_question($questionid, $referencecontextid = 0) {
     }
 
     // Do not delete a question if it is used by an activity module
-    if (questions_in_use(array($questionid))) {
+    if (questions_in_use([$question->id])) {
+        $DB->delete_records('question_references',
+                ['versionid' => $DB->get_record('question_version', ['questionid' => $question->id], 'id')->id,
+                 'usingcontextid' => $usingcontextid]);
         return;
     }
 
@@ -425,6 +429,7 @@ function question_delete_question($questionid, $referencecontextid = 0) {
     // Finally delete the question record itself
     $DB->delete_records('question', ['id' => $question->id]);
     $DB->delete_records('question_version', ['id' => $questiondata->versionid]);
+    $DB->delete_records('question_references', ['versionid' => $questiondata->versionid]);
     delete_question_bank_entry($questiondata->entryid);
     question_bank::notify_question_edited($question->id);
 
@@ -447,11 +452,9 @@ function question_delete_context($contextid) {
     global $DB;
 
     $fields = 'id, parent, name, contextid';
-    if ($categories = $DB->get_records('question_categories', array('contextid' => $contextid), 'parent', $fields)) {
-        //Sort categories following their tree (parent-child) relationships
-        //this will make the feedback more readable
+    if ($categories = $DB->get_records('question_categories', ['contextid' => $contextid], 'parent', $fields)) {
+        // Sort categories following their tree (parent-child) relationships this will make the feedback more readable.
         $categories = sort_categories_by_tree($categories);
-
         foreach ($categories as $category) {
             question_category_delete_safe($category);
         }
@@ -501,9 +504,9 @@ function question_delete_course_category($category, $newcategory, $notused=false
             $newtopcategory = question_get_top_category($newcontext->id, true);
 
             question_move_category_to_context($topcategory->id, $context->id, $newcontext->id);
-            $DB->set_field('question_categories', 'parent', $newtopcategory->id, array('parent' => $topcategory->id));
+            $DB->set_field('question_categories', 'parent', $newtopcategory->id, ['parent' => $topcategory->id]);
             // Now delete the top category.
-            $DB->delete_records('question_categories', array('id' => $topcategory->id));
+            $DB->delete_records('question_categories', ['id' => $topcategory->id]);
         }
     }
 
@@ -511,7 +514,7 @@ function question_delete_course_category($category, $newcategory, $notused=false
 }
 
 /**
- * Enter description here...
+ * Creates a new category to save the questions in use.
  *
  * @param array $questionids of question ids
  * @param object $newcontextid the context to create the saved category in.
@@ -553,8 +556,6 @@ function question_save_from_deletion($questionids, $newcontextid, $oldplace,
  * @return boolean
  */
 function question_delete_activity($cm, $notused = false) {
-    global $DB;
-
     $modcontext = context_module::instance($cm->id);
     question_delete_context($modcontext->id);
     return true;
@@ -675,6 +676,47 @@ function question_move_question_tags_to_new_context(array $questions, context $n
 }
 
 /**
+ * Check if an idnumber exist in the category.
+ *
+ * @param int $questionidnumber
+ * @param int $categoryid
+ * @param int $limitfrom
+ * @param int $limitnum
+ * @return array
+ */
+function idnumber_exist_in_question_category($questionidnumber, $categoryid, $limitfrom = 0, $limitnum = 1) {
+    global $DB;
+    $response  = false;
+    $record = [];
+    // Check if the idnumber exist in the category.
+    $sql = 'SELECT q.id as id
+              FROM {question} q
+              JOIN {question_version} qv
+                ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe
+                ON qbe.id = qv.bankentryid
+              JOIN {question_categories} qc
+                ON qc.id = qbe.questioncategoryid
+             WHERE q.idnumber = ?
+               AND qc.id = ?';
+    $questionrecord = $DB->get_record_sql($sql, [$questionidnumber, $categoryid]);
+    if ((string) $questionidnumber !== '' && count($questionrecord) > 0) {
+        $response  = true;
+        list($questionidcondition, $params) = $DB->get_in_or_equal(array_keys($questionrecord));
+        $params['idnumber'] = $questionidnumber . '_%';
+        $recordsql = "SELECT id,
+                             idnumber
+                        FROM {question}
+                       WHERE idnumber like :idnumber
+                         AND id $questionidcondition
+                    ORDER BY idnumber DESC";
+        $record = $DB->get_records_sql($recordsql, $params, $limitfrom, $limitnum);
+    }
+
+    return [$response, $record];
+}
+
+/**
  * This function should be considered private to the question bank, it is called from
  * question/editlib.php question/contextmoveq.php and a few similar places to to the
  * work of actually moving questions and associated data. However, callers of this
@@ -687,24 +729,42 @@ function question_move_question_tags_to_new_context(array $questions, context $n
 function question_move_questions_to_category($questionids, $newcategoryid) {
     global $DB;
 
-    $newcontextid = $DB->get_field('question_categories', 'contextid',
-            array('id' => $newcategoryid));
+    $newcategorydata = $DB->get_record('question_categories', ['id' => $newcategoryid]);
+    if (!$newcategorydata) {
+        return false;
+    }
     list($questionidcondition, $params) = $DB->get_in_or_equal($questionids);
-    $questions = $DB->get_records_sql("
-            SELECT q.id, q.qtype, qc.contextid, q.idnumber, q.category
+    $sql = "SELECT qv.id as versionid,
+                   qbe.id as entryid,
+                   qc.id as category,
+                   qc.contextid as contextid,
+                   q.id,
+                   q.qtype,
+                   q.idnumber,
+                   qr.id as referenceid
               FROM {question} q
-              JOIN {question_categories} qc ON q.category = qc.id
-             WHERE  q.id $questionidcondition", $params);
+              JOIN {question_version} qv
+                ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe
+                ON qbe.id = qv.bankentryid
+              JOIN {question_categories} qc
+                ON qc.id = qbe.questioncategoryid
+              JOIN {question_references} qr
+                ON qr.versionid = qv.id
+             WHERE qr.usingcontext = qc.contextid
+               AND qr.questionbankentryid = qbe.id
+               AND q.id $questionidcondition";
+    $questions = $DB->get_records_sql($sql, $params);
     foreach ($questions as $question) {
-        if ($newcontextid != $question->contextid) {
+        if ($newcategorydata->contextid != $question->contextid) {
             question_bank::get_qtype($question->qtype)->move_files(
-                    $question->id, $question->contextid, $newcontextid);
+                    $question->id, $question->contextid, $newcategorydata->contextid);
         }
         // Check whether there could be a clash of idnumbers in the new category.
-        if (((string) $question->idnumber !== '') &&
-                $DB->record_exists('question', ['idnumber' => $question->idnumber, 'category' => $newcategoryid])) {
-            $rec = $DB->get_records_select('question', "category = ? AND idnumber LIKE ?",
-                    [$newcategoryid, $question->idnumber . '_%'], 'idnumber DESC', 'id, idnumber', 0, 1);
+        list($idnumberclash, $rec) = idnumber_exist_in_question_category($question->idnumber, $newcategoryid);
+        if ($idnumberclash) {
+            //$rec = $DB->get_records_select('question', "category = ? AND idnumber LIKE ?",
+            //        [$newcategoryid, $question->idnumber . '_%'], 'idnumber DESC', 'id, idnumber', 0, 1);
             $unique = 1;
             if (count($rec)) {
                 $rec = reset($rec);
@@ -717,26 +777,29 @@ function question_move_questions_to_category($questionids, $newcategoryid) {
             // mistakenly moved then the idnumber will not be completely lost.
             $q = new stdClass();
             $q->id = $question->id;
-            $q->category = $newcategoryid;
             $q->idnumber = $question->idnumber . '_' . $unique;
             $DB->update_record('question', $q);
         }
 
+        // Update the reference to point to the new category context.
+        $r = new stdClass();
+        $r->id = $question->referenceid;
+        $r->usingcontextid = $newcategorydata->contextid;
+        $DB->update_record('question_references', $r);
+
+        // Update the entry to the new category id.
+        $e = new stdClass();
+        $e->id = $question->entryid;
+        $e->questioncategoryid = $newcategorydata->id;
+        $DB->update_record('question_bank_entry', $e);
+
         // Log this question move.
         $event = \core\event\question_moved::create_from_question_instance($question, context::instance_by_id($question->contextid),
-                ['oldcategoryid' => $question->category, 'newcategoryid' => $newcategoryid]);
+                ['oldcategoryid' => $question->category, 'newcategoryid' => $newcategorydata->id]);
         $event->trigger();
     }
 
-    // Move the questions themselves.
-    $DB->set_field_select('question', 'category', $newcategoryid,
-            "id $questionidcondition", $params);
-
-    // Move any subquestions belonging to them.
-    $DB->set_field_select('question', 'category', $newcategoryid,
-            "parent $questionidcondition", $params);
-
-    $newcontext = context::instance_by_id($newcontextid);
+    $newcontext = context::instance_by_id($newcategorydata->contextid);
     question_move_question_tags_to_new_context($questions, $newcontext);
 
     // TODO Deal with datasets.
