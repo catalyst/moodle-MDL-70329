@@ -1686,7 +1686,6 @@ $string['publicsitefileswarning'] = 'Note: files placed here can be accessed by 
 $string['publicsitefileswarning2'] = 'Note: Files placed here can be accessed by anyone who knows (or can guess) the URL. For security reasons, it is recommended that any backup files are deleted immediately after restoring them.';
 $string['publicsitefileswarning3'] = 'Note: Files placed here can be accessed by anyone who knows (or can guess) the URL. <br />For security reasons, backup files should be saved in the secure backupdata folder only.';
 $string['question'] = 'Question';
-$string['questionsinthequestionbank'] = 'Questions in the question bank';
 $string['queued'] = 'Queued';
 $string['quotausage'] = 'You have currently used {$a->used} of your {$a->total} limit.';
 $string['readinginfofrombackup'] = 'Reading info from backup';
@@ -2336,3 +2335,4 @@ $string['registrationno'] = 'No, I do not wish to receive any emails';
 
 // Deprecated since Moodle 4.0.
 $string['descriptiona'] = 'Description: {$a}';
+$string['questionsinthequestionbank'] = 'Questions in the question bank';
