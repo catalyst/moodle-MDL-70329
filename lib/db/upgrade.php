@@ -2675,7 +2675,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2021060900.00);
     }
 
-    if ($oldversion < 2021062500.00) {
+    if ($oldversion < 2021072800.00) {
         // Define table question_bank_entry to be created.
         $table = new xmldb_table('question_bank_entry');
 
@@ -2770,9 +2770,10 @@ function xmldb_main_upgrade($oldversion) {
 
         // TODO: Remove fields from question table.
         // TODO: Remove fields from quiz_slot table.
+        // TODO: Remove all quiz_slot_tags table.
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2021062500.00);
+        upgrade_main_savepoint(true, 2021072800.00);
     }
 
     return true;
