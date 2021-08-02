@@ -43,7 +43,7 @@ class custom_view extends \core_question\bank\view {
 
     /**
      * Constructor
-     * @param \question_edit_contexts $contexts
+     * @param \core_question\lib\question_edit_contexts $contexts
      * @param \moodle_url $pageurl
      * @param \stdClass $course course settings
      * @param \stdClass $cm activity settings.

@@ -46,7 +46,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', array('course' => $course->id));
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories(array($contexts->lowest()));
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -82,7 +82,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -120,7 +120,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -161,7 +161,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -209,7 +209,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -260,7 +260,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;

@@ -64,7 +64,7 @@ class view {
     protected $editquestionurl;
 
     /**
-     * @var \question_edit_contexts
+     * @var \core_question\lib\question_edit_contexts
      */
     protected $contexts;
 
@@ -130,7 +130,7 @@ class view {
 
     /**
      * Constructor
-     * @param \question_edit_contexts $contexts
+     * @param \core_question\lib\question_edit_contexts $contexts
      * @param \moodle_url $pageurl
      * @param object $course course settings
      * @param object $cm (optional) activity settings.

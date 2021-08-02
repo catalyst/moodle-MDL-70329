@@ -51,7 +51,7 @@ class core_question_category_class_testcase extends advanced_testcase {
         self::setAdminUser();
         $this->resetAfterTest();
         $this->context = context_course::instance(SITEID);
-        $contexts = new question_edit_contexts($this->context);
+        $contexts = new core_question\lib\question_edit_contexts($this->context);
         $this->topcat = question_get_top_category($this->context->id, true);
         $this->qcobject = new question_category_object(null,
                 new moodle_url('/question/category.php', ['courseid' => SITEID]),

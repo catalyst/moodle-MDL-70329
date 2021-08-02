@@ -824,11 +824,9 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     global $DB;
 
     $questions = [];
-    $questionids = $DB->get_records_menu('question',
-            array('category' => $categoryid), '', 'id,qtype');
+    $questionids = $DB->get_records_menu('question', ['category' => $categoryid], '', 'id,qtype');
     foreach ($questionids as $questionid => $qtype) {
-        question_bank::get_qtype($qtype)->move_files(
-                $questionid, $oldcontextid, $newcontextid);
+        question_bank::get_qtype($qtype)->move_files($questionid, $oldcontextid, $newcontextid);
         // Purge this question from the cache.
         question_bank::notify_question_edited($questionid);
 
@@ -841,11 +839,9 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     $newcontext = context::instance_by_id($newcontextid);
     question_move_question_tags_to_new_context($questions, $newcontext);
 
-    $subcatids = $DB->get_records_menu('question_categories',
-            array('parent' => $categoryid), '', 'id,1');
+    $subcatids = $DB->get_records_menu('question_categories', ['parent' => $categoryid], '', 'id,1');
     foreach ($subcatids as $subcatid => $notused) {
-        $DB->set_field('question_categories', 'contextid', $newcontextid,
-                array('id' => $subcatid));
+        $DB->set_field('question_categories', 'contextid', $newcontextid, ['id' => $subcatid]);
         question_move_category_to_context($subcatid, $oldcontextid, $newcontextid);
     }
 }
@@ -929,21 +925,19 @@ function question_preview_popup_params() {
  * @return array partially complete question objects. You need to call get_question_options
  * on them before they can be properly used.
  */
-function question_preload_questions($questionids = null, $extrafields = '', $join = '',
-        $extraparams = array(), $orderby = '') {
+function question_preload_questions($questionids = null, $extrafields = '', $join = '', $extraparams = [], $orderby = '') {
     global $DB;
 
     if ($questionids === null) {
-        $where = '';
-        $params = array();
+        $extracondition = '';
+        $params = [];
     } else {
         if (empty($questionids)) {
-            return array();
+            return [];
         }
 
-        list($questionidcondition, $params) = $DB->get_in_or_equal(
-                $questionids, SQL_PARAMS_NAMED, 'qid0000');
-        $where = 'WHERE q.id ' . $questionidcondition;
+        list($questionidcondition, $params) = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'qid0000');
+        $extracondition = 'AND q.id ' . $questionidcondition;
     }
 
     if ($join) {
@@ -958,12 +952,23 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
         $orderby = 'ORDER BY ' . $orderby;
     }
 
-    $sql = "SELECT q.*, qc.contextid{$extrafields}
+    $sql = "SELECT q.*,
+                   qc.contextid as contextid
+                   {$extrafields}
               FROM {question} q
-              JOIN {question_categories} qc ON q.category = qc.id
+              JOIN {question_version} qv
+                ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe
+                ON qbe.id = qv.bankentryid
+              JOIN {question_categories} qc
+                ON qc.id = qbe.questioncategoryid
+              JOIN {question_references} qr
+                ON qr.versionid = qv.id
               {$join}
-             {$where}
-          {$orderby}";
+             WHERE qr.usingcontext = qc.contextid
+               AND qr.questionbankentryid = qbe.id
+               {$extracondition}
+               {$orderby}";
 
     // Load the questions.
     $questions = $DB->get_records_sql($sql, $extraparams + $params);
@@ -982,17 +987,14 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
  * @param array $questionids array of question ids.
  * @param string $extrafields extra SQL code to be added to the query.
  * @param string $join extra SQL code to be added to the query.
- * @param array $extraparams values for any placeholders in $join.
- * You are strongly recommended to use named placeholder.
- *
- * @return array question objects.
+ * @return array|string question objects.
  */
 function question_load_questions($questionids, $extrafields = '', $join = '') {
     $questions = question_preload_questions($questionids, $extrafields, $join);
 
-    // Load the question type specific information
+    // Load the question type specific information.
     if (!get_question_options($questions)) {
-        return 'Could not load the question options';
+        return get_string('questionloaderror', 'question');
     }
 
     return $questions;
@@ -1557,6 +1559,12 @@ function question_category_options($contexts, $top = false, $currentcat = 0,
     }
 }
 
+/**
+ * Add context to the key of the categories.
+ *
+ * @param $categories
+ * @return array
+ */
 function question_add_context_in_key($categories) {
     $newcatarray = array();
     foreach ($categories as $id => $category) {
@@ -1705,66 +1713,13 @@ function question_default_export_filename($course, $category) {
 }
 
 /**
- * Converts contextlevels to strings and back to help with reading/writing contexts
- * to/from import/export files.
- *
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class context_to_string_translator{
-    /**
-     * @var array used to translate between contextids and strings for this context.
-     */
-    protected $contexttostringarray = array();
-
-    public function __construct($contexts) {
-        $this->generate_context_to_string_array($contexts);
-    }
-
-    public function context_to_string($contextid) {
-        return $this->contexttostringarray[$contextid];
-    }
-
-    public function string_to_context($contextname) {
-        $contextid = array_search($contextname, $this->contexttostringarray);
-        return $contextid;
-    }
-
-    protected function generate_context_to_string_array($contexts) {
-        if (!$this->contexttostringarray) {
-            $catno = 1;
-            foreach ($contexts as $context) {
-                switch ($context->contextlevel) {
-                    case CONTEXT_MODULE :
-                        $contextstring = 'module';
-                        break;
-                    case CONTEXT_COURSE :
-                        $contextstring = 'course';
-                        break;
-                    case CONTEXT_COURSECAT :
-                        $contextstring = "cat$catno";
-                        $catno++;
-                        break;
-                    case CONTEXT_SYSTEM :
-                        $contextstring = 'system';
-                        break;
-                }
-                $this->contexttostringarray[$context->id] = $contextstring;
-            }
-        }
-    }
-
-}
-
-/**
- * Check capability on category
+ * Check capability on category.
  *
  * @param int|stdClass|question_definition $questionorid object or id.
  *      If an object is passed, it should include ->contextid and ->createdby.
  * @param string $cap 'add', 'edit', 'view', 'use', 'move' or 'tag'.
  * @param int $notused no longer used.
  * @return bool this user has the capability $cap for this question $question?
- * @throws coding_exception
  */
 function question_has_capability_on($questionorid, $cap, $notused = -1) {
     global $USER, $DB;
@@ -1792,11 +1747,24 @@ function question_has_capability_on($questionorid, $cap, $notused = -1) {
                 debugging($e->getMessage(), DEBUG_NORMAL, $e->getTrace());
             }
 
+            $sql = 'SELECT q.id, 
+                           q.createdby, 
+                           qc.contextid
+                      FROM {question} q
+                      JOIN {question_version} qv
+                        ON qv.questionid = q.id
+                      JOIN {question_bank_entry} qbe
+                        ON qbe.id = qv.bankentryid
+                      JOIN {question_categories} qc
+                        ON qc.id = qbe.questioncategoryid
+                      JOIN {question_references} qr
+                        ON qr.versionid = qv.id
+                     WHERE qr.usingcontext = qc.contextid
+                       AND qr.questionbankentryid = qbe.id
+                       AND q.id = :id';
+
             // Well, at least we tried. Seems that we really have to read from DB.
-            $question = $DB->get_record_sql('SELECT q.id, q.createdby, qc.contextid
-                                               FROM {question} q
-                                               JOIN {question_categories} qc ON q.category = qc.id
-                                              WHERE q.id = :id', ['id' => $questionid]);
+            $question = $DB->get_record_sql($sql, ['id' => $questionid]);
         }
     }
 
@@ -1820,17 +1788,23 @@ function question_has_capability_on($questionorid, $cap, $notused = -1) {
 
 /**
  * Require capability on question.
+ *
+ * @param object $question
+ * @param string $cap
+ * @return bool
  */
 function question_require_capability_on($question, $cap) {
     if (!question_has_capability_on($question, $cap)) {
-        print_error('nopermissions', '', '', $cap);
+        throw new moodle_exception('nopermissions', '', '', $cap);
     }
     return true;
 }
 
 /**
+ * Gets the question edit url.
+ *
  * @param object $context a context
- * @return string A URL for editing questions in this context.
+ * @return string|bool A URL for editing questions in this context.
  */
 function question_edit_url($context) {
     global $CFG, $SITE;
@@ -1882,7 +1856,7 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     $questionnode = $navigationnode->add(get_string('questionbank', 'question'),
             new moodle_url('/question/edit.php', $params), navigation_node::TYPE_CONTAINER, null, 'questionbank');
 
-    $contexts = new question_edit_contexts($context);
+    $contexts = new core_question\lib\question_edit_contexts($context);
     if ($contexts->have_one_edit_tab_cap('questions')) {
         $questionnode->add(get_string('questions', 'question'), new moodle_url(
                 '/question/edit.php', $params), navigation_node::TYPE_SETTING, null, 'questions');
@@ -1904,6 +1878,8 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
 }
 
 /**
+ * Get the array of capabilities for question.
+ *
  * @return array all the capabilities that relate to accessing particular questions.
  */
 function question_get_question_capabilities() {
@@ -1923,6 +1899,8 @@ function question_get_question_capabilities() {
 }
 
 /**
+ * Get the question bank caps.
+ *
  * @return array all the question bank capabilities.
  */
 function question_get_all_capabilities() {
@@ -1931,188 +1909,6 @@ function question_get_all_capabilities() {
     $caps[] = 'moodle/question:flag';
     return $caps;
 }
-
-
-/**
- * Tracks all the contexts related to the one where we are currently editing
- * questions, and provides helper methods to check permissions.
- *
- * @copyright 2007 Jamie Pratt me@jamiep.org
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class question_edit_contexts {
-
-    public static $caps = array(
-        'editq' => array('moodle/question:add',
-            'moodle/question:editmine',
-            'moodle/question:editall',
-            'moodle/question:viewmine',
-            'moodle/question:viewall',
-            'moodle/question:usemine',
-            'moodle/question:useall',
-            'moodle/question:movemine',
-            'moodle/question:moveall'),
-        'questions'=>array('moodle/question:add',
-            'moodle/question:editmine',
-            'moodle/question:editall',
-            'moodle/question:viewmine',
-            'moodle/question:viewall',
-            'moodle/question:movemine',
-            'moodle/question:moveall'),
-        'categories'=>array('moodle/question:managecategory'),
-        'import'=>array('moodle/question:add'),
-        'export'=>array('moodle/question:viewall', 'moodle/question:viewmine'));
-
-    protected $allcontexts;
-
-    /**
-     * Constructor
-     * @param context the current context.
-     */
-    public function __construct(context $thiscontext) {
-        $this->allcontexts = array_values($thiscontext->get_parent_contexts(true));
-    }
-
-    /**
-     * @return context[] all parent contexts
-     */
-    public function all() {
-        return $this->allcontexts;
-    }
-
-    /**
-     * @return context lowest context which must be either the module or course context
-     */
-    public function lowest() {
-        return $this->allcontexts[0];
-    }
-
-    /**
-     * @param string $cap capability
-     * @return context[] parent contexts having capability, zero based index
-     */
-    public function having_cap($cap) {
-        $contextswithcap = array();
-        foreach ($this->allcontexts as $context) {
-            if (has_capability($cap, $context)) {
-                $contextswithcap[] = $context;
-            }
-        }
-        return $contextswithcap;
-    }
-
-    /**
-     * @param array $caps capabilities
-     * @return context[] parent contexts having at least one of $caps, zero based index
-     */
-    public function having_one_cap($caps) {
-        $contextswithacap = array();
-        foreach ($this->allcontexts as $context) {
-            foreach ($caps as $cap) {
-                if (has_capability($cap, $context)) {
-                    $contextswithacap[] = $context;
-                    break; //done with caps loop
-                }
-            }
-        }
-        return $contextswithacap;
-    }
-
-    /**
-     * @param string $tabname edit tab name
-     * @return context[] parent contexts having at least one of $caps, zero based index
-     */
-    public function having_one_edit_tab_cap($tabname) {
-        return $this->having_one_cap(self::$caps[$tabname]);
-    }
-
-    /**
-     * @return context[] those contexts where a user can add a question and then use it.
-     */
-    public function having_add_and_use() {
-        $contextswithcap = array();
-        foreach ($this->allcontexts as $context) {
-            if (!has_capability('moodle/question:add', $context)) {
-                continue;
-            }
-            if (!has_any_capability(array('moodle/question:useall', 'moodle/question:usemine'), $context)) {
-                            continue;
-            }
-            $contextswithcap[] = $context;
-        }
-        return $contextswithcap;
-    }
-
-    /**
-     * Has at least one parent context got the cap $cap?
-     *
-     * @param string $cap capability
-     * @return boolean
-     */
-    public function have_cap($cap) {
-        return (count($this->having_cap($cap)));
-    }
-
-    /**
-     * Has at least one parent context got one of the caps $caps?
-     *
-     * @param array $caps capability
-     * @return boolean
-     */
-    public function have_one_cap($caps) {
-        foreach ($caps as $cap) {
-            if ($this->have_cap($cap)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Has at least one parent context got one of the caps for actions on $tabname
-     *
-     * @param string $tabname edit tab name
-     * @return boolean
-     */
-    public function have_one_edit_tab_cap($tabname) {
-        return $this->have_one_cap(self::$caps[$tabname]);
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got the cap $cap
-     *
-     * @param string $cap capability
-     */
-    public function require_cap($cap) {
-        if (!$this->have_cap($cap)) {
-            print_error('nopermissions', '', '', $cap);
-        }
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got one of the caps $caps
-     *
-     * @param array $caps capabilities
-     */
-    public function require_one_cap($caps) {
-        if (!$this->have_one_cap($caps)) {
-            $capsstring = join(', ', $caps);
-            print_error('nopermissions', '', '', $capsstring);
-        }
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got one of the caps $caps
-     *
-     * @param string $tabname edit tab name
-     */
-    public function require_one_edit_tab_cap($tabname) {
-        if (!$this->have_one_edit_tab_cap($tabname)) {
-            print_error('nopermissions', '', '', 'access question edit tab '.$tabname);
-        }
-    }
-}
-
 
 /**
  * Helps call file_rewrite_pluginfile_urls with the right parameters.
@@ -2204,7 +2000,7 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
         require_login($course, false, $cm);
 
         require_once($CFG->dirroot . '/question/editlib.php');
-        $contexts = new question_edit_contexts($context);
+        $contexts = new core_question\lib\question_edit_contexts($context);
         // check export capability
         $contexts->require_one_edit_tab_cap('export');
         $category_id = (int)array_shift($args);
@@ -2337,17 +2133,27 @@ function question_pluginfile($course, $context, $component, $filearea, $args, $f
  * @param bool $forcedownload.
  * @param array $options additional options affecting the file serving.
  */
-function core_question_question_preview_pluginfile($previewcontext, $questionid,
-        $filecontext, $filecomponent, $filearea, $args, $forcedownload, $options = array()) {
+function core_question_question_preview_pluginfile($previewcontext, $questionid, $filecontext, $filecomponent,
+                                                    $filearea, $args, $forcedownload, $options = []) {
     global $DB;
+    $sql = 'SELECT q.*,
+                   qc.contextid
+              FROM {question} q
+              JOIN {question_version} qv
+                ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe
+                ON qbe.id = qv.bankentryid
+              JOIN {question_categories} qc
+                ON qc.id = qbe.questioncategoryid
+              JOIN {question_references} qr
+                ON qr.versionid = qv.id
+             WHERE qr.usingcontext = qc.contextid
+               AND qr.questionbankentryid = qbe.id
+               AND q.id = :id
+               AND qc.contextid = :contextid';
 
     // Verify that contextid matches the question.
-    $question = $DB->get_record_sql('
-            SELECT q.*, qc.contextid
-              FROM {question} q
-              JOIN {question_categories} qc ON qc.id = q.category
-             WHERE q.id = :id AND qc.contextid = :contextid',
-            array('id' => $questionid, 'contextid' => $filecontext->id), MUST_EXIST);
+    $question = $DB->get_record_sql($sql, ['id' => $questionid, 'contextid' => $filecontext->id], MUST_EXIST);
 
     // Check the capability.
     list($context, $course, $cm) = get_context_info_array($previewcontext->id);
@@ -2366,17 +2172,18 @@ function core_question_question_preview_pluginfile($previewcontext, $questionid,
 }
 
 /**
- * Create url for question export
+ * Create url for question export.
  *
  * @param int $contextid, current context
  * @param int $categoryid, categoryid
  * @param string $format
  * @param string $withcategories
- * @param string $ithcontexts
+ * @param string $withcontexts
+ * @param string $filename
  * @param moodle_url export file url
+ * @return moodle_url
  */
-function question_make_export_url($contextid, $categoryid, $format, $withcategories,
-        $withcontexts, $filename) {
+function question_make_export_url($contextid, $categoryid, $format, $withcategories, $withcontexts, $filename) {
     global $CFG;
     $urlbase = "$CFG->wwwroot/pluginfile.php";
     return moodle_url::make_file_url($urlbase,
@@ -2419,13 +2226,13 @@ function question_get_export_single_question_url($question) {
  */
 function question_page_type_list($pagetype, $parentcontext, $currentcontext) {
     global $CFG;
-    $types = array(
-        'question-*'=>get_string('page-question-x', 'question'),
-        'question-edit'=>get_string('page-question-edit', 'question'),
-        'question-category'=>get_string('page-question-category', 'question'),
-        'question-export'=>get_string('page-question-export', 'question'),
-        'question-import'=>get_string('page-question-import', 'question')
-    );
+    $types = [
+        'question-*' => get_string('page-question-x', 'question'),
+        'question-edit' => get_string('page-question-edit', 'question'),
+        'question-category' => get_string('page-question-category', 'question'),
+        'question-export' => get_string('page-question-export', 'question'),
+        'question-import' => get_string('page-question-import', 'question')
+    ];
     if ($currentcontext->contextlevel == CONTEXT_COURSE) {
         require_once($CFG->dirroot . '/course/lib.php');
         return array_merge(course_page_type_list($pagetype, $parentcontext, $currentcontext), $types);
