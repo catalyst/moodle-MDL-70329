@@ -117,6 +117,7 @@ completely removed from Moodle core too.
  - quiz_slot_tags (table removed)
  During the upgrade, data from the question table will be copied to the new tables. After this process,
  the data copied will be removed from question table quiz_slot and finally the the quiz_slot_tags table will be removed.
+* Function question_hash() is deprecated without replacement.
 
 === 3.11.2 ===
 * For security reasons, filelib has been updated so all requests now use emulated redirects.
