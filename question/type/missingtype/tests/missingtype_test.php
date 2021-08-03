@@ -56,7 +56,6 @@ class qtype_missing_test extends question_testcase {
         $questiondata->qtype = 'strange_unknown';
         $questiondata->length = 1;
         $questiondata->stamp = make_unique_id_code();
-        $questiondata->version = make_unique_id_code();
         $questiondata->hidden = 0;
         $questiondata->idnumber = null;
         $questiondata->timecreated = 0;
