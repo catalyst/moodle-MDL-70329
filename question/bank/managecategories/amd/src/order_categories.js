@@ -33,7 +33,7 @@ import $ from 'jquery';
  *
  * @returns {void}
  */
-const setupSortableLists = () => {
+const setupSortableLists = (editlists) => {
     new SortableList(
         '.category_list',
         {
@@ -56,25 +56,15 @@ const setupSortableLists = () => {
         $('li.list_item[style]').remove();
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
-        setCatOrder(JSON.stringify(newOrder));
+        setCatOrder(JSON.stringify(newOrder), editlists);
         // setTimeout(() => {
         //     pageReload();
         // }, 500);
     });
 };
 
-/**
- * Reloads page.
- *
- * @returns {void}
- */
-const pageReload = () => {
-    let url = window.location.href;
-    window.location.href = url;
-};
-
 const templateRender = (context) => {
-    Templates.render('qbank_managecategories/categoryobject', context).done((html) => {
+    Templates.render('qbank_managecategories/category', context).done((html) => {
         $('#categoriesrendered').replaceWith(html);
     });
 };
@@ -85,18 +75,22 @@ const templateRender = (context) => {
  * @param {string} updatedCategories String containing new sortorder.
  * @returns {void}
  */
- const setCatOrder = (updatedCategories) => {
+ const setCatOrder = (updatedCategories, editlists) => {
     let response = Ajax.call([{
         methodname: 'qbank_managecategories_set_category_order',
-        args: {categories: updatedCategories},
+        args: {categories: updatedCategories, data: editlists},
         fail: Notification.exception
     }]);
-    response[0].then((resp) => console.log(JSON.parse(resp)));
-    let context = {
-        listitem: "somedat"
-    };
+    response[0].done((resp) => {
+        let data = JSON.parse(resp);
+        console.log(data);
+        let context = {
+            categoriesrendered: data,
+            items: data.items,
+        };
 
-    //templateRender(context);
+        templateRender(context);
+    });
 };
 
 /**
@@ -136,6 +130,6 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 
-export const init = () => {
-    setupSortableLists();
+export const init = (editlists) => {
+    setupSortableLists(editlists);
 };

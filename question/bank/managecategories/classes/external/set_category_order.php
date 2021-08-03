@@ -41,20 +41,22 @@ class set_category_order extends external_api {
      * @return external_function_parameters
      */
     public static function execute_parameters() {
-        return new external_function_parameters(
-                ['categories' => new external_value(PARAM_RAW, 'JSON String')]
-        );
+        return new external_function_parameters([
+            'categories' => new external_value(PARAM_RAW, 'JSON String - category order'),
+            'data' => new external_value(PARAM_RAW, 'JSON String - data for mustache file')    
+        ]);
     }
 
     /**
      * Set category order the add category form.
      *
      * @param string $categories Category order, encoded as a json array.
+     * @param string $data Data to use to render from mustache.
      * @return string $sortorder sororder.
      */
-    public static function execute(string $categories) {
+    public static function execute(string $categories, string $data) {
         global $DB;
-        $params = self::validate_parameters(self::execute_parameters(), ['categories' => $categories]);
+        $params = self::validate_parameters(self::execute_parameters(), ['categories' => $categories, 'data' => $data]);
 
         $categories = json_decode($categories, true);
         $neworder = $categories[0];
@@ -78,8 +80,8 @@ class set_category_order extends external_api {
                 }
             }
         }
-        $sortorder = json_encode($categories);
-        return $sortorder;
+        //$sortorder = json_encode($categories);
+        return $data;
     }
 
     /**
@@ -88,6 +90,6 @@ class set_category_order extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_RAW, 'Return cleaned JSON string');
+        return new external_value(PARAM_RAW, 'Returns cleaned JSON string');
     }
 }

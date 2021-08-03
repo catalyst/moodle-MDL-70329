@@ -30,6 +30,10 @@ namespace qbank_managecategories;
 use context;
 use moodle_exception;
 use html_writer;
+use moodle_url;
+use action_menu;
+use action_menu_link;
+use pix_icon;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -339,6 +343,90 @@ class helper {
         } else {
             return $categoriesarray;
         }
+    }
+
+    /**
+     * Returns an array of data passed to set_category_order external method - rendered by qbank_managecategory/category mustache.
+     *
+     * @param question_category_object $qcobject Question category object.
+     * @return array
+     */
+    public static function get_data_from_category_object(question_category_object $qcobject): string {
+        global $PAGE, $OUTPUT;
+        $data = [];
+        foreach ($qcobject->editlists as $context => $editlist) {
+            $items = [];
+            $fullcontext = context::instance_by_id($context);
+            $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
+            foreach ($editlist->items as $item) {
+                $category = $item->item;
+                $questionbankurl = new moodle_url($nodeparent->action->get_path(), $item->parentlist->pageurl->params());
+                $questionbankurl->param('cat', $category->id . ',' . $category->contextid);
+                $categoryname = format_string($category->name, true, ['context' => $item->parentlist->context]);
+                $questioncount = ' (' . $category->questioncount . ')';
+                $categorydesc = format_text($category->info, $category->infoformat,
+                ['context' => $item->parentlist->context, 'noclean' => true]);
+
+                $menu = new action_menu();
+                $menu->set_menu_trigger(get_string('edit'));
+                if ($item->children->editable) {
+                    // Sets up edit link.
+                    $editurl = new moodle_url('/question/bank/managecategories/category.php',
+                        ['cmid' => $cmid, 'edit' => $category->id]);
+                    $menu->add(new action_menu_link(
+                        $editurl,
+                        new pix_icon('t/edit', 'edit'),
+                        get_string('editsettings'),
+                        false
+                    ));
+                    // Don't allow delete if this is the top category, or the last editable category in this context.
+                    if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                        // Sets up delete link.
+                        $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
+                            ['cmid' => $cmid, 'delete' => $category->id, 'sesskey' => sesskey()]);
+                        $menu->add(new action_menu_link(
+                            $deleteurl,
+                            new pix_icon('t/delete', 'delete'),
+                            get_string('delete'),
+                            false
+                        ));
+                    }
+                }
+                // Sets up export to XML link.
+                $exporturl = new moodle_url('/question/export.php',
+                    ['cmid' => $cmid, 'cat' => $category->id . ',' . $category->contextid]);
+                $menu->add(new action_menu_link(
+                    $exporturl,
+                    new pix_icon('t/download', 'download'),
+                    get_string('exportasxml', 'question'),
+                    false
+                ));
+                // Menu to string/html.
+                $menu = $OUTPUT->render($menu);
+                // Don't allow movement if only subcat.
+                if (!question_is_only_child_of_top_category_in_context($category->id)) {
+                    $handle = $OUTPUT->pix_icon('grip-vertical-solid', 'gripvsol', 'qbank_managecategories');
+                } else {
+                    $handle = '';
+                }
+                $items[] = [
+                    'questionbankurl' => $questionbankurl->__toString(),
+                    'categoryname' => $categoryname,
+                    'questioncount' => $questioncount,
+                    'categorydesc' => $categorydesc,
+                    'editactionmenu' => $menu,
+                    'handle' => $handle
+                ];
+            }
+
+            $data[] = [
+                'heading' => get_string('questioncatsfor', 'question', $fullcontext->get_context_name()),
+                'ctxlvl' => $editlist->context->contextlevel,
+                'items' => $items,
+            ];
+        }
+        $data = json_encode($data);
+        return $data;
     }
 
     /**

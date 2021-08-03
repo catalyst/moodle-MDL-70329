@@ -32,7 +32,6 @@ use qbank_managecategories\question_category_object;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
-$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
@@ -58,8 +57,9 @@ $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
 
-$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
-
+$data = helper::get_data_from_category_object($qcobject);
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init', [$data]);
+//$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
 
 if ($param->left || $param->right) {
     require_sesskey();
