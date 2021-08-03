@@ -70,7 +70,6 @@ class qtype_description_test_helper extends question_test_helper {
         $qdata->category = 0;
         $qdata->parent = 0;
         $qdata->stamp = make_unique_id_code();
-        $qdata->version = make_unique_id_code();
         $qdata->timecreated = time();
         $qdata->timemodified = time();
         $qdata->createdby = $USER->id;

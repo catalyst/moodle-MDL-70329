@@ -69,7 +69,6 @@ class qtype_multianswer_test extends advanced_testcase {
         $q->penalty = 0.3333333;
         $q->length = 1;
         $q->stamp = make_unique_id_code();
-        $q->version = make_unique_id_code();
         $q->hidden = 0;
         $q->timecreated = time();
         $q->timemodified = time();
@@ -139,7 +138,7 @@ class qtype_multianswer_test extends advanced_testcase {
 
         $this->assertEquals(['id', 'category', 'parent', 'name', 'questiontext', 'questiontextformat',
                 'generalfeedback', 'generalfeedbackformat', 'defaultmark', 'penalty', 'qtype',
-                'length', 'stamp', 'version', 'hidden', 'timecreated', 'timemodified',
+                'length', 'stamp', 'hidden', 'timecreated', 'timemodified',
                 'createdby', 'modifiedby', 'idnumber', 'contextid', 'options', 'hints', 'categoryobject'],
                 array_keys(get_object_vars($questiondata)));
         $this->assertEquals($category->id, $questiondata->category);
@@ -215,7 +214,6 @@ class qtype_multianswer_test extends advanced_testcase {
         }
         // Need to get rid of (version, idnumber, options, hints, maxmark). They are missing @ fromform.
         $gotquestions = array_map(function($question) {
-                unset($question->version);
                 unset($question->idnumber);
                 unset($question->options);
                 unset($question->hints);
@@ -250,7 +248,7 @@ class qtype_multianswer_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'version', 'timemodified', 'timecreated', 'options', 'hints', 'stamp'))) {
+            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options', 'hints', 'stamp'))) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }
@@ -273,7 +271,7 @@ class qtype_multianswer_test extends advanced_testcase {
         $this->assertObjectHasAttribute('questions', $actualquestiondata->options);
 
         $subqpropstoignore =
-            array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'version', 'timemodified',
+            array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'timemodified',
                 'timecreated');
         foreach ($questiondata->options->questions as $subqno => $subq) {
             $actualsubq = $actualquestiondata->options->questions[$subqno];
