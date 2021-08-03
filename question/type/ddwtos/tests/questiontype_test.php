@@ -73,7 +73,6 @@ class qtype_ddwtos_test extends question_testcase {
         $dd->penalty = 0.3333333;
         $dd->length = 1;
         $dd->stamp = make_unique_id_code();
-        $dd->version = make_unique_id_code();
         $dd->hidden = 0;
         $dd->idnumber = null;
         $dd->timecreated = time();
@@ -147,7 +146,6 @@ class qtype_ddwtos_test extends question_testcase {
 
         $expected = test_question_maker::make_question('ddwtos');
         $expected->stamp = $qdata->stamp;
-        $expected->version = $qdata->version;
         $expected->idnumber = null;
 
         $q = $this->qtype->make_question($qdata);
