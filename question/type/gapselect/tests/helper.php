@@ -57,7 +57,6 @@ class qtype_gapselect_test_helper extends question_test_helper {
         $gapselect->penalty = 0.3333333;
         $gapselect->length = 1;
         $gapselect->stamp = make_unique_id_code();
-        $gapselect->version = make_unique_id_code();
         $gapselect->hidden = 0;
         $gapselect->idnumber = null;
         $gapselect->timecreated = time();

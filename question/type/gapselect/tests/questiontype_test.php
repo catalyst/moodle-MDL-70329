@@ -105,7 +105,6 @@ class qtype_gapselect_test extends question_testcase {
 
         $expected = test_question_maker::make_question('gapselect');
         $expected->stamp = $qdata->stamp;
-        $expected->version = $qdata->version;
 
         $q = $this->qtype->make_question($qdata);
 
