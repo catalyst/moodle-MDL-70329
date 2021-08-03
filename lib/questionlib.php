@@ -242,10 +242,10 @@ function question_remove_stale_questions_from_category($categoryid): void {
     global $DB;
     $sql = 'SELECT q.id
               FROM {question} q
-              JOIN {question_version} qv
+              JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
              WHERE qc.id = :categoryid
@@ -288,7 +288,7 @@ function question_category_delete_safe($category): void {
         // and then that course is moved to another category (MDL-14802).
         $questionids = [];
         foreach ($questionentries as $questionentry) {
-            array_merge($questionids, $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id'));
+            array_merge($questionids, $DB->get_records('question_versions', ['questionbankentryid' => $questionentry], '', 'id'));
         }
         if (!empty($questionids)) {
             $parentcontextid = SYSCONTEXTID;
@@ -316,7 +316,7 @@ function question_category_delete_safe($category): void {
  */
 function question_delete_question_bank_entry_questions($questionentry, $contextid): void {
     global $DB;
-    $questionids = $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id');
+    $questionids = $DB->get_records('question_versions', ['questionbankentryid' => $questionentry], '', 'id');
 
     // Try to delete each question.
     foreach ($questionids as $questionid) {
@@ -338,7 +338,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
     $questionentries = $DB->get_records('question_bank_entry', ['questioncategoryid' => $categoryid], '', 'id');
     $questionids = [];
     foreach ($questionentries as $questionentry) {
-        array_merge($questionids, $DB->get_records('question_version', ['bankentryid' => $questionentry], '', 'id, 1'));
+        array_merge($questionids, $DB->get_records('question_versions', ['questionbankentryid' => $questionentry], '', 'id, 1'));
     }
     if ($questionids) {
         if (questions_in_use(array_keys($questionids))) {
@@ -370,7 +370,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
  */
 function delete_question_bank_entry($entryid): void {
     global $DB;
-    if ($DB->count_records('question_version', ['bankentryid' => $entryid]) == 0) {
+    if ($DB->count_records('question_versions', ['questionbankentryid' => $entryid]) == 0) {
         $DB->delete_records('question_bank_entry', ['id' => $entryid]);
     }
 }
@@ -398,9 +398,9 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
                    qbe.id as entryid,
                    qc.id as categoryid,
                    qc.contextid as contextid
-              FROM {question_version} qv
+              FROM {question_versions} qv
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
              WHERE qv.questionid = ?';
@@ -434,7 +434,7 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
 
     // Finally delete the question record itself.
     $DB->delete_records('question', ['id' => $question->id]);
-    $DB->delete_records('question_version', ['id' => $questiondata->versionid]);
+    $DB->delete_records('question_versions', ['id' => $questiondata->versionid]);
     $DB->delete_records('question_references', ['versionid' => $questiondata->versionid]);
     delete_question_bank_entry($questiondata->entryid);
     question_bank::notify_question_edited($question->id);
@@ -694,10 +694,10 @@ function idnumber_exist_in_question_category($questionidnumber, $categoryid, $li
     // Check if the idnumber exist in the category.
     $sql = 'SELECT q.id as id
               FROM {question} q
-              JOIN {question_version} qv
+              JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
              WHERE q.idnumber = ?
@@ -748,10 +748,10 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
                    q.idnumber,
                    qr.id as referenceid
               FROM {question} q
-              JOIN {question_version} qv
+              JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
               JOIN {question_references} qr
@@ -962,10 +962,10 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
                    qc.contextid as contextid
                    {$extrafields}
               FROM {question} q
-              JOIN {question_version} qv
+              JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
               {$join}
@@ -1488,15 +1488,19 @@ function get_categories_for_contexts($contexts, $sortorder = 'qc.parent, qc.sort
     $topwhere = $top ? '' : 'AND qc.parent <> 0';
 
     $sql = "SELECT qc.*,
-                   count(q.id) as questioncount
-              FROM {question} q
-              JOIN {question_version} qv
-                ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
-              JOIN {question_categories} qc
-                ON qc.id = qbe.questioncategoryid
-             WHERE c.contextid IN ($contexts)
+                   (SELECT count(1)
+                      FROM {question} q
+                      JOIN {question_versions} qv
+                        ON qv.questionid = q.id
+                      JOIN {question_bank_entry} qbe
+                        ON qbe.id = qv.questionbankentryid
+                      JOIN {question_categories} qci
+                        ON qc.id = qbe.questioncategoryid
+                     WHERE qc.id = qci.id
+                       AND qv.status='0' 
+                       AND qc.parent='0') AS questioncount
+              FROM {question_categories} qc
+             WHERE qc.contextid IN ($contexts)
              $topwhere
           ORDER BY $sortorder";
 
@@ -1523,7 +1527,7 @@ function question_category_options($contexts, $top = false, $currentcat = 0, $po
     }
     $contextslist = join(', ', $pcontexts);
 
-    $categories = get_categories_for_contexts($contextslist, 'parent, sortorder, name ASC', $top);
+    $categories = get_categories_for_contexts($contextslist, 'qc.parent, qc.sortorder, qc.name ASC', $top);
 
     if ($top) {
         $categories = question_fix_top_names($categories);
@@ -1771,10 +1775,10 @@ function question_has_capability_on($questionorid, $cap, $notused = -1): bool {
                            q.createdby,
                            qc.contextid
                       FROM {question} q
-                      JOIN {question_version} qv
+                      JOIN {question_versions} qv
                         ON qv.questionid = q.id
                       JOIN {question_bank_entry} qbe
-                        ON qbe.id = qv.bankentryid
+                        ON qbe.id = qv.questionbankentryid
                       JOIN {question_categories} qc
                         ON qc.id = qbe.questioncategoryid
                      WHERE q.id = :id';
@@ -2151,10 +2155,10 @@ function core_question_question_preview_pluginfile($previewcontext, $questionid,
     $sql = 'SELECT q.*,
                    qc.contextid
               FROM {question} q
-              JOIN {question_version} qv
+              JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
-                ON qbe.id = qv.bankentryid
+                ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
              WHERE q.id = :id
