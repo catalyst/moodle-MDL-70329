@@ -27,6 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/engine/lib.php');
+require_once($CFG->libdir . '/questionlib.php');
 
 
 /**
@@ -367,8 +368,10 @@ class question_type {
         // The actual update/insert done with multiple DB access, so we do it in a transaction.
         $transaction = $DB->start_delegated_transaction ();
 
-        list($question->category) = explode(',', $form->category);
-        $context = $this->get_context_by_category_id($question->category);
+        list($form->category) = explode(',', $form->category);
+        $context = $this->get_context_by_category_id($form->category);
+        // TODO: The category wont be in the question table, this is done now as the category is required.
+        $question->category = $form->category;
 
         // This default implementation is suitable for most
         // question types.
@@ -430,18 +433,30 @@ class question_type {
                     $question->idnumber = $form->idnumber;
                 }
             }
+        } else {
+            $question->idnumber = null;
         }
 
-        // If the question is new, create it.
-        $newquestion = false;
-        if (empty($question->id)) {
-            // Set the unique code.
-            $question->stamp = make_unique_id_code();
-            $question->createdby = $USER->id;
-            $question->timecreated = time();
-            $question->id = $DB->insert_record('question', $question);
-            $newquestion = true;
+        // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
+        $versionnumber = 0;
+        $questionbankentry = null;
+        if (!empty($question->id)) {
+            $version = get_question_version($question->id);
+            $versionnumber = $version[array_key_first($version)]->version;
+            // Get the bank entry record where the question is referenced.
+            $questionbankentry = get_question_bank_entry($question->id);
         }
+
+        // Always creates a new question and version record.
+        // Set the unique code.
+        $question->stamp = make_unique_id_code();
+        $question->createdby = $USER->id;
+        $question->timecreated = time();
+        $question->id = $DB->insert_record('question', $question);
+        $newquestion = true;
+
+        // Create a new version, bank_entry and reference for each question.
+        save_question_versions($question, $form, $context, $versionnumber, $questionbankentry);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
@@ -465,7 +480,6 @@ class question_type {
         // Now to save all the answers and type-specific options.
         $form->id = $question->id;
         $form->qtype = $question->qtype;
-        $form->category = $question->category;
         $form->questiontext = $question->questiontext;
         $form->questiontextformat = $question->questiontextformat;
         // Current context.
@@ -485,10 +499,6 @@ class question_type {
             throw new coding_exception(
                     '$result->noticeyesno no longer supported in save_question.');
         }
-
-        // Give the question a unique version stamp determined by question_hash().
-        $DB->set_field('question', 'version', question_hash($question),
-                array('id' => $question->id));
 
         if ($newquestion) {
             // Log the creation of this question.
@@ -945,7 +955,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->version = $questiondata->version;
         $question->hidden = $questiondata->hidden;
         $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
