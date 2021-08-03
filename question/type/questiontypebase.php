@@ -367,6 +367,7 @@ class question_type {
         // The actual update/insert done with multiple DB access, so we do it in a transaction.
         $transaction = $DB->start_delegated_transaction ();
 
+        // TODO: The category wont be in the question table.
         list($question->category) = explode(',', $form->category);
         $context = $this->get_context_by_category_id($question->category);
 
@@ -443,6 +444,20 @@ class question_type {
             $newquestion = true;
         }
 
+        // Get the question version status, if is a new question or the status is not draft, create a new question.
+        $version = $this->get_question_version($question->id);
+
+        if ($version[array_key_first($version)]->status <> 2 || $newquestion) {
+            $this->save_question_versions($question, $form, $context);
+        } else {
+            // Update additional data for the original question in the bank entry record.
+            $questionbankentry = $this->get_question_bank_entry($question->id);
+            $questionbankentry->name = $question->name;
+            $questionbankentry->idnumber = $question->idnumber;
+            $questionbankentry->ownerid = $question->createdby;
+            $DB->update_record('question_bank_entry', $question);
+        }
+
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
         // Question already exists, update.
@@ -486,6 +501,7 @@ class question_type {
                     '$result->noticeyesno no longer supported in save_question.');
         }
 
+        // TODO: Remove version field in question as now this will be handle by question_versions.
         // Give the question a unique version stamp determined by question_hash().
         $DB->set_field('question', 'version', question_hash($question),
                 array('id' => $question->id));
@@ -503,6 +519,93 @@ class question_type {
         $transaction->allow_commit();
 
         return $question;
+    }
+
+    /**
+     * Create a new version, bank_entry and reference for each question.
+     *
+     * @param $question object question object with all the information required for additional tables.
+     * @param $form object Form data object.
+     * @param $context object Context object.
+     * @throws dml_exception
+     */
+    public function save_question_versions(object $question, object $form, object $context) : void {
+        global $DB;
+
+        // Create a record for question_bank_entry, question_versions and question_references.
+        $questionbankentry = new \stdClass();
+        $questionbankentry->questioncategoryid = $question->category;
+        $questionbankentry->name = $question->name;
+        $questionbankentry->idnumber = $question->idnumber;
+        $questionbankentry->ownerid = $question->createdby;
+        $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+
+        // Create question_versions records.
+        $questionversion = new \stdClass();
+        $questionversion->questionbankentryid = $questionbankentry->id;
+        $questionversion->questionid = $question->id;
+        $questionversion->status = 2;
+        $questionversion->id = $DB->insert_record('question_versions', $questionversion);
+
+        // As we do not have random types anymore all new questions will go to reference,
+        // set_references will be manage apart.
+        $questionreference = new \stdClass();
+        $questionreference->usingcontextid = $context->id;
+        $questionreference->component = 'core_question';
+        $questionreference->questionarea = 'qbank';
+        $questionreference->itemid = 0;
+        $questionreference->questionbankentryid = $questionbankentry->id;
+        $questionreference->versionid = $questionversion->id;
+        $questionreference->id = $DB->insert_record('question_references', $questionreference);
+
+        if ($form->modulename) {
+            $questionreference = new \stdClass();
+            $questionreference->usingcontextid = $context->id;
+            $questionreference->component = $form->modulename;
+            $questionreference->questionarea = 'slot';
+            $questionreference->itemid = 0;
+            $questionreference->questionbankentryid = $questionbankentry->id;
+            $questionreference->versionid = $questionversion->id;
+            $questionreference->id = $DB->insert_record('question_references', $questionreference);
+        }
+    }
+
+
+    /**
+     * Get the question_bank_entry object given a question id.
+     *
+     * @param $questionid int Question id.
+     * @return false|mixed
+     * @throws dml_exception
+     */
+    public function get_question_bank_entry(int $questionid): object {
+        global $DB;
+
+        $sql = "SELECT qbe.*
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE q.id = :id";
+
+        $qbankentry = $DB->get_record_sql($sql, ['id' => $questionid]);
+
+        return $qbankentry;
+    }
+
+    /**
+     * Get the question versions given a question id in a descending sort .
+     *
+     * @param $questionid int Question id.
+     * @return array
+     * @throws dml_exception
+     */
+    public function get_question_version($questionid): array {
+        global $DB;
+
+        $version = $DB->get_records('question_versions', ['questionid' => $questionid]);
+        krsort($version);
+
+        return $version;
     }
 
     /**

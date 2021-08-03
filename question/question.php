@@ -235,6 +235,10 @@ if ($mform->is_cancelled()) {
         $question->id = 0;
         $question->hidden = 0; // Copies should not be hidden.
     }
+    // If is will be added directly to a module send the module name to be referenced.
+    if ($appendqnumstring && $cm) {
+        $fromform->modulename = 'mod_' . $cm->modname;
+    }
 
     /// Process the combination of usecurrentcat, categorymoveto and category form
     /// fields, so the save_question method only has to consider $fromform->category
