@@ -29,6 +29,11 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class question_edit_contexts.
+ *
+ * @package   core_question
+ * @copyright 2007 Jamie Pratt me@jamiep.org
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_edit_contexts {
 

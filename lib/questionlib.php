@@ -1495,7 +1495,7 @@ function get_categories_for_contexts($contexts, $sortorder = 'qc.parent, qc.sort
                       JOIN {question_bank_entry} qbe
                         ON qbe.id = qv.questionbankentryid
                       JOIN {question_categories} qci
-                        ON qc.id = qbe.questioncategoryid
+                        ON qci.id = qbe.questioncategoryid
                      WHERE qc.id = qci.id
                        AND qv.status='0' 
                        AND qc.parent='0') AS questioncount
