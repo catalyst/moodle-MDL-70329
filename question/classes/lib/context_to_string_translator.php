@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Converts contextlevels to strings and back to help with reading/writing contexts
- * to/from import/export files.
+ * Converts contextlevels to strings and back to help with reading/writing contexts to/from import/export files.
  *
  * @package   core_question
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
@@ -41,7 +40,7 @@ class context_to_string_translator {
     /**
      * context_to_string_translator constructor.
      *
-     * @param $contexts
+     * @param \context[] $contexts
      */
     public function __construct($contexts) {
         $this->generate_context_to_string_array($contexts);
@@ -50,7 +49,7 @@ class context_to_string_translator {
     /**
      * Context to string.
      *
-     * @param $contextid
+     * @param int $contextid
      * @return mixed
      */
     public function context_to_string($contextid) {
@@ -60,7 +59,7 @@ class context_to_string_translator {
     /**
      * String to context.
      *
-     * @param $contextname
+     * @param string $contextname
      * @return false|int|string
      */
     public function string_to_context($contextname) {
@@ -71,7 +70,7 @@ class context_to_string_translator {
     /**
      * Generate context to array.
      *
-     * @param $contexts
+     * @param \context[] $contexts
      */
     protected function generate_context_to_string_array($contexts) {
         if (!$this->contexttostringarray) {

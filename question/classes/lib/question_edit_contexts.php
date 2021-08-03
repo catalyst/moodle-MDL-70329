@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tracks all the contexts related to the one where we are currently editing
- * questions, and provides helper methods to check permissions.
+ * Tracks all the contexts related to the one we are currently editing questions and provides helper methods to check permissions.
  *
  * @package   core_question
  * @copyright 2007 Jamie Pratt me@jamiep.org
@@ -70,13 +69,15 @@ class question_edit_contexts {
 
     /**
      * Constructor
-     * @param \context the current context.
+     * @param \context $thiscontext the current context.
      */
     public function __construct(\context $thiscontext) {
         $this->allcontexts = array_values($thiscontext->get_parent_contexts(true));
     }
 
     /**
+     * Get all the contexts.
+     *
      * @return \context[] all parent contexts
      */
     public function all() {
@@ -84,6 +85,8 @@ class question_edit_contexts {
     }
 
     /**
+     * Get the lowest context.
+     *
      * @return \context lowest context which must be either the module or course context
      */
     public function lowest() {
@@ -91,6 +94,8 @@ class question_edit_contexts {
     }
 
     /**
+     * Get the contexts having cap.
+     *
      * @param string $cap capability
      * @return \context[] parent contexts having capability, zero based index
      */
@@ -105,6 +110,8 @@ class question_edit_contexts {
     }
 
     /**
+     * Get the contexts having at least one cap.
+     *
      * @param array $caps capabilities
      * @return \context[] parent contexts having at least one of $caps, zero based index
      */
@@ -114,7 +121,7 @@ class question_edit_contexts {
             foreach ($caps as $cap) {
                 if (has_capability($cap, $context)) {
                     $contextswithacap[] = $context;
-                    break; //done with caps loop
+                    break; // Done with caps loop.
                 }
             }
         }
@@ -122,6 +129,8 @@ class question_edit_contexts {
     }
 
     /**
+     * Context having at least one cap.
+     *
      * @param string $tabname edit tab name
      * @return \context[] parent contexts having at least one of $caps, zero based index
      */
@@ -130,6 +139,8 @@ class question_edit_contexts {
     }
 
     /**
+     * Contexts for adding question and also using it.
+     *
      * @return \context[] those contexts where a user can add a question and then use it.
      */
     public function having_add_and_use() {
