@@ -126,6 +126,7 @@ check when and who has enabled/disabled plugins.
 * Final deprecation: The following functions along with associated tests have been removed:
   - core_grades_external::get_grades
   - core_grades_external::get_grade_item
+* Function question_hash() is deprecated without replacement.
 
 === 3.11.4 ===
 * A new option dontforcesvgdownload has been added to the $options parameter of the send_file() function.
