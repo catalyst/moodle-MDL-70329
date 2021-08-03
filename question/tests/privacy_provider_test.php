@@ -309,12 +309,14 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $q2 = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
 
         $this->setUser($otheruser);
-        $questiongenerator->update_question($q2);
+        // When we update a question, a new question/version is created.
+        $q2updated = $questiongenerator->update_question($q2);
         $q3 = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
         $q4 = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
 
         $this->setUser($user);
-        $questiongenerator->update_question($q3);
+        // When we update a question, a new question/version is created.
+        $q3updated = $questiongenerator->update_question($q3);
         $q5 = $questiongenerator->create_question('shortanswer', null, ['category' => $othercat->id]);
 
         $approvedcontextlist = new \core_privacy\tests\request\approved_contextlist(
@@ -336,12 +338,12 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(0, $qrecord->createdby);
         $this->assertEquals(0, $qrecord->modifiedby);
 
-        $qrecord = $DB->get_record('question', ['id' => $q2->id]);
-        $this->assertEquals(0, $qrecord->createdby);
+        $qrecord = $DB->get_record('question', ['id' => $q2updated->id]);
+        $this->assertEquals($otheruser->id, $qrecord->createdby);
         $this->assertEquals($otheruser->id, $qrecord->modifiedby);
 
-        $qrecord = $DB->get_record('question', ['id' => $q3->id]);
-        $this->assertEquals($otheruser->id, $qrecord->createdby);
+        $qrecord = $DB->get_record('question', ['id' => $q3updated->id]);
+        $this->assertEquals(0, $qrecord->createdby);
         $this->assertEquals(0, $qrecord->modifiedby);
 
         $qrecord = $DB->get_record('question', ['id' => $q4->id]);
@@ -512,9 +514,11 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(
                 0,
                 $DB->count_records_sql("SELECT COUNT(q.id)
-                                          FROM {question} q
-                                          JOIN {question_categories} qc ON q.category = qc.id
-                                         WHERE qc.contextid = ?
+                                              FROM {question} q
+                                              JOIN {question_versions} qv ON qv.questionid = q.id
+                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                             WHERE qc.contextid = ?
                                                AND (q.createdby = ? OR q.modifiedby = ? OR q.createdby = ? OR q.modifiedby = ?)",
                         [$course1context->id, $user1->id, $user1->id, $user2->id, $user2->id])
         );
@@ -523,9 +527,11 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(
                 2,
                 $DB->count_records_sql("SELECT COUNT(q.id)
-                                          FROM {question} q
-                                          JOIN {question_categories} qc ON q.category = qc.id
-                                         WHERE qc.contextid = ? AND (q.createdby = ? OR q.modifiedby = ?)",
+                                              FROM {question} q
+                                              JOIN {question_versions} qv ON qv.questionid = q.id
+                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                             WHERE qc.contextid = ? AND (q.createdby = ? OR q.modifiedby = ?)",
                         [$course1context->id, $user3->id, $user3->id])
         );
 
