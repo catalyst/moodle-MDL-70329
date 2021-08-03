@@ -48,10 +48,11 @@ if (!$category = $DB->get_record("question_categories", ['id' => $catid])) {
 
 $categorycontext = context::instance_by_id($category->contextid);
 $category->context = $categorycontext;
-// This page can be called without courseid or cmid in which case.
+
+// This page can be called without courseid or cmid in which case
 // We get the context from the category object.
-if ($contexts === null) { // Need to get the course from the chosen category.
-    $contexts = new question_edit_contexts($categorycontext);
+if ($contexts === null) { // need to get the course from the chosen category
+    $contexts = new core_question\lib\question_edit_contexts($categorycontext);
     $thiscontext = $contexts->lowest();
     if ($thiscontext->contextlevel == CONTEXT_COURSE) {
         require_login($thiscontext->instanceid, false);

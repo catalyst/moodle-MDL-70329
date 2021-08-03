@@ -50,7 +50,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -101,7 +101,7 @@ class core_question_events_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $contexts = new question_edit_contexts(context_module::instance($quiz->cmid));
+        $contexts = new core_question\lib\question_edit_contexts(context_module::instance($quiz->cmid));
 
         $defaultcategoryobj = question_make_default_categories([$contexts->lowest()]);
         $defaultcategory = $defaultcategoryobj->id . ',' . $defaultcategoryobj->contextid;
@@ -222,12 +222,13 @@ class core_question_events_testcase extends advanced_testcase {
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
-        $qtype->save_question($questiondata, $fromform);
+        $question = $qtype->save_question($questiondata, $fromform);
         $events = $sink->get_events();
         $event = reset($events);
 
         // Check that the event data is valid.
-        $this->assertInstanceOf('\core\event\question_updated', $event);
+        // Every save is a new question after Moodle 4.0.
+        $this->assertInstanceOf('\core\event\question_created', $event);
         $this->assertEquals($question->id, $event->objectid);
         $this->assertEquals($cat->id, $event->other['categoryid']);
         $this->assertDebuggingNotCalled();
