@@ -57,7 +57,6 @@ class qformat_xml_test extends question_testcase {
         $q->penalty = 0.3333333;
         $q->length = 1;
         $q->stamp = make_unique_id_code();
-        $q->version = make_unique_id_code();
         $q->hidden = 0;
         $q->timecreated = time();
         $q->timemodified = time();
