@@ -499,9 +499,6 @@ class qformat_default {
                 return true;
             }
 
-            // Give the question a unique version stamp determined by question_hash()
-            $DB->set_field('question', 'version', question_hash($question),
-                    array('id' => $question->id));
         }
         return true;
     }
