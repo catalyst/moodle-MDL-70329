@@ -14,24 +14,37 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Base for various question-related areas.
+ *
+ * This is an abstract class so it will be skipped by manager when it finds all areas.
+ *
+ * @package    tool_brickfield
+ * @copyright  2020 onward: Brickfield Education Labs, www.brickfield.ie
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_brickfield\local\areas\core_question;
 
 use core\event\question_created;
 use core\event\question_updated;
+use core_question\admin\tool\brickfield;
 
 /**
- * Base class for various question-related areas
+ * Base class for various question-related areas.
  *
- * This is an abstract class so it will be skipped by manager when it finds all areas
+ * This is an abstract class so it will be skipped by manager when it finds all areas.
  *
  * @package    tool_brickfield
  * @copyright  2020 onward: Brickfield Education Labs, www.brickfield.ie
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class answerbase extends base {
 
     /**
      * Get table name reference.
+     *
      * @return string
      */
     public function get_ref_tablename(): string {
@@ -40,34 +53,15 @@ abstract class answerbase extends base {
 
     /**
      * Find recordset of the relevant areas.
+     *
      * @param \core\event\base $event
      * @return \moodle_recordset|null
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public function find_relevant_areas(\core\event\base $event): ?\moodle_recordset {
-        global $DB;
-
         if (($event instanceof question_created) || ($event instanceof question_updated)) {
-            $rs = $DB->get_recordset_sql(
-                "SELECT {$this->get_type()} AS type,
-                ctx.id AS contextid,
-                {$this->get_standard_area_fields_sql()}
-                a.id AS itemid,
-                {$this->get_reftable_field_sql()}
-                t.id AS refid,
-                {$this->get_course_and_cat_sql($event)}
-                a.{$this->get_fieldname()} AS content
-            FROM {question} t
-            INNER JOIN {question_answers} a ON a.question = t.id
-            INNER JOIN {question_categories} qc ON qc.id = t.category
-            INNER JOIN {context} ctx ON ctx.id = qc.contextid
-            WHERE (t.id = :refid)
-            ORDER BY a.id",
-                [
-                    'refid' => $event->objectid,
-                ]);
-            return $rs;
+            $areas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
+            return $areas->find_relevant_question_answer_areas($this->get_course_and_cat_sql($event),
+                                                                $event->objectid, $this->get_reftable_field_sql());
         }
         return null;
     }
@@ -75,61 +69,36 @@ abstract class answerbase extends base {
     /**
      * Return an array of area objects that contain content at the site and system levels only. This would be question content from
      * question categories at the system context, or course category context.
+     *
      * @return mixed
-     * @throws \dml_exception
      */
     public function find_system_areas(): ?\moodle_recordset {
-        global $DB;
-        $select = 'SELECT ' . $this->get_type() . ' AS type, qc.contextid AS contextid, ' . $this->get_standard_area_fields_sql() .
-            ' a.id AS itemid, ' . $this->get_reftable_field_sql() . 't.id AS refid, '.
-            SITEID . ' as courseid, cc.id as categoryid, a.'.$this->get_fieldname().' AS content ';
-        $from = 'FROM {question} t ' .
-            'INNER JOIN {question_answers} a ON a.question = t.id ' .
-            'INNER JOIN {question_categories} qc ON qc.id = t.category ' .
-            'INNER JOIN {context} ctx ON ctx.id = qc.contextid ' .
-            'LEFT JOIN {course_categories} cc ON cc.id = ctx.instanceid AND ctx.contextlevel = :coursecat ';
-        $where = 'WHERE (ctx.contextlevel = :syscontext) OR (ctx.contextlevel = :coursecat2) ';
-        $order = 'ORDER BY a.id';
         $params = [
             'syscontext' => CONTEXT_SYSTEM,
             'coursecat' => CONTEXT_COURSECAT,
             'coursecat2' => CONTEXT_COURSECAT,
         ];
-
-        return $DB->get_recordset_sql($select . $from . $where . $order, $params);
+        $systemareas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
+        return $systemareas->find_system_question_answer_areas($params, $this->get_reftable_field_sql());
     }
 
     /**
      * Find recordset of the course areas.
+     *
      * @param int $courseid
      * @return \moodle_recordset
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public function find_course_areas(int $courseid): ?\moodle_recordset {
         global $DB;
 
         $coursecontext = \context_course::instance($courseid);
-        return $DB->get_recordset_sql(
-            "SELECT {$this->get_type()} AS type,
-                ctx.id AS contextid,
-                {$this->get_standard_area_fields_sql()}
-                a.id AS itemid,
-                {$this->get_reftable_field_sql()}
-                t.id AS refid,
-                {$courseid} AS courseid,
-                a.{$this->get_fieldname()} AS content
-            FROM {question} t
-            INNER JOIN {question_answers} a ON a.question = t.id
-            INNER JOIN {question_categories} qc ON qc.id = t.category
-            INNER JOIN {context} ctx ON ctx.id = qc.contextid
-            WHERE (ctx.contextlevel = :ctxcourse AND ctx.id = qc.contextid AND ctx.instanceid = :courseid) OR
-                (ctx.contextlevel = :module AND {$DB->sql_like('ctx.path', ':coursecontextpath')})
-            ORDER BY a.id",
-            ['ctxcourse' => CONTEXT_COURSE,
-             'courseid' => $courseid,
-             'module' => CONTEXT_MODULE,
-             'coursecontextpath' => $DB->sql_like_escape($coursecontext->path) . '/%',
-            ]);
+        $param = [
+            'ctxcourse' => CONTEXT_COURSE,
+            'courseid' => $courseid,
+            'module' => CONTEXT_MODULE,
+            'coursecontextpath' => $DB->sql_like_escape($coursecontext->path) . '/%',
+        ];
+        $courseareas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
+        return $courseareas->find_question_answer_area($courseid, $param, $this->get_reftable_field_sql());
     }
 }
