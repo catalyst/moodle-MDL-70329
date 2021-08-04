@@ -259,7 +259,7 @@ class brickfield {
                        q.id AS refid,
                        " . SITEID . "  as courseid,
                        cc.id as categoryid,
-                       q.{$this->fieldname} AS content
+                       a.{$this->fieldname} AS content
                   FROM {question} q
             INNER JOIN {question_answers} a 
                     ON a.question = q.id
