@@ -367,9 +367,10 @@ class question_type {
         // The actual update/insert done with multiple DB access, so we do it in a transaction.
         $transaction = $DB->start_delegated_transaction ();
 
-        // TODO: The category wont be in the question table.
-        list($question->category) = explode(',', $form->category);
-        $context = $this->get_context_by_category_id($question->category);
+        list($form->category) = explode(',', $form->category);
+        $context = $this->get_context_by_category_id($form->category);
+        // TODO: The category wont be in the question table, this is done now as the category is required.
+        $question->category = $form->category;
 
         // This default implementation is suitable for most
         // question types.
@@ -433,21 +434,20 @@ class question_type {
             }
         }
 
+        // Get the question version status, if is a new question or the status is not draft, create a new question.
+        $version = $this->get_question_version($question->id);
+
         // If the question is new, create it.
         $newquestion = false;
-        if (empty($question->id)) {
+        if (empty($question->id) || $version[array_key_first($version)]->status <> 2) {
             // Set the unique code.
             $question->stamp = make_unique_id_code();
             $question->createdby = $USER->id;
             $question->timecreated = time();
             $question->id = $DB->insert_record('question', $question);
             $newquestion = true;
-        }
 
-        // Get the question version status, if is a new question or the status is not draft, create a new question.
-        $version = $this->get_question_version($question->id);
-
-        if ($version[array_key_first($version)]->status <> 2 || $newquestion) {
+            // Create a new version, bank_entry and reference for each question.
             $this->save_question_versions($question, $form, $context);
         } else {
             // Update additional data for the original question in the bank entry record.
@@ -455,7 +455,7 @@ class question_type {
             $questionbankentry->name = $question->name;
             $questionbankentry->idnumber = $question->idnumber;
             $questionbankentry->ownerid = $question->createdby;
-            $DB->update_record('question_bank_entry', $question);
+            $DB->update_record('question_bank_entry', $questionbankentry);
         }
 
         // Now, whether we are updating a existing question, or creating a new
@@ -480,7 +480,6 @@ class question_type {
         // Now to save all the answers and type-specific options.
         $form->id = $question->id;
         $form->qtype = $question->qtype;
-        $form->category = $question->category;
         $form->questiontext = $question->questiontext;
         $form->questiontextformat = $question->questiontextformat;
         // Current context.
@@ -500,11 +499,6 @@ class question_type {
             throw new coding_exception(
                     '$result->noticeyesno no longer supported in save_question.');
         }
-
-        // TODO: Remove version field in question as now this will be handle by question_versions.
-        // Give the question a unique version stamp determined by question_hash().
-        $DB->set_field('question', 'version', question_hash($question),
-                array('id' => $question->id));
 
         if ($newquestion) {
             // Log the creation of this question.
@@ -534,7 +528,7 @@ class question_type {
 
         // Create a record for question_bank_entry, question_versions and question_references.
         $questionbankentry = new \stdClass();
-        $questionbankentry->questioncategoryid = $question->category;
+        $questionbankentry->questioncategoryid = $form->category;
         $questionbankentry->name = $question->name;
         $questionbankentry->idnumber = $question->idnumber;
         $questionbankentry->ownerid = $question->createdby;
@@ -544,7 +538,7 @@ class question_type {
         $questionversion = new \stdClass();
         $questionversion->questionbankentryid = $questionbankentry->id;
         $questionversion->questionid = $question->id;
-        $questionversion->status = 2;
+        $questionversion->status = 0;
         $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
         // As we do not have random types anymore all new questions will go to reference,
@@ -558,6 +552,7 @@ class question_type {
         $questionreference->versionid = $questionversion->id;
         $questionreference->id = $DB->insert_record('question_references', $questionreference);
 
+        // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
         if ($form->modulename) {
             $questionreference = new \stdClass();
             $questionreference->usingcontextid = $context->id;
@@ -1048,7 +1043,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->version = $questiondata->version;
         $question->hidden = $questiondata->hidden;
         $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
