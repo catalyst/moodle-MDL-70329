@@ -432,14 +432,20 @@ class question_type {
                     $question->idnumber = $form->idnumber;
                 }
             }
+        } else {
+            $question->idnumber = null;
         }
 
         // Get the question version status, if is a new question or the status is not draft, create a new question.
-        $version = $this->get_question_version($question->id);
+        $versionstatus = 0;
+        if (!empty($question->id)) {
+            $version = $this->get_question_version($question->id);
+            $versionstatus = $version[array_key_first($version)]->status;
+        }
 
         // If the question is new, create it.
         $newquestion = false;
-        if (empty($question->id) || $version[array_key_first($version)]->status <> 2) {
+        if (empty($question->id) || $versionstatus <> 2) {
             // Set the unique code.
             $question->stamp = make_unique_id_code();
             $question->createdby = $USER->id;
@@ -553,7 +559,7 @@ class question_type {
         $questionreference->id = $DB->insert_record('question_references', $questionreference);
 
         // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
-        if ($form->modulename) {
+        if (isset($form->modulename)) {
             $questionreference = new \stdClass();
             $questionreference->usingcontextid = $context->id;
             $questionreference->component = $form->modulename;
