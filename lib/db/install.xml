@@ -1403,7 +1403,6 @@
     <TABLE NAME="question" COMMENT="The questions themselves">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="category" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="parent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
@@ -1415,8 +1414,6 @@
         <FIELD NAME="qtype" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="length" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="stamp" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="version" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="hidden" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="time question was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="time that question was last modified"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid of person who created this question"/>
@@ -1425,14 +1422,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="category" TYPE="foreign" FIELDS="category" REFTABLE="question_categories" REFFIELDS="id"/>
         <KEY NAME="parent" TYPE="foreign" FIELDS="parent" REFTABLE="question" REFFIELDS="id" COMMENT="note that to make this recursive FK working someday, the parent field must be declared NULL"/>
         <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id" COMMENT="foreign (createdby) references user (id)"/>
         <KEY NAME="modifiedby" TYPE="foreign" FIELDS="modifiedby" REFTABLE="user" REFFIELDS="id" COMMENT="foreign (modifiedby) references user (id)"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="qtype" UNIQUE="false" FIELDS="qtype"/>
-        <INDEX NAME="categoryidnumber" UNIQUE="true" FIELDS="category, idnumber"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="question_bank_entry" COMMENT="Each question bank entry. This table has one row for each question that appears in the question bank.">
@@ -1487,14 +1482,13 @@
         <FIELD NAME="usingcontextid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Context where question is used."/>
         <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Component (e.g. mod_quiz)"/>
         <FIELD NAME="questionarea" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Slot"/>
-        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID of a quiz_slots."/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID of a quiz_slots or 0 if is question area is core_question."/>
         <FIELD NAME="questionscontextid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Context questions come from."/>
         <FIELD NAME="filtercondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Filter expression in json format"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="usingcontextid" TYPE="foreign" FIELDS="usingcontextid" REFTABLE="context" REFFIELDS="id"/>
-        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="quiz_slots" REFFIELDS="id"/>
         <KEY NAME="questionscontextid" TYPE="foreign" FIELDS="questionscontextid" REFTABLE="context" REFFIELDS="id"/>
       </KEYS>
     </TABLE>

@@ -1308,6 +1308,9 @@ function upgrade_migrate_question_table(): void {
      */
     $questionreferences = [];
 
+    // The actual update/insert done with multiple DB access, so we do it in a transaction.
+    $transaction = $DB->start_delegated_transaction();
+
     // Get all records in question table.
     $questions = $DB->get_recordset('question');
     foreach ($questions as $question) {
@@ -1410,4 +1413,6 @@ function upgrade_migrate_question_table(): void {
     if ($questionreferences) {
         $DB->insert_records('question_references', $questionreferences);
     }
+
+    $transaction->allow_commit();
 }
