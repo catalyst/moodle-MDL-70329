@@ -22,7 +22,7 @@
  * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+error_reporting (E_ALL);
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot."/question/editlib.php");
 
@@ -57,8 +57,9 @@ $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
 
-$data = helper::get_data_from_category_object($qcobject);
-$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init', [$data]);
+$data = helper::get_context_and_heading($qcobject);
+$currenturl = $PAGE->url->__toString();
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init', [$data, $cmid]);
 //$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
 
 if ($param->left || $param->right) {
@@ -117,4 +118,5 @@ if (!empty($param->edit)) {
     // Display the user interface.
     $qcobject->display_user_interface();
 }
+
 echo $OUTPUT->footer();

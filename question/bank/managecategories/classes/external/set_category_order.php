@@ -34,6 +34,7 @@ require_once($CFG->libdir . "/externallib.php");
 use external_api;
 use external_function_parameters;
 use external_value;
+use qbank_managecategories\helper;
 
 class set_category_order extends external_api {
     /**
@@ -43,7 +44,8 @@ class set_category_order extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters([
             'categories' => new external_value(PARAM_RAW, 'JSON String - category order'),
-            'data' => new external_value(PARAM_RAW, 'JSON String - data for mustache file')    
+            'data' => new external_value(PARAM_RAW, 'JSON String - data for mustache file'),  
+            'cmid' => new external_value(PARAM_INT, 'Int - cmid')  
         ]);
     }
 
@@ -54,10 +56,11 @@ class set_category_order extends external_api {
      * @param string $data Data to use to render from mustache.
      * @return string $sortorder sororder.
      */
-    public static function execute(string $categories, string $data) {
+    public static function execute(string $categories, string $data, int $cmid) {
         global $DB;
-        $params = self::validate_parameters(self::execute_parameters(), ['categories' => $categories, 'data' => $data]);
-
+        $params = self::validate_parameters(self::execute_parameters(), 
+            ['categories' => $categories, 'data' => $data, 'cmid' => $cmid]);
+        // New order insertion.
         $categories = json_decode($categories, true);
         $neworder = $categories[0];
         $catid = (int)explode(' ', $categories[2])[1];
@@ -73,14 +76,41 @@ class set_category_order extends external_api {
             $DB->set_field('question_categories', 'parent', $destparentcat->id, ['id' => $catid]);
             // Sets new context id.
             $DB->set_field('question_categories', 'contextid', $newctxid, ['id' => $catid]);
-            // Sets sortorder field.
+            // Sets sortorder field and retrieval of all category ids.
+            $categorylistids = [];
             foreach ($neworder as $order => $category) {
                 foreach ($category as $innerorder => $innervalue) {
                     $DB->set_field('question_categories', 'sortorder', $innerorder, ['id' => explode(' ', $innervalue)[1]]);
+                    $categorylistids[] = explode(' ', $innervalue)[1];
                 }
             }
         }
-        //$sortorder = json_encode($categories);
+
+        // Data to pass to mustache file
+        $data = json_decode($data, true);
+        $records = $DB->get_records_list('question_categories', 'id', $categorylistids);
+        $records = json_decode(json_encode($records), true);
+        $contexts = [];
+        foreach ($records as $categoryid => $record) {
+            $editactionmenu = helper::create_category_action_menu($cmid, $record['id'], $record['contextid']);
+            $questionbankurl = helper::create_category_questionbankurl($cmid, $record['id'], $record['contextid']);
+            $handle = helper::create_category_handle($record['id']);
+            // $record['contextid']
+            $contexts[$record['contextid']][] = [
+                'categoryname' => $record['name'],
+                'categorydescr' => $record['info'],
+                'editactionmenu' => $editactionmenu,
+                'questionbankurl' => $questionbankurl,
+                'handle' => $handle,
+            ];
+        }
+        // foreach ($data as $key => $dat) {
+        //     foreach ($contexts as $context) {
+        //         $data[$key]['items'] = $context;
+        //     }
+        // }
+        //$data = array_merge_recursive($data, $contexts);
+        $data = json_encode($contexts);
         return $data;
     }
 
