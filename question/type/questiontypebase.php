@@ -536,7 +536,7 @@ class question_type {
         $questionbankentry = new \stdClass();
         $questionbankentry->questioncategoryid = $form->category;
         $questionbankentry->name = $question->name;
-        $questionbankentry->idnumber = $question->idnumber;
+        $questionbankentry->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $form->category);
         $questionbankentry->ownerid = $question->createdby;
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
 

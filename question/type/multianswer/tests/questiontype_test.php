@@ -69,7 +69,6 @@ class qtype_multianswer_test extends advanced_testcase {
         $q->penalty = 0.3333333;
         $q->length = 1;
         $q->stamp = make_unique_id_code();
-        $q->version = make_unique_id_code();
         $q->hidden = 0;
         $q->timecreated = time();
         $q->timemodified = time();
@@ -215,7 +214,6 @@ class qtype_multianswer_test extends advanced_testcase {
         }
         // Need to get rid of (version, idnumber, options, hints, maxmark). They are missing @ fromform.
         $gotquestions = array_map(function($question) {
-                unset($question->version);
                 unset($question->idnumber);
                 unset($question->options);
                 unset($question->hints);
