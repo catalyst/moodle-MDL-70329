@@ -69,6 +69,7 @@ class brickfield {
      * Find the relevant areas of the question.
      *
      * @param string $questiondata
+     * @param int $refid
      * @return \moodle_recordset
      */
     public function find_relevant_question_areas($questiondata, $refid): ?\moodle_recordset {
@@ -87,7 +88,7 @@ class brickfield {
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
-            INNER JOIN {context} ctx 
+            INNER JOIN {context} ctx
                     ON ctx.id = qc.contextid
                  WHERE (q.id = :refid)
               ORDER BY q.id";
@@ -120,12 +121,12 @@ class brickfield {
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
-            INNER JOIN {context} ctx 
+            INNER JOIN {context} ctx
                     ON ctx.id = qc.contextid
-                 WHERE (ctx.contextlevel = :ctxcourse 
-                   AND ctx.id = qc.contextid 
-                   AND ctx.instanceid = :courseid) 
-                    OR (ctx.contextlevel = :module 
+                 WHERE (ctx.contextlevel = :ctxcourse
+                   AND ctx.id = qc.contextid
+                   AND ctx.instanceid = :courseid)
+                    OR (ctx.contextlevel = :module
                    AND {$DB->sql_like('ctx.path', ':coursecontextpath')})
               ORDER BY q.id ASC";
 
@@ -135,7 +136,7 @@ class brickfield {
     /**
      * Find system question areas.
      *
-     * @param $params
+     * @param array $params
      * @return \moodle_recordset
      */
     public function find_system_question_areas($params): ?\moodle_recordset {
@@ -160,7 +161,7 @@ class brickfield {
              LEFT JOIN {course_categories} cc
                     ON cc.id = ctx.instanceid
                    AND ctx.contextlevel = :coursecat
-                 WHERE (ctx.contextlevel = :syscontext) 
+                 WHERE (ctx.contextlevel = :syscontext)
                     OR (ctx.contextlevel = :coursecat2)
               ORDER BY q.id";
 
@@ -171,6 +172,8 @@ class brickfield {
      * Find the relevant question answer areas of the question.
      *
      * @param string $questiondata
+     * @param int $refid
+     * @param string $reftable
      * @return \moodle_recordset
      */
     public function find_relevant_question_answer_areas($questiondata, $refid, $reftable): ?\moodle_recordset {
@@ -181,11 +184,11 @@ class brickfield {
                        {$this->areafield}
                        a.id AS itemid,
                        {$reftable}
-                       q.id AS refid,    
+                       q.id AS refid,
                        {$questiondata}
                        a.{$this->fieldname} AS content
                   FROM {question} q
-            INNER JOIN {question_answers} a 
+            INNER JOIN {question_answers} a
                     ON a.question = q.id
             INNER JOIN {question_versions} qv
                     ON qv.questionid = q.id
@@ -193,7 +196,7 @@ class brickfield {
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
-            INNER JOIN {context} ctx 
+            INNER JOIN {context} ctx
                     ON ctx.id = qc.contextid
                  WHERE (q.id = :refid)
               ORDER BY a.id";
@@ -218,11 +221,11 @@ class brickfield {
                        {$this->areafield}
                        a.id AS itemid,
                        {$reftable}
-                       q.id AS refid,    
+                       q.id AS refid,
                        {$courseid} AS courseid,
                        a.{$this->fieldname} AS content
                   FROM {question} q
-            INNER JOIN {question_answers} a 
+            INNER JOIN {question_answers} a
                     ON a.question = q.id
             INNER JOIN {question_versions} qv
                     ON qv.questionid = q.id
@@ -230,12 +233,12 @@ class brickfield {
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
-            INNER JOIN {context} ctx 
+            INNER JOIN {context} ctx
                     ON ctx.id = qc.contextid
-                 WHERE (ctx.contextlevel = :ctxcourse 
-                   AND ctx.id = qc.contextid 
-                   AND ctx.instanceid = :courseid) 
-                    OR (ctx.contextlevel = :module 
+                 WHERE (ctx.contextlevel = :ctxcourse
+                   AND ctx.id = qc.contextid
+                   AND ctx.instanceid = :courseid)
+                    OR (ctx.contextlevel = :module
                    AND {$DB->sql_like('ctx.path', ':coursecontextpath')})
               ORDER BY a.id ASC";
 
@@ -245,7 +248,8 @@ class brickfield {
     /**
      * Find system question answer areas.
      *
-     * @param $params
+     * @param array $params
+     * @param string $reftable
      * @return \moodle_recordset
      */
     public function find_system_question_answer_areas($params, $reftable): ?\moodle_recordset {
@@ -261,7 +265,7 @@ class brickfield {
                        cc.id as categoryid,
                        a.{$this->fieldname} AS content
                   FROM {question} q
-            INNER JOIN {question_answers} a 
+            INNER JOIN {question_answers} a
                     ON a.question = q.id
             INNER JOIN {question_versions} qv
                     ON qv.questionid = q.id
@@ -274,7 +278,7 @@ class brickfield {
              LEFT JOIN {course_categories} cc
                     ON cc.id = ctx.instanceid
                    AND ctx.contextlevel = :coursecat
-                 WHERE (ctx.contextlevel = :syscontext) 
+                 WHERE (ctx.contextlevel = :syscontext)
                     OR (ctx.contextlevel = :coursecat2)
               ORDER BY a.id";
 
@@ -315,10 +319,10 @@ class brickfield {
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
-            INNER JOIN {context} ctx 
+            INNER JOIN {context} ctx
                     ON ctx.id = qc.contextid
-             LEFT JOIN {course_modules} cm 
-                    ON cm.id = ctx.instanceid 
+             LEFT JOIN {course_modules} cm
+                    ON cm.id = ctx.instanceid
                    AND ctx.contextlevel = :coursemodule
                  WHERE q.id = :refid';
         $params = [
