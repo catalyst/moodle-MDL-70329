@@ -138,7 +138,7 @@ class qtype_multianswer_test extends advanced_testcase {
 
         $this->assertEquals(['id', 'category', 'parent', 'name', 'questiontext', 'questiontextformat',
                 'generalfeedback', 'generalfeedbackformat', 'defaultmark', 'penalty', 'qtype',
-                'length', 'stamp', 'version', 'hidden', 'timecreated', 'timemodified',
+                'length', 'stamp', 'hidden', 'timecreated', 'timemodified',
                 'createdby', 'modifiedby', 'idnumber', 'contextid', 'options', 'hints', 'categoryobject'],
                 array_keys(get_object_vars($questiondata)));
         $this->assertEquals($category->id, $questiondata->category);
@@ -248,7 +248,7 @@ class qtype_multianswer_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'version', 'timemodified', 'timecreated', 'options', 'hints', 'stamp'))) {
+            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options', 'hints', 'stamp'))) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }
@@ -271,7 +271,7 @@ class qtype_multianswer_test extends advanced_testcase {
         $this->assertObjectHasAttribute('questions', $actualquestiondata->options);
 
         $subqpropstoignore =
-            array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'version', 'timemodified',
+            array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'timemodified',
                 'timecreated');
         foreach ($questiondata->options->questions as $subqno => $subq) {
             $actualsubq = $actualquestiondata->options->questions[$subqno];

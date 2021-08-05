@@ -438,9 +438,14 @@ class question_type {
 
         // Get the question version status, if is a new question or the status is not draft, create a new question.
         $versionstatus = 0;
+        $versionnumber = 0;
+        $questionbankentry = null;
         if (!empty($question->id)) {
             $version = $this->get_question_version($question->id);
             $versionstatus = $version[array_key_first($version)]->status;
+            $versionnumber = $version[array_key_first($version)]->version;
+            // Get the bank entry record where the question is referenced.
+            $questionbankentry = $this->get_question_bank_entry($question->id);
         }
 
         // If the question is new, create it.
@@ -454,10 +459,9 @@ class question_type {
             $newquestion = true;
 
             // Create a new version, bank_entry and reference for each question.
-            $this->save_question_versions($question, $form, $context);
+            $this->save_question_versions($question, $form, $context, $versionnumber, $questionbankentry);
         } else {
             // Update additional data for the original question in the bank entry record.
-            $questionbankentry = $this->get_question_bank_entry($question->id);
             $questionbankentry->name = $question->name;
             $questionbankentry->idnumber = $question->idnumber;
             $questionbankentry->ownerid = $question->createdby;
@@ -527,24 +531,39 @@ class question_type {
      * @param $question object question object with all the information required for additional tables.
      * @param $form object Form data object.
      * @param $context object Context object.
+     * @param $versionnumber int Question version number.
+     * @param object|null $questionbankentry object Question bank entry object.
      * @throws dml_exception
      */
-    public function save_question_versions(object $question, object $form, object $context) : void {
+    public function save_question_versions(object $question, object $form, object $context, int $versionnumber = 0,
+                                           object $questionbankentry = null) : void {
         global $DB;
 
-        // Create a record for question_bank_entry, question_versions and question_references.
-        $questionbankentry = new \stdClass();
-        $questionbankentry->questioncategoryid = $form->category;
-        $questionbankentry->name = $question->name;
-        $questionbankentry->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $form->category);
-        $questionbankentry->ownerid = $question->createdby;
-        $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+        if (!$questionbankentry) {
+            // Create a record for question_bank_entry, question_versions and question_references.
+            $questionbankentry = new \stdClass();
+            $questionbankentry->questioncategoryid = $form->category;
+            $questionbankentry->name = $question->name;
+            $questionbankentry->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $form->category);
+            $questionbankentry->ownerid = $question->createdby;
+            $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+        } else {
+            // Update additional data for the original question in the bank entry record.
+            $questionbankentry->name = $question->name;
+            $questionbankentry->idnumber = $question->idnumber;
+            $questionbankentry->ownerid = $question->createdby;
+            $DB->update_record('question_bank_entry', $questionbankentry);
+        }
 
         // Create question_versions records.
         $questionversion = new \stdClass();
         $questionversion->questionbankentryid = $questionbankentry->id;
         $questionversion->questionid = $question->id;
         $questionversion->status = 0;
+        $nextversion = $this->get_next_version($questionbankentry->id);
+        if ($versionnumber && $nextversion) {
+            $questionversion->version = $nextversion;
+        }
         $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
         // As we do not have random types anymore all new questions will go to reference,
@@ -570,7 +589,6 @@ class question_type {
             $questionreference->id = $DB->insert_record('question_references', $questionreference);
         }
     }
-
 
     /**
      * Get the question_bank_entry object given a question id.
@@ -607,6 +625,30 @@ class question_type {
         krsort($version);
 
         return $version;
+    }
+
+    /**
+     * Get the next version number to create base on a Question bank entry id.
+     *
+     * @param $questionbankentryid int Question bank entry id.
+     * @return null|int next version number.
+     * @throws dml_exception
+     */
+    public function get_next_version(int $questionbankentryid): ?int {
+        global $DB;
+
+        $sql = "SELECT MAX(qv.version)
+                  FROM {question_versions} qv
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.id = :id";
+
+        $nextversion = $DB->get_field_sql($sql, ['id' => $questionbankentryid]);
+
+        if ($nextversion) {
+            return (int)$nextversion + 1;
+        }
+
+        return null;
     }
 
     /**

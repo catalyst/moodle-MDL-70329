@@ -199,7 +199,6 @@ class test_question_maker {
         $qdata->penalty = 0.3333333;
         $qdata->length = 1;
         $qdata->stamp = make_unique_id_code();
-        $qdata->version = make_unique_id_code();
         $qdata->hidden = 0;
         $qdata->timecreated = time();
         $qdata->timemodified = time();
