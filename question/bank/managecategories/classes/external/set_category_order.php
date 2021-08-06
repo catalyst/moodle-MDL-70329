@@ -84,7 +84,6 @@ class set_category_order extends external_api {
             }
         }
 
-
         $data = json_encode($data);
         return $data;
     }

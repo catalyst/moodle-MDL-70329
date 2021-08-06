@@ -25,7 +25,7 @@
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
-import Templates from 'core/templates';
+import Fragment from 'core/fragment';
 import $ from 'jquery';
 
 /**
@@ -33,7 +33,7 @@ import $ from 'jquery';
  *
  * @returns {void}
  */
-const setupSortableLists = () => {
+const setupSortableLists = (contextid) => {
     new SortableList(
         '.category_list',
         {
@@ -57,16 +57,20 @@ const setupSortableLists = () => {
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         setCatOrder(JSON.stringify(newOrder));
-        setTimeout(() => {
-            location.reload();
-        }, 500);
+        let html = getCategoriesRendered(contextid);
+        //$('#categoriesrendered').replaceWith(html);
+        //console.log(torender);
+        // setTimeout(() => {
+        //     location.reload();
+        // }, 500);
     });
 };
 
-const templateRender = (context) => {
-    Templates.render('qbank_managecategories/category', context).done((html) => {
-        $('#categoriesrendered').replaceWith(html);
-    });
+const getCategoriesRendered = (contextid) => {
+    let params = {contextid: JSON.stringify(contextid)};
+    let htmlBody = Fragment.loadFragment('qbank_managecategories', 'questions_rendered_reload', contextid, params);
+    console.log(htmlBody);
+    return htmlBody;
 };
 
 /**
@@ -129,6 +133,6 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 
-export const init = () => {
-    setupSortableLists();
+export const init = (contextid) => {
+    setupSortableLists(contextid);
 };

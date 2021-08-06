@@ -32,6 +32,7 @@ import Notification from 'core/notification';
 
 const displayModal = (selector, contextid, cmid) => {
     let trigger = $(selector);
+    console.log(getBody(contextid, cmid));
     ModalFactory.create({
       title: Str.get_string('addcategory', 'question'),
       body: getBody(contextid, cmid),

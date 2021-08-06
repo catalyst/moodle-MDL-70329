@@ -28,8 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use qbank_managecategories\form\question_category_edit_form;
-use context_module;
-use question_edit_contexts;
+require_once($CFG->dirroot . '/question/editlib.php');
 
 /**
  * Question tags fragment callback.
@@ -45,4 +44,15 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
     $mform = new question_category_edit_form(null, $customdata);
     return $mform->render();
+}
+
+function qbank_managecategories_output_fragment_questions_rendered_reload($args) {
+    list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
+        question_edit_setup('categories', '/question/bank/managecategories/category.php');
+    
+    $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
+    $contexts->having_one_edit_tab_cap('categories'), $param->edit,
+    $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
+    //return $qcobject->display_user_interface();
+    return "<h1>teststring</h1>";
 }

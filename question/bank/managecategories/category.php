@@ -22,13 +22,14 @@
  * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-error_reporting (E_ALL);
+
 require_once(__DIR__ . '/../../../config.php');
-require_once($CFG->dirroot."/question/editlib.php");
+require_once($CFG->dirroot . '/question/editlib.php');
 
 use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
+use context_module;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
@@ -36,7 +37,7 @@ core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('categories', '/question/bank/managecategories/category.php');
 
-$thiscontext = \context_module::instance($cmid)->id;
+$thiscontext = context_module::instance($cmid)->id;
 $PAGE->requires->js_call_amd(
     'qbank_managecategories/addcategory_dialogue', 'initModal',
     ['[data-action=addcategory]',
@@ -57,8 +58,7 @@ $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
 
-$currenturl = $PAGE->url->__toString();
-$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init', [$thiscontext]);
 //$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
 
 if ($param->left || $param->right) {
