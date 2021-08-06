@@ -85,9 +85,6 @@ class submit_tags extends external_api {
             throw new \moodle_exception('questiondoesnotexist', 'question');
         }
 
-        require_once($CFG->libdir . '/questionlib.php');
-        require_once($CFG->dirroot . '/question/type/tags_form.php');
-
         $cantag = question_has_capability_on($question, 'tag');
         $questioncontext = \context::instance_by_id($question->contextid);
         $contexts = new \question_edit_contexts($editingcontext);
