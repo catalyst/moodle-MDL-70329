@@ -36,12 +36,13 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0 MDL-71573
  * @see qbank_exportquestions\form\export_form
+ * @todo Final deprecation of this class in moodle 4.4
  */
 class question_export_form extends moodleform {
 
     protected function definition() {
         debugging('Class question_export_form in \core_question\export_form is deprecated,
-        please use core_question\bank\exportquestions\export_form instead.', DEBUG_DEVELOPER);
+         please use core_question\bank\exportquestions\export_form instead.', DEBUG_DEVELOPER);
 
         global $OUTPUT;
 

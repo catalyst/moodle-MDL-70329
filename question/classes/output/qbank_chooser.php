@@ -26,6 +26,7 @@ namespace core_question\output;
 defined('MOODLE_INTERNAL') || die();
 
 use context_course;
+use core\check\performance\debugging;
 use core\output\chooser_section;
 use lang_string;
 use moodle_url;
@@ -54,6 +55,8 @@ class qbank_chooser extends \core\output\chooser {
      * @param context $context The relevant context.
      */
     public function __construct($real, $fake, $course, $hiddenparams, $context) {
+        debugging('Class qbank_chooser has been depreacated and moved to the editquestion plugin,
+         please use qbank_editquestion\qbank_chooser instead.');
         $sections = [];
         $sections[] = new chooser_section('questions', new lang_string('questions', 'question'),
                 array_map(function($qtype) use ($context) {
