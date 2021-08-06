@@ -28,6 +28,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 use qbank_managecategories\form\question_category_edit_form;
+use context_module;
+use question_edit_contexts;
+
 /**
  * Question tags fragment callback.
  *
@@ -36,8 +39,8 @@ use qbank_managecategories\form\question_category_edit_form;
  */
 function qbank_managecategories_output_fragment_new_category_form($args) {
     $args = (object) $args;
-    $thiscontext = \context_module::instance((int)$args->cmid);
-    $contexts = new \question_edit_contexts($thiscontext);
+    $thiscontext = context_module::instance((int)$args->cmid);
+    $contexts = new question_edit_contexts($thiscontext);
     $contexts = $contexts->having_one_edit_tab_cap('categories');
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
     $mform = new question_category_edit_form(null, $customdata);

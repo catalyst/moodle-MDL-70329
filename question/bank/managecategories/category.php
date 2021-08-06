@@ -57,9 +57,8 @@ $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
         $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'));
 
-$data = helper::get_context_and_heading($qcobject);
 $currenturl = $PAGE->url->__toString();
-$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init', [$data, $cmid]);
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
 //$val = question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''));
 
 if ($param->left || $param->right) {
