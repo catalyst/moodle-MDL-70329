@@ -110,7 +110,7 @@ class set_category_order extends external_api {
         //     }
         // }
         //$data = array_merge_recursive($data, $contexts);
-        $data = json_encode($contexts);
+        $data = json_encode($data);
         return $data;
     }
 
