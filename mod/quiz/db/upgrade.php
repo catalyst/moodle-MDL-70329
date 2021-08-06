@@ -60,5 +60,51 @@ function xmldb_quiz_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2020061501, 'quiz');
     }
 
+    if ($oldversion < 2021052502) {
+        // Define table quiz_slot_tags to be dropped.
+        $table = new xmldb_table('quiz_slot_tags');
+
+        // Conditionally launch drop table for quiz_slot_tags.
+        if (!$dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Define fields to be dropped from quiz_slots.
+        $table = new xmldb_table('quiz_slots');
+
+        // Define key questionid (foreign) to be dropped form quiz_slots.
+        $key = new xmldb_key('questionid', XMLDB_KEY_FOREIGN, ['questionid'], 'question', ['id']);
+
+        // Launch drop key questionid.
+        $dbman->drop_key($table, $key);
+
+        // Define key questioncategoryid (foreign) to be dropped form quiz_slots.
+        $key = new xmldb_key('questioncategoryid', XMLDB_KEY_FOREIGN, ['questioncategoryid'], 'question_categories', ['id']);
+
+        // Launch drop key questioncategoryid.
+        $dbman->drop_key($table, $key);
+
+        $field = new xmldb_field('questionid');
+        // Conditionally launch drop field questionid.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('questioncategoryid');
+        // Conditionally launch drop field questioncategoryid.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('includingsubcategories');
+        // Conditionally launch drop field includingsubcategories.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Quiz savepoint reached.
+        upgrade_mod_savepoint(true, 2021052502, 'quiz');
+    }
+
     return true;
 }
