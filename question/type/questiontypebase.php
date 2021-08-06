@@ -460,12 +460,6 @@ class question_type {
 
             // Create a new version, bank_entry and reference for each question.
             $this->save_question_versions($question, $form, $context, $versionnumber, $questionbankentry);
-        } else {
-            // Update additional data for the original question in the bank entry record.
-            $questionbankentry->name = $question->name;
-            $questionbankentry->idnumber = $question->idnumber;
-            $questionbankentry->ownerid = $question->createdby;
-            $DB->update_record('question_bank_entry', $questionbankentry);
         }
 
         // Now, whether we are updating a existing question, or creating a new
@@ -543,16 +537,8 @@ class question_type {
             // Create a record for question_bank_entry, question_versions and question_references.
             $questionbankentry = new \stdClass();
             $questionbankentry->questioncategoryid = $form->category;
-            $questionbankentry->name = $question->name;
-            $questionbankentry->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $form->category);
             $questionbankentry->ownerid = $question->createdby;
             $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
-        } else {
-            // Update additional data for the original question in the bank entry record.
-            $questionbankentry->name = $question->name;
-            $questionbankentry->idnumber = $question->idnumber;
-            $questionbankentry->ownerid = $question->createdby;
-            $DB->update_record('question_bank_entry', $questionbankentry);
         }
 
         // Create question_versions records.
