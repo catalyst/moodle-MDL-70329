@@ -36,7 +36,7 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\form\preview_options_form
- * @todo MDL-72004 remove the class
+ * @todo Final deprecation of this class in moodle 4.4
  */
 class preview_options_form extends moodleform {
 
@@ -113,7 +113,7 @@ class preview_options_form extends moodleform {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\output\question_preview_options
- * @todo MDL-72004 remove the class
+ * @todo Final deprecation of this class in moodle 4.4
  */
 class question_preview_options extends question_display_options {
     /** @var string the behaviour to use for this preview. */
@@ -245,7 +245,7 @@ class question_preview_options extends question_display_options {
  * @return void false if file not found, does not return if found - justsend the file
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_question_pluginfile()
- * @todo MDL-72004 determine the final deprecation
+ * @todo Final deprecation of this in moodle 4.4
  */
 function question_preview_question_pluginfile($course, $context, $component,
         $filearea, $qubaid, $slot, $args, $forcedownload, $fileoptions) {
@@ -292,7 +292,7 @@ function question_preview_question_pluginfile($course, $context, $component,
  * @param context $context
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_action_url()
- * @todo MDL-72004 determine the final deprecation
+ * @todo Final deprecation of this in moodle 4.4
  */
 function question_preview_action_url($questionid, $qubaid,
         question_preview_options $options, $context) {
@@ -318,7 +318,7 @@ function question_preview_action_url($questionid, $qubaid,
  * @param int $previewid optional previewid to sign post saved previewed answers.
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_form_url()
- * @todo MDL-72004 determine the final deprecation
+ * @todo Final deprecation of this in moodle 4.4
  */
 function question_preview_form_url($questionid, $context, $previewid = null) {
     debugging('Function question_preview_form_url() has been deprecated and moved to qbank_previewquestion plugin,
@@ -346,7 +346,7 @@ function question_preview_form_url($questionid, $context, $previewid = null) {
  * @param object $context
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::restart_preview()
- * @todo MDL-72004 determine the final deprecation
+ * @todo Final deprecation of this in moodle 4.4
  */
 function restart_preview($previewid, $questionid, $displayoptions, $context) {
     debugging('Function restart_preview() has been deprecated and moved to qbank_previewquestion plugin,
