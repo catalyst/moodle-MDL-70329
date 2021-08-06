@@ -200,7 +200,6 @@ class view {
      * Get the list of qbank plugins with available objects for features.
      *
      * @return array
-     * @todo MDL-72004 changes for class renaming.
      */
     protected function get_question_bank_plugins(): array {
         $questionbankclasscolumns = [];
@@ -225,16 +224,12 @@ class view {
 
         foreach ($corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
-            if (!class_exists($fullname)) {
-                if (class_exists('core_question\\local\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\local\\bank\\' . $fullname;
-                } else if (class_exists('core_question\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\bank\\' . $fullname;
-                } else {
-                    throw new \coding_exception("No such class exists: $fullname");
-                }
+            if (class_exists('core_question\\local\\bank\\' . $fullname)) {
+                $fullname = 'core_question\\local\\bank\\' . $fullname;
+                $questionbankclasscolumns[$shortname] = new $fullname($this);
+            } else {
+                $questionbankclasscolumns[$shortname] = '';
             }
-            $questionbankclasscolumns[$shortname] = new $fullname($this);
         }
         $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         foreach ($plugins as $componentname => $plugin) {
@@ -280,30 +275,15 @@ class view {
      * Loads all the available columns.
      *
      * @return array
-     * @todo MDL-72004 changes for class renaming.
      */
     protected function wanted_columns(): array {
-        global $CFG;
         $this->requiredcolumns = [];
-
-        if (empty($CFG->questionbankcolumns)) {
-            $questionbankcolumns = $this->get_question_bank_plugins();
-            foreach ($questionbankcolumns as $classobject) {
-                $this->requiredcolumns[get_class($classobject)] = $classobject;
+        $questionbankcolumns = $this->get_question_bank_plugins();
+        foreach ($questionbankcolumns as $classobject) {
+            if (empty($classobject)) {
+                continue;
             }
-        } else {
-            // Config overrides the array, but uses the deprecated classes.
-            $questionbankcolumns = explode(',', $CFG->questionbankcolumns);
-            foreach ($questionbankcolumns as $fullname) {
-                if (! class_exists($fullname)) {
-                    if (class_exists('core_question\\bank\\' . $fullname)) {
-                        $fullname = 'core_question\\bank\\' . $fullname;
-                    } else {
-                        throw new \coding_exception("No such class exists: $fullname");
-                    }
-                }
-                $this->requiredcolumns[$fullname] = new $fullname($this);
-            }
+            $this->requiredcolumns[get_class($classobject)] = $classobject;
         }
 
         return $this->requiredcolumns;
@@ -335,12 +315,11 @@ class view {
      *
      * @param array $wanted Collection of column names
      * @param string $heading The name of column that is set as heading
-     * @todo MDL-72004 changes for class renaming.
      */
     protected function init_columns($wanted, $heading = ''): void {
         // If we are using the edit menu column, allow it to absorb all the actions.
         foreach ($wanted as $column) {
-            if ($column instanceof edit_menu_column || $column instanceof \core_question\bank\edit_menu_column) {
+            if ($column instanceof edit_menu_column) {
                 $wanted = $column->claim_menuable_columns($wanted);
                 break;
             }
@@ -481,20 +460,15 @@ class view {
     /**
      * Default sort for question data.
      * @return int[]
-     * @todo MDL-72004 changes for class renaming.
      */
     protected function default_sort(): array {
         $defaultsort = [];
         if (class_exists('\\qbank_viewquestiontype\\question_type_column')) {
             $sort = 'qbank_viewquestiontype\question_type_column';
-        } else {
-            $sort = 'core_question\bank\question_type_column';
         }
         $defaultsort[$sort] = 1;
         if (class_exists('\\qbank_viewquestionname\\question_name_idnumber_tags_column')) {
             $sort = 'qbank_viewquestionname\question_name_idnumber_tags_column';
-        } else {
-            $sort = 'core_question\bank\question_name_idnumber_tags_column';
         }
         $defaultsort[$sort . '-name'] = 1;
 
@@ -546,7 +520,6 @@ class view {
     /**
      * Create the SQL query to retrieve the indicated questions, based on
      * \core_question\bank\search\condition filters.
-     * @todo MDL-72004 changes for class renaming and default sort.
      */
     protected function build_query(): void {
         // Get the required tables and fields.
@@ -678,6 +651,7 @@ class view {
      * @return \moodle_url the URL.
      * @deprecated since Moodle 4.0
      * @see \qbank_previewquestion\previewquestion_helper::question_preview_url()
+     * @todo Final deprecation of this function in moodle 4.4
      */
     public function preview_question_url($questiondata) {
         debugging('Function preview_question_url() has been deprecated and moved to qbank_previewquestion plugin,
@@ -1125,6 +1099,7 @@ class view {
      *
      * @deprecated since Moodle 4.0
      * @see print_table()
+     * @todo Final deprecation of this function in moodle 4.4
      */
     protected function start_table() {
         debugging('Function start_table() is deprecated, please use print_table() instead.', DEBUG_DEVELOPER);
@@ -1140,6 +1115,7 @@ class view {
      *
      * @deprecated since Moodle 4.0
      * @see print_table()
+     * @todo Final deprecation of this function in moodle 4.4
      */
     protected function end_table() {
         debugging('Function end_table() is deprecated, please use print_table() instead.', DEBUG_DEVELOPER);

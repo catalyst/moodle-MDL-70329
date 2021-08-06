@@ -35,6 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return null|string The rendered form.
  * @deprecated since Moodle 4.0
  * @see /question/bank/qbank_tagquestion/lib.php
+ * @todo Final deprecation of this function in moodle 4.4
  */
 function core_question_output_fragment_tags_form($args) {
     debugging('Function core_question_output_fragment_tags_form() is deprecated,
