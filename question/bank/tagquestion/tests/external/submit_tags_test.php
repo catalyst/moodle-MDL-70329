@@ -374,9 +374,6 @@ class submit_tags_test extends \externallib_advanced_testcase {
      */
     protected function generate_encoded_submit_tags_form_string($question, $questioncategory,
             $questioncontext, $tags = [], $coursetags = []) {
-        global $CFG;
-
-        require_once($CFG->dirroot . '/question/type/tags_form.php');
 
         $data = [
                 'id' => $question->id,

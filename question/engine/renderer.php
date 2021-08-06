@@ -50,12 +50,10 @@ class core_question_renderer extends plugin_renderer_base {
      *      If false, just show the icon.
      * @deprecated since Moodle 4.0
      * @see qbank_previewquestion\output\renderer
-     * @todo MDL-72004 uncomment the debugging message after implementing the changes in mod_quiz
      */
     public function question_preview_link($questionid, context $context, $showlabel) {
-        // Debugging message will be re-added after implementing the changes in mod_quiz.
-        // ...debugging('Function question_preview_link() has been deprecated and moved to qbank_previewquestion plugin,
-        // Please use qbank_previewquestion renderer.', DEBUG_DEVELOPER);.
+         debugging('Function question_preview_link() has been deprecated and moved to qbank_previewquestion plugin,
+         Please use qbank_previewquestion renderer.', DEBUG_DEVELOPER);
 
         return $this->page->get_renderer('qbank_previewquestion')->question_preview_link(
                 $questionid, $context, $showlabel
