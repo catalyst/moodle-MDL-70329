@@ -27,6 +27,8 @@
 require_once('../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
+use core\plugininfo\qbank;
+
 $action = required_param('action', PARAM_ALPHANUMEXT);
 $name   = required_param('name', PARAM_PLUGIN);
 
@@ -49,6 +51,7 @@ switch ($action) {
     case 'disable':
         if ($plugins[$name]->is_enabled()) {
             set_config('disabled', 1, 'qbank_'. $name);
+            qbank::remove_unused_column_from_db($plugins[$name]->displayname);
         }
         break;
     case 'enable':
