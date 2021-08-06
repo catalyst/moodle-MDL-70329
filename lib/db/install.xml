@@ -1439,8 +1439,6 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="questioncategoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="ID of the category this question is part of."/>
-        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the question."/>
-        <FIELD NAME="idnumber" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"  COMMENT="The idnumber of the question."/>
         <FIELD NAME="ownerid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid of person who owns this question bank entry."/>
       </FIELDS>
       <KEYS>
@@ -1448,9 +1446,6 @@
         <KEY NAME="questioncategoryid" TYPE="foreign" FIELDS="questioncategoryid" REFTABLE="question_categories" REFFIELDS="id"/>
         <KEY NAME="ownerid" TYPE="foreign" FIELDS="ownerid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
-      <INDEXES>
-        <INDEX NAME="categoryidnumber" UNIQUE="true" FIELDS="questioncategoryid, idnumber"/>
-      </INDEXES>
     </TABLE>
     <TABLE NAME="question_versions" COMMENT="Different versions of the question. Store the data that defines how a particular version of the question works.">
       <FIELDS>

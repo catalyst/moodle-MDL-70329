@@ -2682,17 +2682,12 @@ function xmldb_main_upgrade($oldversion) {
         // Adding fields to table question_bank_entry.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('questioncategoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
-        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('idnumber', XMLDB_TYPE_CHAR, '100', null, null, null, null);
         $table->add_field('ownerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
 
         // Adding keys to table question_bank_entry.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_key('questioncategoryid', XMLDB_KEY_FOREIGN, ['questioncategoryid'], 'question_categories', ['id']);
         $table->add_key('ownerid', XMLDB_KEY_FOREIGN, ['ownerid'], 'user', ['id']);
-
-        // Adding indexes to table question_bank_entry.
-        $table->add_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['questioncategoryid', 'idnumber']);
 
         // Conditionally launch create table for question_bank_entry.
         if (!$dbman->table_exists($table)) {

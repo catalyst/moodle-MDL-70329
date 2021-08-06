@@ -1314,8 +1314,6 @@ function upgrade_migrate_question_table(): void {
         // Populate table question_bank_entry.
         $questionbankentry = new \stdClass();
         $questionbankentry->questioncategoryid = $question->category;
-        $questionbankentry->name = $question->name;
-        $questionbankentry->idnumber = $question->idnumber;
         $questionbankentry->ownerid = $question->createdby;
         // Insert a question_bank_entry record here as the id is required to populate other tables.
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
