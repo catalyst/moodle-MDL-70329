@@ -105,7 +105,6 @@ function qbank_comment_preview_display($question, $courseid): string {
  *
  * @param array $args
  * @return string rendered output
- * @todo cleanup after class renaming to remove check for previewlib.php MDL-71679
  */
 function qbank_comment_output_fragment_question_comment($args): string {
     global $USER, $PAGE, $CFG;
@@ -114,14 +113,7 @@ function qbank_comment_output_fragment_question_comment($args): string {
     $question = question_bank::load_question($args['questionid']);
     $quba = question_engine::make_questions_usage_by_activity(
             'core_question_preview', context_user::instance($USER->id));
-
-    if (class_exists('\\qbank_previewquestion\\question_preview_options')) {
-        $options = new \qbank_previewquestion\question_preview_options($question);
-    } else {
-        require_once($CFG->dirroot . '/question/previewlib.php');
-        $options = new question_preview_options($question);
-    }
-
+    $options = new \qbank_previewquestion\question_preview_options($question);
     $options->load_user_defaults();
     $options->set_from_request();
     $quba->set_preferred_behaviour($options->behaviour);
