@@ -33,7 +33,7 @@ import $ from 'jquery';
  *
  * @returns {void}
  */
-const setupSortableLists = (editlists, cmid) => {
+const setupSortableLists = () => {
     new SortableList(
         '.category_list',
         {
@@ -56,10 +56,10 @@ const setupSortableLists = (editlists, cmid) => {
         $('li.list_item[style]').remove();
         let newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
-        setCatOrder(JSON.stringify(newOrder), editlists, cmid);
-        // setTimeout(() => {
-        //     pageReload();
-        // }, 500);
+        setCatOrder(JSON.stringify(newOrder));
+        setTimeout(() => {
+            location.reload();
+        }, 500);
     });
 };
 
@@ -75,21 +75,21 @@ const templateRender = (context) => {
  * @param {string} updatedCategories String containing new sortorder.
  * @returns {void}
  */
- const setCatOrder = (updatedCategories, editlists, cmid) => {
+ const setCatOrder = (updatedCategories) => {
     let response = Ajax.call([{
         methodname: 'qbank_managecategories_set_category_order',
-        args: {categories: updatedCategories, data: editlists, cmid: cmid},
+        args: {categories: updatedCategories},
         fail: Notification.exception
     }]);
-    response[0].done((resp) => {
-        let data = JSON.parse(resp);
-        let context = {
-            categoriesrendered: data,
-            items: data.items,
-        };
-        console.log(data);
-        templateRender(context);
-    });
+    // response[0].done((resp) => {
+    //     let data = JSON.parse(resp);
+    //     let context = {
+    //         categoriesrendered: data,
+    //         items: data.items,
+    //     };
+    //     console.log(data);
+    //     templateRender(context);
+    // });
 };
 
 /**
@@ -129,6 +129,6 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 
-export const init = (editlists, cmid) => {
-    setupSortableLists(editlists, cmid);
+export const init = () => {
+    setupSortableLists();
 };

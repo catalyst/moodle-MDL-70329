@@ -44,8 +44,6 @@ class set_category_order extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters([
             'categories' => new external_value(PARAM_RAW, 'JSON String - category order'),
-            'data' => new external_value(PARAM_RAW, 'JSON String - data for mustache file'),  
-            'cmid' => new external_value(PARAM_INT, 'Int - cmid')  
         ]);
     }
 
@@ -56,10 +54,10 @@ class set_category_order extends external_api {
      * @param string $data Data to use to render from mustache.
      * @return string $sortorder sororder.
      */
-    public static function execute(string $categories, string $data, int $cmid) {
+    public static function execute(string $categories) {
         global $DB;
         $params = self::validate_parameters(self::execute_parameters(), 
-            ['categories' => $categories, 'data' => $data, 'cmid' => $cmid]);
+            ['categories' => $categories]);
         // New order insertion.
         $categories = json_decode($categories, true);
         $neworder = $categories[0];
@@ -86,30 +84,7 @@ class set_category_order extends external_api {
             }
         }
 
-        // Data to pass to mustache file
-        $data = json_decode($data, true);
-        $records = $DB->get_records_list('question_categories', 'id', $categorylistids);
-        $records = json_decode(json_encode($records), true);
-        $contexts = [];
-        foreach ($records as $categoryid => $record) {
-            $editactionmenu = helper::create_category_action_menu($cmid, $record['id'], $record['contextid']);
-            $questionbankurl = helper::create_category_questionbankurl($cmid, $record['id'], $record['contextid']);
-            $handle = helper::create_category_handle($record['id']);
-            // $record['contextid']
-            $contexts[$record['contextid']][] = [
-                'categoryname' => $record['name'],
-                'categorydescr' => $record['info'],
-                'editactionmenu' => $editactionmenu,
-                'questionbankurl' => $questionbankurl,
-                'handle' => $handle,
-            ];
-        }
-        // foreach ($data as $key => $dat) {
-        //     foreach ($contexts as $context) {
-        //         $data[$key]['items'] = $context;
-        //     }
-        // }
-        //$data = array_merge_recursive($data, $contexts);
+
         $data = json_encode($data);
         return $data;
     }
