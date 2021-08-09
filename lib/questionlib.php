@@ -1074,8 +1074,10 @@ function print_question_icon($question) {
  *
  * @param object $question
  * @return string A unique version stamp
+ * @deprecated since Moodle 4.0
  */
 function question_hash($question) {
+    debugging('Function question_hash() has been deprecated without replacement.', DEBUG_DEVELOPER);
     return make_unique_id_code();
 }
 
@@ -2477,4 +2479,122 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
     } while (isset($usedidnumbers[$newidnumber]));
 
     return (string) $newidnumber;
+}
+
+/**
+ * Create a new version, bank_entry and reference for each question.
+ *
+ * @param $question object question object with all the information required for additional tables.
+ * @param $form object Form data object.
+ * @param $context object Context object.
+ * @param $versionnumber int Question version number.
+ * @param object|null $questionbankentry object Question bank entry object.
+ * @throws dml_exception
+ */
+function save_question_versions(object $question, object $form, object $context, int $versionnumber = 0,
+                                       object $questionbankentry = null) : void {
+    global $DB;
+
+    if (!$questionbankentry) {
+        // Create a record for question_bank_entry, question_versions and question_references.
+        $questionbankentry = new \stdClass();
+        $questionbankentry->questioncategoryid = $form->category;
+        $questionbankentry->ownerid = $question->createdby;
+        $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+    }
+
+    // Create question_versions records.
+    $questionversion = new \stdClass();
+    $questionversion->questionbankentryid = $questionbankentry->id;
+    $questionversion->questionid = $question->id;
+    $questionversion->status = 0;
+    $nextversion = get_next_version($questionbankentry->id);
+    if ($versionnumber && $nextversion) {
+        $questionversion->version = $nextversion;
+    }
+    $questionversion->id = $DB->insert_record('question_versions', $questionversion);
+
+    // As we do not have random types anymore all new questions will go to reference,
+    // set_references will be manage apart.
+    $questionreference = new \stdClass();
+    $questionreference->usingcontextid = $context->id;
+    $questionreference->component = 'core_question';
+    $questionreference->questionarea = 'qbank';
+    $questionreference->itemid = 0;
+    $questionreference->questionbankentryid = $questionbankentry->id;
+    $questionreference->versionid = $questionversion->id;
+    $questionreference->id = $DB->insert_record('question_references', $questionreference);
+
+    // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
+    if (isset($form->modulename)) {
+        $questionreference = new \stdClass();
+        $questionreference->usingcontextid = $context->id;
+        $questionreference->component = $form->modulename;
+        $questionreference->questionarea = 'slot';
+        $questionreference->itemid = 0;
+        $questionreference->questionbankentryid = $questionbankentry->id;
+        $questionreference->versionid = $questionversion->id;
+        $questionreference->id = $DB->insert_record('question_references', $questionreference);
+    }
+}
+
+/**
+ * Get the question_bank_entry object given a question id.
+ *
+ * @param $questionid int Question id.
+ * @return false|mixed
+ * @throws dml_exception
+ */
+function get_question_bank_entry(int $questionid): object {
+    global $DB;
+
+    $sql = "SELECT qbe.*
+              FROM {question} q
+              JOIN {question_versions} qv ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+             WHERE q.id = :id";
+
+    $qbankentry = $DB->get_record_sql($sql, ['id' => $questionid]);
+
+    return $qbankentry;
+}
+
+/**
+ * Get the question versions given a question id in a descending sort .
+ *
+ * @param $questionid int Question id.
+ * @return array
+ * @throws dml_exception
+ */
+function get_question_version($questionid): array {
+    global $DB;
+
+    $version = $DB->get_records('question_versions', ['questionid' => $questionid]);
+    krsort($version);
+
+    return $version;
+}
+
+/**
+ * Get the next version number to create base on a Question bank entry id.
+ *
+ * @param $questionbankentryid int Question bank entry id.
+ * @return null|int next version number.
+ * @throws dml_exception
+ */
+function get_next_version(int $questionbankentryid): ?int {
+    global $DB;
+
+    $sql = "SELECT MAX(qv.version)
+              FROM {question_versions} qv
+              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+             WHERE qbe.id = :id";
+
+    $nextversion = $DB->get_field_sql($sql, ['id' => $questionbankentryid]);
+
+    if ($nextversion) {
+        return (int)$nextversion + 1;
+    }
+
+    return null;
 }
