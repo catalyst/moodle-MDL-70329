@@ -446,13 +446,20 @@ class question_type {
         }
 
         // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
-        $versionnumber = 0;
         $questionbankentry = null;
-        if (!empty($question->id)) {
-            $version = get_question_version($question->id);
-            $versionnumber = $version[array_key_first($version)]->version;
-            // Get the bank entry record where the question is referenced.
-            $questionbankentry = get_question_bank_entry($question->id);
+        if (isset($question->id)) {
+            $oldparent = $question->id;
+            if (!empty($question->id)) {
+                // Get the bank entry record where the question is referenced.
+                $questionbankentry = get_question_bank_entry($question->id);
+            }
+        }
+
+        // Get the bank entry old id (this is when there are questions related with a parent, e.g.: qtype_multianswers).
+        if (isset($question->oldid)) {
+            if (!empty($question->oldid)) {
+                $questionbankentry = get_question_bank_entry($question->oldid);
+            }
         }
 
         // Always creates a new question and version record.
@@ -464,7 +471,7 @@ class question_type {
         $newquestion = true;
 
         // Create a new version, bank_entry and reference for each question.
-        save_question_versions($question, $form, $context, $versionnumber, $questionbankentry);
+        save_question_versions($question, $form, $context, $questionbankentry);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
@@ -492,7 +499,12 @@ class question_type {
         $form->questiontextformat = $question->questiontextformat;
         // Current context.
         $form->context = $context;
-
+        // Old parent question id is used when there are questions related with a parent, e.g.: qtype_multianswers).
+        if (isset($oldparent)) {
+            $form->oldparent = $oldparent;
+        } else {
+            $form->oldparent = $question->parent;
+        }
         $result = $this->save_question_options($form);
 
         if (!empty($result->error)) {
@@ -963,12 +975,13 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->hidden = $questiondata->hidden;
         $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;
         $question->createdby = $questiondata->createdby;
         $question->modifiedby = $questiondata->modifiedby;
+
+        $this->initialise_question_extra_record($question, $questiondata);
 
         // Fill extra question fields values.
         $extraquestionfields = $this->extra_question_fields();
@@ -981,6 +994,43 @@ class question_type {
         }
 
         $this->initialise_question_hints($question, $questiondata);
+    }
+
+    /**
+     * Initialise the extra question fields.
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     */
+    protected function initialise_question_extra_record(question_definition $question, $questiondata) {
+        global $DB;
+        $extrarecord = $DB->get_record_sql('SELECT qv.status,
+                                                       qv.version,
+                                                       qv.id as versionid,
+                                                       qv.questionbankentryid
+                                                  FROM {question} q
+                                                  JOIN {question_versions} qv
+                                                    ON qv.questionid = q.id
+                                                 WHERE q.id = ?', [$questiondata->id]);
+        if (isset($questiondata->status)) {
+            $question->status = $questiondata->status;
+        } else {
+            $question->status = $extrarecord->status;
+        }
+        if (isset($questiondata->versionid)) {
+            $question->versionid = $questiondata->versionid;
+        } else {
+            $question->versionid = $extrarecord->versionid;
+        }
+        if (isset($questiondata->version)) {
+            $question->version = $questiondata->version;
+        } else {
+            $question->version = $extrarecord->version;
+        }
+        if (isset($questiondata->questionbankentryid)) {
+            $question->questionbankentryid = $questiondata->questionbankentryid;
+        } else {
+            $question->questionbankentryid = $extrarecord->questionbankentryid;
+        }
     }
 
     /**
@@ -1323,6 +1373,7 @@ class question_type {
         $form->questiontext = 'test question, generated by script';
         $form->defaultmark = 1;
         $form->penalty = 0.3333333;
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $form->generalfeedback = "Well done";
 
         $context = context_course::instance($courseid);

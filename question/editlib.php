@@ -64,7 +64,7 @@ function get_questions_category( $category, $noparent=false, $recurse=true, $exp
     // Build sql bit for $noparent
     $npsql = '';
     if ($noparent) {
-      $npsql = " and parent='0' ";
+      $npsql = " and q.parent='0' ";
     }
 
     // Get list of categories
@@ -76,7 +76,14 @@ function get_questions_category( $category, $noparent=false, $recurse=true, $exp
 
     // Get the list of questions for the category
     list($usql, $params) = $DB->get_in_or_equal($categorylist);
-    $questions = $DB->get_records_select('question', "category {$usql} {$npsql}", $params, 'category, qtype, name');
+    $questions = $DB->get_records_sql(
+        "SELECT q.*, qv.status
+               FROM {question} q
+               JOIN {question_versions} qv ON qv.questionid = q.id
+               JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+              WHERE qc.id {$usql} {$npsql}
+           ORDER BY qc.id, q.qtype, q.name", $params);
 
     // Iterate through questions, getting stuff we need
     $qresults = array();
