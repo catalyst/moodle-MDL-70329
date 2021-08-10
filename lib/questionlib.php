@@ -1486,10 +1486,8 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     global $PAGE;
 
     if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = array('courseid' => $context->instanceid);
         $params = ['courseid' => $context->instanceid];
     } else if ($context->contextlevel == CONTEXT_MODULE) {
-        $params = array('cmid' => $context->instanceid);
         $params = ['cmid' => $context->instanceid];
     } else {
         return;
@@ -1983,6 +1981,10 @@ function save_question_versions(object $question, object $form, object $context,
     $nextversion = get_next_version($questionbankentry->id);
     if ($versionnumber && $nextversion) {
         $questionversion->version = $nextversion;
+    } elseif ($question->parent) {
+        $parentversion = get_question_version($form->parent);
+        $parentversionnumber = $parentversion[array_key_first($parentversion)]->version;
+        $questionversion->version = $parentversionnumber;
     }
     $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
