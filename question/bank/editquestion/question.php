@@ -233,7 +233,7 @@ if ($mform->is_cancelled()) {
     // If we are saving as a copy, break the connection to the old question.
     if ($makecopy) {
         $question->id = 0;
-        $question->hidden = 0; // Copies should not be hidden.
+        $question->status = \core_question\local\bank\constants::QUESTION_STATUS_READY; // Copies should not be hidden.
     }
 
     // If is will be added directly to a module send the module name to be referenced.
@@ -322,7 +322,7 @@ if ($mform->is_cancelled()) {
         }
         $nexturlparams['id'] = $question->id;
         $nexturlparams['wizardnow'] = $fromform->wizard;
-        $nexturl = new moodle_url('/question/question.php', $nexturlparams);
+        $nexturl = new moodle_url($url, $nexturlparams);
         if ($cmid) {
             $nexturl->param('cmid', $cmid);
         } else {

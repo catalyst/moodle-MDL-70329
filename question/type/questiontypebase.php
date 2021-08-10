@@ -446,13 +446,20 @@ class question_type {
         }
 
         // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
-        $versionnumber = 0;
         $questionbankentry = null;
-        if (!empty($question->id)) {
-            $version = get_question_version($question->id);
-            $versionnumber = $version[array_key_first($version)]->version;
-            // Get the bank entry record where the question is referenced.
-            $questionbankentry = get_question_bank_entry($question->id);
+        if (isset($question->id)) {
+            $oldparent = $question->id;
+            if (!empty($question->id)) {
+                // Get the bank entry record where the question is referenced.
+                $questionbankentry = get_question_bank_entry($question->id);
+            }
+        }
+
+        // Get the bank entry old id (this is when there are questions related with a parent, e.g.: qtype_multianswers).
+        if (isset($question->oldid)) {
+            if (!empty($question->oldid)) {
+                $questionbankentry = get_question_bank_entry($question->oldid);
+            }
         }
 
         // Always creates a new question and version record.
@@ -464,7 +471,7 @@ class question_type {
         $newquestion = true;
 
         // Create a new version, bank_entry and reference for each question.
-        save_question_versions($question, $form, $context, $versionnumber, $questionbankentry);
+        save_question_versions($question, $form, $context, $questionbankentry);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
@@ -492,7 +499,12 @@ class question_type {
         $form->questiontextformat = $question->questiontextformat;
         // Current context.
         $form->context = $context;
-
+        // Old parent question id is used when there are questions related with a parent, e.g.: qtype_multianswers).
+        if (isset($oldparent)) {
+            $form->oldparent = $oldparent;
+        } else {
+            $form->oldparent = $question->parent;
+        }
         $result = $this->save_question_options($form);
 
         if (!empty($result->error)) {
@@ -963,7 +975,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->hidden = $questiondata->hidden;
         $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;

@@ -124,6 +124,9 @@ abstract class question_definition {
     /** @var array of question_hints. */
     public $hints = array();
 
+    /** @var boolean question status hidden/ready/draft in the question bank. */
+    public $status = 0;
+
     /**
      * Constructor. Normally to get a question, you call
      * {@link question_bank::load_question()}, but questions can be created

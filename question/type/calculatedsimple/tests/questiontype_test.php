@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/question/type/calculatedsimple/edit_calculatedsim
  * @copyright  2007 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_calculatedsimple_test extends advanced_testcase {
+class questiontype_test extends advanced_testcase {
     public static $includecoverage = array(
         'question/type/questiontypebase.php',
         'question/type/calculatedsimple/questiontype.php',
@@ -89,7 +89,7 @@ class qtype_calculatedsimple_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'version', 'timemodified', 'timecreated', 'options'))) {
+            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options'))) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }

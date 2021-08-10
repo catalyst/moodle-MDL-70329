@@ -850,7 +850,8 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
     }
 
     $sql = "SELECT q.*,
-                   qc.contextid as contextid
+                   qc.contextid as contextid,
+                   qv.status
                    {$extrafields}
               FROM {question} q
               JOIN {question_versions} qv
@@ -1486,10 +1487,8 @@ function question_extend_settings_navigation(navigation_node $navigationnode, $c
     global $PAGE;
 
     if ($context->contextlevel == CONTEXT_COURSE) {
-        $params = array('courseid' => $context->instanceid);
         $params = ['courseid' => $context->instanceid];
     } else if ($context->contextlevel == CONTEXT_MODULE) {
-        $params = array('cmid' => $context->instanceid);
         $params = ['cmid' => $context->instanceid];
     } else {
         return;
@@ -1963,8 +1962,7 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
  * @param object|null $questionbankentry object Question bank entry object.
  * @throws dml_exception
  */
-function save_question_versions(object $question, object $form, object $context, int $versionnumber = 0,
-                                       object $questionbankentry = null) : void {
+function save_question_versions(object $question, object $form, object $context, object $questionbankentry = null) : void {
     global $DB;
 
     if (!$questionbankentry) {
@@ -1979,10 +1977,20 @@ function save_question_versions(object $question, object $form, object $context,
     $questionversion = new \stdClass();
     $questionversion->questionbankentryid = $questionbankentry->id;
     $questionversion->questionid = $question->id;
-    $questionversion->status = $form->status;
-    $nextversion = get_next_version($questionbankentry->id);
-    if ($versionnumber && $nextversion) {
-        $questionversion->version = $nextversion;
+    // Get the version and status from the parent question if parent is set.
+    if (!$question->parent) {
+        // Get the status field. It comes from the form, but for testing we can
+        if (!isset($form->status)) {
+            $status = $question->status;
+        } else {
+            $status = $form->status;
+        }
+        $questionversion->version = get_next_version($questionbankentry->id);
+        $questionversion->status = $status;
+    } else {
+        $parentversion = get_question_version($form->parent);
+        $questionversion->version = $parentversion[array_key_first($parentversion)]->version;
+        $questionversion->status = $parentversion[array_key_first($parentversion)]->status;
     }
     $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
@@ -2051,10 +2059,10 @@ function get_question_version($questionid): array {
  * Get the next version number to create base on a Question bank entry id.
  *
  * @param $questionbankentryid int Question bank entry id.
- * @return null|int next version number.
+ * @return int next version number.
  * @throws dml_exception
  */
-function get_next_version(int $questionbankentryid): ?int {
+function get_next_version(int $questionbankentryid): int {
     global $DB;
 
     $sql = "SELECT MAX(qv.version)
@@ -2068,7 +2076,7 @@ function get_next_version(int $questionbankentryid): ?int {
         return (int)$nextversion + 1;
     }
 
-    return null;
+    return 1;
 }
 
 // Deprecated classes and functions from Moodle 4.0.
