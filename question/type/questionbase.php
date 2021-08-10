@@ -100,9 +100,7 @@ abstract class question_definition {
     /** @var string unique identifier of this question. */
     public $stamp;
 
-    /** @var string unique identifier of this version of this question. */
-    public $version;
-
+    // TODO: Delete after removing the hidden field.
     /** @var boolean whethre this question has been deleted/hidden in the question bank. */
     public $hidden = 0;
 
@@ -123,6 +121,18 @@ abstract class question_definition {
 
     /** @var array of question_hints. */
     public $hints = array();
+
+    /** @var boolean question status hidden/ready/draft in the question bank. */
+    public $status = 0;
+
+    /** @var int Version id of the question in a question bank */
+    public $versionid;
+
+    /** @var int Version number of the question in a question bank */
+    public $version;
+
+    /** @var int Bank entry id for the question */
+    public $questionbankentryid;
 
     /**
      * Constructor. Normally to get a question, you call
