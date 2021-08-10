@@ -17,6 +17,7 @@
 namespace qbank_managecategories;
 
 use context;
+use core_question\local\bank\constants;
 use moodle_exception;
 use html_writer;
 
@@ -250,20 +251,30 @@ class helper {
      * @throws \dml_exception
      */
     public static function get_categories_for_contexts($contexts, string $sortorder = 'parent, sortorder, name ASC',
-                                                       bool $top = false): array {
+                                                       bool $top = false, $showallversions = 0,
+                                                       $status = constants::QUESTION_STATUS_READY): array {
         global $DB;
-        $topwhere = $top ? '' : 'AND qc.parent <> 0';
+        $topwhere = $top ? '' : 'AND c.parent <> 0';
 
-        $sql = "SELECT qc.*,
-                   (SELECT count(1)
-                      FROM {question} q
-                      JOIN {question_versions} qv ON qv.questionid = q.id
-                      JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
-                     WHERE qc.id = qbe.questioncategoryid
-                       AND qv.status = '0'
-                       AND q.parent = '0') AS questioncount
-                  FROM {question_categories} qc
-                 WHERE qc.contextid IN ($contexts) $topwhere
+        $sql = "SELECT c.*,
+                    (SELECT COUNT(1)
+                       FROM {question} q
+                       JOIN {question_versions} qv ON qv.questionid = q.id
+                       JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                       JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                      WHERE q.parent = '0'
+                        AND qv.status = $status
+                        AND c.id = qbe.questioncategoryid
+                        AND ($showallversions = 1
+                            OR (qv.version = (SELECT MAX(v.version)
+                                                FROM {question_versions} v
+                                                JOIN {question_bank_entry} be ON be.id = v.questionbankentryid
+                                               WHERE be.id = qbe.id)
+                               )
+                            )
+                        ) AS questioncount
+                  FROM {question_categories} c
+                 WHERE c.contextid IN ($contexts) $topwhere
               ORDER BY $sortorder";
 
         return $DB->get_records_sql($sql);
