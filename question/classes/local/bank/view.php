@@ -1203,9 +1203,11 @@ class view {
             if ($questionids) {
                 list($usql, $params) = $DB->get_in_or_equal($questionids);
                 $questions = $DB->get_records_sql("
-                        SELECT q.*, c.contextid
+                        SELECT q.*, qc.contextid
                         FROM {question} q
-                        JOIN {question_categories} c ON c.id = q.category
+                        JOIN {question_versions} qv ON qv.questionid = q.id
+                        JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                        JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                         WHERE q.id {$usql}", $params);
                 foreach ($questions as $question) {
                     question_require_capability_on($question, 'move');
