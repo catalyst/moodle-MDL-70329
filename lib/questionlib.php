@@ -61,6 +61,16 @@ define("QUESTION_NUMANS_START", 3);
  */
 define("QUESTION_NUMANS_ADD", 3);
 
+
+/** @var int question_version status: Final. */
+const CORE_QUESTION_STATUS_FINAL = 0;
+
+/** @var int question_version status: Hidden. */
+const CORE_QUESTION_STATUS_HIDDEN = 1;
+
+/** @var int question_version status: Draft. */
+const CORE_QUESTION_STATUS_DRAFT = 2;
+
 /**
  * Move one question type in a list of question types. If you try to move one element
  * off of the end, nothing will change.
@@ -2503,10 +2513,14 @@ function save_question_versions(object $question, object $form, object $context,
     $questionversion = new \stdClass();
     $questionversion->questionbankentryid = $questionbankentry->id;
     $questionversion->questionid = $question->id;
-    $questionversion->status = 0;
+    $questionversion->status = CORE_QUESTION_STATUS_FINAL;
     $nextversion = get_next_version($questionbankentry->id);
     if ($versionnumber && $nextversion) {
         $questionversion->version = $nextversion;
+    } elseif ($question->parent) {
+        $parentversion = get_question_version($form->parent);
+        $parentversionnumber = $parentversion[array_key_first($parentversion)]->version;
+        $questionversion->version = $parentversionnumber;
     }
     $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
