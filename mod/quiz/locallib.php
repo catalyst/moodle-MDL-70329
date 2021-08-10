@@ -2366,7 +2366,7 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
             $form->includesubcategories = $includesubcategories;
             $form->fromtags = $tagstrings;
             $form->defaultmark = 1;
-            $form->hidden = 1;
+            $form->status = \core_question\local\bank\constants::QUESTION_STATUS_HIDDEN;
             $form->stamp = make_unique_id_code(); // Set the unique code (not to be changed).
             $question = new stdClass();
             $question->qtype = 'random';
