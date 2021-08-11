@@ -2795,9 +2795,49 @@ function xmldb_main_upgrade($oldversion) {
         // Split question table in 4 tables (question_bank_entry and question_versions).
         upgrade_migrate_question_table();
 
-        // TODO: Remove fields from question table.
-        // TODO: Remove fields from quiz_slot table.
-        // TODO: Remove all quiz_slot_tags table.
+        // Define fields to be dropped from questions.
+        $table = new xmldb_table('question');
+
+        $field = new xmldb_field('version');
+        // Conditionally launch drop field version.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('hidden');
+        // Conditionally launch drop field hidden.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $field = new xmldb_field('timemodified');
+        // Conditionally launch drop field timemodified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define index categoryidnumber (not unique) to be dropped form question.
+        $index = new xmldb_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['category', 'idnumber']);
+
+        // Conditionally launch drop index categoryidnumber.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Define key category (foreign) to be dropped form questions.
+        $key = new xmldb_key('category', XMLDB_KEY_FOREIGN, ['category'], 'question_categories', ['id']);
+
+        // Launch drop key category.
+        $dbman->drop_key($table, $key);
+
+        $field = new xmldb_field('category');
+        // Conditionally launch drop field category.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // TODO: Remove fields from quiz_slot table - Should be done in MDL-71679.
+        // TODO: Remove all quiz_slot_tags table - Should be done in MDL-71679.
 
         // Main savepoint reached.
         upgrade_main_savepoint(true, 2021080500.00);
