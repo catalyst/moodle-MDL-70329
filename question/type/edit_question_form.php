@@ -189,6 +189,11 @@ abstract class question_edit_form extends question_wizard_form {
             }
         }
 
+        if (!empty($this->question->id)) {
+            $mform->addElement('static', 'versioninfo', get_string('versioninfo', 'qbank_editquestion'),
+                                \qbank_editquestion\editquestion_helper::get_edit_form_extra_elements($this->question));
+        }
+
         $mform->addElement('text', 'name', get_string('questionname', 'question'),
                 array('size' => 50, 'maxlength' => 255));
         $mform->setType('name', PARAM_TEXT);
@@ -198,6 +203,9 @@ abstract class question_edit_form extends question_wizard_form {
                 array('rows' => 15), $this->editoroptions);
         $mform->setType('questiontext', PARAM_RAW);
         $mform->addRule('questiontext', null, 'required', null, 'client');
+
+        $mform->addElement('select', 'status', get_string('status', 'qbank_editquestion'),
+                            \qbank_editquestion\editquestion_helper::get_question_status_list());
 
         $mform->addElement('float', 'defaultmark', get_string('defaultmark', 'question'),
                 array('size' => 7));
