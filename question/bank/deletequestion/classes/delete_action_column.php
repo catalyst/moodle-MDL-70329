@@ -104,7 +104,6 @@ class delete_action_column extends menu_action_column_base {
 
     public function get_required_fields(): array {
         $required = parent::get_required_fields();
-        $required[] = 'q.hidden';
         return $required;
     }
 

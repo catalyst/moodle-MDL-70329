@@ -210,6 +210,7 @@ if ($formeditable && $id) {
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
+$toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
 if ($cm !== null) {
     $toform->cmid = $cm->id;
     $toform->courseid = $cm->course;
