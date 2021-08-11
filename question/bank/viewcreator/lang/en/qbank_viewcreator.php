@@ -25,3 +25,4 @@
 
 $string['pluginname'] = 'View creator';
 $string['privacy:metadata'] = 'View creator question bank plugin does not store any user data.';
+$string['version'] = 'Version';
