@@ -15,24 +15,40 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_editquestion, language 'en'.
+ * Constants for the qbank api and questions.
  *
- * @package    qbank_editquestion
+ * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Edit questions';
-$string['privacy:metadata'] = 'The Edit questions question bank plugin does not store any user data.';
+namespace core_question\local\bank;
 
-// Question status.
-$string['questionstatus'] = 'Status';
-$string['questionstatusready'] = 'Ready';
-$string['questionstatushidden'] = 'Hidden';
-$string['questionstatusdraft'] = 'Draft';
-$string['questionstatusunknown'] = 'Unknown';
+defined('MOODLE_INTERNAL') || die();
 
-// Edit form.
-$string['versioninfo'] = 'Authors, version control and usage';
-$string['status'] = 'Question status';
+/**
+ * Class constants.
+ *
+ * @package    core_question
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class constants {
+
+    /**
+     * Const if the question is ready to use.
+     */
+    const QUESTION_STATUS_READY = 0;
+
+    /**
+     * Const if the question is hidden.
+     */
+    const QUESTION_STATUS_HIDDEN = 1;
+
+    /**
+     * const if the question is in draft.
+     */
+    const QUESTION_STATUS_DRAFT = 2;
+}
