@@ -189,6 +189,11 @@ abstract class question_edit_form extends question_wizard_form {
             }
         }
 
+        if (!empty($this->question->id)) {
+            $mform->addElement('static', 'versioninfo', get_string('versioninfo', 'qbank_editquestion'),
+                                \qbank_editquestion\editquestion_helper::get_edit_form_extra_elements($this->question));
+        }
+
         $mform->addElement('text', 'name', get_string('questionname', 'question'),
                 array('size' => 50, 'maxlength' => 255));
         $mform->setType('name', PARAM_TEXT);
@@ -198,6 +203,9 @@ abstract class question_edit_form extends question_wizard_form {
                 array('rows' => 15), $this->editoroptions);
         $mform->setType('questiontext', PARAM_RAW);
         $mform->addRule('questiontext', null, 'required', null, 'client');
+
+        $mform->addElement('select', 'status', get_string('status', 'qbank_editquestion'),
+                            \qbank_editquestion\editquestion_helper::get_question_status_list());
 
         $mform->addElement('float', 'defaultmark', get_string('defaultmark', 'question'),
                 array('size' => 7));
@@ -218,30 +226,6 @@ abstract class question_edit_form extends question_wizard_form {
 
         if (core_tag_tag::is_enabled('core_question', 'question')) {
             $this->add_tag_fields($mform);
-        }
-
-        if (!empty($this->question->id)) {
-            $mform->addElement('header', 'createdmodifiedheader',
-                    get_string('createdmodifiedheader', 'question'));
-            $a = new stdClass();
-            if (!empty($this->question->createdby)) {
-                $a->time = userdate($this->question->timecreated);
-                $a->user = fullname($DB->get_record(
-                        'user', array('id' => $this->question->createdby)));
-            } else {
-                $a->time = get_string('unknown', 'question');
-                $a->user = get_string('unknown', 'question');
-            }
-            $mform->addElement('static', 'created', get_string('created', 'question'),
-                    get_string('byandon', 'question', $a));
-            if (!empty($this->question->modifiedby)) {
-                $a = new stdClass();
-                $a->time = userdate($this->question->timemodified);
-                $a->user = fullname($DB->get_record(
-                        'user', array('id' => $this->question->modifiedby)));
-                $mform->addElement('static', 'modified', get_string('modified', 'question'),
-                        get_string('byandon', 'question', $a));
-            }
         }
 
         $this->add_hidden_fields();

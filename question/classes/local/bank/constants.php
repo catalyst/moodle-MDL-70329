@@ -15,32 +15,40 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin entrypoint for columns.
+ * Constants for the qbank api and questions.
  *
- * @package    qbank_editquestion
+ * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_editquestion;
+namespace core_question\local\bank;
+
+defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class columns is the entrypoint for the columns.
+ * Class constants.
  *
- * @package    qbank_editquestion
+ * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends \core_question\local\bank\plugin_features_base{
+class constants {
 
-    public function get_question_columns($qbank): array {
-        return [
-            new edit_action_column($qbank),
-            new copy_action_column($qbank),
-            new question_status_column($qbank)
-        ];
-    }
+    /**
+     * Const if the question is ready to use.
+     */
+    const QUESTION_STATUS_READY = 0;
 
+    /**
+     * Const if the question is hidden.
+     */
+    const QUESTION_STATUS_HIDDEN = 1;
+
+    /**
+     * const if the question is in draft.
+     */
+    const QUESTION_STATUS_DRAFT = 2;
 }
