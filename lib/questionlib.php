@@ -2353,7 +2353,7 @@ function save_question_versions(object $question, object $form, object $context,
     $questionversion = new \stdClass();
     $questionversion->questionbankentryid = $questionbankentry->id;
     $questionversion->questionid = $question->id;
-    $questionversion->status = 0;
+    $questionversion->status = $form->status;
     $nextversion = get_next_version($questionbankentry->id);
     if ($versionnumber && $nextversion) {
         $questionversion->version = $nextversion;
