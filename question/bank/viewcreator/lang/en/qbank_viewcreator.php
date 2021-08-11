@@ -25,3 +25,4 @@
 
 $string['pluginname'] = 'View creator question bank feature';
 $string['privacy:metadata'] = 'View creator shows question creator and modifier column, it does not store user data.';
+$string['version'] = 'Version';
