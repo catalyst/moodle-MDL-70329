@@ -215,8 +215,10 @@ class view {
                 'preview_action_column',
                 'delete_action_column',
                 'export_xml_action_column',
+                'question_status_column',
                 'creator_name_column',
-                'modifier_name_column'
+                'modifier_name_column',
+                'comment_count_column'
         ];
         if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
             $corequestionbankcolumns[] = 'question_text_row';
@@ -547,7 +549,12 @@ class view {
         }
 
         // Build the where clause.
-        $tests = ['q.parent = 0'];
+        $latestversion = 'qv.version  = (SELECT MAX(v.version)
+                                        FROM {question_versions} v
+                                        JOIN {question_bank_entry} be 
+                                          ON be.id = v.questionbankentryid
+                                       WHERE be.id = qbe.id)';
+        $tests = ['q.parent = 0', $latestversion];
         $this->sqlparams = [];
         foreach ($this->searchconditions as $searchcondition) {
             if ($searchcondition->where()) {

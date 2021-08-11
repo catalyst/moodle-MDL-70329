@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin entrypoint for columns.
+ * A column to show the status of the question.
  *
  * @package    qbank_editquestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -27,22 +27,30 @@ namespace qbank_editquestion;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_question\local\bank\column_base;
+
 /**
- * Class columns is the entrypoint for the columns.
+ * Class question_status_column.
  *
  * @package    qbank_editquestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends \core_question\local\bank\plugin_features_base{
+class question_status_column extends column_base {
 
-    public function get_question_columns($qbank): array {
-        return [
-            new edit_action_column($qbank),
-            new copy_action_column($qbank),
-            new question_status_column($qbank)
-        ];
+    public function get_name(): string {
+        return 'questionstatus';
+    }
+
+    protected function get_title(): string {
+        return get_string('questionstatus', 'qbank_editquestion');
+    }
+
+    protected function display_content($question, $rowclasses): void {
+        global $DB;
+        $version = $DB->get_record('question_versions', ['questionid' => $question->id], 'status');
+        echo \html_writer::tag('a', editquestion_helper::get_question_status_string($version->status));
     }
 
 }
