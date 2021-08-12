@@ -526,7 +526,7 @@ class view {
     protected function build_query(): void {
         // Get the required tables and fields.
         $joins = [];
-        $fields = ['q.hidden', 'q.category'];
+        $fields = ['qv.status', 'qc.id'];
         if (!empty($this->requiredcolumns)) {
             foreach ($this->requiredcolumns as $column) {
                 $extrajoins = $column->get_extra_joins();
@@ -862,8 +862,6 @@ class view {
             if (\core\plugininfo\qbank::is_plugin_enabled('qbank_viewquestiontext')) {
                 echo $PAGE->get_renderer('core_question', 'bank')->render_showtext_checkbox($displaydata);
             }
-        } else {
-            echo $PAGE->get_renderer('core_question', 'bank')->render_showtext_checkbox($displaydata);
         }
     }
 
@@ -1148,7 +1146,7 @@ class view {
      */
     protected function get_row_classes($question, $rowcount): array {
         $classes = [];
-        if ($question->hidden) {
+        if ((int)$question->status == 1) {
             $classes[] = 'dimmed_text';
         }
         if ($question->id == $this->lastchangedid) {

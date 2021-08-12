@@ -47,7 +47,7 @@ class hidden_condition extends condition {
     public function __construct($hide = true) {
         $this->hide = $hide;
         if ($hide) {
-            $this->where = 'q.hidden = 0';
+            $this->where = 'qv.status = 0';
         }
     }
 
