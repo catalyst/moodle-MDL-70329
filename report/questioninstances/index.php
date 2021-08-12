@@ -90,7 +90,16 @@ if ($requestedqtype) {
     $ctxgroupby = implode(',', array_keys(context_helper::get_preload_record_columns('con')));
     $sql = "SELECT qc.contextid,
                    count(1) as numquestions,
-                   sum(hidden) as numhidden,
+                   (SELECT COUNT(vq.id)
+                      FROM {question_versions} vq
+                      JOIN {question_bank_entry} beq ON beq.id = vq.questionbankentryid
+                     WHERE beq.id = qbe.id
+                       AND vq.status = 1
+                       AND vq.version = (SELECT MAX(vv.version)
+                                           FROM {question_versions} vv
+                                           JOIN {question_bank_entry} bqe 
+                                             ON bqe.id = vv.questionbankentryid
+                                          WHERE bqe.id = beq.id)) as numhidden,
                    $ctxpreload
              FROM {question} q
              JOIN {question_versions} qv ON qv.questionid = q.id
@@ -99,6 +108,11 @@ if ($requestedqtype) {
              JOIN {context} con ON con.id = qc.contextid
              $sqlqtypetest
               AND (q.parent = 0 OR q.parent = q.id)
+              AND qv.version  = (SELECT MAX(v.version)
+                                        FROM {question_versions} v
+                                        JOIN {question_bank_entry} be 
+                                          ON be.id = v.questionbankentryid
+                                       WHERE be.id = qbe.id)
          GROUP BY qc.contextid, $ctxgroupby
          ORDER BY numquestions DESC, numhidden ASC, con.contextlevel ASC, con.id ASC";
     $counts = $DB->get_records_sql($sql, $params);
