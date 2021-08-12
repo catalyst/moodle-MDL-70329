@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A question bank column which gathers together all the actions into a menu.
  *

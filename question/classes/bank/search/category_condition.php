@@ -25,8 +25,6 @@
 
 namespace core_question\bank\search;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  *  This class controls from which category questions are listed.
  *
@@ -89,7 +87,7 @@ class category_condition extends condition {
         if ($this->recurse) {
             $categoryids = question_categorylist($this->category->id);
         } else {
-            $categoryids = array($this->category->id);
+            $categoryids = [$this->category->id];
         }
         list($catidtest, $this->params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
         $this->where = 'q.category ' . $catidtest;
@@ -117,10 +115,10 @@ class category_condition extends condition {
      */
     public function display_options() {
         global $PAGE;
-        $displaydata = array();
+        $displaydata = [];
         $catmenu = question_category_options($this->contexts, true, 0,
                 true, -1, false);
-        $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, array(),
+        $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
                 array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
         $displaydata['categorydesc'] = $this->print_category_info($this->category);
         return $PAGE->get_renderer('core_question', 'bank')->render_category_condition($displaydata);
@@ -132,9 +130,9 @@ class category_condition extends condition {
      */
     public function display_options_adv() {
         global $PAGE;
-        $displaydata = array();
+        $displaydata = [];
         if ($this->recurse) {
-            $displaydata['checked'] = 'checked="checked"';
+            $displaydata['checked'] = 'checked="true"';
         }
         return $PAGE->get_renderer('core_question', 'bank')->render_category_condition_advanced($displaydata);
     }

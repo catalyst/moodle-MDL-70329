@@ -61,15 +61,15 @@ class core_question_bank_view_testcase extends advanced_testcase {
         // Generate the view.
         $view = new core_question\local\bank\view($contexts, new moodle_url('/'), $course);
         ob_start();
-        $pagevars = array (
-                'qpage' => 0,
-                'qperpage' => 20,
-                'cat' => $cat->id . ',' . $context->id,
-                'recurse' => false,
-                'showhidden' => false,
-                'qbshowtext' => false
+        $pagevars = [
+            'qpage' => 0,
+            'qperpage' => 20,
+            'cat' => $cat->id . ',' . $context->id,
+            'recurse' => false,
+            'showhidden' => false,
+            'qbshowtext' => false
 
-        );
+        ];
         $view->display($pagevars, 'editq');
         $html = ob_get_clean();
 
@@ -102,15 +102,15 @@ class core_question_bank_view_testcase extends advanced_testcase {
         // Generate the view.
         $view = new core_question\local\bank\view($contexts, new moodle_url('/'), $course);
         ob_start();
-        $pagevars = array (
-                'qpage' => 0,
-                'qperpage' => 20,
-                'cat' => $cat->id . ',' . $context->id,
-                'recurse' => false,
-                'showhidden' => false,
-                'qbshowtext' => false
+        $pagevars = [
+            'qpage' => 0,
+            'qperpage' => 20,
+            'cat' => $cat->id . ',' . $context->id,
+            'recurse' => false,
+            'showhidden' => false,
+            'qbshowtext' => false
 
-        );
+        ];
         $view->display($pagevars, 'editq');
         $html = ob_get_clean();
 

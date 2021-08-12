@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core\output\checkbox_toggleall;
 
 /**

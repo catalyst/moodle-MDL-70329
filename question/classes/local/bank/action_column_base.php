@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A base class for actions that are an icon that lets you manipulate the question in some way.
  *

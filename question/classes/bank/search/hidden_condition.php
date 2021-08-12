@@ -24,13 +24,12 @@
  */
 
 namespace core_question\bank\search;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * This class controls whether hidden / deleted questions are hidden in the list.
  *
  * @copyright 2013 Ray Morris
- * @author    2021 2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hidden_condition extends condition {
@@ -65,9 +64,9 @@ class hidden_condition extends condition {
      */
     public function display_options_adv() {
         global $PAGE;
-        $displaydata = array();
+        $displaydata = [];
         if (!$this->hide) {
-            $displaydata['checked'] = 'checked="checked"';
+            $displaydata['checked'] = 'checked="true"';
         }
         return $PAGE->get_renderer('core_question', 'bank')->render_hidden_condition_advanced($displaydata);
     }

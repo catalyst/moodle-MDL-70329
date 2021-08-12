@@ -27,8 +27,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class plugin_features_base is the base class for qbank plugins.
  *

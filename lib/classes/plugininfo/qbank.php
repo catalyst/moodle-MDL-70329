@@ -42,7 +42,7 @@ class qbank extends base {
     }
 
     public static function get_manage_url(): \moodle_url {
-        return new \moodle_url('/admin/settings.php', array('section' => 'manageqbanks'));
+        return new \moodle_url('/admin/settings.php', ['section' => 'manageqbanks']);
     }
 
     public static function get_plugins($type, $typerootdir, $typeclass, $pluginman): array {
@@ -50,7 +50,7 @@ class qbank extends base {
 
         $qbank = parent::get_plugins($type, $typerootdir, $typeclass, $pluginman);
         $order = array_keys($qbank);
-        $sortedqbanks = array();
+        $sortedqbanks = [];
         foreach ($order as $qbankname) {
             $sortedqbanks[$qbankname] = $qbank[$qbankname];
         }
@@ -63,13 +63,13 @@ class qbank extends base {
         $plugins = $pluginmanager->get_installed_plugins('qbank');
 
         if (!$plugins) {
-            return array();
+            return [];
         }
 
         $plugins = array_keys($plugins);
 
         // Filter to return only enabled plugins.
-        $enabled = array();
+        $enabled = [];
         foreach ($plugins as $plugin) {
             $qbankinfo = $pluginmanager->get_plugin_info('qbank_'.$plugin);
             $qbankavailable = $qbankinfo->get_status();

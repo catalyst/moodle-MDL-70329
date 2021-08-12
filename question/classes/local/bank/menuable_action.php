@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Interface to indicate that a question bank column can go in the action menu.
  *

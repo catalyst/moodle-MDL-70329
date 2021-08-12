@@ -24,7 +24,6 @@
  */
 
 namespace core_question\bank\search;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * An abstract class for filtering/searching questions.

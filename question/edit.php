@@ -38,7 +38,7 @@ $PAGE->set_url($url);
 
 $questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
 
-// This one will become redundant after implementing bulk actions plugin.
+// TODO MDL-72076 - this one will become redundant after implementing bulk actions UI.
 $questionbank->process_actions();
 
 $context = $contexts->lowest();

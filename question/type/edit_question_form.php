@@ -261,13 +261,12 @@ abstract class question_edit_form extends question_wizard_form {
                 if (\core\plugininfo\qbank::is_plugin_enabled('qbank_previewquestion')) {
                     $previewlink = $PAGE->get_renderer('qbank_previewquestion')->question_preview_link(
                             $this->question->id, $this->context, true);
-                    $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
                 }
             } else {
                 $previewlink = $PAGE->get_renderer('core_question')->question_preview_link(
                         $this->question->id, $this->context, true);
-                $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
             }
+            $buttonarray[] = $mform->createElement('static', 'previewlink', '', $previewlink);
         }
 
         $mform->addGroup($buttonarray, 'updatebuttonar', '', array(' '), false);

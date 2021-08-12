@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Base class for representing a column.
  *

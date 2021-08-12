@@ -23,7 +23,6 @@
  */
 
 namespace core_question\bank\search;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Question bank search class to allow searching/filtering by tags on a question.

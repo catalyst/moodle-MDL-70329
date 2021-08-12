@@ -25,8 +25,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class navigation_node_base is the base class for navigation node.
  *

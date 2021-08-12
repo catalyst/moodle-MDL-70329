@@ -24,8 +24,6 @@
 
 namespace core_question\local\bank;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_question\bank\search\condition;
 
 /**
@@ -723,10 +721,8 @@ class view {
         $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
 
         // Continues with list of questions.
-        $this->display_question_list($editcontexts,
-                $this->baseurl, $cat, $this->cm,
-                null, $page, $perpage, $showhidden, $showquestiontext,
-                $this->contexts->having_cap('moodle/question:add'));
+        $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
+                                        $this->contexts->having_cap('moodle/question:add'));
         echo \html_writer::end_div();
 
     }
@@ -909,21 +905,15 @@ class view {
     /**
      * Prints the table of questions in a category with interactions
      *
-     * @param array      $contexts    Not used!
      * @param \moodle_url $pageurl     The URL to reload this page.
      * @param string     $categoryandcontext 'categoryID,contextID'.
-     * @param \stdClass  $cm          Not used!
      * @param int        $recurse     Whether to include subcategories.
      * @param int        $page        The number of the page to be displayed
      * @param int        $perpage     Number of questions to show per page
-     * @param bool       $showhidden  Not used! This is now controlled in a different way.
-     * @param bool       $showquestiontext Not used! This is now controlled in a different way.
      * @param array      $addcontexts contexts where the user is allowed to add new questions.
      */
-    protected function display_question_list($contexts, $pageurl, $categoryandcontext,
-            $cm = null, $recurse = 1, $page = 0, $perpage = 100, $showhidden = false,
-            $showquestiontext = false, $addcontexts = []): void {
-
+    protected function display_question_list($pageurl, $categoryandcontext, $recurse = 1, $page = 0,
+                                                $perpage = 100, $addcontexts = []): void {
         global $OUTPUT;
         // This function can be moderately slow with large question counts and may time out.
         // We probably do not want to raise it to unlimited, so randomly picking 5 minutes.
