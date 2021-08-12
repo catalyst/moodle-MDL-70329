@@ -88,15 +88,20 @@ if ($requestedqtype) {
     // context. That is, rows of these results can be used as $context objects.
     $ctxpreload = context_helper::get_preload_record_columns_sql('con');
     $ctxgroupby = implode(',', array_keys(context_helper::get_preload_record_columns('con')));
-    $counts = $DB->get_records_sql("
-            SELECT qc.contextid, count(1) as numquestions, sum(hidden) as numhidden, $ctxpreload
-            FROM {question} q
-            JOIN {question_categories} qc ON q.category = qc.id
-            JOIN {context} con ON con.id = qc.contextid
-            $sqlqtypetest
-            AND (q.parent = 0 OR q.parent = q.id)
-            GROUP BY qc.contextid, $ctxgroupby
-            ORDER BY numquestions DESC, numhidden ASC, con.contextlevel ASC, con.id ASC", $params);
+    $sql = "SELECT qc.contextid,
+                   count(1) as numquestions,
+                   sum(hidden) as numhidden,
+                   $ctxpreload
+             FROM {question} q
+             JOIN {question_versions} qv ON qv.questionid = q.id
+             JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+             JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+             JOIN {context} con ON con.id = qc.contextid
+             $sqlqtypetest
+              AND (q.parent = 0 OR q.parent = q.id)
+         GROUP BY qc.contextid, $ctxgroupby
+         ORDER BY numquestions DESC, numhidden ASC, con.contextlevel ASC, con.id ASC";
+    $counts = $DB->get_records_sql($sql, $params);
 
     // Print the report heading.
     echo $OUTPUT->heading($title);
