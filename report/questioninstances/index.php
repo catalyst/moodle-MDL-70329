@@ -88,34 +88,35 @@ if ($requestedqtype) {
     // context. That is, rows of these results can be used as $context objects.
     $ctxpreload = context_helper::get_preload_record_columns_sql('con');
     $ctxgroupby = implode(',', array_keys(context_helper::get_preload_record_columns('con')));
-    $sql = "SELECT qc.contextid,
-                   count(1) as numquestions,
-                   (SELECT COUNT(vq.id)
-                      FROM {question_versions} vq
-                      JOIN {question_bank_entry} beq ON beq.id = vq.questionbankentryid
-                     WHERE beq.id = qbe.id
-                       AND vq.status = 1
-                       AND vq.version = (SELECT MAX(vv.version)
-                                           FROM {question_versions} vv
-                                           JOIN {question_bank_entry} bqe 
-                                             ON bqe.id = vv.questionbankentryid
-                                          WHERE bqe.id = beq.id)) as numhidden,
-                   $ctxpreload
-             FROM {question} q
-             JOIN {question_versions} qv ON qv.questionid = q.id
-             JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
-             JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-             JOIN {context} con ON con.id = qc.contextid
-             $sqlqtypetest
-              AND (q.parent = 0 OR q.parent = q.id)
-              AND qv.version  = (SELECT MAX(v.version)
-                                        FROM {question_versions} v
-                                        JOIN {question_bank_entry} be 
-                                          ON be.id = v.questionbankentryid
-                                       WHERE be.id = qbe.id)
-         GROUP BY qc.contextid, $ctxgroupby
-         ORDER BY numquestions DESC, numhidden ASC, con.contextlevel ASC, con.id ASC";
-    $counts = $DB->get_records_sql($sql, $params);
+    $counts = $DB->get_records_sql("
+            SELECT result.contextid, sum(numquestions) as numquestions, sum(numhidden) as numhidden, $ctxpreload
+                FROM (
+                         SELECT data.contextid,
+                                count(data.numquestions) as numquestions,
+                                (SELECT COUNT(qv.id)
+                                 FROM {question_versions} qv
+                                 WHERE qv.id = data.versionid
+                                   AND qv.status = 1) as numhidden
+                         FROM (
+                                 SELECT qv.id as versionid, qc.contextid, 1 as numquestions
+                                   FROM {question} q
+                                   JOIN {question_versions} qv ON qv.questionid = q.id
+                                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                   JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                   JOIN {context} con ON con.id = qc.contextid
+                                   $sqlqtypetest
+                                    AND qv.version = (SELECT MAX(v.version)
+                                                        FROM {question_versions} v
+                                                        JOIN {question_bank_entry} be
+                                                          ON be.id = v.questionbankentryid
+                                                       WHERE be.id = qbe.id)
+                                    AND (q.parent = 0 OR q.parent = q.id)
+                              ) data
+                         GROUP BY data.contextid, data.versionid
+                     ) result
+                JOIN {context} con ON con.id = result.contextid
+                GROUP BY result.contextid, $ctxgroupby
+                ORDER BY numquestions DESC, numhidden ASC, con.contextlevel ASC, con.id ASC", $params);
 
     // Print the report heading.
     echo $OUTPUT->heading($title);
