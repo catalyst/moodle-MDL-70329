@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_usage, language 'en'
+ * qbank_usage renderer.
  *
  * @package    qbank_usage
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,7 +23,26 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question usage question bank feature';
-$string['privacy:metadata'] = 'Question usage plugin shows where a question is used, it does not store any user data.';
-$string['questionusage'] = 'Usage';
-$string['usageheader'] = 'Question usage';
+namespace qbank_usage\output;
+
+/**
+ * Class renderer
+ *
+ * @package    qbank_usage
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class renderer extends \plugin_renderer_base {
+
+    /**
+     * Render the html fragment for usage modal.
+     *
+     * @param array $displaydata
+     * @return string
+     */
+    public function render_usage_fragment($displaydata): string {
+        return $this->render_from_template('qbank_usage/usage_modal', $displaydata);
+    }
+
+}

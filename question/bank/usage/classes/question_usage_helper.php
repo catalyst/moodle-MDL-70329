@@ -25,10 +25,6 @@
 
 namespace qbank_usage;
 
-defined('MOODLE_INTERNAL') || die();
-
-use core_question\local\bank\column_base;
-
 /**
  * A column type for the name of the question type.
  *
@@ -37,32 +33,22 @@ use core_question\local\bank\column_base;
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class question_usage_column extends column_base {
+class question_usage_helper {
 
-    public function get_name(): string {
-        return 'qusage';
+    /**
+     * Get the usage count for the question.
+     *
+     * @param $questionid
+     * @return int
+     */
+    public static function get_question_usage_count($questionid): int {
+        global $DB;
+        $sql = 'SELECT COUNT(qr.id) as questionusage
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_references} qr ON qr.versionid = qv.id
+                 WHERE q.id = ?';
+        $usagecount = $DB->get_record_sql($sql, [$questionid])->questionusage;
+        return $usagecount;
     }
-
-    protected function get_title(): string {
-        return get_string('questionusage', 'qbank_usage');
-    }
-
-    protected function display_content($question, $rowclasses): void {
-        global $PAGE;
-        $usagecount = question_usage_helper::get_question_usage_count($question->id);
-        $attributes = [];
-        if (question_has_capability_on($question, 'view')) {
-            $target = 'questionusagepreview_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_usage/usage', 'init', [$datatarget]);
-            $attributes = [
-                'data-target' => $target,
-                'data-questionid' => $question->id,
-                'data-courseid' => $this->qbank->course->id,
-                'class' => 'link-primary comment-pointer'
-            ];
-        }
-        echo \html_writer::tag('a', $usagecount, $attributes);
-    }
-
 }
