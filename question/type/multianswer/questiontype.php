@@ -95,7 +95,7 @@ class qtype_multianswer extends question_type {
         // First we get all the existing wrapped questions.
         $oldwrappedquestions = [];
         if ($oldwrappedids = $DB->get_field('question_multianswer', 'sequence',
-                array('question' => $question->oldparent))) {
+                ['question' => $question->oldparent])) {
             $oldwrappedidsarray = explode(',', $oldwrappedids);
             $unorderedquestions = $DB->get_records_list('question', 'id', $oldwrappedidsarray);
 
@@ -132,7 +132,6 @@ class qtype_multianswer extends question_type {
                             default:
                                 throw new moodle_exception('qtypenotrecognized',
                                         'qtype_multianswer', '', $oldwrappedquestion->qtype);
-                                $wrapped->id = 0;
                         }
                     }
                 }
