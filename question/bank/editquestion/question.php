@@ -322,7 +322,7 @@ if ($mform->is_cancelled()) {
         }
         $nexturlparams['id'] = $question->id;
         $nexturlparams['wizardnow'] = $fromform->wizard;
-        $nexturl = new moodle_url('/question/question.php', $nexturlparams);
+        $nexturl = new moodle_url($url, $nexturlparams);
         if ($cmid) {
             $nexturl->param('cmid', $cmid);
         } else {
