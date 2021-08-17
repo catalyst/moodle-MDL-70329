@@ -48,9 +48,8 @@ class question_usage_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        var_dump($question);die;
         global $PAGE;
-        $usagecount = question_usage_helper::get_question_usage_count($question->id);
+        $usagecount = question_usage_helper::get_question_usage_count($question);
         $attributes = [];
         if (question_has_capability_on($question, 'view')) {
             $target = 'questionusagepreview_' . $question->id;

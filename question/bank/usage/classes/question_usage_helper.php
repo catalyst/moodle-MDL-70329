@@ -38,10 +38,10 @@ class question_usage_helper {
     /**
      * Get the sql for question usage count
      *
-     * @param int $questionid
+     * @param \stdClass $question
      * @return string
      */
-    public static function get_question_usage_count_sql($questionid): string {
+    public static function get_question_usage_count_sql($question): string {
         $latestversionsql = 'SELECT MAX(qv.version)
                                FROM {question} q
                                JOIN {question_versions} qv ON qv.questionid = q.id
@@ -59,12 +59,12 @@ class question_usage_helper {
     /**
      * Get the usage count for the question.
      *
-     * @param $questionid
+     * @param \stdClass $question
      * @return int
      */
-    public static function get_question_usage_count($questionid): int {
+    public static function get_question_usage_count($question): int {
         global $DB;
-        $usagecount = $DB->get_record_sql(self::get_question_usage_count_sql($questionid), [$questionid])->questionusage;
+        $usagecount = $DB->get_record_sql(self::get_question_usage_count_sql($question), [$question->id])->questionusage;
         return $usagecount;
     }
 
