@@ -59,7 +59,7 @@ class qtype_match_test_helper extends question_test_helper {
         $q->defaultmark = 1;
         $q->penalty = 0.3333333;
         $q->length = 1;
-        $q->hidden = 0;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $q->createdby = $USER->id;
         $q->modifiedby = $USER->id;
 
@@ -180,7 +180,7 @@ class qtype_match_test_helper extends question_test_helper {
         $q->defaultmark = 1;
         $q->penalty = 0.3333333;
         $q->length = 1;
-        $q->hidden = 0;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $q->createdby = $USER->id;
         $q->modifiedby = $USER->id;
 

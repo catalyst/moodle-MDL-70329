@@ -83,7 +83,7 @@ class qtype_description_test_helper extends question_test_helper {
         $qdata->defaultmark = 0;
         $qdata->length = 0;
         $qdata->penalty = 0;
-        $qdata->hidden = 0;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $qdata->hints = array();
         $qdata->options = new stdClass();
         $qdata->options->answers = array();

@@ -57,7 +57,7 @@ class qtype_multichoice_test_helper extends question_test_helper {
         $qdata->defaultmark = 1;
         $qdata->length = 1;
         $qdata->penalty = 0.3333333;
-        $qdata->hidden = 0;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $qdata->options = new stdClass();
         $qdata->options->shuffleanswers = 1;
@@ -240,7 +240,7 @@ class qtype_multichoice_test_helper extends question_test_helper {
         $qdata->defaultmark = 1;
         $qdata->length = 1;
         $qdata->penalty = 0.3333333;
-        $qdata->hidden = 0;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $qdata->options = new stdClass();
         $qdata->options->shuffleanswers = 1;

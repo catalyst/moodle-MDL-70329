@@ -1976,9 +1976,16 @@ function save_question_versions(object $question, object $form, object $context,
     $questionversion = new \stdClass();
     $questionversion->questionbankentryid = $questionbankentry->id;
     $questionversion->questionid = $question->id;
+    // Get the version and status from the parent question if parent is set.
     if (!$question->parent) {
+        // Get the status field. It comes from the form, but for testing we can
+        if (!isset($form->status)) {
+            $status = $question->status;
+        } else {
+            $status = $form->status;
+        }
         $questionversion->version = get_next_version($questionbankentry->id);
-        $questionversion->status = $form->status;
+        $questionversion->status = $status;
     } else {
         $parentversion = get_question_version($form->parent);
         $questionversion->version = $parentversion[array_key_first($parentversion)]->version;

@@ -102,7 +102,7 @@ class qtype_truefalse_test_helper extends question_test_helper {
         $q->penalty = 1;
         $q->qtype = 'truefalse';
         $q->length = '1';
-        $q->hidden = '0';
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $q->createdby = '2';
         $q->modifiedby = '2';
         $q->options = new stdClass();

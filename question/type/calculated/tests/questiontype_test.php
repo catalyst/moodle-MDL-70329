@@ -102,7 +102,7 @@ class qtype_calculated_test extends advanced_testcase {
         $this->assertEquals(0, $questiondata->penalty);
         $this->assertEquals('calculated', $questiondata->qtype);
         $this->assertEquals(1, $questiondata->length);
-        $this->assertEquals(0, $questiondata->hidden);
+        $this->assertEquals(0, $questiondata->status);
         $this->assertEquals($question->createdby, $questiondata->createdby);
         $this->assertEquals($question->createdby, $questiondata->modifiedby);
         $this->assertEquals('', $questiondata->idnumber);

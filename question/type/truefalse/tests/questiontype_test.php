@@ -96,7 +96,7 @@ class qtype_truefalse_test extends advanced_testcase {
         $this->assertEquals(1, $questiondata->penalty);
         $this->assertEquals('truefalse', $questiondata->qtype);
         $this->assertEquals(1, $questiondata->length);
-        $this->assertEquals(0, $questiondata->hidden);
+        $this->assertEquals(0, $questiondata->status);
         $this->assertEquals($question->createdby, $questiondata->createdby);
         $this->assertEquals($question->createdby, $questiondata->modifiedby);
         $this->assertEquals('', $questiondata->idnumber);

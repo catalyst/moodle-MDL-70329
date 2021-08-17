@@ -975,7 +975,7 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->hidden = $questiondata->hidden;
+        //$question->status = $questiondata->status;
         $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;

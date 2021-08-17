@@ -123,6 +123,7 @@ abstract class question_test_helper {
         $dataforformconstructor->qtype = $questiondata->qtype;
         $dataforformconstructor->contextid = $questiondata->contextid = $catcontext->id;
         $dataforformconstructor->category = $questiondata->category = $cat->id;
+        $dataforformconstructor->status = $questiondata->status;
         $dataforformconstructor->formoptions = new stdClass();
         $dataforformconstructor->formoptions->canmove = true;
         $dataforformconstructor->formoptions->cansaveasnew = true;
