@@ -83,7 +83,8 @@ class qtype_truefalse_test extends advanced_testcase {
         $this->assertEquals(['id', 'category', 'parent', 'name', 'questiontext', 'questiontextformat',
                 'generalfeedback', 'generalfeedbackformat', 'defaultmark', 'penalty', 'qtype',
                 'length', 'stamp', 'timecreated', 'timemodified',
-                'createdby', 'modifiedby', 'idnumber', 'contextid', 'status', 'options', 'hints', 'categoryobject'],
+                'createdby', 'modifiedby', 'idnumber', 'contextid', 'status', 'versionid', 'questionbankentryid',
+                'options', 'hints', 'categoryobject'],
                 array_keys(get_object_vars($questiondata)));
         $this->assertEquals($category->id, $questiondata->category);
         $this->assertEquals(0, $questiondata->parent);

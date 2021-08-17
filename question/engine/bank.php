@@ -592,12 +592,14 @@ class question_finder implements cache_data_source {
     public function load_for_cache($questionid) {
         global $DB;
 
-        $sql = 'SELECT q.id, q.category, q.parent, q.name, q.questiontext, q.questiontextformat,
+        $sql = 'SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
                        q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
                        q.length, q.stamp, q.timecreated, q.timemodified,
                        q.createdby, q.modifiedby, q.idnumber,
                        qc.contextid,
-                       qv.status
+                       qv.status,
+                       qv.id as versionid,
+                       qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
@@ -613,12 +615,14 @@ class question_finder implements cache_data_source {
     public function load_many_for_cache(array $questionids) {
         global $DB;
         list($idcondition, $params) = $DB->get_in_or_equal($questionids);
-        $sql = 'SELECT q.id, q.category, q.parent, q.name, q.questiontext, q.questiontextformat,
+        $sql = 'SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
                        q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
                        q.length, q.stamp, q.timecreated, q.timemodified,
                        q.createdby, q.modifiedby, q.idnumber,
                        qc.contextid,
-                       qv.status
+                       qv.status,
+                       qv.id as versionid,
+                       qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
