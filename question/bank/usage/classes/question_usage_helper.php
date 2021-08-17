@@ -36,6 +36,27 @@ namespace qbank_usage;
 class question_usage_helper {
 
     /**
+     * Get the sql for question usage count
+     *
+     * @param int $questionid
+     * @return string
+     */
+    public static function get_question_usage_count_sql($questionid): string {
+        $latestversionsql = 'SELECT MAX(qv.version)
+                               FROM {question} q
+                               JOIN {question_versions} qv ON qv.questionid = q.id
+                               JOIN {question_bank_entry} qbe 
+                                 ON qbe.id = qv.questionbankentryid
+                              WHERE q.id = ?';
+        $sql = 'SELECT COUNT(qr.id) as questionusage
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_references} qr ON qr.versionid = qv.id
+                 WHERE q.id = ?';
+        return $sql;
+    }
+
+    /**
      * Get the usage count for the question.
      *
      * @param $questionid
@@ -43,12 +64,8 @@ class question_usage_helper {
      */
     public static function get_question_usage_count($questionid): int {
         global $DB;
-        $sql = 'SELECT COUNT(qr.id) as questionusage
-                  FROM {question} q
-                  JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_references} qr ON qr.versionid = qv.id
-                 WHERE q.id = ?';
-        $usagecount = $DB->get_record_sql($sql, [$questionid])->questionusage;
+        $usagecount = $DB->get_record_sql(self::get_question_usage_count_sql($questionid), [$questionid])->questionusage;
         return $usagecount;
     }
+
 }

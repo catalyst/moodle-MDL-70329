@@ -32,6 +32,7 @@ require_once($CFG->libdir.'/tablelib.php');
 
 use DateTime;
 use moodle_url;
+use qbank_usage\question_usage_helper;
 use table_sql;
 
 /**
@@ -48,9 +49,16 @@ class question_usage_table extends table_sql {
     /**
      * Search string.
      *
-     * @var string
+     * @var string $search
      */
     public $search = '';
+
+    /**
+     * Question id.
+     *
+     * @var int $questionid
+     */
+    public $questionid;
 
     /**
      * constructor.
@@ -62,7 +70,7 @@ class question_usage_table extends table_sql {
     public function __construct(string $uniqueid, int $questionid) {
         global $PAGE;
         parent::__construct($uniqueid);
-
+        $this->questionid = $questionid;
         $columns = ['modulename', 'coursename', 'state', 'versions', 'attempts', 'lastused'];
         $headers = [
             get_string('modulename', 'qbank_usage'),
@@ -75,13 +83,18 @@ class question_usage_table extends table_sql {
         $this->is_collapsible = false;
         $this->define_columns($columns);
         $this->define_headers($headers);
-        $params = [];
-        $sql = '';
-        $this->set_count_sql($sql, $params);
+        $this->set_count_sql(question_usage_helper::get_question_usage_count_sql(), [$this->questionid]);
         $this->define_baseurl($PAGE->url);
     }
 
-
+    public function query_db($pagesize, $useinitialsbar = true) {
+        global $DB;
+        $sql = 'SELECT qv.version as versions
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_references} qr ON qr.versionid = qv.id
+                 WHERE q.id = ?';
+    }
 
     /**
      * Export this data so it can be used as the context for a mustache template/fragment.
