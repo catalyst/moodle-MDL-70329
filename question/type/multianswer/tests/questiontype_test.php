@@ -272,7 +272,7 @@ class qtype_multianswer_test extends advanced_testcase {
 
         $subqpropstoignore =
             array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'timemodified',
-                'timecreated');
+                'timecreated', 'status');
         foreach ($questiondata->options->questions as $subqno => $subq) {
             $actualsubq = $actualquestiondata->options->questions[$subqno];
             foreach ($subq as $subqproperty => $subqvalue) {

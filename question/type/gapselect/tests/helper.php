@@ -69,8 +69,6 @@ class qtype_gapselect_test_helper extends question_test_helper {
         $gapselect->generalfeedback = 'This sentence uses each letter of the alphabet.';
         $gapselect->qtype = 'gapselect';
 
-        $gapselect->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
-
         $gapselect->options = new stdClass();
         $gapselect->options->shuffleanswers = true;
 

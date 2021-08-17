@@ -144,6 +144,7 @@ class qtype_multichoice_test_helper extends question_test_helper {
         $qdata->noanswers = 5;
         $qdata->numhints = 2;
         $qdata->penalty = 0.3333333;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $qdata->shuffleanswers = 1;
         $qdata->answernumbering = '123';
@@ -215,8 +216,6 @@ class qtype_multichoice_test_helper extends question_test_helper {
         );
         $qdata->hintclearwrong = array(0, 1);
         $qdata->hintshownumcorrect = array(1, 1);
-
-        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $qdata;
     }
@@ -329,6 +328,7 @@ class qtype_multichoice_test_helper extends question_test_helper {
         $qdata->noanswers = 5;
         $qdata->numhints = 2;
         $qdata->penalty = 0.3333333;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $qdata->shuffleanswers = 1;
         $qdata->answernumbering = '123';
@@ -400,8 +400,6 @@ class qtype_multichoice_test_helper extends question_test_helper {
         );
         $qdata->hintclearwrong = array(0, 1);
         $qdata->hintshownumcorrect = array(1, 1);
-
-        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $qdata;
     }
