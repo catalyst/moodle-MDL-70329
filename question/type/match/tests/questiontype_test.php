@@ -183,7 +183,7 @@ class qtype_match_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'version', 'timemodified', 'timecreated', 'options', 'stamp'))) {
+            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options', 'stamp'))) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }

@@ -850,7 +850,8 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
     }
 
     $sql = "SELECT q.*,
-                   qc.contextid as contextid
+                   qc.contextid as contextid,
+                   qv.status
                    {$extrafields}
               FROM {question} q
               JOIN {question_versions} qv

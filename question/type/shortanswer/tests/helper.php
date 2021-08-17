@@ -108,6 +108,7 @@ class qtype_shortanswer_test_helper extends question_test_helper {
             array('text' => 'Toad is an OK good answer.', 'format' => FORMAT_HTML),
             array('text' => 'That is a bad answer.', 'format' => FORMAT_HTML),
         );
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $form;
     }

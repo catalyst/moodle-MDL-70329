@@ -105,6 +105,7 @@ class qtype_match_test_helper extends question_test_helper {
         $q->generalfeedback = array('text' => 'General feedback.', 'format' => FORMAT_HTML);
         $q->defaultmark = 1;
         $q->penalty = 0.3333333;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $q->shuffleanswers = 1;
         test_question_maker::set_standard_combined_feedback_form_data($q);
@@ -221,6 +222,7 @@ class qtype_match_test_helper extends question_test_helper {
         $q->generalfeedback = ['text' => 'Java has some advantages over PHP I guess!', 'format' => FORMAT_HTML];
         $q->defaultmark = 1;
         $q->penalty = 0.3333333;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         $q->shuffleanswers = 1;
         test_question_maker::set_standard_combined_feedback_form_data($q);

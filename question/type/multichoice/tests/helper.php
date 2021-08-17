@@ -216,6 +216,8 @@ class qtype_multichoice_test_helper extends question_test_helper {
         $qdata->hintclearwrong = array(0, 1);
         $qdata->hintshownumcorrect = array(1, 1);
 
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+
         return $qdata;
     }
 
@@ -398,6 +400,8 @@ class qtype_multichoice_test_helper extends question_test_helper {
         );
         $qdata->hintclearwrong = array(0, 1);
         $qdata->hintshownumcorrect = array(1, 1);
+
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $qdata;
     }

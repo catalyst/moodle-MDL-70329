@@ -104,6 +104,7 @@ class qtype_description_test_helper extends question_test_helper {
                                     'format' => FORMAT_HTML);
         $form->generalfeedback = array('text' => 'And here is some more text shown only on the review page.',
                                        'format' => FORMAT_HTML);
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $form;
     }

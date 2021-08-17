@@ -162,6 +162,8 @@ class qtype_numerical_test_helper extends question_test_helper {
         $form->hint[1]['text'] = '';
 
         $form->qtype = 'numerical';
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+
         return $form;
     }
 

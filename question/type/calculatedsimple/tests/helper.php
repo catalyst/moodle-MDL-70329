@@ -205,6 +205,8 @@ class qtype_calculatedsimple_test_helper extends question_test_helper {
         $form->definition[19] = '1-0-b';
         $form->definition[20] = '1-0-a';
 
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+
         return $form;
     }
 

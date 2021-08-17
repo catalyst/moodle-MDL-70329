@@ -86,6 +86,7 @@ class qtype_truefalse_test_helper extends question_test_helper {
         $form->feedbackfalse['text'] = 'This is the wrong answer.';
 
         $form->penalty = 1;
+        $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 
         return $form;
     }

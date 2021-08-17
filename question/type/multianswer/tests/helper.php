@@ -274,6 +274,8 @@ class qtype_multianswer_test_helper extends question_test_helper {
             1 => array('text' => 'Hint 2', 'format' => FORMAT_HTML, 'itemid' => 0),
         );
 
+        $formdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+
         return $formdata;
     }
 

@@ -179,7 +179,7 @@ class test_question_maker {
         $q->penalty = 0.3333333;
         $q->length = 1;
         $q->stamp = make_unique_id_code();
-        $q->hidden = 0;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $q->timecreated = time();
         $q->timemodified = time();
         $q->createdby = $USER->id;
@@ -200,7 +200,7 @@ class test_question_maker {
         $qdata->penalty = 0.3333333;
         $qdata->length = 1;
         $qdata->stamp = make_unique_id_code();
-        $qdata->hidden = 0;
+        $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $qdata->timecreated = time();
         $qdata->timemodified = time();
         $qdata->createdby = $USER->id;
