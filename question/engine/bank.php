@@ -599,6 +599,7 @@ class question_finder implements cache_data_source {
                        qc.contextid,
                        qv.status,
                        qv.id as versionid,
+                       qv.version,
                        qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
@@ -622,6 +623,7 @@ class question_finder implements cache_data_source {
                        qc.contextid,
                        qv.status,
                        qv.id as versionid,
+                       qv.version,
                        qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
