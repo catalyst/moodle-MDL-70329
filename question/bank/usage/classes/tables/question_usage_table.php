@@ -56,26 +56,25 @@ class question_usage_table extends table_sql {
     /**
      * Question id.
      *
-     * @var int $questionid
+     * @var \question_definition $question
      */
-    public $questionid;
+    public \question_definition $question;
 
     /**
      * constructor.
      * Sets the SQL for the table and the pagination.
      *
      * @param string $uniqueid
-     * @param int $questionid
+     * @param \question_definition $question
      */
-    public function __construct(string $uniqueid, int $questionid) {
+    public function __construct(string $uniqueid, \question_definition $question) {
         global $PAGE;
         parent::__construct($uniqueid);
-        $this->questionid = $questionid;
-        $columns = ['modulename', 'coursename', 'state', 'versions', 'attempts', 'lastused'];
+        $this->question = $question;
+        $columns = ['modulename', 'coursename', 'versions', 'attempts', 'lastused'];
         $headers = [
             get_string('modulename', 'qbank_usage'),
             get_string('coursename', 'qbank_usage'),
-            get_string('state', 'qbank_usage'),
             get_string('versions', 'qbank_usage'),
             get_string('attempts', 'qbank_usage'),
             get_string('lastused', 'qbank_usage')
@@ -83,17 +82,35 @@ class question_usage_table extends table_sql {
         $this->is_collapsible = false;
         $this->define_columns($columns);
         $this->define_headers($headers);
-        $this->set_count_sql(question_usage_helper::get_question_usage_count_sql(), [$this->questionid]);
+        $this->set_count_sql(question_usage_helper::get_question_usage_count_sql(), [$this->question->id]);
         $this->define_baseurl($PAGE->url);
     }
 
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
-        $sql = 'SELECT qv.version as versions
-                  FROM {question} q
-                  JOIN {question_versions} qv ON qv.questionid = q.id
+        $sort = $this->get_sql_sort();
+        if ($sort) {
+            $sort = "ORDER BY $sort";
+        }
+        $sql = "SELECT q.name as modulename
+                       qv.version as versions
+                       (SELECT COUNT(qat.id)
+                          FROM {quiz_attempts} qat
+                          WHERE qat.quiz = q.id) as attempts
+                       q.id as moduleid
+                  FROM {question_bank_entry} qbe
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
                   JOIN {question_references} qr ON qr.versionid = qv.id
-                 WHERE q.id = ?';
+                  JOIN {quiz_slots} qs ON qs.id = qr.itemid
+                  JOIN {quiz} q ON q.id = qs.quizid
+                 WHERE qbe.id = ?
+                 $sort";
+        if (!$this->is_downloading()) {
+            $this->rawdata = $DB->get_records_sql($sql, $this->question->questionbankentryid, $this->get_page_start(), $this->get_page_size());
+        } else {
+            $this->rawdata = $DB->get_records_sql($sql, $this->sql->params);
+        }
+
     }
 
     /**
