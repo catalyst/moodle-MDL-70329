@@ -38,21 +38,14 @@ class question_usage_helper {
     /**
      * Get the sql for question usage count
      *
-     * @param \stdClass $question
      * @return string
      */
-    public static function get_question_usage_count_sql($question): string {
-        $latestversionsql = 'SELECT MAX(qv.version)
-                               FROM {question} q
-                               JOIN {question_versions} qv ON qv.questionid = q.id
-                               JOIN {question_bank_entry} qbe 
-                                 ON qbe.id = qv.questionbankentryid
-                              WHERE q.id = ?';
+    public static function get_question_usage_count_sql(): string {
         $sql = 'SELECT COUNT(qr.id) as questionusage
-                  FROM {question} q
-                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  FROM {question_bank_entry} qbe
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
                   JOIN {question_references} qr ON qr.versionid = qv.id
-                 WHERE q.id = ?';
+                 WHERE qbe.id = ?';
         return $sql;
     }
 
@@ -64,7 +57,8 @@ class question_usage_helper {
      */
     public static function get_question_usage_count($question): int {
         global $DB;
-        $usagecount = $DB->get_record_sql(self::get_question_usage_count_sql($question), [$question->id])->questionusage;
+        $usagecount = $DB->get_record_sql(self::get_question_usage_count_sql(),
+                                            [$question->questionbankentryid])->questionusage;
         return $usagecount;
     }
 
