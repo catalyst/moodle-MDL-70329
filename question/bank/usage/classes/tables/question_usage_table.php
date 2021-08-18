@@ -106,7 +106,8 @@ class question_usage_table extends table_sql {
                  WHERE qbe.id = ?
                  $sort";
         if (!$this->is_downloading()) {
-            $this->rawdata = $DB->get_records_sql($sql, $this->question->questionbankentryid, $this->get_page_start(), $this->get_page_size());
+            $this->rawdata = $DB->get_records_sql($sql, $this->question->questionbankentryid,
+                                                    $this->get_page_start(), $this->get_page_size());
         } else {
             $this->rawdata = $DB->get_records_sql($sql, $this->sql->params);
         }
