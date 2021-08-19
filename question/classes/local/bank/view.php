@@ -808,7 +808,7 @@ class view {
 
         // The html will be refactored in the filter feature implementation.
         echo \html_writer::start_tag('form', ['method' => 'get',
-                'action' => new \moodle_url($this->baseurl->get_path()), 'id' => 'displayoptions']);
+                'action' => new \moodle_url($this->baseurl), 'id' => 'displayoptions']);
         echo \html_writer::start_div();
 
         $excludes = ['recurse', 'showhidden', 'qbshowtext'];
