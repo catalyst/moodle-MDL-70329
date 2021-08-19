@@ -2343,13 +2343,25 @@ class backup_questions_structure_step extends backup_structure_step {
             'info', 'infoformat', 'stamp', 'parent',
             'sortorder', 'idnumber'));
 
+        $questionbankentries = new backup_nested_element('question_bank_entries');
+
+        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], [
+            'ownerid'
+        ]);
+
+        $questionversions = new backup_nested_element('question_versions_entry');
+
+        $questionverion = new backup_nested_element('question_versions', ['id'], [
+                'version', 'status'
+        ]);
+
         $questions = new backup_nested_element('questions');
 
         $question = new backup_nested_element('question', array('id'), array(
             'parent', 'name', 'questiontext', 'questiontextformat',
             'generalfeedback', 'generalfeedbackformat', 'defaultmark', 'penalty',
-            'qtype', 'length', 'stamp', 'version',
-            'hidden', 'timecreated', 'timemodified', 'createdby', 'modifiedby', 'idnumber'));
+            'qtype', 'length', 'stamp',
+            'timecreated', 'timemodified', 'createdby', 'modifiedby', 'idnumber'));
 
         // attach qtype plugin structure to $question element, only one allowed
         $this->add_plugin_structure('qtype', $question, false);
@@ -2374,7 +2386,11 @@ class backup_questions_structure_step extends backup_structure_step {
         // Build the tree
 
         $qcategories->add_child($qcategory);
-        $qcategory->add_child($questions);
+        $qcategory->add_child($questionbankentries);
+        $questionbankentries->add_child($questionbankentry);
+        $questionbankentry->add_child($questionversions);
+        $questionversions->add_child($questionverion);
+        $questionbankentry->add_child($questions);
         $questions->add_child($question);
         $question->add_child($qhints);
         $qhints->add_child($qhint);
@@ -2395,7 +2411,17 @@ class backup_questions_structure_step extends backup_structure_step {
              WHERE bi.backupid = ?
                AND bi.itemname = 'question_categoryfinal'", array(backup::VAR_BACKUPID));
 
+        $questionbankentry->set_source_table('question_bank_entry', ['questioncategoryid' => backup::VAR_PARENTID]);
+
+        $questionverion->set_source_table('question_versions', ['questionbankentryid' => backup::VAR_PARENTID]);
+
         $question->set_source_table('question', array('category' => backup::VAR_PARENTID));
+
+        $question->set_source_sql('SELECT q.*
+                                        FROM {question} q
+                                        JOIN {question_versions} qv ON qv.questionid = q.id
+                                        JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                       WHERE qbe.id = ?', [backup::VAR_PARENTID]);
 
         $qhint->set_source_sql('
                 SELECT *
