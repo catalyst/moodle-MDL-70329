@@ -28,7 +28,7 @@ require_once(__DIR__ . '/../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-        question_edit_setup('questions', '/question/edit.php');
+        question_edit_setup('questions', "$CFG->wwwroot/question/edit.php");
 
 $url = new moodle_url($thispageurl);
 if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
