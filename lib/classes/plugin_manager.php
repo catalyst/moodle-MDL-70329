@@ -1947,6 +1947,7 @@ class core_plugin_manager {
                 'editquestion',
                 'exporttoxml',
                 'exportquestions',
+                'history',
                 'importquestions',
                 'managecategories',
                 'previewquestion',
