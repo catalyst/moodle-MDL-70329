@@ -58,6 +58,9 @@ class qtype_gapselect_test_helper extends question_test_helper {
         $gapselect->length = 1;
         $gapselect->stamp = make_unique_id_code();
         $gapselect->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $gapselect->versionid = 0;
+        $gapselect->version = 1;
+        $gapselect->questionbankentryid = 0;
         $gapselect->idnumber = null;
         $gapselect->timecreated = time();
         $gapselect->timemodified = time();

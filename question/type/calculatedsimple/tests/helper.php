@@ -225,6 +225,7 @@ class qtype_calculatedsimple_test_helper extends question_test_helper {
         $q->qtype = 'calculatedsimple';
         $q->length = '1';
         $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $q->version = 1;
         $q->options = new stdClass();
         $q->options->synchronize = 0;
         $q->options->single = 0;

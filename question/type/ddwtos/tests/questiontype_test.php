@@ -74,6 +74,9 @@ class qtype_ddwtos_test extends question_testcase {
         $dd->length = 1;
         $dd->stamp = make_unique_id_code();
         $dd->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $dd->version = 1;
+        $dd->versionid = 0;
+        $dd->questionbankentryid = 0;
         $dd->idnumber = null;
         $dd->timecreated = time();
         $dd->timemodified = time();

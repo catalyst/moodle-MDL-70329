@@ -57,6 +57,9 @@ class qtype_missing_test extends question_testcase {
         $questiondata->length = 1;
         $questiondata->stamp = make_unique_id_code();
         $questiondata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $questiondata->version = 1;
+        $questiondata->versionid = 0;
+        $questiondata->questionbankentryid = 0;
         $questiondata->idnumber = null;
         $questiondata->timecreated = 0;
         $questiondata->timemodified = 0;

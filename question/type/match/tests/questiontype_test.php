@@ -67,6 +67,9 @@ class qtype_match_test extends advanced_testcase {
         $q->length = 1;
         $q->stamp = make_unique_id_code();
         $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $q->version = 1;
+        $q->versionid = 0;
+        $q->questionbankentryid = 0;
         $q->idnumber = null;
         $q->timecreated = time();
         $q->timemodified = time();
@@ -183,7 +186,8 @@ class qtype_match_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options', 'stamp'))) {
+            if (!in_array($property, ['id', 'timemodified', 'timecreated', 'options', 'stamp',
+                'versionid', 'questionbankentryid'])) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }

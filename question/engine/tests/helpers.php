@@ -180,6 +180,7 @@ class test_question_maker {
         $q->length = 1;
         $q->stamp = make_unique_id_code();
         $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $q->version = 1;
         $q->timecreated = time();
         $q->timemodified = time();
         $q->createdby = $USER->id;
@@ -201,6 +202,7 @@ class test_question_maker {
         $qdata->length = 1;
         $qdata->stamp = make_unique_id_code();
         $qdata->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $qdata->version = 1;
         $qdata->timecreated = time();
         $qdata->timemodified = time();
         $qdata->createdby = $USER->id;

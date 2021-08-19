@@ -67,9 +67,12 @@ class qtype_multianswer_test extends advanced_testcase {
         $q->generalfeedbackformat = FORMAT_HTML;
         $q->defaultmark = 2;
         $q->penalty = 0.3333333;
+        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+        $q->versionid = 0;
+        $q->version = 1;
+        $q->questionbankentryid = 0;
         $q->length = 1;
         $q->stamp = make_unique_id_code();
-        $q->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $q->timecreated = time();
         $q->timemodified = time();
         $q->createdby = $USER->id;
@@ -259,7 +262,8 @@ class qtype_multianswer_test extends advanced_testcase {
         $actualquestiondata = end($actualquestionsdata);
 
         foreach ($questiondata as $property => $value) {
-            if (!in_array($property, array('id', 'timemodified', 'timecreated', 'options', 'hints', 'stamp'))) {
+            if (!in_array($property, ['id', 'timemodified', 'timecreated', 'options', 'hints', 'stamp',
+                'idnumber', 'version', 'versionid', 'questionbankentryid'])) {
                 $this->assertEquals($value, $actualquestiondata->$property);
             }
         }
@@ -282,8 +286,8 @@ class qtype_multianswer_test extends advanced_testcase {
         $this->assertObjectHasAttribute('questions', $actualquestiondata->options);
 
         $subqpropstoignore =
-            array('id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'timemodified',
-                'timecreated', 'status');
+            ['id', 'category', 'parent', 'contextid', 'question', 'options', 'stamp', 'timemodified',
+                'timecreated', 'status', 'idnumber', 'version', 'versionid', 'questionbankentryid'];
         foreach ($questiondata->options->questions as $subqno => $subq) {
             $actualsubq = $actualquestiondata->options->questions[$subqno];
             foreach ($subq as $subqproperty => $subqvalue) {

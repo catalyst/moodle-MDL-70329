@@ -849,9 +849,15 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
         $orderby = 'ORDER BY ' . $orderby;
     }
 
-    $sql = "SELECT q.*,
-                   qc.contextid as contextid,
-                   qv.status
+    $sql = "SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
+                   q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
+                   q.length, q.stamp, q.timecreated, q.timemodified,
+                   q.createdby, q.modifiedby, q.idnumber,
+                   qv.status,
+                   qv.id as versionid,
+                   qv.version,
+                   qv.questionbankentryid,
+                   qc.contextid as contextid
                    {$extrafields}
               FROM {question} q
               JOIN {question_versions} qv
