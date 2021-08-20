@@ -2390,7 +2390,7 @@ class backup_questions_structure_step extends backup_structure_step {
         $questionbankentries->add_child($questionbankentry);
         $questionbankentry->add_child($questionversions);
         $questionversions->add_child($questionverion);
-        $questionbankentry->add_child($questions);
+        $questionverion->add_child($questions);
         $questions->add_child($question);
         $question->add_child($qhints);
         $qhints->add_child($qhint);
@@ -2414,8 +2414,6 @@ class backup_questions_structure_step extends backup_structure_step {
         $questionbankentry->set_source_table('question_bank_entry', ['questioncategoryid' => backup::VAR_PARENTID]);
 
         $questionverion->set_source_table('question_versions', ['questionbankentryid' => backup::VAR_PARENTID]);
-
-        $question->set_source_table('question', array('category' => backup::VAR_PARENTID));
 
         $question->set_source_sql('SELECT q.*
                                         FROM {question} q
