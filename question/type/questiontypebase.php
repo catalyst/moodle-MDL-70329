@@ -980,10 +980,8 @@ class question_type {
         $question->timemodified = $questiondata->timemodified;
         $question->createdby = $questiondata->createdby;
         $question->modifiedby = $questiondata->modifiedby;
-        $question->status = $questiondata->status;
-        $question->versionid = $questiondata->versionid;
-        $question->version = $questiondata->version;
-        $question->questionbankentryid = $questiondata->questionbankentryid;
+
+        $this->initialise_question_extra_record($question, $questiondata);
 
         // Fill extra question fields values.
         $extraquestionfields = $this->extra_question_fields();
@@ -996,6 +994,43 @@ class question_type {
         }
 
         $this->initialise_question_hints($question, $questiondata);
+    }
+
+    /**
+     * Initialise the extra question fields.
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     */
+    protected function initialise_question_extra_record(question_definition $question, $questiondata) {
+        global $DB;
+        $extrarecord = $DB->get_record_sql('SELECT qv.status,
+                                                       qv.version,
+                                                       qv.id as versionid,
+                                                       qv.questionbankentryid
+                                                  FROM {question} q
+                                                  JOIN {question_versions} qv
+                                                    ON qv.questionid = q.id
+                                                 WHERE q.id = ?', [$questiondata->id]);
+        if (isset($questiondata->status)) {
+            $question->status = $questiondata->status;
+        } else {
+            $question->status = $extrarecord->status;
+        }
+        if (isset($questiondata->versionid)) {
+            $question->versionid = $questiondata->versionid;
+        } else {
+            $question->versionid = $extrarecord->versionid;
+        }
+        if (isset($questiondata->version)) {
+            $question->version = $questiondata->version;
+        } else {
+            $question->version = $extrarecord->version;
+        }
+        if (isset($questiondata->questionbankentryid)) {
+            $question->questionbankentryid = $questiondata->questionbankentryid;
+        } else {
+            $question->questionbankentryid = $extrarecord->questionbankentryid;
+        }
     }
 
     /**
