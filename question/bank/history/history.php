@@ -27,13 +27,14 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 
 $entryid = required_param('entryid', PARAM_INT);
+$returnurl = required_param('returnurl', PARAM_RAW);
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('questions', '/question/bank/history/history.php');
 
-$url = new moodle_url($thispageurl, ['entryid' => $entryid]);
+$url = new moodle_url($thispageurl, ['entryid' => $entryid, 'returnurl' => $returnurl]);
 $PAGE->set_url($url);
-$questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, $cm, $entryid);
+$questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, $cm, $entryid, $returnurl);
 
 $questionbank->process_actions();
 

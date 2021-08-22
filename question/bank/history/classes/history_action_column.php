@@ -63,7 +63,7 @@ class history_action_column extends menu_action_column_base {
             $context = $this->qbank->get_most_specific_context();
             $url = question_history_helper::question_history_url($question->questionbankentryid, $this->qbank->returnurl,
                                                                     $this->qbank->course->id);
-            return [$url, 't/history', $this->strpreview];
+            return [$url, 't/log', $this->strpreview];
         } else {
             return [null, null, null];
         }

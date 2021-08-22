@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_history, language 'en'.
+ * Renderer for qbank_history.
  *
  * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,8 +23,25 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank history feature';
-$string['privacy:metadata:core_comment'] = 'Question bank history shows the versions of a question, it does not store user data.';
-$string['history_action'] = 'History';
-$string['history_header'] = 'Question history';
-$string['close_history'] = 'Close';
+namespace qbank_history\output;
+
+/**
+ * Class renderer for rendering question history.
+ *
+ * @package    qbank_history
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class renderer extends \plugin_renderer_base {
+
+    /**
+     * Render the preview page.
+     *
+     * @param array $historydata
+     */
+    public function render_history_header($historydata) {
+        return $this->render_from_template('qbank_history/history_header', $historydata);
+    }
+
+}
