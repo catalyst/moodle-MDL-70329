@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin entrypoint for columns.
+ * Privacy api.
  *
  * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,22 +23,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_history;
+namespace qbank_history\privacy;
 
 /**
- * Class plugin_feature is the entrypoint for the columns.
+ * Privacy Subsystem for qbank_history implementing null_provider.
  *
- * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends \core_question\local\bank\plugin_features_base{
+class provider implements \core_privacy\local\metadata\null_provider {
 
-    public function get_question_columns($qbank): array {
-        return [
-            new history_action_column($qbank)
-        ];
+    public static function get_reason(): string {
+        return 'privacy:metadata';
     }
-
 }

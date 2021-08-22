@@ -25,7 +25,7 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
-
+require_login();
 $entryid = required_param('entryid', PARAM_INT);
 $returnurl = required_param('returnurl', PARAM_RAW);
 
@@ -36,17 +36,18 @@ $url = new moodle_url($thispageurl, ['entryid' => $entryid, 'returnurl' => $retu
 $PAGE->set_url($url);
 $questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, $cm, $entryid, $returnurl);
 
+// Todo: make changes after bulk actions ui MDL-72076.
 $questionbank->process_actions();
 
-$context = $contexts->lowest();
 $streditingquestions = get_string('history_header', 'qbank_history');
 $PAGE->set_title($streditingquestions);
 $PAGE->set_heading($streditingquestions);
-echo $OUTPUT->header();
+$context = $contexts->lowest();
+$PAGE->set_context($context);
+$PAGE->navbar->add(get_string('question'), new moodle_url($returnurl));
+$PAGE->navbar->add($streditingquestions, $url);
 
+echo $OUTPUT->header();
 // Print the question area.
 $questionbank->display($pagevars, 'questions');
-
-// Create event.
-
 echo $OUTPUT->footer();

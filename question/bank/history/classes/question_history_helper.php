@@ -38,9 +38,12 @@ class question_history_helper {
     /**
      * Get the question history url.
      *
-     *
+     * @param int $entryid
+     * @param \moodle_url $returnrul
+     * @param int $courseid
+     * @return \moodle_url
      */
-    public static function question_history_url($entryid, $returnrul, $courseid) {
+    public static function question_history_url($entryid, $returnrul, $courseid): \moodle_url {
         $params = [
             'entryid' => $entryid,
             'returnurl' => $returnrul,
@@ -49,4 +52,5 @@ class question_history_helper {
 
         return new \moodle_url('/question/bank/history/history.php', $params);
     }
+
 }

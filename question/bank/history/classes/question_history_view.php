@@ -67,7 +67,6 @@ class question_history_view extends view {
 
     protected function get_question_bank_plugins(): array {
         $questionbankclasscolumns = [];
-        $newpluginclasscolumns = [];
         $corequestionbankcolumns = [
                 'checkbox_column',
                 'question_type_column',
@@ -132,11 +131,11 @@ class question_history_view extends view {
     }
 
     public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        // To replace the filter.
+        // As we dont want filters in this page.
     }
 
     protected function create_new_question_form($category, $canadd): void {
-        // To replace with empty form.
+        // As we dont want to create questions in this page.
     }
 
     protected function build_query(): void {
@@ -166,6 +165,7 @@ class question_history_view extends view {
 
         // Build the where clause.
         $entryid = "qbe.id = $this->entryid";
+        // Changes done here to get the questions only for the passed entryid.
         $tests = ['q.parent = 0', $entryid];
         $this->sqlparams = [];
         foreach ($this->searchconditions as $searchcondition) {
@@ -186,7 +186,7 @@ class question_history_view extends view {
     protected function print_table($questions): void {
         global $PAGE;
         $latestversion = max(array_column($questions, 'version'));
-        foreach($questions as $question) {
+        foreach ($questions as $question) {
             if ($question->version === $latestversion) {
                 $questionname = $question->name;
             }
@@ -195,6 +195,7 @@ class question_history_view extends view {
             'questionname' => $questionname,
             'returnurl' => $this->basereturnurl
         ];
+        // Header for the page before the actual form from the api.
         echo $PAGE->get_renderer('qbank_history')->render_history_header($historydata);
         parent::print_table($questions);
     }
