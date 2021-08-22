@@ -21,18 +21,18 @@
     {
         "headerdata": [
           {
-                "actionurl": "moodle_url"
+                "returnurl": "moodle_url",
+                "questionname": "name"
           }
         ]
     }
 }}
-<div class="history-header container">
+<div class="history-header container mb-3">
     <div class="row">
         <div class="col-8">
             <h2>{{questionname}}</h2>
         </div>
         <div class="col-4 text-right">
-<!--            <a href="{{{returnurl}}}"><input type="button" name="close-history" value="{{#str}} close_history, qbank_history {{/str}}" class="btn btn-secondary"></a>-->
             <a class="btn btn-secondary" href="{{{returnurl}}}">{{#str}} close_history, qbank_history {{/str}}</a>
         </div>
     </div>
