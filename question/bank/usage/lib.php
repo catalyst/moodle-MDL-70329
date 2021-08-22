@@ -44,6 +44,7 @@ function qbank_usage_output_fragment_question_usage($args): string {
     $slot = $quba->add_question($question, $options->maxmark);
     $quba->start_question($slot, $options->variant);
     $displaydata['question'] = $quba->render_question($slot, $options, '1');
-
+    $questionusagetable = new \qbank_usage\tables\question_usage_table('question_usage_table', $question);
+    $displaydata['tablesql'] = $questionusagetable->export_for_fragment();
     return $PAGE->get_renderer('qbank_usage')->render_usage_fragment($displaydata);
 }

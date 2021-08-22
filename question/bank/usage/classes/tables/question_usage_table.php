@@ -71,18 +71,17 @@ class question_usage_table extends table_sql {
         global $PAGE;
         parent::__construct($uniqueid);
         $this->question = $question;
-        $columns = ['modulename', 'coursename', 'versions', 'attempts', 'lastused'];
+        $columns = ['modulename', 'coursename', 'versions', 'attempts'];
         $headers = [
             get_string('modulename', 'qbank_usage'),
             get_string('coursename', 'qbank_usage'),
             get_string('versions', 'qbank_usage'),
-            get_string('attempts', 'qbank_usage'),
-            get_string('lastused', 'qbank_usage')
+            get_string('attempts', 'qbank_usage')
         ];
         $this->is_collapsible = false;
         $this->define_columns($columns);
         $this->define_headers($headers);
-        $this->set_count_sql(question_usage_helper::get_question_usage_count_sql(), [$this->question->id]);
+        $this->set_count_sql(question_usage_helper::get_question_usage_count_sql(), [$this->question->questionbankentryid]);
         $this->define_baseurl($PAGE->url);
     }
 
@@ -92,26 +91,42 @@ class question_usage_table extends table_sql {
         if ($sort) {
             $sort = "ORDER BY $sort";
         }
-        $sql = "SELECT q.name as modulename
-                       qv.version as versions
+        $param['bankentryid'] = $this->question->questionbankentryid;
+        $this->sql->params = array_merge($this->sql->params, $param);
+        $sql = "SELECT q.name as modulename,
+                       qv.version as versions,
                        (SELECT COUNT(qat.id)
                           FROM {quiz_attempts} qat
-                          WHERE qat.quiz = q.id) as attempts
+                          WHERE qat.quiz = q.id) as attempts,
                        q.id as moduleid
                   FROM {question_bank_entry} qbe
                   JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
                   JOIN {question_references} qr ON qr.versionid = qv.id
                   JOIN {quiz_slots} qs ON qs.id = qr.itemid
                   JOIN {quiz} q ON q.id = qs.quizid
-                 WHERE qbe.id = ?
+                 WHERE qbe.id = :bankentryid
                  $sort";
         if (!$this->is_downloading()) {
-            $this->rawdata = $DB->get_records_sql($sql, $this->question->questionbankentryid,
-                                                    $this->get_page_start(), $this->get_page_size());
+            $this->rawdata = $DB->get_records_sql($sql, $param, $this->get_page_start(), $this->get_page_size());
         } else {
             $this->rawdata = $DB->get_records_sql($sql, $this->sql->params);
         }
+    }
 
+    public function col_modulename(\stdClass $values): string {
+        var_dump('test');die;
+    }
+
+    public function col_coursename(\stdClass $values): string {
+        var_dump('test');die;
+    }
+
+    public function col_versions(\stdClass $values): string {
+        var_dump('test');die;
+    }
+
+    public function col_attempts(\stdClass $values): string {
+        var_dump('test');die;
     }
 
     /**
