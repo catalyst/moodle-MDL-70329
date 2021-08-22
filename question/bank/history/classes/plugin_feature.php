@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_history, language 'en'.
+ * Plugin entrypoint for columns.
  *
  * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,8 +23,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank history feature';
-$string['privacy:metadata:core_comment'] = 'Question bank history shows the versions of a question, it does not store user data.';
-$string['history_action'] = 'History';
-$string['history_header'] = 'Question history';
+namespace qbank_history;
 
+/**
+ * Class columns is the entrypoint for the columns.
+ *
+ * @package    qbank_history
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class plugin_feature extends \core_question\local\bank\plugin_features_base{
+
+    public function get_question_columns($qbank): array {
+        return [
+            new history_action_column($qbank)
+        ];
+    }
+}

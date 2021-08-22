@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_history, language 'en'.
+ * Question history preview.
  *
  * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,8 +23,29 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank history feature';
-$string['privacy:metadata:core_comment'] = 'Question bank history shows the versions of a question, it does not store user data.';
-$string['history_action'] = 'History';
-$string['history_header'] = 'Question history';
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->dirroot . '/question/editlib.php');
 
+$entryid = required_param('entryid', PARAM_INT);
+
+list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
+        question_edit_setup('questions', '/question/bank/history/history.php');
+
+$url = new moodle_url($thispageurl, ['entryid' => $entryid]);
+$PAGE->set_url($url);
+$questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, $cm, $entryid);
+
+$questionbank->process_actions();
+
+$context = $contexts->lowest();
+$streditingquestions = get_string('history_header', 'qbank_history');
+$PAGE->set_title($streditingquestions);
+$PAGE->set_heading($streditingquestions);
+echo $OUTPUT->header();
+
+// Print the question area.
+$questionbank->display($pagevars, 'questions');
+
+// Create event.
+
+echo $OUTPUT->footer();

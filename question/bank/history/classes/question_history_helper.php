@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_history, language 'en'.
+ * Helper class for question history.
  *
  * @package    qbank_history
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,8 +23,30 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Question bank history feature';
-$string['privacy:metadata:core_comment'] = 'Question bank history shows the versions of a question, it does not store user data.';
-$string['history_action'] = 'History';
-$string['history_header'] = 'Question history';
+namespace qbank_history;
 
+/**
+ * Helper class.
+ *
+ * @package    qbank_history
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class question_history_helper {
+
+    /**
+     * Get the question history url.
+     *
+     *
+     */
+    public static function question_history_url($entryid, $returnrul, $courseid) {
+        $params = [
+            'entryid' => $entryid,
+            'returnurl' => $returnrul,
+            'courseid' => $courseid
+        ];
+
+        return new \moodle_url('/question/bank/history/history.php', $params);
+    }
+}
