@@ -29,7 +29,6 @@ namespace tool_brickfield\local\areas\core_question;
 use core\event\question_created;
 use core\event\question_updated;
 use tool_brickfield\area_base;
-use core_question\admin\tool\brickfield;
 
 /**
  * Base class for various question-related areas.
@@ -50,10 +49,28 @@ abstract class base extends area_base {
      * @return \moodle_recordset|null
      */
     public function find_relevant_areas(\core\event\base $event): ?\moodle_recordset {
-
+        global $DB;
         if (($event instanceof question_created) || ($event instanceof question_updated)) {
-            $areas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
-            return $areas->find_relevant_question_areas($this->get_course_and_cat_sql($event), $event->objectid);
+            $sql = "SELECT {$this->get_type()} AS type,
+                       ctx.id AS contextid,
+                       {$this->get_standard_area_fields_sql()}
+                       q.id AS itemid,
+                       {$this->get_course_and_cat_sql($event)}
+                       q.{$this->get_fieldname()} AS content
+                  FROM {question} q
+            INNER JOIN {question_versions} qv
+                    ON qv.questionid = q.id
+            INNER JOIN {question_bank_entry} qbe
+                    ON qbe.id = qv.questionbankentryid
+            INNER JOIN {question_categories} qc
+                    ON qc.id = qbe.questioncategoryid
+            INNER JOIN {context} ctx
+                    ON ctx.id = qc.contextid
+                 WHERE (q.id = :refid)
+              ORDER BY q.id";
+
+            $rs = $DB->get_recordset_sql($sql, ['refid' => $event->objectid]);
+            return $rs;
         }
         return null;
     }
@@ -73,8 +90,31 @@ abstract class base extends area_base {
             'module' => CONTEXT_MODULE,
             'coursecontextpath' => $DB->sql_like_escape($coursecontext->path) . '/%',
         ];
-        $courseareas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
-        return $courseareas->find_question_course_areas($courseid, $param);
+
+        $sql = "SELECT {$this->get_type()} AS type,
+                       ctx.id AS contextid,
+                       {$this->get_standard_area_fields_sql()}
+                       q.id AS itemid,
+                       {$courseid} AS courseid,
+                       null AS categoryid,
+                       q.{$this->get_fieldname()} AS content
+                  FROM {question} q
+            INNER JOIN {question_versions} qv
+                    ON qv.questionid = q.id
+            INNER JOIN {question_bank_entry} qbe
+                    ON qbe.id = qv.questionbankentryid
+            INNER JOIN {question_categories} qc
+                    ON qc.id = qbe.questioncategoryid
+            INNER JOIN {context} ctx
+                    ON ctx.id = qc.contextid
+                 WHERE (ctx.contextlevel = :ctxcourse
+                   AND ctx.id = qc.contextid
+                   AND ctx.instanceid = :courseid)
+                    OR (ctx.contextlevel = :module
+                   AND {$DB->sql_like('ctx.path', ':coursecontextpath')})
+              ORDER BY q.id ASC";
+
+        return $DB->get_recordset_sql($sql, $param);
     }
 
     /**
@@ -84,13 +124,37 @@ abstract class base extends area_base {
      * @return \moodle_recordset
      */
     public function find_system_areas(): ?\moodle_recordset {
+        global $DB;
         $params = [
             'syscontext' => CONTEXT_SYSTEM,
             'coursecat' => CONTEXT_COURSECAT,
             'coursecat2' => CONTEXT_COURSECAT,
         ];
-        $systemareas = new brickfield($this->get_type(), $this->get_standard_area_fields_sql(), $this->get_fieldname());
-        return $systemareas->find_system_question_areas($params);
+
+        $sql = "SELECT {$this->get_type()} AS type,
+                       qc.contextid AS contextid,
+                       {$this->get_standard_area_fields_sql()}
+                       q.id AS itemid,
+                       " . SITEID . "  as courseid,
+                       cc.id as categoryid,
+                       q.{$this->get_fieldname()} AS content
+                  FROM {question} q
+            INNER JOIN {question_versions} qv
+                    ON qv.questionid = q.id
+            INNER JOIN {question_bank_entry} qbe
+                    ON qbe.id = qv.questionbankentryid
+            INNER JOIN {question_categories} qc
+                    ON qc.id = qbe.questioncategoryid
+            INNER JOIN {context} ctx
+                    ON ctx.id = qc.contextid
+             LEFT JOIN {course_categories} cc
+                    ON cc.id = ctx.instanceid
+                   AND ctx.contextlevel = :coursecat
+                 WHERE (ctx.contextlevel = :syscontext)
+                    OR (ctx.contextlevel = :coursecat2)
+              ORDER BY q.id";
+
+        return $DB->get_recordset_sql($sql, $params);
     }
 
     /**
@@ -108,7 +172,8 @@ abstract class base extends area_base {
         }
         // Default to SITEID if courseid is null, i.e. system or category level questions.
         $thiscourseid = ($componentinfo->courseid !== null) ? $componentinfo->courseid : SITEID;
-        return brickfield::get_edit_question_url(['courseid' => $thiscourseid, 'id' => $questionid]);
+
+        return new \moodle_url('/question/bank/editquestion/question.php', ['courseid' => $thiscourseid, 'id' => $questionid]);
     }
 
     /**
@@ -121,7 +186,7 @@ abstract class base extends area_base {
         $courseid = 'null';
         $catid = 'null';
 
-        if ($record = brickfield::get_course_and_category(CONTEXT_MODULE, $event->objectid)) {
+        if ($record = self::get_course_and_category(CONTEXT_MODULE, $event->objectid)) {
             if ($record->contextlevel == CONTEXT_MODULE) {
                 $courseid = $record->courseid;
             } else if ($record->contextlevel == CONTEXT_COURSE) {
@@ -137,5 +202,38 @@ abstract class base extends area_base {
             {$courseid} AS courseid,
             {$catid} AS categoryid,
         ";
+    }
+
+    /**
+     * Get the course and category data for the question.
+     *
+     * @param int $coursemodule
+     * @param int $refid
+     * @return false|mixed
+     */
+    public static function get_course_and_category ($coursemodule, $refid) {
+        global $DB;
+
+        $sql = 'SELECT ctx.instanceid,
+                       cm.course as courseid,
+                       ctx.contextlevel
+                  FROM {question} q
+            INNER JOIN {question_versions} qv
+                    ON qv.questionid = q.id
+            INNER JOIN {question_bank_entry} qbe
+                    ON qbe.id = qv.questionbankentryid
+            INNER JOIN {question_categories} qc
+                    ON qc.id = qbe.questioncategoryid
+            INNER JOIN {context} ctx
+                    ON ctx.id = qc.contextid
+             LEFT JOIN {course_modules} cm
+                    ON cm.id = ctx.instanceid
+                   AND ctx.contextlevel = :coursemodule
+                 WHERE q.id = :refid';
+        $params = [
+                'coursemodule' => $coursemodule,
+                'refid' => $refid
+        ];
+        return $DB->get_record_sql($sql, $params);
     }
 }
