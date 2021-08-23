@@ -12,23 +12,19 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template qbank_viewcreator/creator_display
+    @template qbank_viewcreator/history_display
     Example context (json):
     {
         "displaydata": [
           {
-                "creator": "Marc Ghaly",
-                "date": "2 June 2021, 5:32 PM",
+                "datecreated": "24.08.21, 1:50 PM",
+                "datemodified": "27.08.21, 7:50 AM",
           }
         ]
     }
 }}
 
-<span class="qbank-creator-name">
-    {{creator}}
+<span>
+    {{datecreated}} / {{datemodified}}
 </span>
 <br>
-<span class="date">
-    {{date}}
-</span>
-

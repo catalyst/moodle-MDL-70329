@@ -35,31 +35,30 @@ use core_question\local\bank\column_base;
  * @author    2021 Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class creator_name_column extends column_base {
+class versioncontrol_column extends column_base {
 
     public function get_name(): string {
-        return 'creatorname';
+        return 'versioncontrol';
     }
 
     protected function get_title(): string {
-        return get_string('createdby', 'question');
+        return get_string('versioncontrol', 'qbank_viewcreator');
     }
 
     protected function display_content($question, $rowclasses): void {
         global $PAGE;
         $displaydata = [];
 
-        if (!empty($question->creatorfirstname) && !empty($question->creatorlastname)) {
-            $u = new \stdClass();
-            $u = username_load_fields_from_object($u, $question, 'creator');
-            $displaydata['date'] = userdate($question->timecreated, get_string('strftimedatetime', 'langconfig'));
-            $displaydata['creator'] = fullname($u);
-            echo $PAGE->get_renderer('qbank_viewcreator')->render_creator_name($displaydata);
-        }
+        $displaydata['version'] = $question->version;
+        $displaydata['creator'] = $question->creatorfirstname . ' ' . $question->creatorlastname;
+        $displaydata['lastmodifier'] = $question->modifierfirstname . ' ' . $question->modifierlastname;
+        echo $PAGE->get_renderer('qbank_viewcreator')->render_version_control($displaydata);
     }
 
     public function get_extra_joins(): array {
-        return ['uc' => 'LEFT JOIN {user} uc ON uc.id = q.createdby'];
+        return ['uc' => 'LEFT JOIN {user} uc ON uc.id = q.createdby',
+                'um' => 'JOIN {user} um ON um.id = q.modifiedby'
+                ];
     }
 
     public function get_required_fields(): array {
@@ -67,16 +66,17 @@ class creator_name_column extends column_base {
         $requiredfields = [];
         foreach ($allnames as $allname) {
             $requiredfields[] = 'uc.' . $allname . ' AS creator' . $allname;
+            $requiredfields[] = 'um.' . $allname . ' AS modifier' . $allname;
         }
-        $requiredfields[] = 'q.timecreated';
+        $requiredfields[] = 'qv.version';
         return $requiredfields;
     }
 
     public function is_sortable(): array {
         return [
-            'firstname' => ['field' => 'uc.firstname', 'title' => get_string('firstname')],
-            'lastname' => ['field' => 'uc.lastname', 'title' => get_string('lastname')],
-            'timecreated' => ['field' => 'q.timecreated', 'title' => get_string('date')]
+            'creator' => ['field' => 'uc.firstname', 'title' => get_string('creator', 'qbank_viewcreator')],
+            'lastmodifier' => ['field' => 'um.firstname', 'title' => get_string('lastmodifier', 'qbank_viewcreator')],
+            'Version' => ['field' => 'qv.version', 'title' => get_string('version', 'qbank_viewcreator')],
         ];
     }
 
