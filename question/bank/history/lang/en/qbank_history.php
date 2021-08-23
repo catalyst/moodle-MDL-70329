@@ -24,7 +24,7 @@
  */
 
 $string['pluginname'] = 'Question bank history feature';
-$string['privacy:metadata:core_comment'] = 'Question bank history shows the versions of a question, it does not store user data.';
+$string['privacy:metadata'] = 'Question bank history shows the versions of a question, it does not store user data.';
 $string['history_action'] = 'History';
 $string['history_header'] = 'Question history';
 $string['close_history'] = 'Close';
