@@ -447,9 +447,16 @@ class problem_000013 extends problem_base {
                     JOIN {question_multianswer} qma ON $positionexpr > 0
                 WHERE qma.question <> q.parent") ||
             $DB->record_exists_sql("
-                SELECT * FROM {question} q
+                  SELECT q.*
+                    FROM {question} q
+                    JOIN {question_versions} qv ON qv.questionid = q.id
+                    JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                    JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                     JOIN {question} parent_q ON parent_q.id = q.parent
-                WHERE q.category <> parent_q.category");
+                    JOIN {question_versions} pqv ON pqv.questionid = parent_q.id
+                    JOIN {question_bank_entry} pqbe ON pqbe.id = pqv.questionbankentryid
+                    JOIN {question_categories} pqc ON pqc.id = pqbe.questioncategoryid                  
+                   WHERE qc.id <> pqc.id");
     }
     function severity() {
         return SEVERITY_ANNOYANCE;
@@ -503,10 +510,16 @@ class problem_000015 extends problem_base {
     function exists() {
         global $DB;
         return $DB->record_exists_sql("
-            SELECT qc.*, (SELECT COUNT(1) FROM {question} q WHERE q.category = qc.id) AS numquestions
-            FROM {question_categories} qc
-                LEFT JOIN {context} con ON qc.contextid = con.id
-            WHERE con.id IS NULL");
+            SELECT qcc.*,
+                  (SELECT COUNT(1) 
+                     FROM {question} q
+                     JOIN {question_versions} qv ON qv.questionid = q.id
+                     JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                     JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                    WHERE qc.id = qcc.id) AS numquestions
+            FROM {question_categories} qcc
+       LEFT JOIN {context} con ON qcc.contextid = con.id
+           WHERE con.id IS NULL");
     }
     function severity() {
         return SEVERITY_ANNOYANCE;
@@ -544,11 +557,7 @@ class problem_000015 extends problem_base {
     }
     function solution() {
         global $CFG;
-        return '<p>You can delete the empty categories by executing the following SQL:</p><pre>
-DELETE FROM ' . $CFG->prefix . 'question_categories
-WHERE
-    NOT EXISTS (SELECT * FROM ' . $CFG->prefix . 'question q WHERE q.category = ' . $CFG->prefix . 'question_categories.id)
-AND NOT EXISTS (SELECT * FROM ' . $CFG->prefix . 'context con WHERE contextid = con.id)
+        return '<p>You need to delete the empty categories.</p><pre>
         </pre><p>Any remaining categories that contain questions will require more thought. ' .
         'People in the <a href="http://moodle.org/mod/forum/view.php?f=121">Quiz forum</a> may be able to help.</p>';
     }
