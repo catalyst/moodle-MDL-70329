@@ -229,9 +229,6 @@ class qtype_multianswer_test extends advanced_testcase {
                 unset($question->options);
                 unset($question->hints);
                 unset($question->maxmark);
-                // TODO: Delete when version and hidden fields are removed.
-                unset($question->version);
-                unset($question->hidden);
                 return $question;
         }, $questiondata->options->questions);
         // Compare questions.
