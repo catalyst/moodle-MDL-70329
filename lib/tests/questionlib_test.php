@@ -2088,13 +2088,22 @@ class core_questionlib_testcase extends advanced_testcase {
         list($category1, $course1, $quiz1, $questioncat1, $questions1) = $this->setup_quiz_and_questions();
         list($category2, $course2, $quiz2, $questioncat2, $questions2) = $this->setup_quiz_and_questions();
 
-        $DB->set_field('question', 'idnumber', 1, ['id' => $questions1[0]->id]);
-        $DB->set_field('question', 'idnumber', 1, ['id' => $questions2[0]->id]);
+        $questionbankentry1 = get_question_bank_entry($questions1[0]->id);
+        $entry = new stdClass();
+        $entry->id = $questionbankentry1->id;
+        $entry->idnumber = 1;
+        $DB->update_record('question_bank_entry', $entry);
 
-        $question = $DB->get_record('question', ['id' => $questions1[0]->id]);
+        $questionbankentry2 = get_question_bank_entry($questions2[0]->id);
+        $entry2 = new stdClass();
+        $entry2->id = $questionbankentry2->id;
+        $entry2->idnumber = 1;
+        $DB->update_record('question_bank_entry', $entry2);
+
+        $questionbe = $DB->get_record('question_bank_entry', ['id' => $questionbankentry1->id]);
 
         // Validate that a first stage of an idnumber exists (this format: xxxx_x).
-        list($response, $record) = idnumber_exist_in_question_category($question->idnumber, $questioncat1->id);
+        list($response, $record) = idnumber_exist_in_question_category($questionbe->idnumber, $questioncat1->id);
         $this->assertEquals([], $record);
         $this->assertEquals(true, $response);
 
@@ -2102,7 +2111,7 @@ class core_questionlib_testcase extends advanced_testcase {
         question_move_questions_to_category($questions1[0]->id, $questioncat2->id);
 
         // Validate that function return the last record used for the idnumber.
-        list($response, $record) = idnumber_exist_in_question_category($question->idnumber, $questioncat2->id);
+        list($response, $record) = idnumber_exist_in_question_category($questionbe->idnumber, $questioncat2->id);
         $record = reset($record);
         $idnumber = $record->idnumber;
         $this->assertEquals($idnumber, '1_1');
