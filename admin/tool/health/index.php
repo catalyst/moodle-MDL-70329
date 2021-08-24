@@ -513,12 +513,22 @@ class problem_000015 extends problem_base {
     }
     function description() {
         global $DB;
-        $problemcategories = $DB->get_records_sql("
-            SELECT qc.id, qc.name, qc.contextid, (SELECT COUNT(1) FROM {question} q WHERE q.category = qc.id) AS numquestions
-            FROM {question_categories} qc
-                LEFT JOIN {context} con ON qc.contextid = con.id
-            WHERE con.id IS NULL
-            ORDER BY numquestions DESC, qc.name");
+        $sql = 'SELECT qc.id,
+                       qc.name,
+                       qc.contextid,
+                       (SELECT COUNT(1) 
+                          FROM {question} q
+                    INNER JOIN {question_versions} qv
+                            ON qv.questionid = q.id
+                    INNER JOIN {question_bank_entry} qbe
+                            ON qbe.id = qv.questionbankentryid
+                         WHERE qbe.questioncategoryid = qc.id) AS numquestions
+                  FROM {question_categories} qc
+             LEFT JOIN {context} con 
+                    ON qc.contextid = con.id
+                 WHERE con.id IS NULL
+              ORDER BY numquestions DESC, qc.name';
+        $problemcategories = $DB->get_records_sql($sql);
         $table = '<table><thead><tr><th>Cat id</th><th>Category name</th>' .
         "<th>Context id</th><th>Num Questions</th></tr></thead><tbody>\n";
         foreach ($problemcategories as $cat) {
