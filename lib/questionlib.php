@@ -655,17 +655,15 @@ function idnumber_exist_in_question_category($questionidnumber, $categoryid, $li
     $response  = false;
     $record = [];
     // Check if the idnumber exist in the category.
-    $sql = 'SELECT q.id, q.idnumber
+    $sql = 'SELECT q.id, qbe.idnumber
               FROM {question} q
               JOIN {question_versions} qv
                 ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe
                 ON qbe.id = qv.questionbankentryid
-              JOIN {question_categories} qc
-                ON qc.id = qbe.questioncategoryid
-             WHERE q.idnumber LIKE ?
-               AND qc.id = ?
-          ORDER BY idnumber DESC';
+             WHERE qbe.idnumber LIKE ?
+               AND qbe.questioncategoryid = ?
+          ORDER BY qbe.idnumber DESC';
     $questionrecord = $DB->record_exists_sql($sql, [$questionidnumber, $categoryid]);
     if ((string) $questionidnumber !== '' && $questionrecord) {
         $record = $DB->get_records_sql($sql, [$questionidnumber . '_%', $categoryid], 0, 1);
@@ -701,7 +699,7 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
                    qc.contextid as contextid,
                    q.id,
                    q.qtype,
-                   q.idnumber
+                   qbe.idnumber
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
@@ -727,10 +725,10 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
             }
             // For the move process, add a numerical increment to the idnumber. This means that if a question is
             // mistakenly moved then the idnumber will not be completely lost.
-            $q = new stdClass();
-            $q->id = $question->id;
-            $q->idnumber = $question->idnumber . '_' . $unique;
-            $DB->update_record('question', $q);
+            $qbankentry = new stdClass();
+            $qbankentry->id = $question->entryid;
+            $qbankentry->idnumber = $question->idnumber . '_' . $unique;
+            $DB->update_record('question_bank_entry', $qbankentry);
         }
 
         // TODO: Now is commented because we are deciding if we should have an area: core_question.
@@ -852,7 +850,7 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
     $sql = "SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
                    q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
                    q.length, q.stamp, q.timecreated, q.timemodified,
-                   q.createdby, q.modifiedby, q.idnumber,
+                   q.createdby, q.modifiedby, qbe.idnumber,
                    qv.status,
                    qv.id as versionid,
                    qv.version,
@@ -1939,7 +1937,7 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
     }
 
     // Find all used idnumbers in one DB query.
-    $usedidnumbers = $DB->get_records_select_menu('question', 'category = ? AND idnumber IS NOT NULL',
+    $usedidnumbers = $DB->get_records_select_menu('question_bank_entry', 'questioncategoryid = ? AND idnumber IS NOT NULL',
             [$categoryid], '', 'idnumber, 1');
 
     // Find the next unused idnumber.
@@ -1975,6 +1973,7 @@ function save_question_versions(object $question, object $form, object $context,
         // Create a record for question_bank_entry, question_versions and question_references.
         $questionbankentry = new \stdClass();
         $questionbankentry->questioncategoryid = $form->category;
+        $questionbankentry->idnumber = $question->idnumber;
         $questionbankentry->ownerid = $question->createdby;
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
     }
@@ -2019,7 +2018,7 @@ function save_question_versions(object $question, object $form, object $context,
         $questionreference->questionarea = 'slot';
         $questionreference->itemid = 0;
         $questionreference->questionbankentryid = $questionbankentry->id;
-        $questionreference->versionid = $questionversion->id;
+        $questionreference->version = $questionversion->version;
         $questionreference->id = $DB->insert_record('question_references', $questionreference);
     }
 }
