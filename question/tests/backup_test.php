@@ -196,9 +196,11 @@ class core_question_backup_testcase extends advanced_testcase {
 
         // The questions should have been moved to a question category that belongs to a course context.
         $questions = $DB->get_records_sql("SELECT q.*
-                                             FROM {question} q
-                                             JOIN {question_categories} qc ON q.category = qc.id
-                                            WHERE qc.contextid = ?", [$coursecontext3->id]);
+                                                FROM {question} q
+                                                JOIN {question_versions} qv ON qv.questionid = q.id
+                                                JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                                JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                               WHERE qc.contextid = ?", [$coursecontext3->id]);
         $this->assertCount(2, $questions);
 
         // Now, retrieve tags for each question and check if they are assigned at the right context.
