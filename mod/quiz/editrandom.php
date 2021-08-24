@@ -52,7 +52,13 @@ $url = new moodle_url('/mod/quiz/editrandom.php', array('slotid' => $slotid));
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('admin');
 
-if (!$question = $DB->get_record('question', array('id' => $slot->questionid))) {
+// Get the question object + category id.
+$sql = "SELECT q.*, qv.status, qbe.questioncategoryid AS category
+          FROM {question} q
+          JOIN {question_versions} qv ON qv.questionid = q.id
+          JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+         WHERE q.id = :id";
+if (!$question = $DB->get_record_sql($sql, ['id' => $slot->questionid])) {
     print_error('questiondoesnotexist', 'question', $returnurl);
 }
 

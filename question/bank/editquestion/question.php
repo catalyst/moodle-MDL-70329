@@ -210,7 +210,11 @@ if ($formeditable && $id) {
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
-$toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+if (isset($question->id)) {
+    $toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+} else {
+    $toform->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+}
 if ($cm !== null) {
     $toform->cmid = $cm->id;
     $toform->courseid = $cm->course;
@@ -254,7 +258,7 @@ if ($mform->is_cancelled()) {
     // If we are moving a question, check we have permission to move it from
     // whence it came (Where we are moving to is validated by the form).
     list($newcatid, $newcontextid) = explode(',', $fromform->category);
-    if (!empty($question->id) && $newcatid != $question->category) {
+    if (!empty($question->id) && $newcatid != $question->categoryobject->id) {
         $contextid = $newcontextid;
         question_require_capability_on($question, 'move');
     } else {
