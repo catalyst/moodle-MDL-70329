@@ -1314,6 +1314,7 @@ function upgrade_migrate_question_table(): void {
         // Populate table question_bank_entry.
         $questionbankentry = new \stdClass();
         $questionbankentry->questioncategoryid = $question->category;
+        $questionbankentry->idnumber = $question->idnumber;
         $questionbankentry->ownerid = $question->createdby;
         // Insert a question_bank_entry record here as the id is required to populate other tables.
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
@@ -1367,7 +1368,7 @@ function upgrade_migrate_question_table(): void {
     // Create question_references record for each question.
     // Except if qtype is random. That case is handled by question_set_reference.
     // This is done apart because we need the version id.
-    $sql = "SELECT qc.contextid AS qccontextid, qs.id AS qzitemid, qv.questionbankentryid, qv.id AS versionid, qs.quizid
+    $sql = "SELECT qc.contextid AS qccontextid, qs.id AS qzitemid, qv.questionbankentryid, qs.quizid
               FROM {question} q
               JOIN {question_categories} qc ON q.category = qc.id
               JOIN {question_versions} qv ON q.id = qv.questionid
@@ -1385,7 +1386,6 @@ function upgrade_migrate_question_table(): void {
             $questionreference->questionarea = 'slot';
             $questionreference->itemid = $referencerecord->qzitemid;
             $questionreference->questionbankentryid = $referencerecord->questionbankentryid;
-            $questionreference->versionid = $referencerecord->versionid;
             $questionreferences[] = $questionreference;
         }
         /*// Insert a record for each question in a question bank.

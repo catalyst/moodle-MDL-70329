@@ -2707,13 +2707,14 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2021072800.01);
     }
 
-    if ($oldversion < 2021080500.00) {
+    if ($oldversion < 2021082000.00) {
         // Define table question_bank_entry to be created.
         $table = new xmldb_table('question_bank_entry');
 
         // Adding fields to table question_bank_entry.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('questioncategoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('idnumber', XMLDB_TYPE_CHAR, '100', null, null, null, null);
         $table->add_field('ownerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
 
         // Adding keys to table question_bank_entry.
@@ -2724,6 +2725,14 @@ function xmldb_main_upgrade($oldversion) {
         // Conditionally launch create table for question_bank_entry.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
+        }
+
+        // Create category id and id number index.
+        $index = new xmldb_index('categoryidnumber', XMLDB_INDEX_UNIQUE, ['questioncategoryid', 'idnumber']);
+
+        // Conditionally launch add index categoryidnumber.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
         }
 
         // Define table question_versions to be created.
@@ -2756,12 +2765,11 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_field('questionarea', XMLDB_TYPE_CHAR, '50', null, null, null, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('questionbankentryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('versionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('version', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
 
         // Adding keys to table question_references.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
-        $table->add_key('versionid', XMLDB_KEY_FOREIGN, ['versionid'], 'question_versions', ['id']);
         $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entry', ['id']);
 
         // Conditionally launch create table for question_references.
@@ -2800,7 +2808,7 @@ function xmldb_main_upgrade($oldversion) {
         // TODO: Remove all quiz_slot_tags table.
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2021080500.00);
+        upgrade_main_savepoint(true, 2021082000.00);
     }
 
     return true;
