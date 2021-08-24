@@ -99,8 +99,15 @@ abstract class question_edit_form extends question_wizard_form {
         $this->question = $question;
         $this->contexts = $contexts;
 
+        // Get the question category id.
+        if (isset($question->id)) {
+            $qcategory = $question->categoryobject->id ?? get_question_bank_entry($question->id)->questioncategoryid;
+        } else {
+            $qcategory = $question->category;
+        }
+
         $record = $DB->get_record('question_categories',
-                array('id' => $question->category), 'contextid');
+                array('id' => $qcategory), 'contextid');
         $this->context = context::instance_by_id($record->contextid);
 
         $this->editoroptions = array('subdirs' => 1, 'maxfiles' => EDITOR_UNLIMITED_FILES,
@@ -826,13 +833,20 @@ abstract class question_edit_form extends question_wizard_form {
                 $categoryinfo = $fromform['category'];
             }
             list($categoryid, $notused) = explode(',', $categoryinfo);
-            $conditions = 'category = ? AND idnumber = ?';
+            $conditions = 'questioncategoryid = ? AND idnumber = ?';
             $params = [$categoryid, $fromform['idnumber']];
             if (!empty($this->question->id)) {
+                // Get the question bank entry id to not check the idnumber for the same bank entry.
+                $sql = "SELECT DISTINCT qbe.id
+                          FROM {question_versions} qv
+                          JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                         WHERE qv.questionid = ?";
+                $bankentry = $DB->get_record_sql($sql, ['id' => $this->question->id]);
                 $conditions .= ' AND id <> ?';
-                $params[] = $this->question->id;
+                $params[] = $bankentry->id;
             }
-            if ($DB->record_exists_select('question', $conditions, $params)) {
+
+            if ($DB->record_exists_select('question_bank_entry', $conditions, $params)) {
                 $errors['idnumber'] = get_string('idnumbertaken', 'error');
             }
         }

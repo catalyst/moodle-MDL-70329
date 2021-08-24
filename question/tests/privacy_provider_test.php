@@ -514,9 +514,11 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(
                 0,
                 $DB->count_records_sql("SELECT COUNT(q.id)
-                                          FROM {question} q
-                                          JOIN {question_categories} qc ON q.category = qc.id
-                                         WHERE qc.contextid = ?
+                                              FROM {question} q
+                                              JOIN {question_versions} qv ON qv.questionid = q.id
+                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                             WHERE qc.contextid = ?
                                                AND (q.createdby = ? OR q.modifiedby = ? OR q.createdby = ? OR q.modifiedby = ?)",
                         [$course1context->id, $user1->id, $user1->id, $user2->id, $user2->id])
         );
@@ -525,9 +527,11 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         $this->assertEquals(
                 2,
                 $DB->count_records_sql("SELECT COUNT(q.id)
-                                          FROM {question} q
-                                          JOIN {question_categories} qc ON q.category = qc.id
-                                         WHERE qc.contextid = ? AND (q.createdby = ? OR q.modifiedby = ?)",
+                                              FROM {question} q
+                                              JOIN {question_versions} qv ON qv.questionid = q.id
+                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                             WHERE qc.contextid = ? AND (q.createdby = ? OR q.modifiedby = ?)",
                         [$course1context->id, $user3->id, $user3->id])
         );
 
