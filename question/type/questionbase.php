@@ -100,10 +100,6 @@ abstract class question_definition {
     /** @var string unique identifier of this question. */
     public $stamp;
 
-    // TODO: Delete after removing the hidden field.
-    /** @var boolean whethre this question has been deleted/hidden in the question bank. */
-    public $hidden = 0;
-
     /** @var string question idnumber. */
     public $idnumber;
 
