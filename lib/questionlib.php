@@ -349,6 +349,7 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
     }
 
     $sql = 'SELECT qv.id as versionid,
+                   qv.version,
                    qbe.id as entryid,
                    qc.id as categoryid,
                    qc.contextid as contextid
@@ -398,7 +399,11 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
     // Finally delete the question record itself.
     $DB->delete_records('question', ['id' => $question->id]);
     $DB->delete_records('question_versions', ['id' => $questiondata->versionid]);
-    $DB->delete_records('question_references', ['versionid' => $questiondata->versionid]);
+    $DB->delete_records('question_references',
+        [
+            'version' => $questiondata->version,
+            'questionbankentryid' => $questiondata->entryid,
+        ]);
     delete_question_bank_entry($questiondata->entryid);
     question_bank::notify_question_edited($question->id);
 
@@ -706,8 +711,6 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              WHERE q.id $questionidcondition";
 
-    var_dump('entra?');
-    die;
     $questions = $DB->get_records_sql($sql, $params);
     foreach ($questions as $question) {
         if ($newcategorydata->contextid != $question->contextid) {
