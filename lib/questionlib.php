@@ -706,6 +706,8 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              WHERE q.id $questionidcondition";
 
+    var_dump('entra?');
+    die;
     $questions = $DB->get_records_sql($sql, $params);
     foreach ($questions as $question) {
         if ($newcategorydata->contextid != $question->contextid) {
@@ -1976,6 +1978,11 @@ function save_question_versions(object $question, object $form, object $context,
         $questionbankentry->idnumber = $question->idnumber;
         $questionbankentry->ownerid = $question->createdby;
         $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+    } else {
+        $questionbankentryold = new \stdClass();
+        $questionbankentryold->id = $questionbankentry->id;
+        $questionbankentryold->idnumber = $question->idnumber;
+        $DB->update_record('question_bank_entry', $questionbankentryold);
     }
 
     // Create question_versions records.
