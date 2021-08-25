@@ -131,7 +131,34 @@ class question_history_view extends view {
     }
 
     public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        // As we dont want filters in this page.
+        global $CFG;
+        list(, $contextid) = explode(',', $cat);
+        $catcontext = \context::instance_by_id($contextid);
+        $thiscontext = $this->get_most_specific_context();
+        $this->display_question_bank_header();
+
+        // Display tag filter if usetags setting is enabled/enablefilters is true.
+        if ($this->enablefilters) {
+            if (is_array($this->customfilterobjects)) {
+                foreach ($this->customfilterobjects as $filterobjects) {
+                    $this->searchconditions[] = $filterobjects;
+                }
+            } else {
+                if ($CFG->usetags) {
+                    array_unshift($this->searchconditions,
+                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
+                }
+
+                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
+            }
+        }
+        $this->display_options_form($showquestiontext);
+    }
+
+    protected function display_advanced_search_form($advancedsearch): void {
+        foreach ($advancedsearch as $searchcondition) {
+            echo $searchcondition->display_options_adv();
+        }
     }
 
     protected function create_new_question_form($category, $canadd): void {
@@ -183,21 +210,26 @@ class question_history_view extends view {
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
     }
 
-    protected function print_table($questions): void {
-        global $PAGE;
-        $latestversion = max(array_column($questions, 'version'));
-        foreach ($questions as $question) {
-            if ($question->version === $latestversion) {
-                $questionname = $question->name;
-            }
-        }
+    protected function display_question_bank_header(): void {
+        global $PAGE, $DB;
+        $sql = 'SELECT q.*
+                 FROM {question} q
+                 JOIN {question_versions} qv ON qv.questionid = q.id
+                 JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                WHERE qv.version  = (SELECT MAX(v.version)
+                                        FROM {question_versions} v
+                                        JOIN {question_bank_entry} be 
+                                          ON be.id = v.questionbankentryid
+                                       WHERE be.id = qbe.id)
+                  AND qbe.id = ?';
+        $latestquestiondata = $DB->get_record_sql($sql, [$this->entryid]);
         $historydata = [
-            'questionname' => $questionname,
-            'returnurl' => $this->basereturnurl
+            'questionname' => $latestquestiondata->name,
+            'returnurl' => $this->basereturnurl,
+            'questionicon' => print_question_icon($latestquestiondata)
         ];
         // Header for the page before the actual form from the api.
         echo $PAGE->get_renderer('qbank_history')->render_history_header($historydata);
-        parent::print_table($questions);
     }
 
 }
