@@ -99,8 +99,11 @@ abstract class question_edit_form extends question_wizard_form {
         $this->question = $question;
         $this->contexts = $contexts;
 
+        // Get the question category id.
+        $qcategory = $question->categoryobject->id ?? get_question_bank_entry($question->id)->questioncategoryid;
+
         $record = $DB->get_record('question_categories',
-                array('id' => $question->category), 'contextid');
+                array('id' => $qcategory), 'contextid');
         $this->context = context::instance_by_id($record->contextid);
 
         $this->editoroptions = array('subdirs' => 1, 'maxfiles' => EDITOR_UNLIMITED_FILES,

@@ -411,8 +411,8 @@ class qformat_default {
                     // Id number not really set. Get rid of it.
                     unset($question->idnumber);
                 } else {
-                    if ($DB->record_exists('question',
-                            ['idnumber' => $question->idnumber, 'category' => $question->category])) {
+                    if ($DB->record_exists('question_bank_entry',
+                            ['idnumber' => $question->idnumber, 'questioncategoryid' => $question->category])) {
                         // We cannot have duplicate idnumbers in a category. Just remove it.
                         unset($question->idnumber);
                     }
@@ -904,8 +904,9 @@ class qformat_default {
 
         foreach ($questions as $question) {
             // used by file api
+            $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
             $contextid = $DB->get_field('question_categories', 'contextid',
-                    array('id' => $question->category));
+                    array('id' => $qcategory));
             $question->contextid = $contextid;
 
             // do not export hidden questions
@@ -931,7 +932,7 @@ class qformat_default {
                     // If parent wasn't written.
                     if (!in_array($trackcategoryparent, $writtencategories)) {
                         // If parent is empty.
-                        if (!count($DB->get_records('question', array('category' => $trackcategoryparent)))) {
+                        if (!count($DB->get_records('question_bank_entry', ['questioncategoryid' => $trackcategoryparent]))) {
                             $categoryname = $this->get_category_path($trackcategoryparent, $this->contexttofile);
                             $categoryinfo = $DB->get_record('question_categories', array('id' => $trackcategoryparent),
                                 'name, info, infoformat, idnumber', MUST_EXIST);

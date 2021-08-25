@@ -965,9 +965,10 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
 
     foreach ($questionlist as $question) {
         $questionids[] = $question->id;
+        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
 
-        if (!in_array($question->category, $categoryids)) {
-            $categoryids[] = $question->category;
+        if (!in_array($qcategory, $categoryids)) {
+            $categoryids[] = $qcategory;
         }
     }
 
@@ -985,8 +986,9 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
         } else {
             $tagobjects = $tagobjectsbyquestion[$question->id];
         }
+        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
 
-        _tidy_question($question, $categories[$question->category], $tagobjects, $filtercourses);
+        _tidy_question($question, $categories[$qcategory], $tagobjects, $filtercourses);
     }
 
     return true;
