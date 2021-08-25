@@ -100,7 +100,11 @@ abstract class question_edit_form extends question_wizard_form {
         $this->contexts = $contexts;
 
         // Get the question category id.
-        $qcategory = $question->categoryobject->id ?? get_question_bank_entry($question->id)->questioncategoryid;
+        if (isset($question->id)) {
+            $qcategory = $question->categoryobject->id ?? get_question_bank_entry($question->id)->questioncategoryid;
+        } else {
+            $qcategory = $question->category;
+        }
 
         $record = $DB->get_record('question_categories',
                 array('id' => $qcategory), 'contextid');
