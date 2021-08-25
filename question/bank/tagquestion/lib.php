@@ -53,7 +53,8 @@ function qbank_tagquestion_output_fragment_tags_form($args) {
             $filtercourses = null;
         }
 
-        $category = $DB->get_record('question_categories', ['id' => $question->category]);
+        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
+        $category = $DB->get_record('question_categories', ['id' => $qcategory]);
         $questioncontext = \context::instance_by_id($category->contextid);
         $contexts = new \core_question\lib\question_edit_contexts($editingcontext);
 
