@@ -964,8 +964,18 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
     }
 
     foreach ($questionlist as $question) {
-        $questionids[] = $question->id;
+        $sql = 'SELECT qc.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qv.questionbankentryid = qbe.id
+                  JOIN {question_categories} qc ON qbe.questioncategoryid = qc.id
+                 WHERE q.id = ?';
+        $questioncategory = $DB->get_record_sql($sql, [$question->id]);
+        $question->category = $questioncategory->id;
+    }
 
+    foreach ($questionlist as $question) {
+        $questionids[] = $question->id;
         if (!in_array($question->category, $categoryids)) {
             $categoryids[] = $question->category;
         }

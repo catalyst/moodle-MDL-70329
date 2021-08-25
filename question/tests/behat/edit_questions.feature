@@ -20,6 +20,18 @@ Feature: A teacher can edit questions in the question bank
     And the following "questions" exist:
       | questioncategory | qtype | name                       | questiontext                  |
       | Test questions   | essay | Test question to be edited | Write about whatever you want |
+    And I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I navigate to "Question bank > Questions" in current page administration
+    And I press "Create a new question ..."
+    And I click on "Essay" "input"
+    And I press "Add"
+    And I click on "Question name" "field"
+    And I type "Test question to be edited"
+    And I click on "Question text" "field"
+    And I type "Write about whatever you want"
+    And I press "Save changes"
+    And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "Question bank > Questions" in current page administration
