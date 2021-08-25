@@ -4731,7 +4731,7 @@ abstract class restore_activity_structure_step extends restore_structure_step {
  * Structure step in charge of creating/mapping all the qcats and qs
  * by parsing the questions.xml file and checking it against the
  * results calculated by {@link restore_process_categories_and_questions}
- * and stored in backup_ids_temp
+ * and stored in backup_ids_temp.
  */
 class restore_create_categories_and_questions extends restore_structure_step {
 

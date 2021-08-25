@@ -2328,63 +2328,60 @@ class backup_annotate_all_question_files extends backup_execution_step {
 /**
  * structure step in charge of constructing the questions.xml file for all the
  * question categories and questions required by the backup
- * and letters related to one activity
+ * and letters related to one activity.
  */
 class backup_questions_structure_step extends backup_structure_step {
 
     protected function define_structure() {
 
-        // Define each element separated
-
+        // Define each element separately.
         $qcategories = new backup_nested_element('question_categories');
 
-        $qcategory = new backup_nested_element('question_category', array('id'), array(
-            'name', 'contextid', 'contextlevel', 'contextinstanceid',
-            'info', 'infoformat', 'stamp', 'parent',
-            'sortorder', 'idnumber'));
+        $qcategory = new backup_nested_element('question_category', ['id'],
+                                                ['name', 'contextid', 'contextlevel', 'contextinstanceid', 'info', 'infoformat',
+                                                 'stamp', 'parent', 'sortorder', 'idnumber']);
 
         $questionbankentries = new backup_nested_element('question_bank_entries');
 
-        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], [
-            'ownerid'
-        ]);
+        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['idnumber', 'ownerid']);
 
         $questionversions = new backup_nested_element('question_versions_entry');
 
-        $questionverion = new backup_nested_element('question_versions', ['id'], [
-                'version', 'status'
-        ]);
+        $questionverion = new backup_nested_element('question_versions', ['id'], ['version', 'status']);
 
         $questions = new backup_nested_element('questions');
 
-        $question = new backup_nested_element('question', array('id'), array(
-            'parent', 'name', 'questiontext', 'questiontextformat',
-            'generalfeedback', 'generalfeedbackformat', 'defaultmark', 'penalty',
-            'qtype', 'length', 'stamp',
-            'timecreated', 'timemodified', 'createdby', 'modifiedby', 'idnumber'));
+        $question = new backup_nested_element('question', ['id'],
+                                                ['parent', 'name', 'questiontext', 'questiontextformat',
+                                                'generalfeedback', 'generalfeedbackformat', 'defaultmark',
+                                                'penalty', 'qtype', 'length', 'stamp', 'timecreated',
+                                                'timemodified', 'createdby', 'modifiedby']);
 
-        // attach qtype plugin structure to $question element, only one allowed
+        // Attach qtype plugin structure to $question element, only one allowed.
         $this->add_plugin_structure('qtype', $question, false);
 
-        // attach local plugin stucture to $question element, multiple allowed
+        // Attach local plugin stucture to $question element, multiple allowed.
         $this->add_plugin_structure('local', $question, true);
+
+        // Attach qbank plugin stucture to $question element, multiple allowed.
+        $this->add_plugin_structure('qbank', $question, true);
 
         $qhints = new backup_nested_element('question_hints');
 
-        $qhint = new backup_nested_element('question_hint', array('id'), array(
-            'hint', 'hintformat', 'shownumcorrect', 'clearwrong', 'options'));
+        $qhint = new backup_nested_element('question_hint', ['id'],
+                                            ['hint', 'hintformat', 'shownumcorrect', 'clearwrong', 'options']);
 
         $tags = new backup_nested_element('tags');
 
-        $tag = new backup_nested_element('tag', array('id', 'contextid'), array('name', 'rawname'));
+        $tag = new backup_nested_element('tag', ['id', 'contextid'], ['name', 'rawname']);
 
         $comments = new backup_nested_element('comments');
 
-        $comment = new backup_nested_element('comment', ['id'], ['component', 'commentarea', 'itemid', 'contextid',
-                                                                        'content', 'format', 'userid', 'timecreated']);
+        $comment = new backup_nested_element('comment', ['id'],
+                                                ['component', 'commentarea', 'itemid', 'contextid', 'content',
+                                                 'format', 'userid', 'timecreated']);
 
-        // Build the tree
-
+        // Build the initial tree.
         $qcategories->add_child($qcategory);
         $qcategory->add_child($questionbankentries);
         $questionbankentries->add_child($questionbankentry);
@@ -2395,59 +2392,61 @@ class backup_questions_structure_step extends backup_structure_step {
         $question->add_child($qhints);
         $qhints->add_child($qhint);
 
+        // Add question tags.
         $question->add_child($tags);
         $tags->add_child($tag);
 
+        // Add question comments.
         $question->add_child($comments);
         $comments->add_child($comment);
 
-        // Define the sources
-
+        // Define the sources.
         $qcategory->set_source_sql("
-            SELECT gc.*, contextlevel, instanceid AS contextinstanceid
+            SELECT gc.*,
+                   contextlevel,
+                   instanceid AS contextinstanceid
               FROM {question_categories} gc
               JOIN {backup_ids_temp} bi ON bi.itemid = gc.id
               JOIN {context} co ON co.id = gc.contextid
              WHERE bi.backupid = ?
-               AND bi.itemname = 'question_categoryfinal'", array(backup::VAR_BACKUPID));
+               AND bi.itemname = 'question_categoryfinal'", [backup::VAR_BACKUPID]);
 
         $questionbankentry->set_source_table('question_bank_entry', ['questioncategoryid' => backup::VAR_PARENTID]);
 
         $questionverion->set_source_table('question_versions', ['questionbankentryid' => backup::VAR_PARENTID]);
 
-        $question->set_source_sql('SELECT q.*
-                                        FROM {question} q
-                                        JOIN {question_versions} qv ON qv.questionid = q.id
-                                        JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
-                                       WHERE qbe.id = ?', [backup::VAR_PARENTID]);
+        $question->set_source_sql('
+                SELECT q.*
+                 FROM {question} q
+                 JOIN {question_versions} qv ON qv.questionid = q.id
+                 JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                WHERE qbe.id = ?', [backup::VAR_PARENTID]);
 
         $qhint->set_source_sql('
                 SELECT *
-                FROM {question_hints}
+                 FROM {question_hints}
                 WHERE questionid = :questionid
-                ORDER BY id',
-                array('questionid' => backup::VAR_PARENTID));
+             ORDER BY id', ['questionid' => backup::VAR_PARENTID]);
 
-        $tag->set_source_sql("SELECT t.id, ti.contextid, t.name, t.rawname
-                              FROM {tag} t
-                              JOIN {tag_instance} ti ON ti.tagid = t.id
-                              WHERE ti.itemid = ?
-                              AND ti.itemtype = 'question'
-                              AND ti.component = 'core_question'",
-            [
-                backup::VAR_PARENTID
-            ]);
+        $tag->set_source_sql("
+                SELECT t.id, ti.contextid, t.name, t.rawname
+                 FROM {tag} t
+                 JOIN {tag_instance} ti ON ti.tagid = t.id
+                WHERE ti.itemid = ?
+                  AND ti.itemtype = 'question'
+                  AND ti.component = 'core_question'", [backup::VAR_PARENTID]);
 
-        $comment->set_source_sql("SELECT c.*
-                                        FROM {comments} c
-                                       WHERE c.commentarea = 'core_question'
-                                         AND c.component = 'qbank_comment'
-                                         AND c.itemid = ?", [backup::VAR_PARENTID]);
+        $comment->set_source_sql("
+                SELECT c.*
+                  FROM {comments} c
+                 WHERE c.commentarea = 'core_question'
+                   AND c.component = 'qbank_comment'
+                   AND c.itemid = ?", [backup::VAR_PARENTID]);
 
         $comment->annotate_ids('user', 'userid');
 
-        // don't need to annotate ids nor files
-        // (already done by {@link backup_annotate_all_question_files}
+        // Don't need to annotate ids nor files.
+        // ...(already done by {@link backup_annotate_all_question_files}.
 
         return $qcategories;
     }
