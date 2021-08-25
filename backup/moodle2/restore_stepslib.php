@@ -4735,28 +4735,32 @@ abstract class restore_activity_structure_step extends restore_structure_step {
  */
 class restore_create_categories_and_questions extends restore_structure_step {
 
-    /** @var array $cachecategory store a question category */
+    /** @var array $cachedcategory store a question category */
     protected $cachedcategory = null;
 
     protected function define_structure() {
 
         $category = new restore_path_element('question_category', '/question_categories/question_category');
-        $question = new restore_path_element('question', '/question_categories/question_category/questions/question');
+        $questionbankentry = new restore_path_element('question_bank_entry', 'question_bank_entries/question_bank_entry');
+        $questionversion = new restore_path_element('question_versions', 'question_versions_entry/question_versions');
+        $question = new restore_path_element('question', '/question_categories/question_category/'.
+                        'question_bank_entries/question_bank_entry/question_versions_entry/question_versions/questions/question');
         $hint = new restore_path_element('question_hint',
                 '/question_categories/question_category/questions/question/question_hints/question_hint');
-
         $tag = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
-
         $comment = new restore_path_element('comment',
                 '/question_categories/question_category/questions/question/comments/comment');
 
-        // Apply for 'qtype' plugins optional paths at question level
+        // Apply for 'qtype' plugins optional paths at question level.
         $this->add_plugin_structure('qtype', $question);
 
-        // Apply for 'local' plugins optional paths at question level
+        // Apply for 'local' plugins optional paths at question level.
         $this->add_plugin_structure('local', $question);
 
-        return [$category, $question, $hint, $tag, $comment];
+        // Apply for 'qbank' plugins optional paths at question level.
+        $this->add_plugin_structure('qbank', $question);
+
+        return [$category, $questionbankentry, $questionversion, $question, $hint, $tag, $comment];
     }
 
     protected function process_question_category($data) {
@@ -4832,6 +4836,20 @@ class restore_create_categories_and_questions extends restore_structure_step {
         }
     }
 
+    protected function process_question_bank_entry($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        // Check we have one mapping for this question
+        if (!$questionmapping = $this->get_mapping('question_bank_entry', $oldid)) {
+            return; // No mapping = this question doesn't need to be created/mapped
+        }
+        $data->questioncategoryid = $this->get_mappingid('question_category', $questionmapping->parentitemid);
+
+    }
+
     protected function process_question($data) {
         global $DB;
 
@@ -4847,7 +4865,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // all the categories have been created, so it is not always available
         // Instead we get the mapping for the question->parentitemid because
         // we have loaded qcatids there for all parsed questions
-        $data->category = $this->get_mappingid('question_category', $questionmapping->parentitemid);
+        //$data->category = $this->get_mappingid('question_category', $questionmapping->parentitemid);
 
         // In the past, there were some very sloppy values of penalty. Fix them.
         if ($data->penalty >= 0.33 && $data->penalty <= 0.34) {
@@ -4888,10 +4906,10 @@ class restore_create_categories_and_questions extends restore_structure_step {
         if (!$questionmapping->newitemid) {
 
             // The idnumber if it exists also needs to be unique within a category or reset it to null.
-            if (!empty($data->idnumber) && $DB->record_exists('question',
-                    ['idnumber' => $data->idnumber, 'category' => $data->category])) {
-                unset($data->idnumber);
-            }
+            //if (!empty($data->idnumber) && $DB->record_exists('question',
+            //        ['idnumber' => $data->idnumber, 'category' => $data->category])) {
+            //    unset($data->idnumber);
+            //}
 
             if ($data->qtype === 'random') {
                 // Ensure that this newly created question is considered by
