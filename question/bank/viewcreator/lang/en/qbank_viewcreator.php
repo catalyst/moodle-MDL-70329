@@ -23,6 +23,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['creator'] = 'Creator';
+$string['created'] = 'Created';
+$string['history'] = 'History';
+$string['lastmodifier'] = 'Last modifier';
+$string['lastmodified'] = 'Last modified';
 $string['pluginname'] = 'View creator question bank feature';
 $string['privacy:metadata'] = 'View creator shows question creator and modifier column, it does not store user data.';
+$string['strftimedatetimeshort'] = '%d.%m.%y, %I:%M %p';
 $string['version'] = 'Version';
+$string['versioncontrol'] = 'Version control';

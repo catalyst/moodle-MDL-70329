@@ -27,6 +27,8 @@ namespace qbank_viewcreator\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use plugin_renderer_base;
+
 /**
  * Class renderer.
  *
@@ -34,26 +36,26 @@ defined('MOODLE_INTERNAL') || die();
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class renderer extends \plugin_renderer_base {
+class renderer extends plugin_renderer_base {
 
     /**
-     * Render question creator.
+     * Render version control column.
      *
      * @param array $displaydata
      * @return string
      */
-    public function render_creator_name($displaydata) {
-        return $this->render_from_template('qbank_viewcreator/creator_display', $displaydata);
+    public function render_version_control($displaydata) {
+        return $this->render_from_template('qbank_viewcreator/versioncontrol_display', $displaydata);
     }
 
     /**
-     * Render question modifier.
+     * Render history column.
      *
      * @param array $displaydata
      * @return string
      */
-    public function render_modifier_name($displaydata) {
-        return $this->render_from_template('qbank_viewcreator/modifier_display', $displaydata);
+    public function render_history($displaydata) {
+        return $this->render_from_template('qbank_viewcreator/history_display', $displaydata);
     }
 
 

@@ -12,22 +12,18 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template qbank_viewcreator/modifier_display
+    @template qbank_viewcreator/versioncontrol_display
     Example context (json):
     {
         "displaydata": [
           {
-                "modifier": "Marc Ghaly",
-                "date": "2 June 2021, 5:32 PM",
+                "creator": "Marc Ghaly",
+                "lastmodifier": "Jean Doe",
+                "Version": "5",
           }
         ]
     }
 }}
-
-<span class="qbank-creator-name">
-    {{modifier}}
-</span>
-<br>
-<span class="date">
-    {{date}}
+<span>
+    {{creator}} / {{lastmodifier}} / {{version}}
 </span>
