@@ -499,11 +499,16 @@ class question_finder implements cache_data_source {
             $extraconditions = ' AND (' . $extraconditions . ')';
         }
 
-        return $DB->get_records_select_menu('question',
-                "category {$qcsql}
-                 AND parent = 0
-                 AND hidden = 0
-                 {$extraconditions}", $qcparams + $extraparams, '', 'id,id AS id2');
+        $sql = "SELECT q.id, q.id AS id2
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid {$qcsql}
+                   AND q.parent = 0
+                   AND q.status = 0
+                   {$extraconditions}";
+
+        return $DB->get_records_sql_menu($sql, $qcparams + $extraparams);
     }
 
     /**
@@ -550,9 +555,12 @@ class question_finder implements cache_data_source {
                            WHERE qa.questionid = q.id AND " . $qubaids->where() . "
                          ) AS previous_attempts";
         $from   = "{question} q";
-        $where  = "q.category {$qcsql}
+        $join   = "JOIN {question_versions} qv ON qv.questionid = q.id
+                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid";
+        $from = $from . " " . $join;
+        $where  = "qbe.questioncategoryid {$qcsql}
                AND q.parent = 0
-               AND q.hidden = 0";
+               AND q.status = 0";
         $params = $qcparams;
 
         if (!empty($tagids)) {
@@ -582,9 +590,9 @@ class question_finder implements cache_data_source {
         }
 
         return $DB->get_records_sql_menu("SELECT $select
-                                            FROM $from
-                                           WHERE $where $extraconditions
-                                        ORDER BY previous_attempts",
+                                                FROM $from
+                                               WHERE $where $extraconditions
+                                            ORDER BY previous_attempts",
                 $qubaids->from_where_params() + $params + $extraparams);
     }
 
