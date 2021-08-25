@@ -786,7 +786,13 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     global $DB;
 
     $questions = [];
-    $questionids = $DB->get_records_menu('question', ['category' => $categoryid], '', 'id,qtype');
+    $sql = "SELECT q.id, q.qtype
+              FROM {question} q
+              JOIN {question_versions} qv ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+             WHERE qbe.questioncategoryid = ?";
+
+    $questionids = $DB->get_records_sql_menu($sql, [$categoryid]);
     foreach ($questionids as $questionid => $qtype) {
         question_bank::get_qtype($qtype)->move_files($questionid, $oldcontextid, $newcontextid);
         // Purge this question from the cache.
