@@ -85,11 +85,14 @@ class qbank_tagquestion_external extends external_api {
         self::validate_context($editingcontext);
         parse_str($params['formdata'], $data);
 
-        if (!$question = $DB->get_record_sql('
-                SELECT q.*, qc.contextid
-                FROM {question} q
-                JOIN {question_categories} qc ON qc.id = q.category
-                WHERE q.id = ?', [$questionid])) {
+        $sql = 'SELECT qc.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qv.questionbankentryid = qbe.id
+                  JOIN {question_categories} qc ON qbe.questioncategoryid = qc.id
+                  WHERE q.id = ?';
+
+        if (!$question = $DB->get_record_sql($sql, [$questionid])) {
             throw new \moodle_exception('questiondoesnotexist', 'question');
         }
 

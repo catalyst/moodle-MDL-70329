@@ -53,6 +53,16 @@ function qbank_tagquestion_output_fragment_tags_form($args) {
             $filtercourses = null;
         }
 
+        $sql = 'SELECT qc.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qv.questionbankentryid = qbe.id
+                  JOIN {question_categories} qc ON qbe.questioncategoryid = qc.id
+                 WHERE q.id = ?';
+
+        $questioncategory = $DB->get_record_sql($sql, [$question->id]);
+        $question->category = $questioncategory->id;
+
         $category = $DB->get_record('question_categories', ['id' => $question->category]);
         $questioncontext = \context::instance_by_id($category->contextid);
         $contexts = new \core_question\lib\question_edit_contexts($editingcontext);
