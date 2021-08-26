@@ -505,7 +505,7 @@ class question_finder implements cache_data_source {
                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                  WHERE qbe.questioncategoryid {$qcsql}
                    AND q.parent = 0
-                   AND q.status = 0
+                   AND qv.status = 0
                    {$extraconditions}";
 
         return $DB->get_records_sql_menu($sql, $qcparams + $extraparams);
@@ -560,7 +560,7 @@ class question_finder implements cache_data_source {
         $from = $from . " " . $join;
         $where  = "qbe.questioncategoryid {$qcsql}
                AND q.parent = 0
-               AND q.status = 0";
+               AND qv.status = 0";
         $params = $qcparams;
 
         if (!empty($tagids)) {

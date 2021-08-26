@@ -103,7 +103,7 @@ if ($param->delete) {
 
     helper::question_remove_stale_questions_from_category($param->delete);
 
-    $sql = "SELECT q.id
+    $sql = "SELECT count(q.id)
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
               JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid

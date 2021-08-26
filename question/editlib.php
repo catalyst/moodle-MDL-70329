@@ -77,7 +77,7 @@ function get_questions_category( $category, $noparent=false, $recurse=true, $exp
     // Get the list of questions for the category
     list($usql, $params) = $DB->get_in_or_equal($categorylist);
     $questions = $DB->get_records_sql(
-        "SELECT q.*, qv.status
+        "SELECT q.*, qv.status, qc.id AS category
                FROM {question} q
                JOIN {question_versions} qv ON qv.questionid = q.id
                JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
