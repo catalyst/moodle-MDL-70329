@@ -1975,7 +1975,6 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
  * @param $question object question object with all the information required for additional tables.
  * @param $form object Form data object.
  * @param $context object Context object.
- * @param $versionnumber int Question version number.
  * @param object|null $questionbankentry object Question bank entry object.
  * @throws dml_exception
  */
@@ -2003,11 +2002,7 @@ function save_question_versions(object $question, object $form, object $context,
     // Get the version and status from the parent question if parent is set.
     if (!$question->parent) {
         // Get the status field. It comes from the form, but for testing we can
-        if (!isset($form->status)) {
-            $status = $question->status;
-        } else {
-            $status = $form->status;
-        }
+        $status = $form->status ?? $question->status;
         $questionversion->version = get_next_version($questionbankentry->id);
         $questionversion->status = $status;
     } else {
