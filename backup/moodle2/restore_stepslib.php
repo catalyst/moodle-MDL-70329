@@ -4741,15 +4741,18 @@ class restore_create_categories_and_questions extends restore_structure_step {
     protected function define_structure() {
 
         $category = new restore_path_element('question_category', '/question_categories/question_category');
-        $questionbankentry = new restore_path_element('question_bank_entry', 'question_bank_entries/question_bank_entry');
-        $questionversion = new restore_path_element('question_versions', 'question_versions_entry/question_versions');
+        $questionbankentry = new restore_path_element('question_bank_entry',
+                    '/question_categories/question_category/question_bank_entries/question_bank_entry');
+        $questionversion = new restore_path_element('question_versions', '/question_categories/question_category/'.
+                        'question_bank_entries/question_bank_entry/question_versions_entry/question_versions');
         $question = new restore_path_element('question', '/question_categories/question_category/'.
                         'question_bank_entries/question_bank_entry/question_versions_entry/question_versions/questions/question');
-        $hint = new restore_path_element('question_hint',
-                '/question_categories/question_category/questions/question/question_hints/question_hint');
-        $tag = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
-        $comment = new restore_path_element('comment',
-                '/question_categories/question_category/questions/question/comments/comment');
+        $hint = new restore_path_element('question_hint', '/question_categories/question_category/question_bank_entries/'.
+                        'question_bank_entry/question_versions_entry/question_versions/questions/question/question_hints/question_hint');
+        $tag = new restore_path_element('tag', '/question_categories/question_category/question_bank_entries/'.
+                        'question_bank_entry/question_versions_entry/question_versions/questions/question/tags/tag');
+        $comment = new restore_path_element('comment', '/question_categories/question_category/question_bank_entries/'.
+                        'question_bank_entry/question_versions_entry/question_versions/questions/question/comments/comment');
 
         // Apply for 'qtype' plugins optional paths at question level.
         $this->add_plugin_structure('qtype', $question);
@@ -4842,11 +4845,55 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Check we have one mapping for this question
-        if (!$questionmapping = $this->get_mapping('question_bank_entry', $oldid)) {
-            return; // No mapping = this question doesn't need to be created/mapped
+        // Check if we have one mapping for this entry.
+        if (!$questionentrymapping = $this->get_mapping('question_bank_entry', $oldid)) {
+            return; // No mapping = this question doesn't need to be created/mapped.
         }
-        $data->questioncategoryid = $this->get_mappingid('question_category', $questionmapping->parentitemid);
+        $data->questioncategoryid = $this->get_mappingid('question_category', $questionentrymapping->parentitemid);
+
+        $userid = $this->get_mappingid('user', $data->ownerid);
+        if ($userid) {
+            $data->ownerid = $userid;
+        } else {
+            if (!$this->task->is_samesite()) {
+                $data->ownerid = $this->task->get_userid();
+            }
+        }
+
+        // The idnumber if it exists also needs to be unique within a category or reset it to null.
+        if (!empty($data->idnumber) && $DB->record_exists('question',
+                ['idnumber' => $data->idnumber, 'category' => $data->category])) {
+            unset($data->idnumber);
+        }
+
+        if (!$questionentrymapping->newitemid) {
+            $newitemid = $DB->insert_record('question_bank_entry', $data);
+            $this->set_mapping('question_bank_entry', $oldid, $newitemid);
+        } else {
+            $this->set_mapping('question_bank_entry', $oldid, $questionentrymapping->newitemid);
+        }
+
+    }
+
+    protected function process_question_versions($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        // Check if we have one mapping for this entry.
+        if (!$questionversionmapping = $this->get_mapping('question_versions', $oldid)) {
+            return; // No mapping = this question doesn't need to be created/mapped.
+        }
+        $data->questionbankentryid = $this->get_mappingid('question_bank_entry', $questionversionmapping->parentitemid);
+        // Question id is updated after inserting the question.
+        $data->questionid = 0;
+        if (!$questionversionmapping->newitemid) {
+            $newitemid = $DB->insert_record('question_versions', $data);
+            $this->set_mapping('question_versions', $oldid, $newitemid);
+        } else {
+            $this->set_mapping('question_versions', $oldid, $questionversionmapping->newitemid);
+        }
 
     }
 
@@ -4856,9 +4903,9 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Check we have one mapping for this question
+        // Check we have one mapping for this question.
         if (!$questionmapping = $this->get_mapping('question', $oldid)) {
-            return; // No mapping = this question doesn't need to be created/mapped
+            return; // No mapping = this question doesn't need to be created/mapped.
         }
 
         // Get the mapped category (cannot use get_new_parentid() because not
@@ -4911,11 +4958,11 @@ class restore_create_categories_and_questions extends restore_structure_step {
             //    unset($data->idnumber);
             //}
 
-            if ($data->qtype === 'random') {
-                // Ensure that this newly created question is considered by
-                // \qtype_random\task\remove_unused_questions.
-                $data->hidden = 0;
-            }
+            //if ($data->qtype === 'random') {
+            //    // Ensure that this newly created question is considered by
+            //    // \qtype_random\task\remove_unused_questions.
+            //    $data->hidden = 0;
+            //}
 
             $newitemid = $DB->insert_record('question', $data);
             $this->set_mapping('question', $oldid, $newitemid);
@@ -4925,8 +4972,19 @@ class restore_create_categories_and_questions extends restore_structure_step {
         } else {
             // By performing this set_mapping() we make get_old/new_parentid() to work for all the
             // children elements of the 'question' one (so qtype plugins will know the question they belong to)
-            $this->set_mapping('question', $oldid, $questionmapping->newitemid);
+            $newitemid = $questionmapping->newitemid;
+            $this->set_mapping('question', $oldid, $newitemid);
         }
+        // Now update the question_versions table with the new question id.
+        $version = new stdClass();
+        $version->id = $questionmapping->parentitemid;
+        $version->questionid = $newitemid;
+        if ($data->qtype === 'random') {
+            // Ensure that this newly created question is considered by
+            // \qtype_random\task\remove_unused_questions.
+            $version->status = 0;
+        }
+        $DB->update_record('question_versions', $version);
 
         // Note, we don't restore any question files yet
         // as far as the CONTEXT_MODULE categories still
