@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use mod_quiz\question\bank\qbank_helper;
 use \mod_quiz\structure;
 use \html_writer;
+use \qbank_previewquestion\helper;
 use renderable;
 
 /**
@@ -910,7 +911,11 @@ class edit_renderer extends \plugin_renderer_base {
      */
     public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null) {
         // TODO make changes to the preview for ramdom question using set_reference and re add the preview.
-        $url = quiz_question_preview_url($quiz, $question, $variant);
+        $random = null;
+        if ($qtype === 'random') {
+            $random = true;
+        }
+        $url = quiz_question_preview_url($quiz, $question, $variant, $random);
 
         // Do we want a label?
         $strpreviewlabel = '';
