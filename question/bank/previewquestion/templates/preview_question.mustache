@@ -34,6 +34,16 @@
     }
 }}
 <form id="responseform" method="post" action="{{{actionurl}}}" enctype="multipart/form-data" autocomplete="off">
+    <div class="d-flex">
+        <div class="ml-3 mt-3">{{#pix}} i/menubars, core{{/pix}}</div>
+        <div class="badge-primary h-50 mt-3 px-2">{{questionid}}</div>
+        <h2 class="ml-2 mt-2"> {{questiontitle}}</h2>
+        <h2 class="px-2 py-1 ml-2 mt-1 badge-primary">{{versiontitle}}</h2>
+        <div class="ml-auto p-2">
+            {{{cogwheelmenu}}}
+        </div>
+    </div>
+    <br>
     <div>
         <input type="hidden" name="sesskey" value="{{session}}">
         <input type="hidden" name="slots" value="{{slot}}">

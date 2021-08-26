@@ -250,6 +250,15 @@ $PAGE->set_heading($title);
 echo $OUTPUT->header();
 
 $previewdata = [];
+$previewdata['questionid'] = $question->id;
+$previewdata['questiontitle'] = $question->name;
+$islatestversion = previewquestion_helper::is_latest($question->version, $question->questionbankentryid);
+if ($islatestversion) {
+    $previewdata['versiontitle'] = get_string('versiontitlelatest', 'qbank_previewquestion', $question->version);
+} else {
+    $previewdata['versiontitle'] = get_string('versiontitle', 'qbank_previewquestion', $question->version);
+}
+$previewdata['cogwheelmenu'] = previewquestion_helper::display_edit_menu($cmid, $question->id);
 $previewdata['actionurl'] = $actionurl;
 $previewdata['session'] = sesskey();
 $previewdata['slot'] = $slot;
