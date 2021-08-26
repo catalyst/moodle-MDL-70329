@@ -53,7 +53,9 @@ abstract class backup_question_dbops extends backup_dbops {
         // where they are in the contexts hierarchy, transversals... whatever)
         $contexts = $DB->get_fieldset_sql("SELECT DISTINCT qc2.contextid
                                              FROM {question_categories} qc2
-                                             JOIN {question} q ON q.category = qc2.id
+                                             JOIN {question_bank_entry} qbe ON qbe.questioncategoryid = qc2.id
+                                             JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id    
+                                             JOIN {question} q ON q.id = qv.questionid
                                              JOIN {backup_ids_temp} bi ON bi.itemid = q.id
                                             WHERE bi.backupid = ?
                                               AND bi.itemname = 'question'
