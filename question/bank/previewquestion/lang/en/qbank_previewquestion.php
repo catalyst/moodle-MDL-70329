@@ -23,5 +23,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Preview question';
-$string['privacy:metadata'] = 'Preview question plugin does not store any user data.';
+$string['delete'] = 'Delete';
+$string['duplicate'] = 'Duplicate';
+$string['editquestion'] = 'Edit question';
+$string['exportxlm'] = 'Export as Moodle XML';
+$string['managetags'] = 'Manage tags';
+$string['pluginname'] = 'Preview question bank feature';
+$string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+$string['versiontitle'] = 'Version {$a}';
+$string['versiontitlelatest'] = 'Version {$a} (latest)';

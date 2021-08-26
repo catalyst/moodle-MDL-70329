@@ -16,8 +16,11 @@
 
 namespace qbank_previewquestion;
 
+use action_menu;
+use action_menu_link;
 use context;
 use moodle_url;
+use pix_icon;
 use question_display_options;
 use question_engine;
 use stdClass;
@@ -246,5 +249,52 @@ class previewquestion_helper {
             $extrahtml[] = $pluginhtml;
         }
         return [$comment, $extrahtml];
+    }
+
+    /**
+     * Checks if question is the latest version.
+     *
+     * @param string $version Question version to check.
+     * @param string $questionbankentryid Entry to check against.
+     * @return bool
+     */
+    public static function is_latest($version, $questionbankentryid) : bool {
+        global $DB;
+
+        $sql = 'SELECT MAX(version) 
+                  FROM {question_versions} 
+                 WHERE questionbankentryid = ?';
+        $latestversion = $DB->get_record_sql($sql, [$questionbankentryid]);
+ 
+        return ($version === $latestversion->max) ? true : false;
+    }
+
+    public static function display_edit_menu($cmid, $questionid) : string {
+        global $OUTPUT;
+
+        $menu = new action_menu();
+
+        $editurl = new moodle_url('/question/bank/editquestion/question.php',
+            ['cmid' => $cmid, 'id' => $questionid]);
+        
+        $menu->add(new action_menu_link(
+            $editurl,
+            new pix_icon('t/edit', 'edit'),
+            get_string('editquestion', 'qbank_previewquestion'),
+            false
+        ));
+
+        $duplicateurl = new moodle_url('/question/bank/editquestion/question.php',
+            ['cmid' => $cmid, 'id' => $questionid, 'makecopy' => 1]);
+
+        $menu->add(new action_menu_link(
+            $duplicateurl,
+            new pix_icon('t/copy', 'duplicate'),
+            get_string('duplicate', 'qbank_previewquestion'),
+            false
+        ));
+
+        $menu = $OUTPUT->render($menu);
+        return $menu;
     }
 }
