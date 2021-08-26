@@ -138,7 +138,9 @@ if ($form = $importform->get_data()) {
     $event->trigger();
 
     $params = $thispageurl->params() + ['category' => $qformat->category->id . ',' . $qformat->category->contextid];
-    echo $OUTPUT->continue_button(new moodle_url('/question/edit.php', $params));
+    echo $OUTPUT->continue_button(new moodle_url($PAGE->settingsnav->find(
+        'questionbank',
+        \navigation_node::TYPE_CONTAINER)->action, $params));
     echo $OUTPUT->footer();
     exit;
 }
