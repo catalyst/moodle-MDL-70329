@@ -88,7 +88,7 @@ class view {
      * @var \question_bank_column_base[] these are all the 'columns' that are
      * part of the display. Array keys are the class name.
      */
-    protected $requiredcolumns;
+    public $requiredcolumns;
 
     /**
      * @var \question_bank_column_base[] these are the 'columns' that are
