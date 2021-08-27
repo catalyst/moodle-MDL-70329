@@ -16,9 +16,15 @@
 
 namespace qbank_previewquestion;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/editlib.php');
+
 use action_menu;
 use action_menu_link;
 use context;
+use core_question\local\bank\edit_menu_column;
+use core_question\local\bank\view;
 use moodle_url;
 use pix_icon;
 use question_display_options;
@@ -261,38 +267,40 @@ class previewquestion_helper {
     public static function is_latest($version, $questionbankentryid) : bool {
         global $DB;
 
-        $sql = 'SELECT MAX(version) 
-                  FROM {question_versions} 
+        $sql = 'SELECT MAX(version)
+                  FROM {question_versions}
                  WHERE questionbankentryid = ?';
         $latestversion = $DB->get_record_sql($sql, [$questionbankentryid]);
- 
+
         return ($version === $latestversion->max) ? true : false;
     }
 
-    public static function display_edit_menu($cmid, $questionid) : string {
-        global $OUTPUT;
+    /**
+     * Renders question preview cog wheel menu.
+     *
+     * @param question_with_responses $question Question informations.
+     * @return string $menu Cog wheel menu to render.
+     */
+    public function display_edit_menu($question) : string {
+        global $OUTPUT, $COURSE;
+
+        list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
+            question_edit_setup('questions', '/question/edit.php');
 
         $menu = new action_menu();
+        $qbankview = new view($contexts, $thispageurl, $COURSE, $cm);
+        $editmenucolumn = new edit_menu_column($qbankview);
+        $editmenucolumn->claim_menuable_columns($qbankview->requiredcolumns);
+        $qtype = explode('_', get_class($question->qtype))[1];
+        $questionobject = (object)(array)$question;
+        $questionobject->qtype = $qtype;
 
-        $editurl = new moodle_url('/question/bank/editquestion/question.php',
-            ['cmid' => $cmid, 'id' => $questionid]);
-        
-        $menu->add(new action_menu_link(
-            $editurl,
-            new pix_icon('t/edit', 'edit'),
-            get_string('editquestion', 'qbank_previewquestion'),
-            false
-        ));
-
-        $duplicateurl = new moodle_url('/question/bank/editquestion/question.php',
-            ['cmid' => $cmid, 'id' => $questionid, 'makecopy' => 1]);
-
-        $menu->add(new action_menu_link(
-            $duplicateurl,
-            new pix_icon('t/copy', 'duplicate'),
-            get_string('duplicate', 'qbank_previewquestion'),
-            false
-        ));
+        foreach ($editmenucolumn->actions as $actioncolumn) {
+            $action = $actioncolumn->get_action_menu_link($questionobject);
+            if ($action && get_class($actioncolumn) !== 'qbank_previewquestion\\preview_action_column') {
+                $menu->add($action);
+            }
+        }
 
         $menu = $OUTPUT->render($menu);
         return $menu;

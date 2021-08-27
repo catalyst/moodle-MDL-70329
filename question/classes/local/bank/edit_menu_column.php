@@ -40,7 +40,7 @@ class edit_menu_column extends column_base {
     /**
      * @var menuable_action[]
      */
-    protected $actions;
+    public $actions;
 
     /**
      * Set up the list of actions that should be shown in the menu.
