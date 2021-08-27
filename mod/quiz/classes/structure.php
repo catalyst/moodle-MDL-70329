@@ -608,7 +608,7 @@ class structure {
 
         $slots = $DB->get_records_sql("
                 SELECT slot.id AS slotid, slot.slot, slot.questionid, slot.page, slot.maxmark,
-                       slot.requireprevious, q.*, qc.contextid
+                       slot.requireprevious, q.*, qc.id as category, qc.contextid
                   FROM {quiz_slots} slot
              LEFT JOIN {question} q ON q.id = slot.questionid
              LEFT JOIN {question_versions} qv ON qv.questionid = q.id
