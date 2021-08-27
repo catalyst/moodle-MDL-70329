@@ -87,9 +87,11 @@ class qbank_tagquestion_external extends external_api {
 
         if (!$question = $DB->get_record_sql('
                 SELECT q.*, qc.contextid
-                FROM {question} q
-                JOIN {question_categories} qc ON qc.id = q.category
-                WHERE q.id = ?', [$questionid])) {
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                 WHERE q.id = ?', [$questionid])) {
             throw new \moodle_exception('questiondoesnotexist', 'question');
         }
 

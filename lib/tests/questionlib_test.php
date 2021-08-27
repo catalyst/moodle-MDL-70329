@@ -468,9 +468,11 @@ class core_questionlib_testcase extends advanced_testcase {
         // Verify questions are moved.
         $params = array($qcat2->contextid);
         $actualquestionscount = $DB->count_records_sql("SELECT COUNT(*)
-                                                          FROM {question} q
-                                                          JOIN {question_categories} qc ON q.category = qc.id
-                                                         WHERE qc.contextid = ?", $params);
+                                                              FROM {question} q
+                                                              JOIN {question_versions} qv ON qv.questionid = q.id
+                                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                                              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                                                             WHERE qc.contextid = ?", $params);
         $this->assertEquals($questionsinqcat1 + $questionsinqcat2, $actualquestionscount);
 
         // Verify there is just a single top-level category.

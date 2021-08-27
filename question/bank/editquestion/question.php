@@ -210,7 +210,11 @@ if ($formeditable && $id) {
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
-$toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+if (isset($question->id)) {
+    $toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+} else {
+    $toform->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+}
 if ($cm !== null) {
     $toform->cmid = $cm->id;
     $toform->courseid = $cm->course;

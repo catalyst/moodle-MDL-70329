@@ -370,7 +370,6 @@ class question_type {
 
         list($form->category) = explode(',', $form->category);
         $context = $this->get_context_by_category_id($form->category);
-        // TODO: The category wont be in the question table, this is done now as the category is required.
         $question->category = $form->category;
 
         // This default implementation is suitable for most

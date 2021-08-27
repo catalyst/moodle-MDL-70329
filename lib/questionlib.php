@@ -786,7 +786,13 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     global $DB;
 
     $questions = [];
-    $questionids = $DB->get_records_menu('question', ['category' => $categoryid], '', 'id,qtype');
+    $sql = "SELECT q.id, q.qtype
+              FROM {question} q
+              JOIN {question_versions} qv ON qv.questionid = q.id
+              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+             WHERE qbe.questioncategoryid = ?";
+
+    $questionids = $DB->get_records_sql_menu($sql, [$categoryid]);
     foreach ($questionids as $questionid => $qtype) {
         question_bank::get_qtype($qtype)->move_files($questionid, $oldcontextid, $newcontextid);
         // Purge this question from the cache.
@@ -965,9 +971,10 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
 
     foreach ($questionlist as $question) {
         $questionids[] = $question->id;
+        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
 
-        if (!in_array($question->category, $categoryids)) {
-            $categoryids[] = $question->category;
+        if (!in_array($qcategory, $categoryids)) {
+            $categoryids[] = $qcategory;
         }
     }
 
@@ -985,8 +992,9 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
         } else {
             $tagobjects = $tagobjectsbyquestion[$question->id];
         }
+        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
 
-        _tidy_question($question, $categories[$question->category], $tagobjects, $filtercourses);
+        _tidy_question($question, $categories[$qcategory], $tagobjects, $filtercourses);
     }
 
     return true;
@@ -1967,7 +1975,6 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
  * @param $question object question object with all the information required for additional tables.
  * @param $form object Form data object.
  * @param $context object Context object.
- * @param $versionnumber int Question version number.
  * @param object|null $questionbankentry object Question bank entry object.
  * @throws dml_exception
  */
@@ -1995,11 +2002,7 @@ function save_question_versions(object $question, object $form, object $context,
     // Get the version and status from the parent question if parent is set.
     if (!$question->parent) {
         // Get the status field. It comes from the form, but for testing we can
-        if (!isset($form->status)) {
-            $status = $question->status;
-        } else {
-            $status = $form->status;
-        }
+        $status = $form->status ?? $question->status;
         $questionversion->version = get_next_version($questionbankentry->id);
         $questionversion->status = $status;
     } else {

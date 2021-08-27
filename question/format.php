@@ -411,8 +411,8 @@ class qformat_default {
                     // Id number not really set. Get rid of it.
                     unset($question->idnumber);
                 } else {
-                    if ($DB->record_exists('question',
-                            ['idnumber' => $question->idnumber, 'category' => $question->category])) {
+                    if ($DB->record_exists('question_bank_entry',
+                            ['idnumber' => $question->idnumber, 'questioncategoryid' => $question->category])) {
                         // We cannot have duplicate idnumbers in a category. Just remove it.
                         unset($question->idnumber);
                     }
@@ -426,6 +426,20 @@ class qformat_default {
                 );
 
             $question->id = $DB->insert_record('question', $question);
+            // Create a bank entry for each question imported.
+            $questionbankentry = new \stdClass();
+            $questionbankentry->questioncategoryid = $question->category;
+            $questionbankentry->idnumber = $question->idnumber ?? null;
+            $questionbankentry->ownerid = $question->createdby;
+            $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
+            // Create a version for each question imported.
+            $questionversion = new \stdClass();
+            $questionversion->questionbankentryid = $questionbankentry->id;
+            $questionversion->questionid = $question->id;
+            $questionversion->version = 1;
+            $questionversion->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+            $questionversion->id = $DB->insert_record('question_versions', $questionversion);
+
             $event = \core\event\question_created::create_from_question_instance($question, $this->importcontext);
             $event->trigger();
 
@@ -883,7 +897,8 @@ class qformat_default {
         // get the questions (from database) in this category
         // only get q's with no parents (no cloze subquestions specifically)
         if ($this->category) {
-            $questions = get_questions_category($this->category, true);
+            // Export only the latest version of a question.
+            $questions = get_questions_category($this->category, true, true, true, true);
         } else {
             $questions = $this->questions;
         }
@@ -904,8 +919,8 @@ class qformat_default {
 
         foreach ($questions as $question) {
             // used by file api
-            $contextid = $DB->get_field('question_categories', 'contextid',
-                    array('id' => $question->category));
+            $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
+            $contextid = $DB->get_field('question_categories', 'contextid', ['id' => $qcategory]);
             $question->contextid = $contextid;
 
             // do not export hidden questions
@@ -931,7 +946,7 @@ class qformat_default {
                     // If parent wasn't written.
                     if (!in_array($trackcategoryparent, $writtencategories)) {
                         // If parent is empty.
-                        if (!count($DB->get_records('question', array('category' => $trackcategoryparent)))) {
+                        if (!count($DB->get_records('question_bank_entry', ['questioncategoryid' => $trackcategoryparent]))) {
                             $categoryname = $this->get_category_path($trackcategoryparent, $this->contexttofile);
                             $categoryinfo = $DB->get_record('question_categories', array('id' => $trackcategoryparent),
                                 'name, info, infoformat, idnumber', MUST_EXIST);

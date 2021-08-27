@@ -52,16 +52,17 @@ class remove_unused_questions extends \core\task\scheduled_task {
         $unusedrandomids = $DB->get_records_sql("
                 SELECT q.id, 1
                   FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
              LEFT JOIN {quiz_slots} qslots ON q.id = qslots.questionid
                  WHERE qslots.questionid IS NULL
-                   AND q.qtype = ? AND hidden = ?", ['random', 0], 0, 10000);
+                   AND q.qtype = ? AND qv.status = ?", ['random', 0], 0, 10000);
 
         $count = 0;
         foreach ($unusedrandomids as $unusedrandomid => $notused) {
             question_delete_question($unusedrandomid);
             // In case the question was not actually deleted (because it was in use somehow
             // mark it as hidden so the query above will not return it again.
-            $DB->set_field('question', 'hidden', 1, ['id' => $unusedrandomid]);
+            $DB->set_field('question_versions', 'status', 1, ['questionid' => $unusedrandomid]);
             $count += 1;
         }
         mtrace('Cleaned up ' . $count . ' unused random questions.');

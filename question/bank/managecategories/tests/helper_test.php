@@ -64,9 +64,9 @@ class helper_test extends \advanced_testcase {
 
         // We added one random question to the quiz and we expect the quiz to have only one random question.
         $q2d = $DB->get_record_sql("SELECT q.*
-                                      FROM {question} q
-                                      JOIN {quiz_slots} s ON s.questionid = q.id
-                                     WHERE q.qtype = :qtype
+                                          FROM {question} q
+                                          JOIN {quiz_slots} s ON s.questionid = q.id
+                                         WHERE q.qtype = :qtype
                                            AND s.quizid = :quizid",
             ['qtype' => 'random', 'quizid' => $quiz->id], MUST_EXIST);
 
@@ -75,25 +75,45 @@ class helper_test extends \advanced_testcase {
         $q1b = $qgen->create_question('random', null, ['category' => $qcat1->id]);          // Will not be used.
         $q2c = $qgen->create_question('random', null, ['category' => $qcat2->id]);          // Will not be used.
 
-        $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat1->id]));
-        $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
+        $sql = "SELECT count(q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = ?";
+        $this->assertEquals(2, $DB->count_records_sql($sql, [$qcat1->id]));
+        $this->assertEquals(4, $DB->count_records_sql($sql, [$qcat2->id]));
 
         // Non-existing category, nothing will happen.
         helper::question_remove_stale_questions_from_category(0);
-        $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat1->id]));
-        $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
+        $sql = "SELECT count(q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = ?";
+        $this->assertEquals(2, $DB->count_records_sql($sql, [$qcat1->id]));
+        $this->assertEquals(4, $DB->count_records_sql($sql, [$qcat2->id]));
 
         // First category, should be empty afterwards.
         helper::question_remove_stale_questions_from_category($qcat1->id);
-        $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
-        $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
+        $sql = "SELECT count(q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = ?";
+        $this->assertEquals(0, $DB->count_records_sql($sql, [$qcat1->id]));
+        $this->assertEquals(4, $DB->count_records_sql($sql, [$qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1a->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q1b->id]));
 
         // Second category, used questions should be left untouched.
         helper::question_remove_stale_questions_from_category($qcat2->id);
-        $this->assertEquals(0, $DB->count_records('question', ['category' => $qcat1->id]));
-        $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat2->id]));
+        $sql = "SELECT count(q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid = ?";
+        $this->assertEquals(0, $DB->count_records_sql($sql, [$qcat1->id]));
+        $this->assertEquals(2, $DB->count_records_sql($sql, [$qcat2->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q2a->id]));
         $this->assertTrue($DB->record_exists('question', ['id' => $q2b->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q2c->id]));
