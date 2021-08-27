@@ -43,6 +43,7 @@ class preview_options_form extends moodleform {
         ];
 
         $mform->addElement('header', 'attemptoptionsheader', get_string('attemptoptions', 'question'));
+        $mform->setExpanded('attemptoptionsheader', false);
 
         $behaviours = question_engine::get_behaviour_options(
                 $this->_customdata['quba']->get_preferred_behaviour());
@@ -63,6 +64,7 @@ class preview_options_form extends moodleform {
                 get_string('restartwiththeseoptions', 'question'));
 
         $mform->addElement('header', 'displayoptionsheader', get_string('displayoptions', 'question'));
+        $mform->setExpanded('displayoptionsheader', false);
 
         $mform->addElement('select', 'correctness', get_string('whethercorrect', 'question'),
                 $hiddenorvisible);
