@@ -296,7 +296,8 @@ $previewdata['options'] = $optionsform->render();
 list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id);
 
 if (!empty($comment)) {
-    $previewdata['comments'] = $comment;
+    $previewdata['comments'] = print_collapsible_region($comment, '', 'commentcollapsable',
+        get_string('comments', 'qbank_previewquestion'), '', true, true);
 }
 
 if (!empty($extraelements)) {
