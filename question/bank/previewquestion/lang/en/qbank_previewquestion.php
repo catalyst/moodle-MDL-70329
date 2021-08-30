@@ -25,6 +25,8 @@
 
 $string['comments'] = 'Comments';
 $string['pluginname'] = 'Preview question bank feature';
+$string['previewoptions'] = 'Preview options';
 $string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+$string['questionversion'] = 'Question version';
 $string['versiontitle'] = 'Version {$a}';
 $string['versiontitlelatest'] = 'Version {$a} (latest)';

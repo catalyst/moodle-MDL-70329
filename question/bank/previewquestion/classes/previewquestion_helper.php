@@ -22,7 +22,9 @@ require_once($CFG->dirroot . '/question/editlib.php');
 
 use action_menu;
 use action_menu_link;
+use comment;
 use context;
+use core\plugininfo\qbank;
 use core_question\local\bank\edit_menu_column;
 use core_question\local\bank\view;
 use moodle_url;
@@ -240,7 +242,7 @@ class previewquestion_helper {
      * @param int $courseid
      * @return array
      */
-    public static function get_preview_extra_elements(\question_definition $question, int $courseid): array {
+    public static function get_preview_extra_elements(\question_definition $question, int $courseid, object $context): array {
         $plugintype = 'qbank';
         $functionname = 'preview_display';
         $extrahtml = [];
@@ -249,7 +251,7 @@ class previewquestion_helper {
         foreach ($plugins as $componentname => $plugin) {
             $pluginhtml = component_callback($componentname, $functionname, [$question, $courseid]);
             if ($componentname === 'qbank_comment') {
-                $comment = $this->preview_comment();
+                $comment = self::preview_comment($question->id, $context);
                 continue;
             }
             $extrahtml[] = $pluginhtml;
@@ -306,25 +308,36 @@ class previewquestion_helper {
         return $menu;
     }
 
-    public function preview_comment() : string {
+    public static function preview_comment($questionid, $context) : string {
         global $CFG, $PAGE;
-        if (question_has_capability_on($question, 'comment') && $CFG->usecomments
-                && core\plugininfo\qbank::is_plugin_enabled('qbank_comment')) {
-            \comment::init($PAGE);
+
+        if (question_has_capability_on($questionid, 'use')
+            && qbank::is_plugin_enabled('qbank_comment')) {
+            comment::init($PAGE);
             $args = new stdClass;
-            $args->contextid = 1; // Static data to bypass comment sql as context is not needed.
-            $args->courseid  = $courseid;
-            $args->area      = 'core_question';
-            $args->itemid    = $question->id;
+            $args->context = $context;
             $args->component = 'qbank_comment';
             $args->notoggle  = false;
-            $args->autostart = true;
-            $args->displaycancel = false;
-            $args->linktext = get_string('commentheader', 'qbank_comment');
-            $comment = new \comment($args);
+            $args->area = 'core_question';
+            $comment = new comment($args);
             $comment->set_view_permission(true);
             $comment->set_fullwidth();
             return $comment->output();
         }
+    }
+
+    public static function load_versions($questionbankentryid) : array {
+        global $DB;
+
+        $questionids = [];
+        $sql = 'SELECT version, questionid 
+                  FROM {question_versions} 
+                 WHERE questionbankentryid = ?';
+
+        $versions = $DB->get_records_sql($sql, [$questionbankentryid]);
+        foreach ($versions as $key => $version) {
+            $questionids[$version->questionid] = $key;
+        }
+        return $questionids;
     }
 }

@@ -42,9 +42,12 @@ class preview_options_form extends moodleform {
                 question_display_options::VISIBLE => get_string('shown', 'question'),
         ];
 
-        $mform->addElement('header', 'attemptoptionsheader', get_string('attemptoptions', 'question'));
+        $mform->addElement('header', 'attemptoptionsheader', get_string('previewoptions', 'qbank_previewquestion'));
         $mform->setExpanded('attemptoptionsheader', false);
-
+        $versions = $this->_customdata['versions'];
+        $currentquestionid = $this->_customdata['questionid'];
+        $select = $mform->addElement('select', 'version', get_string('questionversion', 'qbank_previewquestion'), $versions);
+        $select->setSelected($currentquestionid);
         $behaviours = question_engine::get_behaviour_options(
                 $this->_customdata['quba']->get_preferred_behaviour());
         $mform->addElement('select', 'behaviour',

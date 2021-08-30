@@ -132,9 +132,10 @@ $options->behaviour = $quba->get_preferred_behaviour();
 $options->maxmark = $quba->get_question_max_mark($slot);
 
 // Create the settings form, and initialise the fields.
+$versionids = previewquestion_helper::load_versions($question->questionbankentryid);
 $optionsform = new preview_options_form(previewquestion_helper::
 question_preview_form_url($question->id, $context, $previewid, $returnurl),
-        ['quba' => $quba, 'maxvariant' => $maxvariant]);
+        ['quba' => $quba, 'maxvariant' => $maxvariant, 'versions' => $versionids, 'questionid' => $id]);
 $optionsform->set_data($options);
 
 // Process change of settings, if that was requested.
@@ -145,7 +146,7 @@ if ($newoptions = $optionsform->get_submitted_data()) {
         $newoptions->variant = $options->variant;
     }
     if (isset($newoptions->saverestart)) {
-        previewquestion_helper::restart_preview($previewid, $question->id, $newoptions, $context, $returnurl);
+        previewquestion_helper::restart_preview($previewid, $newoptions->version, $newoptions, $context, $returnurl);
     }
 }
 
@@ -275,34 +276,12 @@ foreach ($technical as $info) {
 }
 $previewdata['techinfo'] .= print_collapsible_region_end(true);
 
-// Output a link to export this single question.
-if (question_has_capability_on($question, 'view')) {
-    if (class_exists('qbank_exporttoxml\\exporttoxml_helper')) {
-        if (\core\plugininfo\qbank::is_plugin_enabled('qbank_exporttoxml')) {
-            $exportfunction = '\\qbank_exporttoxml\\exporttoxml_helper::question_get_export_single_question_url';
-            $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
-                    get_string('exportonequestion', 'question'));
-        }
-    } else {
-        $exportfunction = 'question_get_export_single_question_url';
-        $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
-                get_string('exportonequestion', 'question'));
-    }
-}
-
 // Display the settings form.
 $previewdata['options'] = $optionsform->render();
 
-list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id);
+list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id, $context);
 
 if (!empty($comment)) {
-    // comment::init();
-    // $options = new stdClass();
-    // $options->context = $context;
-    // $options->component = 'qbank_previewquestion';
-    // $options->notoggle = 'false';
-    // $commentapi = new comment($options);
-    //$commentapi->set_component('qbank_previewquestion');
     $previewdata['comments'] = $comment;
 }
 
