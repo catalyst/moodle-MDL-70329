@@ -557,7 +557,7 @@ class problem_000015 extends problem_base {
     }
     function solution() {
         global $CFG;
-        return '<p>You need to delete the enpty categories.</p><pre>
+        return '<p>You need to delete the empty categories.</p><pre>
         </pre><p>Any remaining categories that contain questions will require more thought. ' .
         'People in the <a href="http://moodle.org/mod/forum/view.php?f=121">Quiz forum</a> may be able to help.</p>';
     }
