@@ -296,8 +296,14 @@ $previewdata['options'] = $optionsform->render();
 list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id);
 
 if (!empty($comment)) {
-    $previewdata['comments'] = print_collapsible_region($comment, '', 'commentcollapsable',
-        get_string('comments', 'qbank_previewquestion'), '', true, true);
+    // comment::init();
+    // $options = new stdClass();
+    // $options->context = $context;
+    // $options->component = 'qbank_previewquestion';
+    // $options->notoggle = 'false';
+    // $commentapi = new comment($options);
+    //$commentapi->set_component('qbank_previewquestion');
+    $previewdata['comments'] = $comment;
 }
 
 if (!empty($extraelements)) {

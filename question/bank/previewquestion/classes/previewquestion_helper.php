@@ -249,7 +249,7 @@ class previewquestion_helper {
         foreach ($plugins as $componentname => $plugin) {
             $pluginhtml = component_callback($componentname, $functionname, [$question, $courseid]);
             if ($componentname === 'qbank_comment') {
-                $comment = $pluginhtml;
+                $comment = $this->preview_comment();
                 continue;
             }
             $extrahtml[] = $pluginhtml;
@@ -304,5 +304,27 @@ class previewquestion_helper {
 
         $menu = $OUTPUT->render($menu);
         return $menu;
+    }
+
+    public function preview_comment() : string {
+        global $CFG, $PAGE;
+        if (question_has_capability_on($question, 'comment') && $CFG->usecomments
+                && core\plugininfo\qbank::is_plugin_enabled('qbank_comment')) {
+            \comment::init($PAGE);
+            $args = new stdClass;
+            $args->contextid = 1; // Static data to bypass comment sql as context is not needed.
+            $args->courseid  = $courseid;
+            $args->area      = 'core_question';
+            $args->itemid    = $question->id;
+            $args->component = 'qbank_comment';
+            $args->notoggle  = false;
+            $args->autostart = true;
+            $args->displaycancel = false;
+            $args->linktext = get_string('commentheader', 'qbank_comment');
+            $comment = new \comment($args);
+            $comment->set_view_permission(true);
+            $comment->set_fullwidth();
+            return $comment->output();
+        }
     }
 }
