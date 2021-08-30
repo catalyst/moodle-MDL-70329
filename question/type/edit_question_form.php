@@ -174,8 +174,8 @@ abstract class question_edit_form extends question_wizard_form {
             $currentgrp[0] = $mform->createElement('questioncategory', 'category',
                     get_string('categorycurrent', 'question'),
                     array('contexts' => array($this->categorycontext)));
-            if ($this->question->formoptions->canedit ||
-                    $this->question->formoptions->cansaveasnew) {
+            if (($this->question->formoptions->canedit ||
+                    $this->question->formoptions->cansaveasnew) && ($this->question->beingcopied)) {
                 // Not move only form.
                 $currentgrp[1] = $mform->createElement('checkbox', 'usecurrentcat', '',
                         get_string('categorycurrentuse', 'question'));
@@ -186,13 +186,15 @@ abstract class question_edit_form extends question_wizard_form {
             $mform->addGroup($currentgrp, 'currentgrp',
                     get_string('categorycurrent', 'question'), null, false);
 
-            $mform->addElement('questioncategory', 'categorymoveto',
+            if (($this->question->beingcopied)) {
+                $mform->addElement('questioncategory', 'categorymoveto',
                     get_string('categorymoveto', 'question'),
                     array('contexts' => array($this->categorycontext)));
-            if ($this->question->formoptions->canedit ||
+                if ($this->question->formoptions->canedit ||
                     $this->question->formoptions->cansaveasnew) {
-                // Not move only form.
-                $mform->disabledIf('categorymoveto', 'usecurrentcat', 'checked');
+                    // Not move only form.
+                    $mform->disabledIf('categorymoveto', 'usecurrentcat', 'checked');
+                }
             }
         }
 
