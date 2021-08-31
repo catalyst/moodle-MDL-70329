@@ -21,14 +21,14 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/question/editlib.php');
 
 use action_menu;
-use action_menu_link;
 use comment;
+use context_module;
 use context;
 use core\plugininfo\qbank;
 use core_question\local\bank\edit_menu_column;
 use core_question\local\bank\view;
 use moodle_url;
-use pix_icon;
+use question_definition;
 use question_display_options;
 use question_engine;
 use stdClass;
@@ -238,11 +238,12 @@ class previewquestion_helper {
     /**
      * Get the extra elements for preview from qbank plugins.
      *
-     * @param \question_definition $question
-     * @param int $courseid
+     * @param  question_definition $question
+    *  @param  int $courseid
+     * @param  context_module $context Context informations.
      * @return array
      */
-    public static function get_preview_extra_elements(\question_definition $question, int $courseid, object $context): array {
+    public static function get_preview_extra_elements(question_definition $question, int $courseid, context_module $context): array {
         $plugintype = 'qbank';
         $functionname = 'preview_display';
         $extrahtml = [];
@@ -266,7 +267,7 @@ class previewquestion_helper {
      * @param string $questionbankentryid Entry to check against.
      * @return bool
      */
-    public static function is_latest($version, $questionbankentryid) : bool {
+    public static function is_latest(string $version, string $questionbankentryid) : bool {
         global $DB;
 
         $sql = 'SELECT MAX(version)
@@ -280,10 +281,10 @@ class previewquestion_helper {
     /**
      * Renders question preview cog wheel menu.
      *
-     * @param question_with_responses $question Question informations.
+     * @param  object $question Question informations.
      * @return string $menu Cog wheel menu to render.
      */
-    public function display_edit_menu($question) : string {
+    public function display_edit_menu(object $question) : string {
         global $OUTPUT, $COURSE;
 
         list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
@@ -315,7 +316,7 @@ class previewquestion_helper {
      * @param  context_module $context Context informations.
      * @return string Html string representing comment section.
      */
-    public static function preview_comment($questionid, $context) : string {
+    public static function preview_comment(string $questionid, context_module $context) : string {
         global $PAGE;
 
         if (question_has_capability_on($questionid, 'use')
@@ -339,7 +340,7 @@ class previewquestion_helper {
      * @param  string $questionbankentryid Question bank entry id.
      * @return array  $questionids Array containing question id as key and version as value.
      */
-    public static function load_versions($questionbankentryid) : array {
+    public static function load_versions(string $questionbankentryid) : array {
         global $DB;
 
         $questionids = [];
