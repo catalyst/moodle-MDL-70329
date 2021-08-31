@@ -308,8 +308,15 @@ class previewquestion_helper {
         return $menu;
     }
 
+    /**
+     * Renders question comments for the question preview.
+     *
+     * @param  string $questionid Question id.
+     * @param  context_module $context Context informations.
+     * @return string Html string representing comment section.
+     */
     public static function preview_comment($questionid, $context) : string {
-        global $CFG, $PAGE;
+        global $PAGE;
 
         if (question_has_capability_on($questionid, 'use')
             && qbank::is_plugin_enabled('qbank_comment')) {
@@ -326,12 +333,18 @@ class previewquestion_helper {
         }
     }
 
+    /**
+     * Loads question version ids for current question.
+     *
+     * @param  string $questionbankentryid Question bank entry id.
+     * @return array  $questionids Array containing question id as key and version as value.
+     */
     public static function load_versions($questionbankentryid) : array {
         global $DB;
 
         $questionids = [];
-        $sql = 'SELECT version, questionid 
-                  FROM {question_versions} 
+        $sql = 'SELECT version, questionid
+                  FROM {question_versions}
                  WHERE questionbankentryid = ?';
 
         $versions = $DB->get_records_sql($sql, [$questionbankentryid]);
