@@ -14,19 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Plugin entrypoint for navigation.
- *
- * @package    qbank_managecategories
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories;
 
 /**
  * Class navigation.
+ *
+ * Plugin entrypoint for navigation.
  *
  * @package    qbank_managecategories
  * @copyright  2021 Catalyst IT Australia Pty Ltd

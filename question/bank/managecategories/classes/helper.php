@@ -14,17 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Library functions used by qbank_managecategories.
- *
- * This code is based on lib/questionlib.php by Martin Dougiamas.
- *
- * @package    qbank_managecategories
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories;
 
 use context;
@@ -34,6 +23,13 @@ use html_writer;
 /**
  * Class helper contains all the library functions.
  *
+ * Library functions used by qbank_managecategories.
+ * This code is based on lib/questionlib.php by Martin Dougiamas.
+ *
+ * @package    qbank_managecategories
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
 
