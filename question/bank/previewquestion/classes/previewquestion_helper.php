@@ -155,7 +155,7 @@ class previewquestion_helper {
      * @param object $context
      * @param moodle_url $returnurl
      */
-    public static function restart_preview($previewid, $questionid, $displayoptions, $context, $returnurl = null): void {
+    public static function restart_preview($previewid, $questionid, $displayoptions, $context, $returnurl = null, $version = null): void {
         global $DB;
 
         if ($previewid) {
@@ -164,7 +164,7 @@ class previewquestion_helper {
             $transaction->allow_commit();
         }
         redirect(self::question_preview_url($questionid, $displayoptions->behaviour,
-                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context, $returnurl));
+                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context, $returnurl, $version));
     }
 
     /**
@@ -181,10 +181,13 @@ class previewquestion_helper {
      * @return moodle_url the URL.
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
-            $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null): moodle_url {
+            $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null, $version = null): moodle_url {
 
         $params = ['id' => $questionid];
 
+        if (!is_null($version)) {
+            $params['version'] = $version;
+        }
         if (is_null($context)) {
             global $PAGE;
             $context = $PAGE->context;
@@ -239,11 +242,10 @@ class previewquestion_helper {
      * Get the extra elements for preview from qbank plugins.
      *
      * @param  question_definition $question
-    *  @param  int $courseid
-     * @param  context_module $context Context informations.
+     * @param  int $courseid
      * @return array
      */
-    public static function get_preview_extra_elements(question_definition $question, int $courseid, context_module $context): array {
+    public static function get_preview_extra_elements(question_definition $question, int $courseid): array {
         $plugintype = 'qbank';
         $functionname = 'preview_display';
         $extrahtml = [];
@@ -253,7 +255,7 @@ class previewquestion_helper {
             if (!($componentname === 'qbank_comment')) {
                 $pluginhtml = component_callback($componentname, $functionname, [$question, $courseid]);
             } else {
-                $comment = self::preview_comment($question->id, $context);
+                $comment = self::preview_comment($question->id);
                 continue;
             }
             $extrahtml[] = $pluginhtml;

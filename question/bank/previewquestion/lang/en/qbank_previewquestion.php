@@ -23,10 +23,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['comments'] = 'Comments';
 $string['pluginname'] = 'Preview question bank feature';
-$string['previewoptions'] = 'Preview options';
 $string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+// Form string(s).
+$string['previewoptions'] = 'Preview options';
 $string['questionversion'] = 'Question version';
+// Preview title.
 $string['versiontitle'] = 'Version {$a}';
 $string['versiontitlelatest'] = 'Version {$a} (latest)';

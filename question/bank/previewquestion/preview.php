@@ -47,8 +47,13 @@ define('QUESTION_PREVIEW_MAX_VARIANTS', 100);
 
 // Get and validate question id.
 $id = required_param('id', PARAM_INT);
+$version = optional_param('version', null, PARAM_INT);
 $returnurl = optional_param('returnurl', null, PARAM_RAW);
-$question = question_bank::load_question($id);
+if ($version) {
+    $question = question_bank::load_question($version);
+} else {
+    $question = question_bank::load_question($id);
+}
 
 if ($returnurl) {
     $returnurl = new moodle_url($returnurl);
@@ -133,9 +138,10 @@ $options->maxmark = $quba->get_question_max_mark($slot);
 
 // Create the settings form, and initialise the fields.
 $versionids = previewquestion_helper::load_versions($question->questionbankentryid);
+$version = is_null($version) ? $question->id : $version;
 $optionsform = new preview_options_form(previewquestion_helper::
 question_preview_form_url($question->id, $context, $previewid, $returnurl),
-        ['quba' => $quba, 'maxvariant' => $maxvariant, 'versions' => $versionids, 'questionid' => $id]);
+        ['quba' => $quba, 'maxvariant' => $maxvariant, 'versions' => $versionids, 'questionversion' => $version]);
 $optionsform->set_data($options);
 
 // Process change of settings, if that was requested.
@@ -146,7 +152,7 @@ if ($newoptions = $optionsform->get_submitted_data()) {
         $newoptions->variant = $options->variant;
     }
     if (isset($newoptions->saverestart)) {
-        previewquestion_helper::restart_preview($previewid, $newoptions->version, $newoptions, $context, $returnurl);
+        previewquestion_helper::restart_preview($previewid, $question->id, $newoptions, $context, $returnurl, $newoptions->version);
     }
 }
 
@@ -276,10 +282,25 @@ foreach ($technical as $info) {
 }
 $previewdata['techinfo'] .= print_collapsible_region_end(true);
 
+// Output a link to export this single question.
+if (question_has_capability_on($question, 'view')) {
+    if (class_exists('qbank_exporttoxml\\exporttoxml_helper')) {
+        if (\core\plugininfo\qbank::is_plugin_enabled('qbank_exporttoxml')) {
+            $exportfunction = '\\qbank_exporttoxml\\exporttoxml_helper::question_get_export_single_question_url';
+            $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
+                    get_string('exportonequestion', 'question'));
+        }
+    } else {
+        $exportfunction = 'question_get_export_single_question_url';
+        $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
+                get_string('exportonequestion', 'question'));
+    }
+}
+
 // Display the settings form.
 $previewdata['options'] = $optionsform->render();
 
-list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id, $context);
+list($comment, $extraelements) = previewquestion_helper::get_preview_extra_elements($question, $COURSE->id);
 
 if (!empty($comment)) {
     $previewdata['comments'] = $comment;
