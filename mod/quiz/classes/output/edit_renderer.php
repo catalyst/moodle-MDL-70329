@@ -767,6 +767,9 @@ class edit_renderer extends \plugin_renderer_base {
         // Closing the tag which contains everything but edit icons. Content part of the module should not be part of this.
         $output .= html_writer::end_tag('div'); // .activityinstance.
 
+        // TODO: Convert to mustache.
+        $output.= html_writer::select([1,2], 'versions', '', '', ['id' => 'version-' . $structure->get_slot_id_for_slot($slot)]);
+
         // Action icons.
         $questionicons = '';
         $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot));
@@ -783,6 +786,7 @@ class edit_renderer extends \plugin_renderer_base {
         $output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
 
+        $this->page->requires->js_call_amd('mod_quiz/main', 'init', [$structure->get_slot_id_for_slot($slot)]);
         return $output;
     }
 

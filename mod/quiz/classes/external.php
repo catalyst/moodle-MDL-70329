@@ -2010,4 +2010,53 @@ class mod_quiz_external extends external_api {
         );
     }
 
+    /**
+     * Parameters for the get_question_slot method.
+     *
+     * @return \external_function_parameters
+     */
+    public static function get_question_slot_parameters(): external_function_parameters {
+        return new external_function_parameters (
+            [
+                'slotid' => new external_value(PARAM_INT, 'quiz instance id')
+            ]
+        );
+    }
+
+    /**
+     * Get the questions slot parameters to display the question template.
+     *
+     * @param int $slotid Slot id to display.
+     * @return array
+     * @throws invalid_parameter_exception
+     */
+    public static function get_question_slot(int $slotid): array {
+        $params = array(
+            'slotid' => $slotid
+        );
+        $params = self::validate_parameters(self::get_question_slot_parameters(), $params);
+
+        list($quiz, $course, $cm, $context) = self::validate_quiz(1);
+        $quizobj = new quiz($quiz, $cm, $course);
+        $structure = $quizobj->get_structure();
+
+        //$result['html'] = $structure->get_displayed_number_for_slot($slotid);
+        $result['html'] = $slotid;
+
+        return $result;
+    }
+
+    /**
+     * Define the get_question_slot method webservice response.
+     *
+     * @return external_description
+     */
+    public static function get_question_slot_returns() {
+        return new external_single_structure(
+            [
+                'html' => new external_value(PARAM_TEXT, 'Whether the user can do the quiz or not.')
+            ]
+        );
+    }
+
 }
