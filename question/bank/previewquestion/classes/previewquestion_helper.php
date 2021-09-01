@@ -250,8 +250,9 @@ class previewquestion_helper {
         $comment = '';
         $plugins = get_plugin_list_with_function($plugintype, $functionname);
         foreach ($plugins as $componentname => $plugin) {
-            $pluginhtml = component_callback($componentname, $functionname, [$question, $courseid]);
-            if ($componentname === 'qbank_comment') {
+            if (!($componentname === 'qbank_comment')) {
+                $pluginhtml = component_callback($componentname, $functionname, [$question, $courseid]);
+            } else {
                 $comment = self::preview_comment($question->id, $context);
                 continue;
             }
@@ -313,19 +314,20 @@ class previewquestion_helper {
      * Renders question comments for the question preview.
      *
      * @param  string $questionid Question id.
-     * @param  context_module $context Context informations.
      * @return string Html string representing comment section.
      */
-    public static function preview_comment(string $questionid, context_module $context) : string {
+    public static function preview_comment(string $questionid) : string {
         global $PAGE;
 
         if (question_has_capability_on($questionid, 'use')
             && qbank::is_plugin_enabled('qbank_comment')) {
             comment::init($PAGE);
             $args = new stdClass;
-            $args->context = $context;
+            $args->contextid = 1;
+            $args->itemid = $questionid;
             $args->component = 'qbank_comment';
             $args->notoggle  = false;
+            $args->autostart = false;
             $args->area = 'core_question';
             $comment = new comment($args);
             $comment->set_view_permission(true);
