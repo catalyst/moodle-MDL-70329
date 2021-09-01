@@ -14,17 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Library functions used by qbank_managecategories.
- *
- * This code is based on lib/questionlib.php by Martin Dougiamas.
- *
- * @package    qbank_managecategories
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories;
 
 use context;
@@ -34,6 +23,13 @@ use html_writer;
 /**
  * Class helper contains all the library functions.
  *
+ * Library functions used by qbank_managecategories.
+ * This code is based on lib/questionlib.php by Martin Dougiamas.
+ *
+ * @package    qbank_managecategories
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
 
@@ -98,7 +94,7 @@ class helper {
      * @return bool
      * @throws \dml_exception
      */
-    protected static function question_is_top_category(int $categoryid): bool {
+    public static function question_is_top_category(int $categoryid): bool {
         global $DB;
         return 0 == $DB->get_field('question_categories', 'parent', ['id' => $categoryid]);
     }
@@ -123,7 +119,7 @@ class helper {
     }
 
     /**
-     * Private method, only for the use of add_indented_names().
+     * Only for the use of add_indented_names().
      *
      * Recursively adds an indentedname field to each category, starting with the category
      * with id $id, and dealing with that category and all its children, and
@@ -137,7 +133,7 @@ class helper {
      * @param int $nochildrenof
      * @return array a new array of categories, in the right order for the tree.
      */
-    protected static function flatten_category_tree(array &$categories, $id, int $depth = 0, int $nochildrenof = -1): array {
+    public static function flatten_category_tree(array &$categories, $id, int $depth = 0, int $nochildrenof = -1): array {
 
         // Indent the name of this category.
         $newcategories = [];
@@ -166,7 +162,7 @@ class helper {
      * @param int $nochildrenof
      * @return array The formatted list of categories.
      */
-    protected static function add_indented_names(array $categories, int $nochildrenof = -1): array {
+    public static function add_indented_names(array $categories, int $nochildrenof = -1): array {
 
         // Add an array to each category to hold the child category ids. This array
         // will be removed again by flatten_category_tree(). It should not be used
@@ -345,7 +341,7 @@ class helper {
      * @param array $categories The list of categories.
      * @return array
      */
-    protected static function question_add_context_in_key(array $categories): array {
+    public static function question_add_context_in_key(array $categories): array {
         $newcatarray = [];
         foreach ($categories as $id => $category) {
             $category->parent = "$category->parent,$category->contextid";
@@ -363,7 +359,7 @@ class helper {
      * @return array The same question category list given to the function, with the top category names being translated.
      * @throws \coding_exception
      */
-    protected static function question_fix_top_names(array $categories, bool $escape = true): array {
+    public static function question_fix_top_names(array $categories, bool $escape = true): array {
 
         foreach ($categories as $id => $category) {
             if ($category->parent == 0) {

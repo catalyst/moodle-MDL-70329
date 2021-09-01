@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Form for moving questions between categories.
- *
- * @package    qbank_managecategories
- * @copyright  2008 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories\form;
 
 use moodleform;
@@ -34,6 +26,7 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * Form for moving questions between categories.
  *
+ * @package    qbank_managecategories
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -14,17 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for helper class.
- *
- * @package    qbank_managecategories
- * @copyright  2006 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories;
-
-defined('MOODLE_INTERNAL') || die();
 
 use context_system;
 
@@ -38,42 +28,71 @@ use context_system;
  */
 class helper_test extends \advanced_testcase {
 
+    /**
+     * @var \context_module module context.
+     */
+    protected $context;
+
+    /**
+     * @var \stdClass course object.
+     */
+    protected $course;
+
+    /**
+     * @var \component_generator_base question generator.
+     */
+    protected $qgenerator;
+
+    /**
+     * @var \stdClass quiz object.
+     */
+    protected $quiz;
+
+    /**
+     * Tests initial setup.
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        self::setAdminUser();
+        $this->resetAfterTest();
+
+        $datagenerator = $this->getDataGenerator();
+        $this->course = $datagenerator->create_course();
+        $this->quiz = $datagenerator->create_module('quiz', ['course' => $this->course->id]);
+        $this->qgenerator = $datagenerator->get_plugin_generator('core_question');
+        $this->context = \context_module::instance($this->quiz->cmid);
+    }
+
+    /**
+     * Test question_remove_stale_questions_from_category function.
+     */
     public function test_question_remove_stale_questions_from_category() {
         global $DB;
-        $this->resetAfterTest(true);
-        $this->setAdminUser();
 
-        $dg = $this->getDataGenerator();
-        $course = $dg->create_course();
-        $quiz = $dg->create_module('quiz', ['course' => $course->id]);
-
-        $qgen = $dg->get_plugin_generator('core_question');
-        $context = context_system::instance();
-
-        $qcat1 = $qgen->create_question_category(['contextid' => $context->id]);
-        $q1a = $qgen->create_question('shortanswer', null, ['category' => $qcat1->id]);     // Will be hidden.
+        $qcat1 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+        $q1a = $this->qgenerator->create_question('shortanswer', null, ['category' => $qcat1->id]);     // Will be hidden.
         $DB->set_field('question', 'hidden', 1, ['id' => $q1a->id]);
 
-        $qcat2 = $qgen->create_question_category(['contextid' => $context->id]);
-        $q2a = $qgen->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden.
-        $q2b = $qgen->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden but used.
+        $qcat2 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+        $q2a = $this->qgenerator->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden.
+        $q2b = $this->qgenerator->create_question('shortanswer', null, ['category' => $qcat2->id]);     // Will be hidden but used.
         $DB->set_field('question', 'hidden', 1, ['id' => $q2a->id]);
         $DB->set_field('question', 'hidden', 1, ['id' => $q2b->id]);
-        quiz_add_quiz_question($q2b->id, $quiz);
-        quiz_add_random_questions($quiz, 0, $qcat2->id, 1, false);
+        quiz_add_quiz_question($q2b->id, $this->quiz);
+        quiz_add_random_questions($this->quiz, 0, $qcat2->id, 1, false);
 
         // We added one random question to the quiz and we expect the quiz to have only one random question.
         $q2d = $DB->get_record_sql("SELECT q.*
-                                      FROM {question} q
-                                      JOIN {quiz_slots} s ON s.questionid = q.id
-                                     WHERE q.qtype = :qtype
+                                          FROM {question} q
+                                          JOIN {quiz_slots} s ON s.questionid = q.id
+                                         WHERE q.qtype = :qtype
                                            AND s.quizid = :quizid",
-            ['qtype' => 'random', 'quizid' => $quiz->id], MUST_EXIST);
+            ['qtype' => 'random', 'quizid' => $this->quiz->id], MUST_EXIST);
 
         // The following 2 lines have to be after the quiz_add_random_questions() call above.
         // Otherwise, quiz_add_random_questions() will to be "smart" and use them instead of creating a new "random" question.
-        $q1b = $qgen->create_question('random', null, ['category' => $qcat1->id]);          // Will not be used.
-        $q2c = $qgen->create_question('random', null, ['category' => $qcat2->id]);          // Will not be used.
+        $q1b = $this->qgenerator->create_question('random', null, ['category' => $qcat1->id]);          // Will not be used.
+        $q2c = $this->qgenerator->create_question('random', null, ['category' => $qcat2->id]);          // Will not be used.
 
         $this->assertEquals(2, $DB->count_records('question', ['category' => $qcat1->id]));
         $this->assertEquals(4, $DB->count_records('question', ['category' => $qcat2->id]));
@@ -98,5 +117,68 @@ class helper_test extends \advanced_testcase {
         $this->assertTrue($DB->record_exists('question', ['id' => $q2b->id]));
         $this->assertFalse($DB->record_exists('question', ['id' => $q2c->id]));
         $this->assertTrue($DB->record_exists('question', ['id' => $q2d->id]));
+    }
+
+    /**
+     * Test delete top category in function question_can_delete_cat.
+     */
+    public function test_question_can_delete_cat_top_category() {
+
+        $qcategory1 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+
+        // Try to delete a top category.
+        $categorytop = question_get_top_category($qcategory1->id, true)->id;
+        $this->expectException('moodle_exception');
+        $this->expectExceptionMessage(get_string('cannotdeletetopcat', 'question'));
+        helper::question_can_delete_cat($categorytop);
+    }
+
+    /**
+     * Test delete only child category in function question_can_delete_cat.
+     */
+    public function test_question_can_delete_cat_child_category() {
+
+        $qcategory1 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+
+        // Try to delete an only child of top category having also at least one child.
+        $this->expectException('moodle_exception');
+        $this->expectExceptionMessage(get_string('cannotdeletecate', 'question'));
+        helper::question_can_delete_cat($qcategory1->id);
+    }
+
+    /**
+     * Test delete only child category in function question_can_delete_cat.
+     */
+    public function test_question_can_delete_cat_capability() {
+
+        $qcategory1 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+        $qcategory2 = $this->qgenerator->create_question_category(['contextid' => $this->context->id, 'parent' => $qcategory1->id]);
+
+        // This call should not throw an exception as admin user has the capabilities moodle/question:managecategory.
+        helper::question_can_delete_cat($qcategory2->id);
+
+        // Try to delete a category with and user without the capability.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->expectException(\required_capability_exception::class);
+        $this->expectExceptionMessage(get_string('nopermissions', 'error', get_string('question:managecategory', 'role')));
+        helper::question_can_delete_cat($qcategory2->id);
+    }
+
+    /**
+     * Test question_category_select_menu function.
+     */
+    public function test_question_category_select_menu() {
+
+        $contexts = new \question_edit_contexts($this->context);
+
+        ob_start();
+        helper::question_category_select_menu($contexts->having_cap('moodle/question:add'));
+        $output = ob_get_clean();
+
+        // Test the select menu of question categories output.
+        $this->assertStringContainsString('Question category', $output);
+        $this->assertStringContainsString('<option selected="selected" value="">choosedots</option>', $output);
     }
 }

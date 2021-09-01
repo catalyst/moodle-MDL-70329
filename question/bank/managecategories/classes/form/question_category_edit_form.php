@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Defines the form for editing question categories.
- *
- * @package    qbank_managecategories
- * @copyright  2007 Jamie Pratt me@jamiep.org
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories\form;
 
 use moodleform;
@@ -33,8 +25,11 @@ require_once($CFG->libdir.'/formslib.php');
 
 
 /**
- * Form for editing qusetions categories (name, description, etc.)
+ * Defines the form for editing question categories.
  *
+ * Form for editing questions categories (name, description, etc.)
+ *
+ * @package    qbank_managecategories
  * @copyright  2007 Jamie Pratt me@jamiep.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -23,5 +23,5 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Manage question bank categories feature';
-$string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
+$string['pluginname'] = 'Manage categories';
+$string['privacy:metadata'] = 'The Manage Categories plugin does not store any user data.';
