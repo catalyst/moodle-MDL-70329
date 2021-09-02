@@ -457,7 +457,7 @@ class question_type {
                 $questionbankentry = get_question_bank_entry($question->oldid);
             }
         }
-        //var_dump($form);die;
+
         // Always creates a new question and version record.
         // Set the unique code.
         $question->stamp = make_unique_id_code();
@@ -471,7 +471,6 @@ class question_type {
             $newquestion = false;
         }
 
-        //var_dump($form);die;
         // Create a new version, bank_entry and reference for each question.
         save_question_versions($question, $form, $context, $questionbankentry, $newquestion);
 
