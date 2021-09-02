@@ -275,8 +275,11 @@ class core_questionlib_testcase extends advanced_testcase {
                 array(context_course::instance($course2->id)->id), '*', MUST_EXIST);
 
         // Check that there are two questions in the restored to course's context.
-        $this->assertEquals(2, $DB->count_records('question', array('category' => $restoredcategory->id)));
-
+        $this->assertEquals(2, $DB->count_records_sql('SELECT q.id
+                                                                     FROM {question} q
+                                                                     JOIN {question_versions} qv ON qv.questionid = q.identity
+                                                                     JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                                                    WHERE qbe.categoryid = ?', [$restoredcategory->id]));
         $rc->destroy();
     }
 
