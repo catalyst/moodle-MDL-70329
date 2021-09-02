@@ -16,8 +16,6 @@
 
 namespace qbank_managecategories;
 
-use context_system;
-
 /**
  * Unit tests for helper class.
  *
@@ -25,6 +23,7 @@ use context_system;
  * @copyright  2006 The Open University
  * @author     2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass \qbank_managecategories\helper
  */
 class helper_test extends \advanced_testcase {
 
@@ -65,6 +64,8 @@ class helper_test extends \advanced_testcase {
 
     /**
      * Test question_remove_stale_questions_from_category function.
+     *
+     * @covers ::question_remove_stale_questions_from_category
      */
     public function test_question_remove_stale_questions_from_category() {
         global $DB;
@@ -83,9 +84,9 @@ class helper_test extends \advanced_testcase {
 
         // We added one random question to the quiz and we expect the quiz to have only one random question.
         $q2d = $DB->get_record_sql("SELECT q.*
-                                          FROM {question} q
-                                          JOIN {quiz_slots} s ON s.questionid = q.id
-                                         WHERE q.qtype = :qtype
+                                      FROM {question} q
+                                      JOIN {quiz_slots} s ON s.questionid = q.id
+                                     WHERE q.qtype = :qtype
                                            AND s.quizid = :quizid",
             ['qtype' => 'random', 'quizid' => $this->quiz->id], MUST_EXIST);
 
@@ -121,6 +122,9 @@ class helper_test extends \advanced_testcase {
 
     /**
      * Test delete top category in function question_can_delete_cat.
+     *
+     * @covers ::question_can_delete_cat
+     * @covers ::question_is_top_category
      */
     public function test_question_can_delete_cat_top_category() {
 
@@ -135,6 +139,9 @@ class helper_test extends \advanced_testcase {
 
     /**
      * Test delete only child category in function question_can_delete_cat.
+     *
+     * @covers ::question_can_delete_cat
+     * @covers ::question_is_only_child_of_top_category_in_context
      */
     public function test_question_can_delete_cat_child_category() {
 
@@ -147,7 +154,9 @@ class helper_test extends \advanced_testcase {
     }
 
     /**
-     * Test delete only child category in function question_can_delete_cat.
+     * Test delete category in function question_can_delete_cat without capabilities.
+     *
+     * @covers ::question_can_delete_cat
      */
     public function test_question_can_delete_cat_capability() {
 
@@ -168,9 +177,13 @@ class helper_test extends \advanced_testcase {
 
     /**
      * Test question_category_select_menu function.
+     *
+     * @covers ::question_category_select_menu
+     * @covers ::question_category_options
      */
     public function test_question_category_select_menu() {
 
+        $this->qgenerator->create_question_category(['contextid' => $this->context->id, 'name' => 'Test this question category']);
         $contexts = new \question_edit_contexts($this->context);
 
         ob_start();
@@ -180,5 +193,36 @@ class helper_test extends \advanced_testcase {
         // Test the select menu of question categories output.
         $this->assertStringContainsString('Question category', $output);
         $this->assertStringContainsString('<option selected="selected" value="">choosedots</option>', $output);
+        $this->assertStringContainsString('Test this question category', $output);
+    }
+
+    /**
+     * Test that question_category_options function returns the correct category tree.
+     *
+     * @covers ::question_category_options
+     * @covers ::get_categories_for_contexts
+     * @covers ::question_fix_top_names
+     * @covers ::question_add_context_in_key
+     * @covers ::add_indented_names
+     */
+    public function test_question_category_options() {
+
+        $qcategory1 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+        $qcategory2 = $this->qgenerator->create_question_category(['contextid' => $this->context->id, 'parent' => $qcategory1->id]);
+        $qcategory3 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
+
+        $contexts = new \question_edit_contexts($this->context);
+
+        // Validate that we have the array with the categories tree.
+        $categorycontexts = helper::question_category_options($contexts->having_cap('moodle/question:add'));
+        foreach ($categorycontexts as $categorycontext) {
+            $this->assertCount(3, $categorycontext);
+        }
+
+        // Validate that we have the array with the categories tree and that top category is there.
+        $categorycontexts = helper::question_category_options($contexts->having_cap('moodle/question:add'), true);
+        foreach ($categorycontexts as $categorycontext) {
+            $this->assertCount(4, $categorycontext);
+        }
     }
 }

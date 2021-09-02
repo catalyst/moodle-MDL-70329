@@ -35,6 +35,7 @@ use stdClass;
  * @copyright   2019 the Open University
  * @author      2021, Guillermo Gomez Arias <guillermogomez@catalyst-au.net>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass \qbank_managecategories\question_category_object
  */
 class question_category_object_test extends \advanced_testcase {
 
@@ -116,6 +117,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test creating a category.
+     *
+     * @covers ::add_category
      */
     public function test_add_category_no_idnumber() {
         global $DB;
@@ -130,6 +133,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test creating a category with a tricky idnumber.
+     *
+     * @covers ::add_category
      */
     public function test_add_category_set_idnumber_0() {
         global $DB;
@@ -145,6 +150,8 @@ class question_category_object_test extends \advanced_testcase {
     /**
      * Trying to add a category with duplicate idnumber blanks it.
      * (In reality, this would probably get caught by form validation.)
+     *
+     * @covers ::add_category
      */
     public function test_add_category_try_to_set_duplicate_idnumber() {
         global $DB;
@@ -162,6 +169,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test updating a category.
+     *
+     * @covers ::update_category
      */
     public function test_update_category() {
         global $DB;
@@ -179,6 +188,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test updating a category to remove the idnumber.
+     *
+     * @covers ::update_category
      */
     public function test_update_category_removing_idnumber() {
         global $DB;
@@ -196,6 +207,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test updating a category without changing the idnumber.
+     *
+     * @covers ::update_category
      */
     public function test_update_category_dont_change_idnumber() {
         global $DB;
@@ -214,6 +227,8 @@ class question_category_object_test extends \advanced_testcase {
     /**
      * Trying to update a category so its idnumber duplicates idnumber blanks it.
      * (In reality, this would probably get caught by form validation.)
+     *
+     * @covers ::update_category
      */
     public function test_update_category_try_to_set_duplicate_idnumber() {
         global $DB;
@@ -233,6 +248,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test the question category created event.
+     *
+     * @covers ::add_category
      */
     public function test_question_category_created() {
         // Trigger and capture the event.
@@ -251,6 +268,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test the question category deleted event.
+     *
+     * @covers ::delete_category
      */
     public function test_question_category_deleted() {
         // Create the category.
@@ -271,6 +290,8 @@ class question_category_object_test extends \advanced_testcase {
 
     /**
      * Test the question category updated event.
+     *
+     * @covers ::update_category
      */
     public function test_question_category_updated() {
         // Create the category.
@@ -293,6 +314,8 @@ class question_category_object_test extends \advanced_testcase {
      * Test the question category viewed event.
      * There is no external API for viewing the category, so the unit test will simply
      * create and trigger the event and ensure data is returned as expected.
+     *
+     * @covers ::add_category
      */
     public function test_question_category_viewed() {
         // Create the category.
