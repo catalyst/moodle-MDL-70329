@@ -63,7 +63,7 @@ const setSelectors = (slotId) => {
 const ajax = (request, done) => {
     // ...toggleLoading();
 
-    return Ajax.call(request)[0].done(function (response) {
+    return Ajax.call(request)[0].done(function(response) {
         // ...toggleLoading();
         done(response);
     }).fail(Notification.exception);

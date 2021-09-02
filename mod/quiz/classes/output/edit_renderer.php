@@ -732,8 +732,32 @@ class edit_renderer extends \plugin_renderer_base {
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
-    public function question(structure $structure, $slot, \moodle_url $pageurl) {
-        // TODO: Convert to mustache.
+    public function question(structure $structure, int $slot, \moodle_url $pageurl) {
+
+        // Get the data required by the template question_slot.
+        $canedit = $structure->can_be_edited();
+        $checkbox = $this->get_checkbox_render($structure, $slot);
+        $slotid = $structure->get_slot_id_for_slot($slot);
+        $quizid = $structure->get_quizid();
+        $questionnumber = $this->question_number($structure->get_displayed_number_for_slot($slot));
+        $questionname = $this->get_question_name_render($structure, $slot, $pageurl);
+        $questionicons = $this->get_action_icons_render($structure, $slot, $pageurl);
+        $questiondependencyicon = '';
+        if ($canedit) {
+            $questiondependencyicon = $this->question_dependency_icon($structure, $slot);
+        }
+
+        // TODO: Move to questionlib or questiontypebase.
+        global $DB;
+        $sql = "SELECT qv.id AS versionid, qv.version
+                  FROM {question_versions} qv 
+                 WHERE qv.questionbankentryid = (SELECT DISTINCT qbe.id
+                                                   FROM {question_bank_entry} qbe
+                                                   JOIN {question_versions} qv ON qbe.id = qv.questionbankentryid
+                                                   JOIN {question} q ON qv.questionid = q.id
+                                                  WHERE q.id = ?)";
+
+        $versions = $DB->get_records_sql($sql, [$structure->get_question_in_slot($slot)->id]);
 
         $output = '';
         $output .= html_writer::start_tag('div');
@@ -742,36 +766,79 @@ class edit_renderer extends \plugin_renderer_base {
             $output .= $this->question_move_icon($structure, $slot);
         }
 
-        $output .= html_writer::start_div('mod-indent-outer', ['id' => 'mod-indent-outer-slot-' . $structure->get_slot_id_for_slot($slot)]);
-        $checkbox = new \core\output\checkbox_toggleall($this->togglegroup, false, [
-            'id' => 'selectquestion-' . $structure->get_displayed_number_for_slot($slot),
-            'name' => 'selectquestion[]',
-            'value' => $structure->get_displayed_number_for_slot($slot),
-            'classes' => 'select-multiple-checkbox',
-        ]);
-        $output .= $this->render($checkbox);
-        $output .= $this->question_number($structure->get_displayed_number_for_slot($slot));
+        $output .= html_writer::start_div('mod-indent-outer', ['id' => 'mod-indent-outer-slot-' . $slotid]);
 
-        // This div is used to indent the content.
-        $output .= html_writer::div('', 'mod-indent');
+        $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$slotid, $slot, $quizid]);
 
+        $data =
+            [
+                'slotid' => $slotid,
+                'canbeedited' => $canedit,
+                'checkbox' => $checkbox,
+                'questionnumber' => $questionnumber,
+                'questionname' => $questionname,
+                'questionicons' => $questionicons,
+                'questiondependencyicon' => $questiondependencyicon,
+            ];
+
+        // Render the question slot template.
+        $output .= $this->render_from_template('mod_quiz/question_slot', $data);
+
+        //$output.= html_writer::select([1,2], 'versions', '', '', ['id' => 'version-' . $structure->get_slot_id_for_slot($slot)]);
+        // End of indentation div.
+        $output .= html_writer::end_tag('div');
+        $output .= html_writer::end_tag('div');
+
+        return $output;
+    }
+
+    /**
+     * Get the checkbox render.
+     *
+     * @param structure $structure object containing the structure of the quiz.
+     * @param int $slot the slot on the page we are outputting.
+     * @return string HTML to output.
+     */
+    public function get_checkbox_render(structure $structure, int $slot) : string {
+        $checkbox = new \core\output\checkbox_toggleall($this->togglegroup, false,
+            [
+                'id' => 'selectquestion-' . $structure->get_displayed_number_for_slot($slot),
+                'name' => 'selectquestion[]',
+                'value' => $structure->get_displayed_number_for_slot($slot),
+                'classes' => 'select-multiple-checkbox',
+            ]);
+
+        return $this->render($checkbox);
+    }
+
+    /**
+     * Get the question name render.
+     *
+     * @param structure $structure object containing the structure of the quiz.
+     * @param int $slot the slot on the page we are outputting.
+     * @param \moodle_url $pageurl the canonical URL of this page.
+     * @return string HTML to output.
+     */
+    public function get_question_name_render(structure $structure, int $slot, \moodle_url $pageurl) : string {
         // Display the link to the question (or do nothing if question has no url).
-        if ($structure->get_question_type_for_slot($slot) == 'random') {
+        if ($structure->get_question_type_for_slot($slot) === 'random') {
             $questionname = $this->random_question($structure, $slot, $pageurl);
         } else {
             $questionname = $this->question_name($structure, $slot, $pageurl);
         }
 
-        // Start the div for the activity title, excluding the edit icons.
-        $output .= html_writer::start_div('activityinstance');
-        $output .= $questionname;
+        return $questionname;
+    }
 
-        // Closing the tag which contains everything but edit icons. Content part of the module should not be part of this.
-        $output .= html_writer::end_tag('div'); // .activityinstance.
-
-        //
-        $output.= html_writer::select([1,2], 'versions', '', '', ['id' => 'version-' . $structure->get_slot_id_for_slot($slot)]);
-
+    /**
+     * Get the action icons render.
+     *
+     * @param structure $structure object containing the structure of the quiz.
+     * @param int $slot the slot on the page we are outputting.
+     * @param \moodle_url $pageurl the canonical URL of this page.
+     * @return string HTML to output.
+     */
+    public function get_action_icons_render(structure $structure, int $slot, \moodle_url $pageurl) : string {
         // Action icons.
         $questionicons = '';
         $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot));
@@ -779,17 +846,8 @@ class edit_renderer extends \plugin_renderer_base {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
         $questionicons .= $this->marked_out_of_field($structure, $slot);
-        $output .= html_writer::span($questionicons, 'actions'); // Required to add js spinner icon.
-        if ($structure->can_be_edited()) {
-            $output .= $this->question_dependency_icon($structure, $slot);
-        }
 
-        // End of indentation div.
-        $output .= html_writer::end_tag('div');
-        $output .= html_writer::end_tag('div');
-
-        $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$structure->get_slot_id_for_slot($slot), $slot, $structure->get_quizid()]);
-        return $output;
+        return $questionicons;
     }
 
     /**

@@ -2037,53 +2037,42 @@ class mod_quiz_external extends external_api {
     public static function get_question_slot(int $slotid, int $slot, int $quizid): array {
         global $PAGE;
 
-        $params = array(
-            'slotid' => $slotid,
-            'slot' => $slot,
-            'quizid' => $quizid
-        );
+        $params =
+            [
+                'slotid' => $slotid,
+                'slot' => $slot,
+                'quizid' => $quizid
+            ];
         $params = self::validate_parameters(self::get_question_slot_parameters(), $params);
 
-        //
+        // Get the quiz object to generate the quiz structure.
         list($quiz, $course, $cm) = self::validate_quiz($quizid);
         $quizobj = new quiz($quiz, $cm, $course);
         $structure = $quizobj->get_structure();
+        // Get the render object from \mod_quiz\output\edit_render class.
         $render = new \mod_quiz\output\edit_renderer($PAGE, "/");
-        $thispageurl = new \moodle_url('/mod/quiz/edit.php');
-        // TODO: Get the cmid.
-        $thispageurl->param('cmid', 6);
+        $pageurl = new \moodle_url('/mod/quiz/edit.php', ['cmid' => 6]);
 
-        $checkbox = new \core\output\checkbox_toggleall('quiz-questions', false, [
-            'id' => 'selectquestion-' . $structure->get_displayed_number_for_slot($slot),
-            'name' => 'selectquestion[]',
-            'value' => $structure->get_displayed_number_for_slot($slot),
-            'classes' => 'select-multiple-checkbox',
-        ]);
-
-        $questionicons = '';
-        $questionicons .= $render->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot));
-        if ($structure->can_be_edited()) {
-            $questionicons .= $render->question_remove_icon($structure, $slot, $thispageurl);
-        }
-        $questionicons .= $render->marked_out_of_field($structure, $slot);
-
-
-        // Display the link to the question (or do nothing if question has no url).
-        if ($structure->get_question_type_for_slot($slot) == 'random') {
-            $questionname = $render->random_question($structure, $slot, $thispageurl);
-        } else {
-            $questionname = $render->question_name($structure, $slot, $thispageurl);
+        // Get the data required by the question_slot template.
+        $canedit = $structure->can_be_edited();
+        $checkbox = $render->get_checkbox_render($structure, $slot);
+        $questionnumber = $render->question_number($structure->get_displayed_number_for_slot($slot));
+        $questionname = $render->get_question_name_render($structure, $slot, $pageurl);
+        $questionicons = $render->get_action_icons_render($structure, $slot, $pageurl);
+        $questiondependencyicon = '';
+        if ($canedit) {
+            $questiondependencyicon = $render->question_dependency_icon($structure, $slot);
         }
 
         $result =
             [
                 'slotid' => $slotid,
-                'canbeedited' => $structure->can_be_edited(),
-                'checkbox' => $render->render($checkbox),
-                'questionnumber' => $render->question_number($structure->get_displayed_number_for_slot($slot)),
+                'canbeedited' => $canedit,
+                'checkbox' => $checkbox,
+                'questionnumber' => $questionnumber,
                 'questionname' => $questionname,
                 'questionicons' => $questionicons,
-                'questiondependencyicon' => $render->question_dependency_icon($structure, $slot),
+                'questiondependencyicon' => $questiondependencyicon,
             ];
 
         return $result;
