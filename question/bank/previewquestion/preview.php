@@ -265,7 +265,7 @@ if ($islatestversion) {
 } else {
     $previewdata['versiontitle'] = get_string('versiontitle', 'qbank_previewquestion', $question->version);
 }
-$previewdata['cogwheelmenu'] = previewquestion_helper::display_edit_menu($question);
+$previewdata['cogwheelmenu'] = previewquestion_helper::display_edit_menu($question, $returnurl);
 $previewdata['actionurl'] = $actionurl;
 $previewdata['session'] = sesskey();
 $previewdata['slot'] = $slot;

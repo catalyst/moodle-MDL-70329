@@ -27,6 +27,7 @@ use context;
 use core\plugininfo\qbank;
 use core_question\local\bank\edit_menu_column;
 use core_question\local\bank\view;
+use core_question\lib\question_edit_contexts;
 use moodle_url;
 use question_definition;
 use question_display_options;
@@ -287,14 +288,13 @@ class previewquestion_helper {
      * @param  object $question Question informations.
      * @return string $menu Cog wheel menu to render.
      */
-    public function display_edit_menu(object $question) : string {
+    public static function display_edit_menu(object $question, moodle_url $returnurl) : string {
         global $OUTPUT, $COURSE;
 
-        list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-            question_edit_setup('questions', '/question/edit.php');
-
+        $thiscontext = context::instance_by_id($question->contextid);;
+        $questioneditcontexts = new question_edit_contexts($thiscontext);
         $menu = new action_menu();
-        $qbankview = new view($contexts, $thispageurl, $COURSE, $cm);
+        $qbankview = new view($questioneditcontexts, $returnurl, $COURSE, null);
         $editmenucolumn = new edit_menu_column($qbankview);
         $editmenucolumn->claim_menuable_columns($qbankview->requiredcolumns);
         $qtype = explode('_', get_class($question->qtype))[1];
