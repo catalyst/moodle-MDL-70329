@@ -278,7 +278,7 @@ if ($mform->is_cancelled()) {
     if (empty($question->id)) {
         $qtypeobj->save_defaults_for_new_questions($fromform);
     }
-    $fromform->toform = $toform;
+    $fromform->previousstatus = $toform->status;
     $question = $qtypeobj->save_question($question, $fromform);
     if (isset($fromform->tags)) {
         // If we have any question context level tags then set those tags now.

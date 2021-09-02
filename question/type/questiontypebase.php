@@ -335,49 +335,6 @@ class question_type {
         }
     }
 
-    public function compare_form_object($form) {
-        //var_dump($form);die;
-        $previousformproperties = (array) $form->toform;
-        unset($form->toform);
-        $currentformproperties = (array) $form;
-        var_dump($previousformproperties);
-        var_dump($currentformproperties);
-        // Unset the unnecessary elements.
-        $unsetelements = ['category', 'status', 'tags', 'toform'];
-        foreach ($previousformproperties as $keys => $previousformproperty) {
-            if (in_array($keys, $unsetelements)) {
-                continue;
-            }
-            //var_dump($previousformproperty);
-            //var_dump($currentformproperties[$keys]);
-
-            if (is_array($previousformproperty) || is_object($previousformproperty)) {
-                if (is_array($currentformproperties[$keys]) || is_object($currentformproperties[$keys])) {
-                    $previousformvalues = (array) $previousformproperty;
-                    $currentformvalues = (array) $currentformproperties[$keys];
-                    //var_dump($previousformvalues);
-                    //var_dump($currentformvalues);
-                    foreach ($previousformvalues as $key => $value) {
-                        //var_dump($value);
-                        //var_dump($currentformvalues);
-                        if ($value !== $currentformvalues[$key]) {
-                            var_dump('safat');die;
-                            return true;
-                        }
-                    }
-                }
-            } else {
-                if ((string) $previousformproperty !== (string) $currentformproperties[$keys]) {
-                    var_dump('safat');die;
-                    return true;
-                }
-
-            }
-        }
-        //die;
-        return false;
-    }
-
     /**
      * Saves (creates or updates) a question.
      *
@@ -506,9 +463,7 @@ class question_type {
         $question->stamp = make_unique_id_code();
         $question->createdby = $USER->id;
         $question->timecreated = time();
-        $value = $this->compare_form_object($form);
-        var_dump($value);die;
-        if ($value || !isset($question->id)) {
+        if (($form->status === $form->previousstatus) || !isset($question->id)) {
             $question->id = $DB->insert_record('question', $question);
             $newquestion = true;
         } else {

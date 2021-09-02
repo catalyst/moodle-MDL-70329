@@ -2026,6 +2026,7 @@ function save_question_versions(object $question, object $form, object $context,
 
 
     // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
+    // Also check its always doing an insert, shouldnt it update when created a new version? something to check with quiz changes.
     if (isset($form->modulename)) {
         $questionreference = new \stdClass();
         $questionreference->usingcontextid = $context->id;
