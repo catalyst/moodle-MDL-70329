@@ -4772,12 +4772,12 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Check we have one mapping for this category
+        // Check we have one mapping for this category.
         if (!$mapping = $this->get_mapping('question_category', $oldid)) {
             return self::SKIP_ALL_CHILDREN; // No mapping = this category doesn't need to be created/mapped
         }
 
-        // Check we have to create the category (newitemid = 0)
+        // Check we have to create the category (newitemid = 0).
         if ($mapping->newitemid) {
             // By performing this set_mapping() we make get_old/new_parentid() to work for all the
             // children elements of the 'question_category' one.
@@ -4788,7 +4788,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Arrived here, newitemid = 0, we need to create the category
         // we'll do it at parentitemid context, but for CONTEXT_MODULE
         // categories, that will be created at CONTEXT_COURSE and moved
-        // to module context later when the activity is created
+        // to module context later when the activity is created.
         if ($mapping->info->contextlevel == CONTEXT_MODULE) {
             $mapping->parentitemid = $this->get_mappingid('context', $this->task->get_old_contextid());
         }
@@ -4845,12 +4845,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Check if we have one mapping for this entry.
-        if (!$questionentrymapping = $this->get_mapping('question_bank_entry', $oldid)) {
-            return; // No mapping = this question doesn't need to be created/mapped.
-        }
-        $data->questioncategoryid = $this->get_mappingid('question_category', $questionentrymapping->parentitemid);
-
+        $data->questioncategoryid = $this->get_new_parentid('question_category');
         $userid = $this->get_mappingid('user', $data->ownerid);
         if ($userid) {
             $data->ownerid = $userid;
@@ -4861,18 +4856,13 @@ class restore_create_categories_and_questions extends restore_structure_step {
         }
 
         // The idnumber if it exists also needs to be unique within a category or reset it to null.
-        if (!empty($data->idnumber) && $DB->record_exists('question',
-                ['idnumber' => $data->idnumber, 'category' => $data->category])) {
+        if (!empty($data->idnumber) && $DB->record_exists('question_bank_entry',
+                ['idnumber' => $data->idnumber, 'questioncategoryid' => $data->questioncategoryid])) {
             unset($data->idnumber);
         }
 
-        if (!$questionentrymapping->newitemid) {
-            $newitemid = $DB->insert_record('question_bank_entry', $data);
-            $this->set_mapping('question_bank_entry', $oldid, $newitemid);
-        } else {
-            $this->set_mapping('question_bank_entry', $oldid, $questionentrymapping->newitemid);
-        }
-
+        $newitemid = $DB->insert_record('question_bank_entry', $data);
+        $this->set_mapping('question_bank_entry', $oldid, $newitemid);
     }
 
     protected function process_question_versions($data) {
@@ -4881,20 +4871,11 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $data = (object)$data;
         $oldid = $data->id;
 
-        // Check if we have one mapping for this entry.
-        if (!$questionversionmapping = $this->get_mapping('question_versions', $oldid)) {
-            return; // No mapping = this question doesn't need to be created/mapped.
-        }
-        $data->questionbankentryid = $this->get_mappingid('question_bank_entry', $questionversionmapping->parentitemid);
+        $data->questionbankentryid = $this->get_new_parentid('question_bank_entry');
         // Question id is updated after inserting the question.
         $data->questionid = 0;
-        if (!$questionversionmapping->newitemid) {
-            $newitemid = $DB->insert_record('question_versions', $data);
-            $this->set_mapping('question_versions', $oldid, $newitemid);
-        } else {
-            $this->set_mapping('question_versions', $oldid, $questionversionmapping->newitemid);
-        }
-
+        $newitemid = $DB->insert_record('question_versions', $data);
+        $this->set_mapping('question_versions', $oldid, $newitemid);
     }
 
     protected function process_question($data) {
@@ -4902,17 +4883,6 @@ class restore_create_categories_and_questions extends restore_structure_step {
 
         $data = (object)$data;
         $oldid = $data->id;
-
-        // Check we have one mapping for this question.
-        if (!$questionmapping = $this->get_mapping('question', $oldid)) {
-            return; // No mapping = this question doesn't need to be created/mapped.
-        }
-
-        // Get the mapped category (cannot use get_new_parentid() because not
-        // all the categories have been created, so it is not always available
-        // Instead we get the mapping for the question->parentitemid because
-        // we have loaded qcatids there for all parsed questions
-        //$data->category = $this->get_mappingid('question_category', $questionmapping->parentitemid);
 
         // In the past, there were some very sloppy values of penalty. Fix them.
         if ($data->penalty >= 0.33 && $data->penalty <= 0.34) {
@@ -4949,35 +4919,15 @@ class restore_create_categories_and_questions extends restore_structure_step {
             }
         }
 
-        // With newitemid = 0, let's create the question
-        if (!$questionmapping->newitemid) {
-
-            // The idnumber if it exists also needs to be unique within a category or reset it to null.
-            //if (!empty($data->idnumber) && $DB->record_exists('question',
-            //        ['idnumber' => $data->idnumber, 'category' => $data->category])) {
-            //    unset($data->idnumber);
-            //}
-
-            //if ($data->qtype === 'random') {
-            //    // Ensure that this newly created question is considered by
-            //    // \qtype_random\task\remove_unused_questions.
-            //    $data->hidden = 0;
-            //}
-
-            $newitemid = $DB->insert_record('question', $data);
-            $this->set_mapping('question', $oldid, $newitemid);
-            // Also annotate them as question_created, we need
-            // that later when remapping parents (keeping the old categoryid as parentid)
-            $this->set_mapping('question_created', $oldid, $newitemid, false, null, $questionmapping->parentitemid);
-        } else {
-            // By performing this set_mapping() we make get_old/new_parentid() to work for all the
-            // children elements of the 'question' one (so qtype plugins will know the question they belong to)
-            $newitemid = $questionmapping->newitemid;
-            $this->set_mapping('question', $oldid, $newitemid);
-        }
+        $newitemid = $DB->insert_record('question', $data);
+        $this->set_mapping('question', $oldid, $newitemid);
+        // Also annotate them as question_created, we need
+        // that later when remapping parents (keeping the old categoryid as parentid).
+        $parentitemid = $this->get_new_parentid('question_versions');
+        $this->set_mapping('question_created', $oldid, $newitemid, false, null, $parentitemid);
         // Now update the question_versions table with the new question id.
         $version = new stdClass();
-        $version->id = $questionmapping->parentitemid;
+        $version->id = $parentitemid;
         $version->questionid = $newitemid;
         if ($data->qtype === 'random') {
             // Ensure that this newly created question is considered by
@@ -4990,7 +4940,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // as far as the CONTEXT_MODULE categories still
         // haven't their contexts to be restored to
         // The {@link restore_create_question_files}, executed in the final step
-        // step will be in charge of restoring all the question files
+        // step will be in charge of restoring all the question files.
     }
 
     protected function process_question_hint($data) {
