@@ -289,7 +289,7 @@ class previewquestion_helper {
      * @return string $menu Cog wheel menu to render.
      */
     public static function display_edit_menu(object $question, moodle_url $returnurl) : string {
-        global $OUTPUT, $COURSE;
+        global $OUTPUT, $COURSE, $PAGE;
 
         $thiscontext = context::instance_by_id($question->contextid);;
         $questioneditcontexts = new question_edit_contexts($thiscontext);
@@ -303,6 +303,10 @@ class previewquestion_helper {
 
         foreach ($editmenucolumn->actions as $actioncolumn) {
             $action = $actioncolumn->get_action_menu_link($questionobject);
+            if ($action && get_class($actioncolumn) === 'qbank_tagquestion\\tags_action_column'){
+                $action->url = new moodle_url('#');
+                $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#cogwheelmenu']);
+            }
             if ($action && get_class($actioncolumn) !== 'qbank_previewquestion\\preview_action_column') {
                 $menu->add($action);
             }
