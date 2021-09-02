@@ -733,6 +733,8 @@ class edit_renderer extends \plugin_renderer_base {
      * @return string HTML to output.
      */
     public function question(structure $structure, $slot, \moodle_url $pageurl) {
+        // TODO: Convert to mustache.
+
         $output = '';
         $output .= html_writer::start_tag('div');
 
@@ -740,7 +742,7 @@ class edit_renderer extends \plugin_renderer_base {
             $output .= $this->question_move_icon($structure, $slot);
         }
 
-        $output .= html_writer::start_div('mod-indent-outer');
+        $output .= html_writer::start_div('mod-indent-outer', ['id' => 'mod-indent-outer-slot-' . $structure->get_slot_id_for_slot($slot)]);
         $checkbox = new \core\output\checkbox_toggleall($this->togglegroup, false, [
             'id' => 'selectquestion-' . $structure->get_displayed_number_for_slot($slot),
             'name' => 'selectquestion[]',
@@ -767,7 +769,7 @@ class edit_renderer extends \plugin_renderer_base {
         // Closing the tag which contains everything but edit icons. Content part of the module should not be part of this.
         $output .= html_writer::end_tag('div'); // .activityinstance.
 
-        // TODO: Convert to mustache.
+        //
         $output.= html_writer::select([1,2], 'versions', '', '', ['id' => 'version-' . $structure->get_slot_id_for_slot($slot)]);
 
         // Action icons.
@@ -786,7 +788,7 @@ class edit_renderer extends \plugin_renderer_base {
         $output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
 
-        $this->page->requires->js_call_amd('mod_quiz/main', 'init', [$structure->get_slot_id_for_slot($slot)]);
+        $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$structure->get_slot_id_for_slot($slot), $slot, $structure->get_quizid()]);
         return $output;
     }
 
