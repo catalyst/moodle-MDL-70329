@@ -463,7 +463,16 @@ class question_type {
         $question->stamp = make_unique_id_code();
         $question->createdby = $USER->id;
         $question->timecreated = time();
-        if (($form->status === $form->previousstatus) || !isset($question->id)) {
+        if (isset($form->previousstatus)) {
+            $previousstatus = $form->previousstatus;
+        } else {
+            if (isset($question->id)) {
+                $previousstatus = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+            } else {
+                $previousstatus = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+            }
+        }
+        if (($form->status === $previousstatus) || !isset($question->id)) {
             $question->id = $DB->insert_record('question', $question);
             $newquestion = true;
         } else {
