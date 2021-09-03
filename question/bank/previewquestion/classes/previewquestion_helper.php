@@ -288,12 +288,13 @@ class previewquestion_helper {
      * @param  object $question Question informations.
      * @return string $menu Cog wheel menu to render.
      */
-    public static function display_edit_menu(object $question, moodle_url $returnurl) : string {
+    public static function display_edit_menu(object $question, moodle_url $returnurl = null) : string {
         global $OUTPUT, $COURSE, $PAGE;
 
         $thiscontext = context::instance_by_id($question->contextid);;
         $questioneditcontexts = new question_edit_contexts($thiscontext);
         $menu = new action_menu();
+        $returnurl = is_null($returnurl) ? $PAGE->url : $returnurl;
         $qbankview = new view($questioneditcontexts, $returnurl, $COURSE, null);
         $editmenucolumn = new edit_menu_column($qbankview);
         $editmenucolumn->claim_menuable_columns($qbankview->requiredcolumns);

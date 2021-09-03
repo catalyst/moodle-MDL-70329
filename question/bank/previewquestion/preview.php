@@ -91,7 +91,7 @@ $PAGE->set_url(previewquestion_helper::question_preview_url($id, $options->behav
 // Get and validate existing preview, or start a new one.
 $previewid = optional_param('previewid', 0, PARAM_INT);
 
-if ($previewid) {
+if ($previewid && !$version) {
     try {
         $quba = question_engine::load_questions_usage_by_activity($previewid);
 
