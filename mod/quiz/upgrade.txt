@@ -8,6 +8,11 @@ This files describes API changes in the quiz code.
   - quiz_send_notification_messages() in mod/quiz/locallib.php
 * The completionpass criteria has been moved to core as 'completionpassgrade'. Refer to completion/upgrade.txt for
   further information.
+* quiz_slots has been updated as a part of https://docs.moodle.org/dev/Question_bank_improvements_for_Moodle_4.0
+  The fields removed will be now manage by a new table in core_question:
+  - question_set_reference -> Records where a specific question is used.
+  - question_set_reference -> Records where groups of questions are used (e.g.: Random questions).
+  The quiz_slots_tags table will be removed entirely.
 
 === 3.11 ===
 

@@ -63,6 +63,11 @@ class quiz_statistics_report extends quiz_default_report {
             echo quiz_no_questions_message($quiz, $cm, $this->context);
             return true;
         }
+        if (!quiz_attempts_exist($quiz->id)) {
+            $this->print_header_and_tabs($cm, $course, $quiz, 'statistics');
+            echo quiz_no_question_attempts_message($cm);
+            return true;
+        }
 
         // Work out the display options.
         $download = optional_param('download', '', PARAM_ALPHA);
@@ -830,19 +835,33 @@ class quiz_statistics_report extends quiz_default_report {
     public function load_and_initialise_questions_for_calculations($quiz) {
         // Load the questions.
         $questions = quiz_report_get_significant_questions($quiz);
-        $questionids = array();
-        foreach ($questions as $question) {
+        $questionids = [];
+        $randomquestions = [];
+        foreach ($questions as $qs => $question) {
+            if ($question->qtype === 'random') {
+                $question->id = 0;
+                $question->name = get_string('random', 'quiz');
+                $question->questiontext = get_string('random', 'quiz');
+                $question->parenttype = 'random';
+                $randomquestions [] = $question;
+                unset($questions[$qs]);
+                continue;
+            }
             $questionids[] = $question->id;
         }
         $fullquestions = question_load_questions($questionids);
         foreach ($questions as $qno => $question) {
             $q = $fullquestions[$question->id];
             $q->maxmark = $question->maxmark;
-            $q->slot = $qno;
+            $q->slot = $question->slot;
             $q->number = $question->number;
-            $questions[$qno] = $q;
+            $q->parenttype = null;
+            $questiondata[$question->slot] = $q;
         }
-        return $questions;
+        foreach ($randomquestions as $randomquestion) {
+            $questiondata[$randomquestion->slot] = $randomquestion;
+        }
+        return \mod_quiz\question\bank\qbank_helper::question_array_sort($questiondata, 'slot');
     }
 
     /**
