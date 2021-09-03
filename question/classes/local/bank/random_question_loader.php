@@ -306,7 +306,7 @@ class random_question_loader {
                       FROM (SELECT q.*, qbe.questioncategoryid as category
                       FROM {question} q
                       JOIN {question_versions} qv ON qv.questionid = q.id
-                      JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                      JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                      WHERE q.id {$where}) q";
 
             return $DB->get_records_sql($sql, [], $offset, $limit);

@@ -462,9 +462,7 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
 
         // User1 has created questions and user3 has edited them.
         $this->assertCount(2, $userlist);
-        $this->assertEqualsCanonicalizing(
-                [$user1->id, $user3->id],
-                $userlist->get_userids());
+        $this->assertEqualsCanonicalizing([$user1->id, $user3->id], $userlist->get_userids());
     }
 
     /**
@@ -516,7 +514,7 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
                 $DB->count_records_sql("SELECT COUNT(q.id)
                                               FROM {question} q
                                               JOIN {question_versions} qv ON qv.questionid = q.id
-                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                                               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                                              WHERE qc.contextid = ?
                                                AND (q.createdby = ? OR q.modifiedby = ? OR q.createdby = ? OR q.modifiedby = ?)",
@@ -529,7 +527,7 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
                 $DB->count_records_sql("SELECT COUNT(q.id)
                                               FROM {question} q
                                               JOIN {question_versions} qv ON qv.questionid = q.id
-                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                                               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                                              WHERE qc.contextid = ? AND (q.createdby = ? OR q.modifiedby = ?)",
                         [$course1context->id, $user3->id, $user3->id])

@@ -415,32 +415,6 @@ class question_type {
             $question->defaultmark = $form->defaultmark;
         }
 
-        if (isset($form->idnumber)) {
-            if ((string) $form->idnumber === '') {
-                $question->idnumber = null;
-            } else {
-                // While this check already exists in the form validation,
-                // this is a backstop preventing unnecessary errors.
-                // Only set the idnumber if it has changed and will not cause a unique index violation.
-                if (strpos($form->category, ',') !== false) {
-                    list($category, $categorycontextid) = explode(',', $form->category);
-                } else {
-                    $category = $form->category;
-                }
-                $sql = "SELECT qbe.id
-                          FROM {question_bank_entry} qbe
-                         WHERE qbe.idnumber = :idnumber
-                           AND qbe.questioncategoryid = :categoryid";
-
-                if (!$DB->record_exists_sql($sql,
-                        ['idnumber' => $form->idnumber, 'categoryid' => $category])) {
-                    $question->idnumber = $form->idnumber;
-                }
-            }
-        } else {
-            $question->idnumber = null;
-        }
-
         // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
         $questionbankentry = null;
         if (isset($question->id)) {
@@ -463,11 +437,71 @@ class question_type {
         $question->stamp = make_unique_id_code();
         $question->createdby = $USER->id;
         $question->timecreated = time();
-        $question->id = $DB->insert_record('question', $question);
-        $newquestion = true;
 
+        // Idnumber validation.
+        $question->idnumber = null;
+        if (isset($form->idnumber)) {
+            if ((string) $form->idnumber === '') {
+                $question->idnumber = null;
+            } else {
+                // While this check already exists in the form validation,
+                // this is a backstop preventing unnecessary errors.
+                // Only set the idnumber if it has changed and will not cause a unique index violation.
+                if (strpos($form->category, ',') !== false) {
+                    list($category, $categorycontextid) = explode(',', $form->category);
+                } else {
+                    $category = $form->category;
+                }
+                $params = ['idnumber' => $form->idnumber, 'categoryid' => $category];
+                $andcondition = '';
+                if (isset($question->id) && isset($questionbankentry->id)) {
+                    $andcondition = 'AND qbe.id != :notid';
+                    $params['notid'] = $questionbankentry->id;
+                }
+                $sql = "SELECT qbe.id
+                          FROM {question_bank_entries} qbe
+                         WHERE qbe.idnumber = :idnumber
+                           AND qbe.questioncategoryid = :categoryid
+                           $andcondition";
+                if (!$DB->record_exists_sql($sql, $params)) {
+                    $question->idnumber = $form->idnumber;
+                }
+            }
+        }
+
+        // Create the question.
+        $question->id = $DB->insert_record('question', $question);
         // Create a new version, bank_entry and reference for each question.
-        save_question_versions($question, $form, $context, $questionbankentry);
+        if (!$questionbankentry) {
+            // Create a record for question_bank_entries, question_versions and question_references.
+            $questionbankentry = new \stdClass();
+            $questionbankentry->questioncategoryid = $form->category;
+            $questionbankentry->idnumber = $question->idnumber;
+            $questionbankentry->ownerid = $question->createdby;
+            $questionbankentry->id = $DB->insert_record('question_bank_entries', $questionbankentry);
+        } else {
+            $questionbankentryold = new \stdClass();
+            $questionbankentryold->id = $questionbankentry->id;
+            $questionbankentryold->idnumber = $question->idnumber;
+            $DB->update_record('question_bank_entries', $questionbankentryold);
+        }
+
+        // Create question_versions records.
+        $questionversion = new \stdClass();
+        $questionversion->questionbankentryid = $questionbankentry->id;
+        $questionversion->questionid = $question->id;
+        // Get the version and status from the parent question if parent is set.
+        if (!$question->parent) {
+            // Get the status field. It comes from the form, but for testing we can.
+            $status = $form->status ?? $question->status ?? \core_question\local\bank\constants::QUESTION_STATUS_READY;
+            $questionversion->version = get_next_version($questionbankentry->id);
+            $questionversion->status = $status;
+        } else {
+            $parentversion = get_question_version($form->parent);
+            $questionversion->version = $parentversion[array_key_first($parentversion)]->version;
+            $questionversion->status = $parentversion[array_key_first($parentversion)]->status;
+        }
+        $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
@@ -516,15 +550,9 @@ class question_type {
                     '$result->noticeyesno no longer supported in save_question.');
         }
 
-        if ($newquestion) {
-            // Log the creation of this question.
-            $event = \core\event\question_created::create_from_question_instance($question, $context);
-            $event->trigger();
-        } else {
-            // Log the update of this question.
-            $event = \core\event\question_updated::create_from_question_instance($question, $context);
-            $event->trigger();
-        }
+        // Log the creation of this question.
+        $event = \core\event\question_created::create_from_question_instance($question, $context);
+        $event->trigger();
 
         $transaction->allow_commit();
 
@@ -971,7 +999,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;
         $question->createdby = $questiondata->createdby;
@@ -994,6 +1021,7 @@ class question_type {
 
     /**
      * Initialise the extra question fields.
+     *
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      */
@@ -1002,30 +1030,28 @@ class question_type {
         $extrarecord = $DB->get_record_sql('SELECT qv.status,
                                                        qv.version,
                                                        qv.id as versionid,
-                                                       qv.questionbankentryid
+                                                       qv.questionbankentryid,
+                                                       qbe.idnumber
                                                   FROM {question} q
-                                                  JOIN {question_versions} qv
-                                                    ON qv.questionid = q.id
+                                                  JOIN {question_versions} qv ON qv.questionid = q.id
+                                                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                                                  WHERE q.id = ?', [$questiondata->id]);
-        if (isset($questiondata->status)) {
-            $question->status = $questiondata->status;
-        } else {
-            $question->status = $extrarecord->status;
-        }
-        if (isset($questiondata->versionid)) {
-            $question->versionid = $questiondata->versionid;
-        } else {
-            $question->versionid = $extrarecord->versionid;
-        }
-        if (isset($questiondata->version)) {
-            $question->version = $questiondata->version;
-        } else {
-            $question->version = $extrarecord->version;
-        }
-        if (isset($questiondata->questionbankentryid)) {
-            $question->questionbankentryid = $questiondata->questionbankentryid;
-        } else {
-            $question->questionbankentryid = $extrarecord->questionbankentryid;
+
+        $fields =
+            [
+                'status',
+                'versionid',
+                'version',
+                'questionbankentryid',
+                'idnumber',
+            ];
+
+        foreach ($fields as $field) {
+            if (isset($questiondata->{$field})) {
+                $question->{$field} = $questiondata->{$field};
+            } else if ($extrarecord) {
+                $question->{$field} = $extrarecord->{$field};
+            }
         }
     }
 
