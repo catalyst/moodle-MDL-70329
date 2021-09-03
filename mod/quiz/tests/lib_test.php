@@ -114,8 +114,10 @@ class mod_quiz_lib_testcase extends advanced_testcase {
         quiz_delete_instance($quiz->id);
 
         // Check that the random question was deleted.
-        $count = $DB->count_records('question', array('id' => $randomq->id));
-        $this->assertEquals(0, $count);
+        if ($randomq) {
+            $count = $DB->count_records('question', array('id' => $randomq->id));
+            $this->assertEquals(0, $count);
+        }
         // Check that the standard question was not deleted.
         $count = $DB->count_records('question', array('id' => $standardq->id));
         $this->assertEquals(1, $count);

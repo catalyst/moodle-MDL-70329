@@ -23,6 +23,8 @@
  */
 
 namespace mod_quiz;
+use mod_quiz\question\bank\qbank_helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -124,6 +126,15 @@ class structure {
      */
     public function get_question_in_slot($slotnumber) {
         return $this->questions[$this->slotsinorder[$slotnumber]->questionid];
+    }
+
+    /**
+     * Get the information about the question name in a given slot.
+     * @param int $slotnumber the index of the slot in question.
+     * @return \stdClass the data from the questions table, augmented with
+     */
+    public function get_question_name_in_slot($slotnumber) {
+        return $this->questions[$this->slotsinorder[$slotnumber]->name];
     }
 
     /**
@@ -606,32 +617,29 @@ class structure {
     public function populate_structure($quiz) {
         global $DB;
 
-        $slots = $DB->get_records_sql("
-                SELECT slot.id AS slotid, slot.slot, slot.questionid, slot.page, slot.maxmark,
-                       slot.requireprevious, q.*, qc.id as category, qc.contextid
-                  FROM {quiz_slots} slot
-             LEFT JOIN {question} q ON q.id = slot.questionid
-             LEFT JOIN {question_versions} qv ON qv.questionid = q.id
-             LEFT JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid                      
-             LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-                 WHERE slot.quizid = ?
-              ORDER BY slot.slot", array($quiz->id));
+        $slots = qbank_helper::get_question_structure($quiz->id);
 
         $slots = $this->populate_missing_questions($slots);
 
-        $this->questions = array();
-        $this->slotsinorder = array();
+        $this->questions = [];
+        $this->slotsinorder = [];
         foreach ($slots as $slotdata) {
             $this->questions[$slotdata->questionid] = $slotdata;
 
             $slot = new \stdClass();
             $slot->id = $slotdata->slotid;
+            $slot->name = $slotdata->name;
             $slot->slot = $slotdata->slot;
             $slot->quizid = $quiz->id;
             $slot->page = $slotdata->page;
             $slot->questionid = $slotdata->questionid;
             $slot->maxmark = $slotdata->maxmark;
             $slot->requireprevious = $slotdata->requireprevious;
+            $slot->qtype = $slotdata->qtype;
+            $slot->length = $slotdata->length;
+            $slot->category = $slotdata->category;
+            $slot->questionbankentryid = $slotdata->questionbankentryid ?? null;
+            $slot->version = $slotdata->version ?? null;
 
             $this->slotsinorder[$slot->slot] = $slot;
         }
@@ -648,21 +656,30 @@ class structure {
      * @return \stdClass[] updated $slots array.
      */
     protected function populate_missing_questions($slots) {
-        // Address missing question types.
+        global $DB;
+        // Address missing/random question types.
         foreach ($slots as $slot) {
             if ($slot->qtype === null) {
-                // If the questiontype is missing change the question type.
-                $slot->id = $slot->questionid;
-                $slot->category = 0;
-                $slot->qtype = 'missingtype';
-                $slot->name = get_string('missingquestion', 'quiz');
-                $slot->slot = $slot->slot;
-                $slot->maxmark = 0;
-                $slot->requireprevious = 0;
-                $slot->questiontext = ' ';
-                $slot->questiontextformat = FORMAT_HTML;
-                $slot->length = 1;
-
+                // Check if the question is random.
+                if ($setreference = $DB->get_record('question_set_references', ['itemid' => $slot->slotid])) {
+                    $filtercondition = json_decode($setreference->filtercondition);
+                    $slot->id = $slot->slotid;
+                    $slot->category = $filtercondition->questioncategoryid;
+                    $slot->qtype = 'random';
+                    $slot->name = get_string('random', 'quiz');
+                    $slot->length = 1;
+                } else {
+                    // If the questiontype is missing change the question type.
+                    $slot->id = $slot->questionid;
+                    $slot->category = 0;
+                    $slot->qtype = 'missingtype';
+                    $slot->name = get_string('missingquestion', 'quiz');
+                    $slot->maxmark = 0;
+                    $slot->requireprevious = 0;
+                    $slot->questiontext = ' ';
+                    $slot->questiontextformat = FORMAT_HTML;
+                    $slot->length = 1;
+                }
             } else if (!\question_bank::qtype_exists($slot->qtype)) {
                 $slot->qtype = 'missingtype';
             }
@@ -925,7 +942,18 @@ class structure {
         $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {quiz_slots} WHERE quizid = ?', array($this->get_quizid()));
 
         $trans = $DB->start_delegated_transaction();
-        $DB->delete_records('quiz_slot_tags', array('slotid' => $slot->id));
+        // Delete the reference if its a question.
+        $questionreference = $DB->get_record('question_references',
+                ['component' => 'mod_quiz', 'questionarea' => 'slot', 'itemid' => $slot->id]);
+        if ($questionreference) {
+            $DB->delete_records('question_references', ['id' => $questionreference->id]);
+        }
+        // Delete the set reference if its a random question.
+        $questionsetreference = $DB->get_record('question_set_references',
+                ['component' => 'mod_quiz', 'questionarea' => 'slot', 'itemid' => $slot->id]);
+        if ($questionsetreference) {
+            $DB->delete_records('question_set_references', ['id' => $questionsetreference->id]);
+        }
         $DB->delete_records('quiz_slots', array('id' => $slot->id));
         for ($i = $slot->slot + 1; $i <= $maxslot; $i++) {
             $DB->set_field('quiz_slots', 'slot', $i - 1,
@@ -933,12 +961,6 @@ class structure {
             $this->slotsinorder[$i]->slot = $i - 1;
             $this->slotsinorder[$i - 1] = $this->slotsinorder[$i];
             unset($this->slotsinorder[$i]);
-        }
-
-        $qtype = $DB->get_field('question', 'qtype', array('id' => $slot->questionid));
-        if ($qtype === 'random') {
-            // This function automatically checks if the question is in use, and won't delete if it is.
-            question_delete_question($slot->questionid);
         }
 
         quiz_update_section_firstslots($this->get_quizid(), -1, $slotnumber);
@@ -949,11 +971,24 @@ class structure {
         }
         $this->populate_slots_with_sections();
         $this->populate_question_numbers();
-        unset($this->questions[$slot->questionid]);
+        $this->unset_question($slot->id);
 
         $this->refresh_page_numbers_and_update_db();
 
         $trans->allow_commit();
+    }
+
+    /**
+     * Unset the question object after deletion.
+     *
+     * @param int $slotid
+     */
+    public function unset_question($slotid) {
+        foreach ($this->questions as $key => $question) {
+            if ($question->slotid === $slotid) {
+                unset($this->questions[$key]);
+            }
+        }
     }
 
     /**
@@ -1073,30 +1108,6 @@ class structure {
             throw new \coding_exception('Cannot remove the first section in a quiz.');
         }
         $DB->delete_records('quiz_sections', array('id' => $sectionid));
-    }
-
-    /**
-     * Set up this class with the slot tags for each of the slots.
-     */
-    protected function populate_slot_tags() {
-        $slotids = array_column($this->slotsinorder, 'id');
-        $this->slottags = quiz_retrieve_tags_for_slot_ids($slotids);
-    }
-
-    /**
-     * Retrieve the list of slot tags for the given slot id.
-     *
-     * @param  int $slotid The id for the slot
-     * @return \stdClass[] The list of slot tag records
-     */
-    public function get_slot_tags_for_slot_id($slotid) {
-        if (!$this->hasloadedtags) {
-            // Lazy load the tags just in case they are never required.
-            $this->populate_slot_tags();
-            $this->hasloadedtags = true;
-        }
-
-        return isset($this->slottags[$slotid]) ? $this->slottags[$slotid] : [];
     }
 
     /**

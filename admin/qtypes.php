@@ -65,10 +65,10 @@ $sql = "SELECT result.qtype,
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                       AND qv.version = (SELECT MAX(v.version)
-                                           FROM {question_versions} v
-                                           JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
-                                          WHERE be.id = qbe.id)) data
+                   AND qv.version = (SELECT MAX(v.version)
+                                      FROM {question_versions} v
+                                      JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
+                                     WHERE be.id = qbe.id)) data
           GROUP BY data.qtype, data.versionid) result
       GROUP BY result.qtype";
 
