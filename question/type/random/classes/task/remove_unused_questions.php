@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright 2018 Bo Pierce <email.bO.pierce@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @todo MDL-71696 Remove this task after dropping random question type.
  */
 class remove_unused_questions extends \core\task\scheduled_task {
 

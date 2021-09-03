@@ -421,7 +421,7 @@ abstract class question_bank {
         $sql = "SELECT DISTINCT q.qtype
                            FROM {question} q
                            JOIN {question_versions} qv ON qv.questionid = q.id
-                           JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                           JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                           WHERE qbe.questioncategoryid $categorysql";
 
         $qtypes = $DB->get_fieldset_sql($sql, $params);
@@ -503,7 +503,7 @@ class question_finder implements cache_data_source {
         $sql = "SELECT q.id, q.id AS id2
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                  WHERE qbe.questioncategoryid {$qcsql}
                        AND q.parent = 0
                        AND qv.status = $readystatus
@@ -558,7 +558,7 @@ class question_finder implements cache_data_source {
                          ) AS previous_attempts";
         $from   = "{question} q";
         $join   = "JOIN {question_versions} qv ON qv.questionid = q.id
-                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid";
+                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid";
         $from = $from . " " . $join;
         $where  = "qbe.questioncategoryid {$qcsql}
                AND q.parent = 0
@@ -618,7 +618,7 @@ class question_finder implements cache_data_source {
                        qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                   JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                  WHERE q.id = :id';
 
@@ -642,7 +642,7 @@ class question_finder implements cache_data_source {
                        qv.questionbankentryid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                   JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                  WHERE q.id ';
 

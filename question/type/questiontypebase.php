@@ -415,32 +415,6 @@ class question_type {
             $question->defaultmark = $form->defaultmark;
         }
 
-        if (isset($form->idnumber)) {
-            if ((string) $form->idnumber === '') {
-                $question->idnumber = null;
-            } else {
-                // While this check already exists in the form validation,
-                // this is a backstop preventing unnecessary errors.
-                // Only set the idnumber if it has changed and will not cause a unique index violation.
-                if (strpos($form->category, ',') !== false) {
-                    list($category, $categorycontextid) = explode(',', $form->category);
-                } else {
-                    $category = $form->category;
-                }
-                $sql = "SELECT qbe.id
-                          FROM {question_bank_entry} qbe
-                         WHERE qbe.idnumber = :idnumber
-                           AND qbe.questioncategoryid = :categoryid";
-
-                if (!$DB->record_exists_sql($sql,
-                        ['idnumber' => $form->idnumber, 'categoryid' => $category])) {
-                    $question->idnumber = $form->idnumber;
-                }
-            }
-        } else {
-            $question->idnumber = null;
-        }
-
         // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
         $questionbankentry = null;
         if (isset($question->id)) {
@@ -577,15 +551,9 @@ class question_type {
                     '$result->noticeyesno no longer supported in save_question.');
         }
 
-        if ($newquestion) {
-            // Log the creation of this question.
-            $event = \core\event\question_created::create_from_question_instance($question, $context);
-            $event->trigger();
-        } else {
-            // Log the update of this question.
-            $event = \core\event\question_updated::create_from_question_instance($question, $context);
-            $event->trigger();
-        }
+        // Log the creation of this question.
+        $event = \core\event\question_created::create_from_question_instance($question, $context);
+        $event->trigger();
 
         $transaction->allow_commit();
 
@@ -1032,7 +1000,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;
         $question->createdby = $questiondata->createdby;
@@ -1058,6 +1025,7 @@ class question_type {
 
     /**
      * Initialise the extra question fields.
+     *
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      */
