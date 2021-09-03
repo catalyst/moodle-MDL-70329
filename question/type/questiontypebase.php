@@ -463,11 +463,25 @@ class question_type {
         $question->stamp = make_unique_id_code();
         $question->createdby = $USER->id;
         $question->timecreated = time();
-        $question->id = $DB->insert_record('question', $question);
-        $newquestion = true;
+        if (isset($form->previousstatus)) {
+            $previousstatus = $form->previousstatus;
+        } else {
+            if (isset($question->id)) {
+                $previousstatus = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+            } else {
+                $previousstatus = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+            }
+        }
+        if (($form->status === $previousstatus) || !isset($question->id)) {
+            $question->id = $DB->insert_record('question', $question);
+            $newquestion = true;
+        } else {
+            $DB->update_record('question', $question);
+            $newquestion = false;
+        }
 
         // Create a new version, bank_entry and reference for each question.
-        save_question_versions($question, $form, $context, $questionbankentry);
+        save_question_versions($question, $form, $context, $questionbankentry, $newquestion);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
