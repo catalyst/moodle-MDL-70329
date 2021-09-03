@@ -115,6 +115,8 @@ class qtype_shortanswer_test extends advanced_testcase {
 
         $fromform = $form->get_data();
 
+        // Create a new question version with the form submission.
+        unset($questiondata->id);
         $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
         $actualquestionsdata = question_load_questions(array($returnedfromsave->id));
         $actualquestiondata = end($actualquestionsdata);

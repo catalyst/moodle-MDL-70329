@@ -211,7 +211,10 @@ $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
 if (isset($question->id)) {
-    $toform->status = $DB->get_record('question_versions', ['questionid' => $question->id], 'status')->status;
+    $versiondata = $DB->get_record('question_versions', ['questionid' => $question->id]);
+    $toform->status = $versiondata->status;
+    $entrydata = $DB->get_record('question_bank_entry', ['id' => $versiondata->questionbankentryid]);
+    $toform->idnumber = $entrydata->idnumber;
 } else {
     $toform->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 }
