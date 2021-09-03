@@ -1999,7 +1999,9 @@ function save_question_versions(object $question, object $form, object $context,
         $DB->update_record('question_bank_entry', $questionbankentryold);
     }
 
-    if ($newquestion) {
+    $questionversiondata = $DB->get_record('question_versions', ['questionbankentryid' => $questionbankentry->id,
+            'questionid' => $question->id]);
+    if ($newquestion || !$questionversiondata) {
         // Create question_versions records.
         $questionversion = new \stdClass();
         $questionversion->questionbankentryid = $questionbankentry->id;
@@ -2007,7 +2009,13 @@ function save_question_versions(object $question, object $form, object $context,
         // Get the version and status from the parent question if parent is set.
         if (!$question->parent) {
             // Get the status field. It comes from the form, but for testing we can.
-            $status = $form->status ?? $question->status;
+            if (isset($form->status)) {
+                $status = $form->status;
+            } else if (isset($question->status)) {
+                $status = $question->status;
+            } else {
+                $status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+            }
             $questionversion->version = get_next_version($questionbankentry->id);
             $questionversion->status = $status;
         } else {
@@ -2018,9 +2026,7 @@ function save_question_versions(object $question, object $form, object $context,
         $questionversion->id = $DB->insert_record('question_versions', $questionversion);
     } else {
         $questionversion = new \stdClass();
-        $questionversion->id = $DB->get_record('question_versions',
-                                                ['questionbankentryid' => $questionbankentry->id,
-                                                        'questionid' => $question->id])->id;
+        $questionversion->id = $questionversiondata->id;
         // Get the status field. It comes from the form, but for testing we can.
         $questionversion->status = $form->status ?? $question->status;
         $DB->update_record('question_versions', $questionversion);
