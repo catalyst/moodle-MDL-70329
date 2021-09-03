@@ -241,8 +241,7 @@ class core_questionlib_testcase extends advanced_testcase {
 
         // Create some question categories and questions in this course.
         $coursecontext = context_course::instance($course->id);
-        $questioncat = $questiongenerator->create_question_category(array('contextid' =>
-            $coursecontext->id));
+        $questioncat = $questiongenerator->create_question_category(array('contextid' => $coursecontext->id));
         $question1 = $questiongenerator->create_question('shortanswer', null, array('category' => $questioncat->id));
         $question2 = $questiongenerator->create_question('shortanswer', null, array('category' => $questioncat->id));
 
@@ -275,8 +274,11 @@ class core_questionlib_testcase extends advanced_testcase {
                 array(context_course::instance($course2->id)->id), '*', MUST_EXIST);
 
         // Check that there are two questions in the restored to course's context.
-        $this->assertEquals(2, $DB->count_records('question', array('category' => $restoredcategory->id)));
-
+        $this->assertEquals(2, $DB->get_record_sql('SELECT COUNT(q.id) as questioncount
+                                                                  FROM {question} q
+                                                                  JOIN {question_versions} qv ON qv.questionid = q.id
+                                                                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                                                 WHERE qbe.questioncategoryid = ?', [$restoredcategory->id])->questioncount);
         $rc->destroy();
     }
 
