@@ -84,7 +84,7 @@ function get_questions_category(object $category, bool $noparent, bool $recurse 
     if ($latestversion) {
         $version = 'AND (qv.version = (SELECT MAX(v.version)
                                          FROM {question_versions} v
-                                         JOIN {question_bank_entry} be
+                                         JOIN {question_bank_entries} be
                                            ON be.id = v.questionbankentryid
                                         WHERE be.id = qbe.id) OR qv.version is null)';
     }
@@ -92,7 +92,7 @@ function get_questions_category(object $category, bool $noparent, bool $recurse 
         "SELECT q.*, qv.status, qc.id AS category
                FROM {question} q
                JOIN {question_versions} qv ON qv.questionid = q.id
-               JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+               JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
               WHERE qc.id {$usql} {$npsql} {$version}
            ORDER BY qc.id, q.qtype, q.name", $params);

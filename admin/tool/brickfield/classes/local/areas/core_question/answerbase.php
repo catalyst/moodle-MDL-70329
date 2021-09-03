@@ -62,7 +62,7 @@ abstract class answerbase extends base {
                         ON a.question = q.id
                 INNER JOIN {question_versions} qv
                         ON qv.questionid = q.id
-                INNER JOIN {question_bank_entry} qbe
+                INNER JOIN {question_bank_entries} qbe
                         ON qbe.id = qv.questionbankentryid
                 INNER JOIN {question_categories} qc
                         ON qc.id = qbe.questioncategoryid
@@ -106,7 +106,7 @@ abstract class answerbase extends base {
                     ON a.question = q.id
             INNER JOIN {question_versions} qv
                     ON qv.questionid = q.id
-            INNER JOIN {question_bank_entry} qbe
+            INNER JOIN {question_bank_entries} qbe
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
@@ -152,7 +152,7 @@ abstract class answerbase extends base {
                     ON a.question = q.id
             INNER JOIN {question_versions} qv
                     ON qv.questionid = q.id
-            INNER JOIN {question_bank_entry} qbe
+            INNER JOIN {question_bank_entries} qbe
                     ON qbe.id = qv.questionbankentryid
             INNER JOIN {question_categories} qc
                     ON qc.id = qbe.questioncategoryid
