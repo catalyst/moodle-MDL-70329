@@ -1977,9 +1977,11 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
  * @param $form object Form data object.
  * @param $context object Context object.
  * @param object|null $questionbankentry object Question bank entry object.
+ * @param bool $newquestion
  * @throws dml_exception
  */
-function save_question_versions(object $question, object $form, object $context, object $questionbankentry = null) : void {
+function save_question_versions(object $question, object $form, object $context, object $questionbankentry = null,
+                                bool $newquestion = true) : void {
     global $DB;
 
     if (!$questionbankentry) {
@@ -1996,35 +1998,36 @@ function save_question_versions(object $question, object $form, object $context,
         $DB->update_record('question_bank_entry', $questionbankentryold);
     }
 
-    // Create question_versions records.
-    $questionversion = new \stdClass();
-    $questionversion->questionbankentryid = $questionbankentry->id;
-    $questionversion->questionid = $question->id;
-    // Get the version and status from the parent question if parent is set.
-    if (!$question->parent) {
-        // Get the status field. It comes from the form, but for testing we can
-        $status = $form->status ?? $question->status;
-        $questionversion->version = get_next_version($questionbankentry->id);
-        $questionversion->status = $status;
+    if ($newquestion) {
+        // Create question_versions records.
+        $questionversion = new \stdClass();
+        $questionversion->questionbankentryid = $questionbankentry->id;
+        $questionversion->questionid = $question->id;
+        // Get the version and status from the parent question if parent is set.
+        if (!$question->parent) {
+            // Get the status field. It comes from the form, but for testing we can.
+            $status = $form->status ?? $question->status;
+            $questionversion->version = get_next_version($questionbankentry->id);
+            $questionversion->status = $status;
+        } else {
+            $parentversion = get_question_version($form->parent);
+            $questionversion->version = $parentversion[array_key_first($parentversion)]->version;
+            $questionversion->status = $parentversion[array_key_first($parentversion)]->status;
+        }
+        $questionversion->id = $DB->insert_record('question_versions', $questionversion);
     } else {
-        $parentversion = get_question_version($form->parent);
-        $questionversion->version = $parentversion[array_key_first($parentversion)]->version;
-        $questionversion->status = $parentversion[array_key_first($parentversion)]->status;
+        $questionversion = new \stdClass();
+        $questionversion->id = $DB->get_record('question_versions',
+                                                ['questionbankentryid' => $questionbankentry->id,
+                                                        'questionid' => $question->id])->id;
+        // Get the status field. It comes from the form, but for testing we can.
+        $questionversion->status = $form->status ?? $question->status;
+        $DB->update_record('question_versions', $questionversion);
     }
-    $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
-    /*// As we do not have random types anymore all new questions will go to reference,
-    // set_references will be manage apart.
-    $questionreference = new \stdClass();
-    $questionreference->usingcontextid = $context->id;
-    $questionreference->component = 'core_question';
-    $questionreference->questionarea = 'qbank';
-    $questionreference->itemid = 0;
-    $questionreference->questionbankentryid = $questionbankentry->id;
-    $questionreference->versionid = $questionversion->id;
-    $questionreference->id = $DB->insert_record('question_references', $questionreference);*/
 
     // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
+    // Also check its always doing an insert, shouldnt it update when created a new version? something to check with quiz changes.
     if (isset($form->modulename)) {
         $questionreference = new \stdClass();
         $questionreference->usingcontextid = $context->id;
