@@ -204,7 +204,7 @@ class helper_test extends \advanced_testcase {
     public function test_question_category_select_menu() {
 
         $this->qgenerator->create_question_category(['contextid' => $this->context->id, 'name' => 'Test this question category']);
-        $contexts = new \question_edit_contexts($this->context);
+        $contexts = new \core_question\lib\question_edit_contexts($this->context);
 
         ob_start();
         helper::question_category_select_menu($contexts->having_cap('moodle/question:add'));
@@ -230,7 +230,7 @@ class helper_test extends \advanced_testcase {
         $qcategory2 = $this->qgenerator->create_question_category(['contextid' => $this->context->id, 'parent' => $qcategory1->id]);
         $qcategory3 = $this->qgenerator->create_question_category(['contextid' => $this->context->id]);
 
-        $contexts = new \question_edit_contexts($this->context);
+        $contexts = new \core_question\lib\question_edit_contexts($this->context);
 
         // Validate that we have the array with the categories tree.
         $categorycontexts = helper::question_category_options($contexts->having_cap('moodle/question:add'));
