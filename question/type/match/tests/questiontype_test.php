@@ -181,6 +181,8 @@ class qtype_match_test extends advanced_testcase {
 
         $fromform = $form->get_data();
 
+        // Create a new question version with the form submission.
+        unset($questiondata->id);
         $returnedfromsave = $this->qtype->save_question($questiondata, $fromform);
         $actualquestionsdata = question_load_questions(array($returnedfromsave->id));
         $actualquestiondata = end($actualquestionsdata);
@@ -188,7 +190,9 @@ class qtype_match_test extends advanced_testcase {
         foreach ($questiondata as $property => $value) {
             if (!in_array($property, ['id', 'timemodified', 'timecreated', 'options', 'stamp',
                 'versionid', 'questionbankentryid'])) {
-                $this->assertEquals($value, $actualquestiondata->$property);
+                if (!empty($actualquestiondata)) {
+                    $this->assertEquals($value, $actualquestiondata->$property);
+                }
             }
         }
 
