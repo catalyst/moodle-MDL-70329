@@ -171,7 +171,7 @@ function question_context_has_any_questions($context): bool {
         throw new moodle_exception('invalidcontextinhasanyquestions', 'question');
     }
     $sql = 'SELECT qbe.*
-              FROM {question_bank_entry} qbe
+              FROM {question_bank_entries} qbe
               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              WHERE qc.contextid = ?';
     return $DB->record_exists_sql($sql, [$contextid]);
@@ -235,7 +235,7 @@ function question_category_delete_safe($category): void {
     $rescue = null; // See the code around the call to question_save_from_deletion.
 
     // Deal with any questions in the category.
-    if ($questionentries = $DB->get_records('question_bank_entry', $criteria, '', 'id')) {
+    if ($questionentries = $DB->get_records('question_bank_entries', $criteria, '', 'id')) {
 
         foreach ($questionentries as $questionentry) {
             $questionids = $DB->get_records('question_versions',
@@ -288,7 +288,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
     global $DB;
 
     // Look at each question in the category.
-    $questionentries = $DB->get_records('question_bank_entry', ['questioncategoryid' => $categoryid], '', 'id');
+    $questionentries = $DB->get_records('question_bank_entries', ['questioncategoryid' => $categoryid], '', 'id');
     $questionids = [];
     foreach ($questionentries as $questionentry) {
         array_merge($questionids, $DB->get_records('question_versions',
@@ -325,7 +325,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
 function delete_question_bank_entry($entryid): void {
     global $DB;
     if ($DB->count_records('question_versions', ['questionbankentryid' => $entryid]) == 0) {
-        $DB->delete_records('question_bank_entry', ['id' => $entryid]);
+        $DB->delete_records('question_bank_entries', ['id' => $entryid]);
     }
 }
 
@@ -355,13 +355,13 @@ function question_delete_question($questionid, $usingcontextid = 0): void {
                    qc.contextid as contextid
               FROM {question} q
               LEFT JOIN {question_versions} qv ON qv.questionid = q.id
-              LEFT JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              LEFT JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
               LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              WHERE q.id = ?';
     $questiondata = $DB->get_record_sql($sql, [$question->id]);
 
     // Do not delete a question if it is used by an activity module
-    if (questions_in_use([$questionid])) {
+    if (questions_in_use([$question->id])) {
         return;
     }
 
@@ -668,7 +668,7 @@ function idnumber_exist_in_question_category($questionidnumber, $categoryid, $li
               FROM {question} q
               JOIN {question_versions} qv
                 ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe
+              JOIN {question_bank_entries} qbe
                 ON qbe.id = qv.questionbankentryid
              WHERE qbe.idnumber LIKE ?
                AND qbe.questioncategoryid = ?
@@ -711,7 +711,7 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
                    qbe.idnumber
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              WHERE q.id $questionidcondition";
 
@@ -721,6 +721,9 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
             question_bank::get_qtype($question->qtype)->move_files(
                     $question->id, $question->contextid, $newcategorydata->contextid);
         }
+        // Move set_reference records to new category.
+        move_question_set_references($question->category, $newcategoryid,
+            $question->contextid, $newcategorydata->contextid, true);
         // Check whether there could be a clash of idnumbers in the new category.
         list($idnumberclash, $rec) = idnumber_exist_in_question_category($question->idnumber, $newcategoryid);
         if ($idnumberclash) {
@@ -737,27 +740,14 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
             $qbankentry = new stdClass();
             $qbankentry->id = $question->entryid;
             $qbankentry->idnumber = $question->idnumber . '_' . $unique;
-            $DB->update_record('question_bank_entry', $qbankentry);
+            $DB->update_record('question_bank_entries', $qbankentry);
         }
-
-        // TODO: Now is commented because we are deciding if we should have an area: core_question.
-        // Update the reference to point to the new category context.
-        /*$references = $DB->get_records('question_references',
-            [
-                'questionbankentryid' => $question->entryid,
-                'versionid' => $question->versionid
-            ]
-        );
-        foreach ($references as $reference) {
-            $reference->usingcontextid = $newcategorydata->contextid;
-            $DB->update_record('question_references', $reference);
-        }*/
 
         // Update the entry to the new category id.
         $entry = new stdClass();
         $entry->id = $question->entryid;
         $entry->questioncategoryid = $newcategorydata->id;
-        $DB->update_record('question_bank_entry', $entry);
+        $DB->update_record('question_bank_entries', $entry);
 
         // Log this question move.
         $event = \core\event\question_moved::create_from_question_instance($question, context::instance_by_id($question->contextid),
@@ -779,6 +769,39 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
 }
 
 /**
+ * Update the questioncontextid field for all question_set_references records given a new context id
+ *
+ * @param int $oldcategoryid Old category to be moved.
+ * @param int $newcatgoryid New category that will receive the questions.
+ * @param int $oldcontextid Old context to be moved.
+ * @param int $newcontextid New context that will receive the questions.
+ * @param bool $delete If the action is delete.
+ * @throws dml_exception
+ */
+function move_question_set_references(int $oldcategoryid, int $newcatgoryid,
+                                      int $oldcontextid, int $newcontextid, bool $delete = false): void {
+    global $DB;
+
+    if ($delete || $oldcontextid !== $newcontextid) {
+        $setreferences = $DB->get_recordset('question_set_references', ['questionscontextid' => $oldcontextid]);
+        foreach ($setreferences as $setreference) {
+            $filter = json_decode($setreference->filtercondition);
+            if (isset($filter->questioncategoryid)) {
+                if ((int)$filter->questioncategoryid === $oldcategoryid) {
+                    $setreference->questionscontextid = $newcontextid;
+                    if ($oldcategoryid !== $newcatgoryid) {
+                        $filter->questioncategoryid = $newcatgoryid;
+                        $setreference->filtercondition = json_encode($filter);
+                    }
+                    $DB->update_record('question_set_references', $setreference);
+                }
+            }
+        }
+        $setreferences->close();
+    }
+}
+
+/**
  * This function helps move a question cateogry to a new context by moving all
  * the files belonging to all the questions to the new context.
  * Also moves subcategories.
@@ -793,7 +816,7 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
     $sql = "SELECT q.id, q.qtype
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
              WHERE qbe.questioncategoryid = ?";
 
     $questionids = $DB->get_records_sql_menu($sql, [$categoryid]);
@@ -816,6 +839,76 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
         $DB->set_field('question_categories', 'contextid', $newcontextid, ['id' => $subcatid]);
         question_move_category_to_context($subcatid, $oldcontextid, $newcontextid);
     }
+}
+
+/**
+ * Load random questions.
+ *
+ * @param int $quizid
+ * @param array $questiondata
+ * @return array
+ */
+function question_load_random_questions($quizid, $questiondata) {
+    global $DB, $USER;
+    $sql = 'SELECT slot.id AS slotid,
+                   slot.maxmark,
+                   slot.slot,
+                   slot.page,
+                   qsr.filtercondition
+             FROM {question_set_references} qsr
+             JOIN {quiz_slots} slot ON slot.id = qsr.itemid
+            WHERE slot.quizid = ?';
+    $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
+
+    $randomquestions = [];
+    // Questions already added.
+    $usedquestionids = [];
+    foreach ($questiondata as $question) {
+        if (isset($usedquestions[$question->id])) {
+            $usedquestionids[$question->id] += 1;
+        } else {
+            $usedquestionids[$question->id] = 1;
+        }
+    }
+    // Usages for this user's previous quiz attempts.
+    $qubaids = new \mod_quiz\question\qubaids_for_users_attempts($quizid, $USER->id);
+    $randomloader = new \core_question\local\bank\random_question_loader($qubaids, $usedquestionids);
+
+    foreach ($randomquestiondatas as $randomquestiondata) {
+        $filtercondition = json_decode($randomquestiondata->filtercondition);
+        $tagids = [];
+        if (isset($filtercondition->tags)) {
+            foreach ($filtercondition->tags as $tag) {
+                $tagstring = explode(',', $tag);
+                $tagids [] = $tagstring[0];
+            }
+        }
+        $randomquestiondata->randomfromcategory = $filtercondition->questioncategoryid;
+        $randomquestiondata->randomincludingsubcategories = $filtercondition->includingsubcategories;
+        $randomquestiondata->questionid = $randomloader->get_next_question_id($randomquestiondata->randomfromcategory,
+            $randomquestiondata->randomincludingsubcategories, $tagids);
+        $randomquestions [] = $randomquestiondata;
+    }
+
+    foreach ($randomquestions as $randomquestion) {
+        // Should not add if there is no question found from the ramdom question loader, maybe empty category.
+        if ($randomquestion->questionid === null) {
+            continue;
+        }
+        $question = new stdClass();
+        $question->slotid = $randomquestion->slotid;
+        $question->maxmark = $randomquestion->maxmark;
+        $question->slot = $randomquestion->slot;
+        $question->page = $randomquestion->page;
+        $qdatas = question_preload_questions($randomquestion->questionid);
+        $qdatas = reset($qdatas);
+        foreach ($qdatas as $key => $qdata) {
+            $question->$key = $qdata;
+        }
+        $questiondata[$question->id] = $question;
+    }
+
+    return $questiondata;
 }
 
 /**
@@ -862,10 +955,8 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
         $orderby = 'ORDER BY ' . $orderby;
     }
 
-    $sql = "SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
-                   q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
-                   q.length, q.stamp, q.timecreated, q.timemodified,
-                   q.createdby, q.modifiedby, qbe.idnumber,
+    $sql = "SELECT q.*,
+                   qc.id as category,
                    qv.status,
                    qv.id as versionid,
                    qv.version,
@@ -875,7 +966,7 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
               FROM {question} q
               JOIN {question_versions} qv
                 ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe
+              JOIN {question_bank_entries} qbe
                 ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
@@ -1419,7 +1510,7 @@ function question_has_capability_on($questionorid, $cap, $notused = -1): bool {
                       FROM {question} q
                       JOIN {question_versions} qv
                         ON qv.questionid = q.id
-                      JOIN {question_bank_entry} qbe
+                      JOIN {question_bank_entries} qbe
                         ON qbe.id = qv.questionbankentryid
                       JOIN {question_categories} qc
                         ON qc.id = qbe.questioncategoryid
@@ -1863,7 +1954,7 @@ function core_question_question_preview_pluginfile($previewcontext, $questionid,
               FROM {question} q
               JOIN {question_versions} qv
                 ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe
+              JOIN {question_bank_entries} qbe
                 ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc
                 ON qc.id = qbe.questioncategoryid
@@ -1952,7 +2043,7 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
     }
 
     // Find all used idnumbers in one DB query.
-    $usedidnumbers = $DB->get_records_select_menu('question_bank_entry', 'questioncategoryid = ? AND idnumber IS NOT NULL',
+    $usedidnumbers = $DB->get_records_select_menu('question_bank_entries', 'questioncategoryid = ? AND idnumber IS NOT NULL',
             [$categoryid], '', 'idnumber, 1');
 
     // Find the next unused idnumber.
@@ -1972,73 +2063,6 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
 }
 
 /**
- * Create a new version, bank_entry and reference for each question.
- *
- * @param $question object question object with all the information required for additional tables.
- * @param $form object Form data object.
- * @param $context object Context object.
- * @param object|null $questionbankentry object Question bank entry object.
- * @throws dml_exception
- */
-function save_question_versions(object $question, object $form, object $context, object $questionbankentry = null) : void {
-    global $DB;
-
-    if (!$questionbankentry) {
-        // Create a record for question_bank_entry, question_versions and question_references.
-        $questionbankentry = new \stdClass();
-        $questionbankentry->questioncategoryid = $form->category;
-        $questionbankentry->idnumber = $question->idnumber;
-        $questionbankentry->ownerid = $question->createdby;
-        $questionbankentry->id = $DB->insert_record('question_bank_entry', $questionbankentry);
-    } else {
-        $questionbankentryold = new \stdClass();
-        $questionbankentryold->id = $questionbankentry->id;
-        $questionbankentryold->idnumber = $question->idnumber;
-        $DB->update_record('question_bank_entry', $questionbankentryold);
-    }
-
-    // Create question_versions records.
-    $questionversion = new \stdClass();
-    $questionversion->questionbankentryid = $questionbankentry->id;
-    $questionversion->questionid = $question->id;
-    // Get the version and status from the parent question if parent is set.
-    if (!$question->parent) {
-        // Get the status field. It comes from the form, but for testing we can
-        $status = $form->status ?? $question->status;
-        $questionversion->version = get_next_version($questionbankentry->id);
-        $questionversion->status = $status;
-    } else {
-        $parentversion = get_question_version($form->parent);
-        $questionversion->version = $parentversion[array_key_first($parentversion)]->version;
-        $questionversion->status = $parentversion[array_key_first($parentversion)]->status;
-    }
-    $questionversion->id = $DB->insert_record('question_versions', $questionversion);
-
-    /*// As we do not have random types anymore all new questions will go to reference,
-    // set_references will be manage apart.
-    $questionreference = new \stdClass();
-    $questionreference->usingcontextid = $context->id;
-    $questionreference->component = 'core_question';
-    $questionreference->questionarea = 'qbank';
-    $questionreference->itemid = 0;
-    $questionreference->questionbankentryid = $questionbankentry->id;
-    $questionreference->versionid = $questionversion->id;
-    $questionreference->id = $DB->insert_record('question_references', $questionreference);*/
-
-    // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
-    if (isset($form->modulename)) {
-        $questionreference = new \stdClass();
-        $questionreference->usingcontextid = $context->id;
-        $questionreference->component = $form->modulename;
-        $questionreference->questionarea = 'slot';
-        $questionreference->itemid = 0;
-        $questionreference->questionbankentryid = $questionbankentry->id;
-        $questionreference->version = $questionversion->version;
-        $questionreference->id = $DB->insert_record('question_references', $questionreference);
-    }
-}
-
-/**
  * Get the question_bank_entry object given a question id.
  *
  * @param $questionid int Question id.
@@ -2051,7 +2075,7 @@ function get_question_bank_entry(int $questionid): object {
     $sql = "SELECT qbe.*
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
              WHERE q.id = :id";
 
     $qbankentry = $DB->get_record_sql($sql, ['id' => $questionid]);
@@ -2087,7 +2111,7 @@ function get_next_version(int $questionbankentryid): int {
 
     $sql = "SELECT MAX(qv.version)
               FROM {question_versions} qv
-              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
              WHERE qbe.id = :id";
 
     $nextversion = $DB->get_field_sql($sql, ['id' => $questionbankentryid]);
