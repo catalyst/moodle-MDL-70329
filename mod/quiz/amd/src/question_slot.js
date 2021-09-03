@@ -90,6 +90,7 @@ const toggleLoading = () => {
 const changeVersion = (slotId, slot, quizId) => {
     const selectElement = document.querySelector(SELECTORS.VERSION_LIST);
     selectElement.addEventListener('change', () => {
+        let versionIdSelected = parseInt(selectElement.value);
         setSelectors(slotId);
         let mainContainer = document.querySelector(SELECTORS.SLOT_ID);
         let request = [{
@@ -98,10 +99,21 @@ const changeVersion = (slotId, slot, quizId) => {
                 slotid: slotId,
                 slot: slot,
                 quizid: quizId,
+                newversionid: versionIdSelected,
             }
         }];
         ajax(request, function(response) {
-            Templates.render('mod_quiz/question_slot', response).then(function(html) {
+            let dataToRender = {
+                slotid: response.slotid,
+                canbeedited: response.canbeedited,
+                checkbox: response.checkbox,
+                questionnumber: response.questionnumber,
+                questionname: response.questionname,
+                questionicons: response.questionicons,
+                questiondependencyicon: response.questiondependencyicon,
+                versionoption: JSON.parse(response.versionoption)
+            };
+            Templates.render('mod_quiz/question_slot', dataToRender).then(function(html) {
                 mainContainer.innerHTML = html;
                 return html;
             }).catch(Notification.exception);

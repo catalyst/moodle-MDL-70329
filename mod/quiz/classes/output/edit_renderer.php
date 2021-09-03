@@ -734,7 +734,7 @@ class edit_renderer extends \plugin_renderer_base {
      */
     public function question(structure $structure, int $slot, \moodle_url $pageurl) {
 
-        // Get the data required by the template question_slot.
+        // Get the data required by the question_slot template.
         $canedit = $structure->can_be_edited();
         $checkbox = $this->get_checkbox_render($structure, $slot);
         $slotid = $structure->get_slot_id_for_slot($slot);
@@ -747,18 +747,6 @@ class edit_renderer extends \plugin_renderer_base {
             $questiondependencyicon = $this->question_dependency_icon($structure, $slot);
         }
 
-        // TODO: Move to questionlib or questiontypebase.
-        global $DB;
-        $sql = "SELECT qv.id AS versionid, qv.version
-                  FROM {question_versions} qv 
-                 WHERE qv.questionbankentryid = (SELECT DISTINCT qbe.id
-                                                   FROM {question_bank_entry} qbe
-                                                   JOIN {question_versions} qv ON qbe.id = qv.questionbankentryid
-                                                   JOIN {question} q ON qv.questionid = q.id
-                                                  WHERE q.id = ?)";
-
-        $versions = $DB->get_records_sql($sql, [$structure->get_question_in_slot($slot)->id]);
-
         $output = '';
         $output .= html_writer::start_tag('div');
 
@@ -766,9 +754,7 @@ class edit_renderer extends \plugin_renderer_base {
             $output .= $this->question_move_icon($structure, $slot);
         }
 
-        $output .= html_writer::start_div('mod-indent-outer', ['id' => 'mod-indent-outer-slot-' . $slotid]);
-
-        $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$slotid, $slot, $quizid]);
+        //$output .= html_writer::start_div('mod-indent-outer', ['id' => 'mod-indent-outer-slot-' . $slotid]);
 
         $data =
             [
@@ -781,12 +767,37 @@ class edit_renderer extends \plugin_renderer_base {
                 'questiondependencyicon' => $questiondependencyicon,
             ];
 
+        // TODO: Move to questionlib or questiontypebase.
+        global $DB;
+        $sql = "SELECT qv.id AS versionid, qv.version
+                  FROM {question_versions} qv
+                 WHERE qv.questionbankentryid = (SELECT DISTINCT qbe.id
+                                                   FROM {question_bank_entry} qbe
+                                                   JOIN {question_versions} qv ON qbe.id = qv.questionbankentryid
+                                                   JOIN {question} q ON qv.questionid = q.id
+                                                  WHERE q.id = ?)";
+
+        $versionsoptions = $DB->get_records_sql($sql, [$structure->get_question_in_slot($slot)->id]);
+
+        // Get the version of current question.
+        $currentversion = $DB->get_record('question_versions', ['questionid' => $structure->get_question_in_slot($slot)->id]);
+
+        $data['versionoptions'] = [];
+        foreach ($versionsoptions as $versionsoption) {
+            $versionsoption->selected = false;
+            if ($versionsoption->versionid === $currentversion->id) {
+                $versionsoption->selected = true;
+            }
+            $data['versionoption'][] = $versionsoption;
+        }
+        $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$slotid, $slot, $quizid]);
+
         // Render the question slot template.
         $output .= $this->render_from_template('mod_quiz/question_slot', $data);
 
         //$output.= html_writer::select([1,2], 'versions', '', '', ['id' => 'version-' . $structure->get_slot_id_for_slot($slot)]);
         // End of indentation div.
-        $output .= html_writer::end_tag('div');
+        //$output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
 
         return $output;

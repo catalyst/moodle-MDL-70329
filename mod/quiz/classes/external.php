@@ -2021,6 +2021,7 @@ class mod_quiz_external extends external_api {
                 'slotid' => new external_value(PARAM_INT, ''),
                 'slot' => new external_value(PARAM_INT, ''),
                 'quizid' => new external_value(PARAM_INT, ''),
+                'newversionid' => new external_value(PARAM_INT, ''),
             ]
         );
     }
@@ -2031,29 +2032,68 @@ class mod_quiz_external extends external_api {
      * @param int $slotid Slot id to display.
      * @param int $slot
      * @param int $quizid
+     * @param int $newversionid
      * @return array
      * @throws invalid_parameter_exception
+     * @throws moodle_exception
      */
-    public static function get_question_slot(int $slotid, int $slot, int $quizid): array {
+    public static function get_question_slot(int $slotid, int $slot, int $quizid, int $newversionid): array {
         global $PAGE;
 
         $params =
             [
                 'slotid' => $slotid,
                 'slot' => $slot,
-                'quizid' => $quizid
+                'quizid' => $quizid,
+                'newversionid' => $newversionid
             ];
         $params = self::validate_parameters(self::get_question_slot_parameters(), $params);
 
         // Get the quiz object to generate the quiz structure.
         list($quiz, $course, $cm) = self::validate_quiz($quizid);
         $quizobj = new quiz($quiz, $cm, $course);
-        $structure = $quizobj->get_structure();
         // Get the render object from \mod_quiz\output\edit_render class.
         $render = new \mod_quiz\output\edit_renderer($PAGE, "/");
         $pageurl = new \moodle_url('/mod/quiz/edit.php', ['cmid' => 6]);
 
+
+        // TODO: Move to questionlib or questiontypebase.
+        global $DB;
+
+        $sql = "SELECT DISTINCT q.id
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                 WHERE qv.id = ?";
+        $question = $DB->get_record_sql($sql, [$newversionid]);
+
+        // Get the version of current question.
+        $quizslot = new \stdClass();
+        $quizslot->id = $slotid;
+        $quizslot->questionid = $question->id;
+        $DB->update_record('quiz_slots', $quizslot);
+
+
+        $sql = "SELECT qv.id AS versionid, qv.version
+                  FROM {question_versions} qv
+                 WHERE qv.questionbankentryid = (SELECT DISTINCT qbe.id
+                                                   FROM {question_bank_entry} qbe
+                                                   JOIN {question_versions} qv ON qbe.id = qv.questionbankentryid
+                                                   JOIN {question} q ON qv.questionid = q.id
+                                                  WHERE q.id = ?)";
+
+        $versionsoptions = $DB->get_records_sql($sql, [$question->id]);
+
+        $data = [];
+        foreach ($versionsoptions as $versionsoption) {
+            $versionsoption->selected = false;
+            if ($versionsoption->versionid === $newversionid) {
+                $versionsoption->selected = true;
+            }
+            $data[] = $versionsoption;
+        }
+
         // Get the data required by the question_slot template.
+        $structure = $quizobj->get_structure();
         $canedit = $structure->can_be_edited();
         $checkbox = $render->get_checkbox_render($structure, $slot);
         $questionnumber = $render->question_number($structure->get_displayed_number_for_slot($slot));
@@ -2063,6 +2103,7 @@ class mod_quiz_external extends external_api {
         if ($canedit) {
             $questiondependencyicon = $render->question_dependency_icon($structure, $slot);
         }
+
 
         $result =
             [
@@ -2074,6 +2115,9 @@ class mod_quiz_external extends external_api {
                 'questionicons' => $questionicons,
                 'questiondependencyicon' => $questiondependencyicon,
             ];
+
+
+        $result['versionoption'] = json_encode($data);
 
         return $result;
     }
@@ -2093,6 +2137,7 @@ class mod_quiz_external extends external_api {
                 'questionname' => new external_value(PARAM_RAW, ''),
                 'questionicons' => new external_value(PARAM_RAW, ''),
                 'questiondependencyicon' => new external_value(PARAM_RAW, ''),
+                'versionoption' => new external_value(PARAM_RAW, ''),
             ]
         );
     }
