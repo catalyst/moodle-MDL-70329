@@ -458,11 +458,6 @@ class question_type {
             }
         }
 
-        // Always creates a new question and version record.
-        // Set the unique code.
-        $question->stamp = make_unique_id_code();
-        $question->createdby = $USER->id;
-        $question->timecreated = time();
         if (isset($form->previousstatus)) {
             $previousstatus = $form->previousstatus;
         } else {
@@ -473,6 +468,10 @@ class question_type {
             }
         }
         if (($form->status === $previousstatus) || !isset($question->id)) {
+            // Set the unique code.
+            $question->stamp = make_unique_id_code();
+            $question->createdby = $USER->id;
+            $question->timecreated = time();
             $question->id = $DB->insert_record('question', $question);
             $newquestion = true;
         } else {
