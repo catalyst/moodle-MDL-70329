@@ -92,6 +92,8 @@ if ($param->moveupcontext || $param->movedowncontext) {
     $category->contextid = $param->tocontext;
     $event = \core\event\question_category_moved::create_from_question_category_instance($category);
     $event->trigger();
+    // Update the set_reference records when moving a category to a different context.
+    move_question_set_references($catid, $catid, $oldcat->contextid, $category->contextid);
     $qcobject->update_category($catid, "{$newtopcat->id},{$param->tocontext}", $oldcat->name, $oldcat->info);
     // The previous line does a redirect().
 }
@@ -106,7 +108,7 @@ if ($param->delete) {
     $sql = "SELECT count(q.id)
               FROM {question} q
               JOIN {question_versions} qv ON qv.questionid = q.id
-              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
              WHERE qbe.questioncategoryid = ?";
 
     $questionstomove = $DB->count_records_sql($sql, [$param->delete]);
