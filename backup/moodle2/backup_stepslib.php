@@ -2340,7 +2340,7 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $questionbankentries = new backup_nested_element('question_bank_entries');
 
-        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['idnumber', 'ownerid']);
+        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['questioncategoryid', 'idnumber', 'ownerid']);
 
         $questionversions = new backup_nested_element('question_versions_entry');
 
