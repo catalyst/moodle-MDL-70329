@@ -177,7 +177,7 @@ if ($id) {
     if ($makecopy) {
         // If we are duplicating a question, add some indication to the question name.
         $question->name = get_string('questionnamecopy', 'question', $question->name);
-        $question->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $category->id);
+        //$question->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $category->id);
         $question->beingcopied = true;
     }
 
@@ -210,6 +210,7 @@ if ($formeditable && $id) {
 $toform->appendqnumstring = $appendqnumstring;
 $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
+$toform->idnumber = null;
 if (isset($question->id)) {
     $versiondata = $DB->get_record('question_versions', ['questionid' => $question->id]);
     $toform->status = $versiondata->status;
@@ -217,6 +218,9 @@ if (isset($question->id)) {
     $toform->idnumber = $entrydata->idnumber;
 } else {
     $toform->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
+}
+if ($makecopy) {
+    $toform->idnumber = core_question_find_next_unused_idnumber($toform->idnumber, $category->id);
 }
 if ($cm !== null) {
     $toform->cmid = $cm->id;

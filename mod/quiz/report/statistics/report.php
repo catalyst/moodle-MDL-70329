@@ -63,6 +63,11 @@ class quiz_statistics_report extends quiz_default_report {
             echo quiz_no_questions_message($quiz, $cm, $this->context);
             return true;
         }
+        if (!quiz_attempts_exist($quiz->id)) {
+            $this->print_header_and_tabs($cm, $course, $quiz, 'statistics');
+            echo quiz_no_question_attempts_message($cm);
+            return true;
+        }
 
         // Work out the display options.
         $download = optional_param('download', '', PARAM_ALPHA);
@@ -838,11 +843,11 @@ class quiz_statistics_report extends quiz_default_report {
         foreach ($questions as $qno => $question) {
             $q = $fullquestions[$question->id];
             $q->maxmark = $question->maxmark;
-            $q->slot = $qno;
+            $q->slot = $question->slot;
             $q->number = $question->number;
-            $questions[$qno] = $q;
+            $questiondata[$question->slot] = $q;
         }
-        return $questions;
+        return $questiondata;
     }
 
     /**

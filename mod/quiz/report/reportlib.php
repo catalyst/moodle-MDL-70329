@@ -87,36 +87,33 @@ function quiz_has_questions($quizid) {
 }
 
 /**
+ * Is there any attempts for the quiz.
+ *
+ * @param $quizid
+ * @return bool
+ */
+function quiz_attempts_exist($quizid) {
+    $attempts = count(\mod_quiz\question\bank\qbank_helper::get_questionids_for_attempts_in_quiz($quizid));
+    if ($attempts > 0) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Get the slots of real questions (not descriptions) in this quiz, in order.
  * @param object $quiz the quiz.
  * @return array of slot => $question object with fields
  *      ->slot, ->id, ->maxmark, ->number, ->length.
  */
 function quiz_report_get_significant_questions($quiz) {
-    global $DB;
-
-    $qsbyslot = $DB->get_records_sql("
-            SELECT slot.slot,
-                   q.id,
-                   q.qtype,
-                   q.length,
-                   slot.maxmark
-
-              FROM {question} q
-              JOIN {quiz_slots} slot ON slot.questionid = q.id
-
-             WHERE slot.quizid = ?
-               AND q.length > 0
-
-          ORDER BY slot.slot", array($quiz->id));
-
+    $qsbyslot = \mod_quiz\question\bank\qbank_helper::get_question_report_structure($quiz->id);
     $number = 1;
     foreach ($qsbyslot as $question) {
         $question->number = $number;
         $number += $question->length;
         $question->type = $question->qtype;
     }
-
     return $qsbyslot;
 }
 
@@ -410,6 +407,17 @@ function quiz_no_questions_message($quiz, $cm, $context) {
         $output .= $OUTPUT->single_button(new moodle_url('/mod/quiz/edit.php',
         array('cmid' => $cm->id)), get_string('editquiz', 'quiz'), 'get');
     }
+
+    return $output;
+}
+
+function quiz_no_question_attempts_message($cm) {
+    global $OUTPUT;
+
+    $output = '';
+    $output .= $OUTPUT->notification(get_string('noquestionattempts', 'quiz'));
+    $output .= $OUTPUT->single_button(new moodle_url('/mod/quiz/view.php',
+        array('id' => $cm->id)), get_string('gobacktoquiz', 'quiz'), 'get');
 
     return $output;
 }

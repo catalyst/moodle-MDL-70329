@@ -15,19 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_quiz
- * @subpackage backup-moodle2
- * @copyright  2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-
-defined('MOODLE_INTERNAL') || die();
-
-
-/**
  * Structure step to restore one quiz activity
  *
+ * @package    mod_quiz
+ * @subpackage backup-moodle2
  * @copyright  2010 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -57,10 +48,11 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         // A chance for access subplugings to set up their quiz data.
         $this->add_subplugin_structure('quizaccess', $quiz);
 
-        $paths[] = new restore_path_element('quiz_question_instance',
-                '/activity/quiz/question_instances/question_instance');
-        $paths[] = new restore_path_element('quiz_slot_tags',
-                '/activity/quiz/question_instances/question_instance/tags/tag');
+        $paths[] = new restore_path_element('quiz_question_instance', '/activity/quiz/question_instances/question_instance');
+        $paths[] = new restore_path_element('quiz_question_set_reference',
+            '/activity/quiz/question_instances/question_instance/question_set_references/question_set_reference');
+        $paths[] = new restore_path_element('quiz_question_reference',
+            '/activity/quiz/question_instances/question_instance/question_references/question_reference');
         $paths[] = new restore_path_element('quiz_section', '/activity/quiz/sections/section');
         $paths[] = new restore_path_element('quiz_feedback', '/activity/quiz/feedbacks/feedback');
         $paths[] = new restore_path_element('quiz_override', '/activity/quiz/overrides/override');
@@ -301,9 +293,9 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         $oldid = $data->id;
 
         // Backwards compatibility for old field names (MDL-43670).
-        if (!isset($data->questionid) && isset($data->question)) {
-            $data->questionid = $data->question;
-        }
+        //if (!isset($data->questionid) && isset($data->question)) {
+        //    $data->questionid = $data->question;
+        //}
         if (!isset($data->maxmark) && isset($data->grade)) {
             $data->maxmark = $data->grade;
         }
@@ -335,43 +327,48 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         }
 
         $data->quizid = $this->get_new_parentid('quiz');
-        $questionmapping = $this->get_mapping('question', $data->questionid);
-        $data->questionid = $questionmapping ? $questionmapping->newitemid : false;
-
-        if (isset($data->questioncategoryid)) {
-            $data->questioncategoryid = $this->get_mappingid('question_category', $data->questioncategoryid);
-        } else if ($questionmapping && $questionmapping->info->qtype == 'random') {
-            // Backward compatibility for backups created using Moodle 3.4 or earlier.
-            $data->questioncategoryid = $this->get_mappingid('question_category', $questionmapping->parentitemid);
-            $data->includingsubcategories = $questionmapping->info->questiontext ? 1 : 0;
-        }
+        //$questionmapping = $this->get_mapping('question', $data->questionid);
+        //$data->questionid = $questionmapping ? $questionmapping->newitemid : false;
+        //
+        //if (isset($data->questioncategoryid)) {
+        //    $data->questioncategoryid = $this->get_mappingid('question_category', $data->questioncategoryid);
+        //} else if ($questionmapping && $questionmapping->info->qtype == 'random') {
+        //    // Backward compatibility for backups created using Moodle 3.4 or earlier.
+        //    $data->questioncategoryid = $this->get_mappingid('question_category', $questionmapping->parentitemid);
+        //    $data->includingsubcategories = $questionmapping->info->questiontext ? 1 : 0;
+        //}
 
         $newitemid = $DB->insert_record('quiz_slots', $data);
         // Add mapping, restore of slot tags (for random questions) need it.
         $this->set_mapping('quiz_question_instance', $oldid, $newitemid);
     }
 
-    /**
-     * Process a quiz_slot_tags restore
-     *
-     * @param stdClass|array $data The quiz_slot_tags data
-     */
-    protected function process_quiz_slot_tags($data) {
+    protected function process_quiz_question_set_reference($data) {
         global $DB;
-
-        $data = (object)$data;
-
-        $data->slotid = $this->get_new_parentid('quiz_question_instance');
-        if ($this->task->is_samesite() && $tag = core_tag_tag::get($data->tagid, 'id, name')) {
-            $data->tagname = $tag->name;
-        } else if ($tag = core_tag_tag::get_by_name(0, $data->tagname, 'id, name')) {
-            $data->tagid = $tag->id;
-        } else {
-            $data->tagid = null;
-            $data->tagname = $tag->name;
+        $data = (object) $data;
+        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
+        $data->itemid = $this->get_new_parentid('quiz_question_instance');
+        $filtercondition = json_decode($data->filtercondition);
+        if ($category = $this->get_mappingid('question_category', $filtercondition->questioncategoryid)) {
+            $filtercondition->questioncategoryid = $category;
+        }
+        $data->filtercondition = json_encode($filtercondition);
+        if ($context = $this->get_mappingid('context', $data->questionscontextid)) {
+            $data->questionscontextid = $context;
         }
 
-        $DB->insert_record('quiz_slot_tags', $data);
+        $DB->insert_record('question_set_references', $data);
+    }
+
+    protected function process_quiz_question_reference($data) {
+        global $DB;
+        $data = (object) $data;
+        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
+        $data->itemid = $this->get_new_parentid('quiz_question_instance');
+        if ($entry = $this->get_mappingid('question_bank_entry', $data->questionbankentryid)) {
+            $data->questionbankentryid = $entry;
+        }
+        $DB->insert_record('question_references', $data);
     }
 
     protected function process_quiz_section($data) {
