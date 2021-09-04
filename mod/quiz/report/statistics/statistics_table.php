@@ -160,6 +160,7 @@ class quiz_statistics_table extends flexible_table {
      * @return string contents of this table cell.
      */
     protected function col_number($questionstat) {
+        //var_dump($questionstat->question);die;
         if ($this->is_calculated_question_summary($questionstat)) {
             return '';
         }
@@ -188,7 +189,7 @@ class quiz_statistics_table extends flexible_table {
         if ($this->is_calculated_question_summary($questionstat)) {
             return '';
         } else {
-            return print_question_icon($questionstat->question, true);
+            return print_question_icon($questionstat->question);
         }
     }
 

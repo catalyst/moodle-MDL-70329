@@ -61,7 +61,6 @@ class qtype_multianswer_edit_form extends question_edit_form {
 
 
     public function __construct($submiturl, $question, $category, $contexts, $formeditable = true) {
-        global $SESSION, $CFG, $DB;
         $this->regenerate = true;
         $this->reload = optional_param('reload', false, PARAM_BOOL);
 
@@ -70,14 +69,9 @@ class qtype_multianswer_edit_form extends question_edit_form {
         if (isset($question->id) && $question->id != 0) {
             // TODO MDL-43779 should not have quiz-specific code here.
             $this->savedquestiondisplay = fullclone($question);
-            $this->nbofquiz = $DB->count_records('quiz_slots', array('questionid' => $question->id));
+            $this->nbofquiz = \mod_quiz\question\bank\qbank_helper::get_question_usage_count_in_quiz($question->id);
             $this->usedinquiz = $this->nbofquiz > 0;
-            $this->nbofattempts = $DB->count_records_sql("
-                    SELECT count(1)
-                      FROM {quiz_slots} slot
-                      JOIN {quiz_attempts} quiza ON quiza.quiz = slot.quizid
-                     WHERE slot.questionid = ?
-                       AND quiza.preview = 0", array($question->id));
+            $this->nbofattempts = \mod_quiz\question\bank\qbank_helper::get_question_attempt_count($question->id);
         }
 
         parent::__construct($submiturl, $question, $category, $contexts, $formeditable);
