@@ -415,32 +415,6 @@ class question_type {
             $question->defaultmark = $form->defaultmark;
         }
 
-        if (isset($form->idnumber)) {
-            if ((string) $form->idnumber === '') {
-                $question->idnumber = null;
-            } else {
-                // While this check already exists in the form validation,
-                // this is a backstop preventing unnecessary errors.
-                // Only set the idnumber if it has changed and will not cause a unique index violation.
-                if (strpos($form->category, ',') !== false) {
-                    list($category, $categorycontextid) = explode(',', $form->category);
-                } else {
-                    $category = $form->category;
-                }
-                $sql = "SELECT qbe.id
-                          FROM {question_bank_entry} qbe
-                         WHERE qbe.idnumber = :idnumber
-                           AND qbe.questioncategoryid = :categoryid";
-
-                if (!$DB->record_exists_sql($sql,
-                        ['idnumber' => $form->idnumber, 'categoryid' => $category])) {
-                    $question->idnumber = $form->idnumber;
-                }
-            }
-        } else {
-            $question->idnumber = null;
-        }
-
         // Only create a new bank entry if the question is not a new version (New question or duplicating a question).
         $questionbankentry = null;
         if (isset($question->id)) {
@@ -474,6 +448,38 @@ class question_type {
                 }
             }
         }
+
+        // Idnumber validation.
+        $question->idnumber = null;
+        if (isset($form->idnumber)) {
+            if ((string) $form->idnumber === '') {
+                $question->idnumber = null;
+            } else {
+                // While this check already exists in the form validation,
+                // this is a backstop preventing unnecessary errors.
+                // Only set the idnumber if it has changed and will not cause a unique index violation.
+                if (strpos($form->category, ',') !== false) {
+                    list($category, $categorycontextid) = explode(',', $form->category);
+                } else {
+                    $category = $form->category;
+                }
+                $params = ['idnumber' => $form->idnumber, 'categoryid' => $category];
+                $andcondition = '';
+                if (isset($question->id) && isset($questionbankentry->id)) {
+                    $andcondition = 'AND qbe.id != :notid';
+                    $params['notid'] = $questionbankentry->id;
+                }
+                $sql = "SELECT qbe.id
+                          FROM {question_bank_entry} qbe
+                         WHERE qbe.idnumber = :idnumber
+                           AND qbe.questioncategoryid = :categoryid
+                           $andcondition";
+                if (!$DB->record_exists_sql($sql, $params)) {
+                    $question->idnumber = $form->idnumber;
+                }
+            }
+        }
+
         $currentstatus = $previousstatus;
         if (isset($form->status)) {
             $currentstatus = $form->status;
@@ -485,6 +491,7 @@ class question_type {
             $DB->update_record('question', $question);
             $newquestion = false;
         }
+        //var_dump($question);die;
 
         // Create a new version, bank_entry and reference for each question.
         save_question_versions($question, $form, $context, $questionbankentry, $newquestion);
@@ -991,7 +998,6 @@ class question_type {
         $question->length = $questiondata->length;
         $question->penalty = $questiondata->penalty;
         $question->stamp = $questiondata->stamp;
-        $question->idnumber = $questiondata->idnumber;
         $question->timecreated = $questiondata->timecreated;
         $question->timemodified = $questiondata->timemodified;
         $question->createdby = $questiondata->createdby;
@@ -1022,10 +1028,11 @@ class question_type {
         $extrarecord = $DB->get_record_sql('SELECT qv.status,
                                                        qv.version,
                                                        qv.id as versionid,
-                                                       qv.questionbankentryid
+                                                       qv.questionbankentryid,
+                                                       qbe.idnumber
                                                   FROM {question} q
-                                                  JOIN {question_versions} qv
-                                                    ON qv.questionid = q.id
+                                                  JOIN {question_versions} qv ON qv.questionid = q.id
+                                                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                                                  WHERE q.id = ?', [$questiondata->id]);
         if (isset($questiondata->status)) {
             $question->status = $questiondata->status;
@@ -1046,6 +1053,11 @@ class question_type {
             $question->questionbankentryid = $questiondata->questionbankentryid;
         } else {
             $question->questionbankentryid = $extrarecord->questionbankentryid;
+        }
+        if (isset($questiondata->idnumber)) {
+            $question->idnumber = $questiondata->idnumber;
+        } else {
+            $question->idnumber = $extrarecord->idnumber;
         }
     }
 

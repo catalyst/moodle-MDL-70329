@@ -145,12 +145,20 @@ class quiz {
      * Load just basic information about all the questions in this quiz.
      */
     public function preload_questions() {
-        $this->questions = question_preload_questions(null,
-                'slot.maxmark, slot.id AS slotid, slot.slot, slot.page,
-                 slot.questioncategoryid AS randomfromcategory,
-                 slot.includingsubcategories AS randomincludingsubcategories',
-                '{quiz_slots} slot ON slot.quizid = :quizid AND q.id = slot.questionid',
-                array('quizid' => $this->quiz->id), 'slot.slot');
+        $questiondata = question_preload_questions(null,
+                'slot.id AS slotid, slot.maxmark, slot.slot, slot.page',
+                '(SELECT s.*, null AS questioncategoryid, qr.questionbankentryid AS bankentry, qr.version AS version
+                     FROM {question_references} qr
+                     JOIN {quiz_slots} s ON s.id = qr.itemid) slot ON slot.quizid = :quizid AND slot.bankentry = qbe.id and slot.version = qv.version',
+                ['quizid' => $this->quiz->id], 'slot.slot');
+        $latestquestionids = \mod_quiz\question\bank\qbank_helper::get_always_latest_version_question_ids($this->quiz->id);
+        if (!empty($latestquestionids)) {
+            $latestquestiondata = \mod_quiz\question\bank\qbank_helper::get_question_structure_data($this->quiz->id, $latestquestionids, true);
+            $questiondata = array_merge($questiondata, $latestquestiondata);
+        }
+        $allquestiondata = \mod_quiz\question\bank\qbank_helper::question_array_sort(
+            question_load_random_questions($this->quiz->id, $questiondata), 'slot');
+        $this->questions = $allquestiondata;
     }
 
     /**
@@ -535,21 +543,9 @@ class quiz {
         // To control if we need to look in categories for questions.
         $qcategories = array();
 
-        // We must be careful with random questions, if we find a random question we must assume that the quiz may content
-        // any of the questions in the referenced category (or subcategories).
         foreach ($this->get_questions() as $questiondata) {
-            if ($questiondata->qtype == 'random' and $includepotential) {
-                $includesubcategories = (bool) $questiondata->questiontext;
-                if (!isset($qcategories[$questiondata->category])) {
-                    $qcategories[$questiondata->category] = false;
-                }
-                if ($includesubcategories) {
-                    $qcategories[$questiondata->category] = true;
-                }
-            } else {
-                if (!in_array($questiondata->qtype, $questiontypes)) {
-                    $questiontypes[] = $questiondata->qtype;
-                }
+            if (!in_array($questiondata->qtype, $questiontypes)) {
+                $questiontypes[] = $questiondata->qtype;
             }
         }
 
@@ -709,8 +705,7 @@ class quiz_attempt {
 
         $this->quba = question_engine::load_questions_usage_by_activity($this->attempt->uniqueid);
         $this->slots = $DB->get_records('quiz_slots',
-                array('quizid' => $this->get_quizid()), 'slot',
-                'slot, id, requireprevious, questionid, includingsubcategories');
+                array('quizid' => $this->get_quizid()), 'slot');
         $this->sections = array_values($DB->get_records('quiz_sections',
                 array('quizid' => $this->get_quizid()), 'firstslot'));
 
@@ -739,6 +734,7 @@ class quiz_attempt {
                 $section->lastslot = count($this->slots);
             }
             for ($slot = $section->firstslot; $slot <= $section->lastslot; $slot += 1) {
+                $this->slots[$slot] = new stdClass();
                 $this->slots[$slot]->section = $section;
             }
         }
@@ -2099,19 +2095,25 @@ class quiz_attempt {
         $transaction = $DB->start_delegated_transaction();
 
         // Choose the replacement question.
-        $questiondata = $DB->get_record('question',
-                array('id' => $this->slots[$slot]->questionid));
-        if ($questiondata->qtype != 'random') {
-            $newqusetionid = $questiondata->id;
+        if (!\mod_quiz\question\bank\qbank_helper::is_random($this->slots[$slot]->id)) {
+            $newqusetionid = \mod_quiz\question\bank\qbank_helper::get_question_id_from_slot($this->slots[$slot]->id);
         } else {
-            $tagids = quiz_retrieve_slot_tag_ids($this->slots[$slot]->id);
+            $tagids = [];
+            $randomquestiondata = \mod_quiz\question\bank\qbank_helper::get_random_question_data_from_slot($this->slots[$slot]->id);
+            $filtercondition = json_decode($randomquestiondata->filtercondition);
+            if (isset($filtercondition->tags)) {
+                foreach ($filtercondition->tags as $tag) {
+                    $tagstring = explode(',', $tag);
+                    $tagids [] = $tagstring[0];
+                }
+            }
 
             $randomloader = new \core_question\local\bank\random_question_loader($qubaids, array());
-            $newqusetionid = $randomloader->get_next_question_id($questiondata->category,
-                    (bool) $questiondata->questiontext, $tagids);
+            $newqusetionid = $randomloader->get_next_question_id($filtercondition->questioncategoryid,
+                    (bool) $filtercondition->includingsubcategories, $tagids);
             if ($newqusetionid === null) {
                 throw new moodle_exception('notenoughrandomquestions', 'quiz',
-                        $this->quizobj->view_url(), $questiondata);
+                        $this->quizobj->view_url());
             }
         }
 
