@@ -58,11 +58,14 @@ class helper {
                         AND q.id = ?)
                     UNION
                     (SELECT qz.id as quizid,
-                           qz.name as modulename,
-                           qz.course as courseid
+                            qz.name as modulename,
+                            qz.course as courseid
                       FROM {quiz_slots} slot
                       JOIN {quiz} qz ON qz.id = slot.quizid
-                     WHERE slot.questionid = ?)";
+                      JOIN {question_references} qr ON qr.itemid = slot.id                  
+                      JOIN {question_bank_entry} qbe ON qbe.id = qr.questionbankentryid
+                      JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                     WHERE qv.questionbankentryid = ?)";
         return $sqlset;
     }
 
