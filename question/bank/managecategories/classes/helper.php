@@ -252,9 +252,14 @@ class helper {
      */
     public static function get_categories_for_contexts($contexts, string $sortorder = 'parent, sortorder, name ASC',
                                                        bool $top = false, $showallversions = 0,
-                                                       $status = constants::QUESTION_STATUS_READY): array {
+                                                       $status = null): array {
         global $DB;
         $topwhere = $top ? '' : 'AND c.parent <> 0';
+        if (empty($status)) {
+            $statuscondition = 'AND (qv.status = '. constants::QUESTION_STATUS_READY .' OR qv.status = ' . constants::QUESTION_STATUS_DRAFT . ' )';
+        } else {
+            $statuscondition = "AND qv.status = $status";
+        }
 
         $sql = "SELECT c.*,
                     (SELECT COUNT(1)
@@ -263,7 +268,7 @@ class helper {
                        JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                        JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                       WHERE q.parent = '0'
-                        AND qv.status = $status
+                        $statuscondition
                         AND c.id = qbe.questioncategoryid
                         AND ($showallversions = 1
                             OR (qv.version = (SELECT MAX(v.version)
