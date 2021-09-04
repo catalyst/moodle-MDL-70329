@@ -65,7 +65,7 @@ class qtype_essay_restore_testcase extends restore_date_testcase  {
         $newessay = $DB->get_record_sql('SELECT q.*
                                               FROM {question} q
                                               JOIN {question_versions} qv ON qv.questionid = q.id
-                                              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                                              JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                                              WHERE qbe.questioncategoryid = ?
                                                AND q.qtype = ?', [$newcategory->id, 'essay']);
         $this->assertTrue($DB->record_exists('qtype_essay_options', ['questionid' => $newessay->id]));

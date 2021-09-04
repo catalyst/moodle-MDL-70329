@@ -2340,7 +2340,7 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $questionbankentries = new backup_nested_element('question_bank_entries');
 
-        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['idnumber', 'ownerid']);
+        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['questioncategoryid', 'idnumber', 'ownerid']);
 
         $questionversions = new backup_nested_element('question_versions_entry');
 
@@ -2397,7 +2397,7 @@ class backup_questions_structure_step extends backup_structure_step {
              WHERE bi.backupid = ?
                AND bi.itemname = 'question_categoryfinal'", [backup::VAR_BACKUPID]);
 
-        $questionbankentry->set_source_table('question_bank_entry', ['questioncategoryid' => backup::VAR_PARENTID]);
+        $questionbankentry->set_source_table('question_bank_entries', ['questioncategoryid' => backup::VAR_PARENTID]);
 
         $questionverion->set_source_table('question_versions', ['questionbankentryid' => backup::VAR_PARENTID]);
 
@@ -2405,7 +2405,7 @@ class backup_questions_structure_step extends backup_structure_step {
                 SELECT q.*
                  FROM {question} q
                  JOIN {question_versions} qv ON qv.questionid = q.id
-                 JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                 JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                 WHERE qv.id = ?', [backup::VAR_PARENTID]);
 
         $qhint->set_source_sql('
