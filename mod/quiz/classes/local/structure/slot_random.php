@@ -14,23 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Defines the \mod_quiz\local\structure\slot_random class.
- *
- * @package    mod_quiz
- * @copyright  2018 Shamim Rezaie <shamim@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace mod_quiz\local\structure;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class slot_random, represents a random question slot type.
  *
  * @package    mod_quiz
  * @copyright  2018 Shamim Rezaie <shamim@moodle.com>
+ * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class slot_random {
@@ -39,14 +30,19 @@ class slot_random {
     protected $record;
 
     /**
+     * @var \stdClass set reference record
+     */
+    protected $referencerecord;
+
+    /**
      * @var \stdClass The quiz this question slot belongs to.
      */
     protected $quiz = null;
 
     /**
-     * @var \core_tag_tag[] List of tags for this slot.
+     * @var string filter condition
      */
-    protected $tags = [];
+    protected $filtercondition = null;
 
     /**
      * slot_random constructor.
@@ -55,14 +51,20 @@ class slot_random {
      */
     public function __construct($slotrecord = null) {
         $this->record = new \stdClass();
+        $this->referencerecord = new \stdClass();
 
-        $properties = array(
-            'id', 'slot', 'quizid', 'page', 'requireprevious', 'questionid',
-            'questioncategoryid', 'includingsubcategories', 'maxmark');
+        $slotproperties = ['id', 'slot', 'quizid', 'page', 'requireprevious', 'maxmark'];
+        $setreferenceproperties = ['usingcontextid', 'questionscontextid'];
 
-        foreach ($properties as $property) {
+        foreach ($slotproperties as $property) {
             if (isset($slotrecord->$property)) {
                 $this->record->$property = $slotrecord->$property;
+            }
+        }
+
+        foreach ($setreferenceproperties as $referenceproperty) {
+            if (isset($slotrecord->$referenceproperty)) {
+                $this->referencerecord->$referenceproperty = $slotrecord->$referenceproperty;
             }
         }
     }
@@ -99,27 +101,8 @@ class slot_random {
         $this->record->quizid = $quiz->id;
     }
 
-    /**
-     * Set some tags for this quiz slot.
-     *
-     * @param \core_tag_tag[] $tags
-     */
-    public function set_tags($tags) {
-        $this->tags = [];
-        foreach ($tags as $tag) {
-            // We use $tag->id as the key for the array so not only it handles duplicates of the same tag being given,
-            // but also it is consistent with the behaviour of set_tags_by_id() below.
-            $this->tags[$tag->id] = $tag;
-        }
-    }
-
-    /**
-     * Set some tags for this quiz slot. This function uses tag ids to find tags.
-     *
-     * @param int[] $tagids
-     */
-    public function set_tags_by_id($tagids) {
-        $this->tags = \core_tag_tag::get_bulk($tagids, 'id, name');
+    public function set_filter_condition($filters) {
+        $this->filtercondition = json_encode($filters);
     }
 
     /**
@@ -179,17 +162,11 @@ class slot_random {
 
         $this->record->id = $DB->insert_record('quiz_slots', $this->record);
 
-        if (!empty($this->tags)) {
-            $recordstoinsert = [];
-            foreach ($this->tags as $tag) {
-                $recordstoinsert[] = (object)[
-                    'slotid' => $this->record->id,
-                    'tagid' => $tag->id,
-                    'tagname' => $tag->name
-                ];
-            }
-            $DB->insert_records('quiz_slot_tags', $recordstoinsert);
-        }
+        $this->referencerecord->component = 'mod_quiz';
+        $this->referencerecord->questionarea = 'slot';
+        $this->referencerecord->itemid = $this->record->id;
+        $this->referencerecord->filtercondition = $this->filtercondition;
+        $DB->insert_record('question_set_references', $this->referencerecord);
 
         $trans->allow_commit();
     }

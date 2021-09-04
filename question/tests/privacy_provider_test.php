@@ -463,7 +463,7 @@ class core_question_privacy_provider_testcase extends \core_privacy\tests\provid
         // User1 has created questions and user3 has edited them, it will be one as while user3 edited, a new version created.
         $this->assertCount(1, $userlist);
         $this->assertEqualsCanonicalizing(
-                [$user1->id, $user3->id],
+                [$user3->id],
                 $userlist->get_userids());
     }
 
