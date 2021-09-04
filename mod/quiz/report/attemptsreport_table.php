@@ -256,12 +256,13 @@ abstract class quiz_attempts_report_table extends table_sql {
 
         $feedbackimg = '';
         $state = $this->slot_state($attempt, $slot);
-        if ($state->is_finished() && $state != question_state::$needsgrading) {
+        if ($state && $state->is_finished() && $state != question_state::$needsgrading) {
             $feedbackimg = $this->icon_for_fraction($this->slot_fraction($attempt, $slot));
+            $innerspan = array('class' => $state->get_state_class(true));
         }
 
         $output = html_writer::tag('span', $feedbackimg . html_writer::tag('span',
-                $data, array('class' => $state->get_state_class(true))) . $flag, array('class' => 'que'));
+                $data, $innerspan) . $flag, array('class' => 'que'));
 
         $reviewparams = array('attempt' => $attempt->attempt, 'slot' => $slot);
         if (isset($attempt->try)) {
@@ -289,11 +290,16 @@ abstract class quiz_attempts_report_table extends table_sql {
     /**
      * @param object $attempt the row data
      * @param int $slot
-     * @return question_state
+     * @return question_state|bool
      */
     protected function slot_state($attempt, $slot) {
         $stepdata = $this->lateststeps[$attempt->usageid][$slot];
-        return question_state::get($stepdata->state);
+        if ($stepdata->state) {
+            return question_state::get($stepdata->state);
+        } else {
+            return false;
+        }
+
     }
 
     /**
