@@ -109,6 +109,15 @@ class qtype_truefalse extends question_type {
     }
 
     /**
+     * During unit tests we need to be able to reset all caches so that each new test starts in a known state.
+     * Intended for use only for testing. This is a stop gap until we start using the MUC caching api here.
+     * You need to call this before every test that loads one or more random questions.
+     */
+    public function clear_caches_before_testing() {
+        $this->availablequestionsbycategory = array();
+    }
+
+    /**
      * Loads the question type specific options for the question.
      */
     public function get_question_options($question) {
