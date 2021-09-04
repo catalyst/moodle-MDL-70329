@@ -153,9 +153,10 @@ abstract class quiz_attempts_report extends quiz_default_report {
      * @param int $currentgroup the current group.
      * @param bool $hasquestions whether there are any questions in the quiz.
      * @param bool $hasstudents whether there are any relevant students.
+     * @param bool $hasattempts whether there are any attempts.
      */
     protected function print_standard_header_and_messages($cm, $course, $quiz,
-            $options, $currentgroup, $hasquestions, $hasstudents) {
+            $options, $currentgroup, $hasquestions, $hasstudents, $hasattempts) {
         global $OUTPUT;
 
         $this->print_header_and_tabs($cm, $course, $quiz, $this->mode);
@@ -172,6 +173,8 @@ abstract class quiz_attempts_report extends quiz_default_report {
 
         if (!$hasquestions) {
             echo quiz_no_questions_message($quiz, $cm, $this->context);
+        } else if (!$hasattempts) {
+            echo quiz_no_question_attempts_message($cm);
         } else if ($currentgroup == self::NO_GROUPS_ALLOWED) {
             echo $OUTPUT->notification(get_string('notingroup'));
         } else if (!$hasstudents) {

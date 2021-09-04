@@ -919,9 +919,11 @@ class qformat_default {
 
         foreach ($questions as $question) {
             // used by file api
-            $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
+            $questionbankentry = get_question_bank_entry($question->id);
+            $qcategory = $questionbankentry->questioncategoryid;
             $contextid = $DB->get_field('question_categories', 'contextid', ['id' => $qcategory]);
             $question->contextid = $contextid;
+            $question->idnumber = $questionbankentry->idnumber;
 
             // do not export hidden questions
             if (!empty($question->hidden)) {

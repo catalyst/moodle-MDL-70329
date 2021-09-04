@@ -228,6 +228,7 @@ class calculated {
         foreach ($this->fieldsindb as $field) {
             $toinsert->{$field} = $this->{$field};
         }
+        //var_dump($this->facility);die;
         $DB->insert_record('question_statistics', $toinsert, false);
 
         if ($this->get_variants()) {
