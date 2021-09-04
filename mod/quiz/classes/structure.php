@@ -606,14 +606,16 @@ class structure {
     public function populate_structure($quiz) {
         global $DB;
 
+        // TODO: Add set_reference.
         $slots = $DB->get_records_sql("
-                SELECT slot.id AS slotid, slot.slot, slot.questionid, slot.page, slot.maxmark,
+                SELECT slot.id AS slotid, slot.slot, q.id AS questionid, slot.page, slot.maxmark,
                        slot.requireprevious, q.*, qc.id as category, qc.contextid
                   FROM {quiz_slots} slot
-             LEFT JOIN {question} q ON q.id = slot.questionid
-             LEFT JOIN {question_versions} qv ON qv.questionid = q.id
-             LEFT JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid                      
-             LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+             LEFT JOIN {question_references} qr ON qr.itemid = slot.id                  
+             LEFT JOIN {question_bank_entry} qbe ON qbe.id = qr.questionbankentryid
+             LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id AND qr.version = qv.version
+             LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid   
+             LEFT JOIN {question} q ON q.id = qv.questionid
                  WHERE slot.quizid = ?
               ORDER BY slot.slot", array($quiz->id));
 
@@ -648,21 +650,40 @@ class structure {
      * @return \stdClass[] updated $slots array.
      */
     protected function populate_missing_questions($slots) {
-        // Address missing question types.
+        global $DB;
+        // Address missing/random question types.
         foreach ($slots as $slot) {
             if ($slot->qtype === null) {
-                // If the questiontype is missing change the question type.
-                $slot->id = $slot->questionid;
-                $slot->category = 0;
-                $slot->qtype = 'missingtype';
-                $slot->name = get_string('missingquestion', 'quiz');
-                $slot->slot = $slot->slot;
-                $slot->maxmark = 0;
-                $slot->requireprevious = 0;
-                $slot->questiontext = ' ';
-                $slot->questiontextformat = FORMAT_HTML;
-                $slot->length = 1;
+                //var_dump($slot);die;
+                // Check if the question is random.
+                if ($setreference = $DB->get_record('question_set_references', ['itemid' => $slot->slotid])) {
+                    //var_dump($setreference);die;
+                    $filtercondition = json_decode($setreference->filtercondition);
+                    //var_dump($filtercondition);die;
+                    $slot->id = $slot->slotid;
+                    $slot->category = $filtercondition->questioncategoryid;
+                    $slot->qtype = 'random';
+                    $slot->name = 'Random question';
+                    //$slot->slot = $slot->slot;
+                    //$slot->maxmark = 0;
+                    //$slot->requireprevious = 0;
+                    //$slot->questiontext = ' ';
+                    //$slot->questiontextformat = FORMAT_HTML;
+                    //$slot->length = 1;
 
+                } else {
+                    // If the questiontype is missing change the question type.
+                    $slot->id = $slot->questionid;
+                    $slot->category = 0;
+                    $slot->qtype = 'missingtype';
+                    $slot->name = get_string('missingquestion', 'quiz');
+                    $slot->slot = $slot->slot;
+                    $slot->maxmark = 0;
+                    $slot->requireprevious = 0;
+                    $slot->questiontext = ' ';
+                    $slot->questiontextformat = FORMAT_HTML;
+                    $slot->length = 1;
+                }
             } else if (!\question_bank::qtype_exists($slot->qtype)) {
                 $slot->qtype = 'missingtype';
             }
@@ -925,7 +946,18 @@ class structure {
         $maxslot = $DB->get_field_sql('SELECT MAX(slot) FROM {quiz_slots} WHERE quizid = ?', array($this->get_quizid()));
 
         $trans = $DB->start_delegated_transaction();
-        $DB->delete_records('quiz_slot_tags', array('slotid' => $slot->id));
+        // Delete the reference if its a question.
+        $questionreference = $DB->get_record('question_references',
+                ['component' => 'mod_quiz', 'questionarea' => 'slot', 'itemid' => $slot->id]);
+        if ($questionreference) {
+            $DB->delete_records('question_references', ['id' => $questionreference->id]);
+        }
+        // Delete the set reference if its a random question.
+        $questionsetreference = $DB->get_record('question_set_references',
+                ['component' => 'mod_quiz', 'questionarea' => 'slot', 'itemid' => $slot->id]);
+        if ($questionsetreference) {
+            $DB->delete_records('question_set_references', ['id' => $questionsetreference->id]);
+        }
         $DB->delete_records('quiz_slots', array('id' => $slot->id));
         for ($i = $slot->slot + 1; $i <= $maxslot; $i++) {
             $DB->set_field('quiz_slots', 'slot', $i - 1,
@@ -933,12 +965,6 @@ class structure {
             $this->slotsinorder[$i]->slot = $i - 1;
             $this->slotsinorder[$i - 1] = $this->slotsinorder[$i];
             unset($this->slotsinorder[$i]);
-        }
-
-        $qtype = $DB->get_field('question', 'qtype', array('id' => $slot->questionid));
-        if ($qtype === 'random') {
-            // This function automatically checks if the question is in use, and won't delete if it is.
-            question_delete_question($slot->questionid);
         }
 
         quiz_update_section_firstslots($this->get_quizid(), -1, $slotnumber);

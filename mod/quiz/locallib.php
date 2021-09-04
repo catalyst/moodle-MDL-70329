@@ -2234,12 +2234,29 @@ function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) 
     }
 
     $trans = $DB->start_delegated_transaction();
-    $slots = $DB->get_records('quiz_slots', array('quizid' => $quiz->id),
-            'slot', 'questionid, slot, page, id');
-    if (array_key_exists($questionid, $slots)) {
+
+    $sql = "SELECT q.id questionid, slot.slot, slot.page, slot.id
+              FROM {quiz_slots} slot
+              JOIN {question_references} qr ON qr.itemid = slot.id                  
+              JOIN {question_bank_entry} qbe ON qbe.id = qr.questionbankentryid
+              JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id AND qr.version = qv.version
+              JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid   
+              JOIN {question} q ON q.id = qv.questionid
+             WHERE slot.quizid = ?";
+
+    $questionslots = $DB->get_records_sql($sql, [$quiz->id]);
+
+    if (array_key_exists($questionid, $questionslots)) {
         $trans->allow_commit();
         return false;
     }
+
+    $sql = "SELECT slot.slot, slot.page, slot.id
+              FROM {quiz_slots} slot
+             WHERE slot.quizid = ?
+          ORDER BY slot.slot";
+
+    $slots = $DB->get_records_sql($sql, [$quiz->id]);
 
     $maxpage = 1;
     $numonlastpage = 0;
@@ -2252,10 +2269,9 @@ function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) 
         }
     }
 
-    // Add the new question instance.
+    // Add the new instance.
     $slot = new stdClass();
     $slot->quizid = $quiz->id;
-    $slot->questionid = $questionid;
 
     if ($maxmark !== null) {
         $slot->maxmark = $maxmark;
@@ -2293,7 +2309,48 @@ function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) 
         }
     }
 
-    $DB->insert_record('quiz_slots', $slot);
+    $slotid = $DB->insert_record('quiz_slots', $slot);
+
+    // Update or insert record in question_reference table.
+    $sql = "SELECT DISTINCT qr.id, qr.itemid
+              FROM {question} q
+              JOIN {question_versions} qv ON q.id = qv.questionid
+              JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+              JOIN {question_references} qr ON qbe.id = qr.questionbankentryid AND qr.version = qv.version
+             WHERE q.id = ?";
+    $qreferenceitem = $DB->get_record_sql($sql, [$questionid]);
+
+    if (!$qreferenceitem) {
+        // Create a new reference record for questions created already
+        $question_references = new \StdClass();
+        $question_references->usingcontextid = context_module::instance($quiz->cmid)->id;
+        $question_references->component = 'mod_quiz';
+        $question_references->questionarea = 'slot';
+        $question_references->itemid = $slotid;
+        $question_references->questionbankentryid = get_question_bank_entry($questionid)->id;
+        $version = get_question_version($questionid);
+        $question_references->version = $version[array_key_first($version)]->version;
+
+        $DB->insert_record('question_references', $question_references);
+
+    } elseif ($qreferenceitem->itemid === 0 || $qreferenceitem->itemid === null) {
+        $question_references = new \StdClass();
+        $question_references->id = $qreferenceitem->id;
+        $question_references->itemid = $slotid;
+        $DB->update_record('question_references', $question_references);
+    } else {
+        // If the reference record exits for another quiz.
+        $question_references = new \StdClass();
+        $question_references->usingcontextid = context_module::instance($quiz->cmid)->id;
+        $question_references->component = 'mod_quiz';
+        $question_references->questionarea = 'slot';
+        $question_references->itemid = $slotid;
+        $question_references->questionbankentryid = get_question_bank_entry($questionid)->id;
+        $version = get_question_version($questionid);
+        $question_references->version = $version[array_key_first($version)]->version;
+        $DB->insert_record('question_references', $question_references);
+    }
+
     $trans->allow_commit();
 }
 
@@ -2331,63 +2388,40 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
         $includesubcategories, $tagids = []) {
     global $DB;
 
-    $category = $DB->get_record('question_categories', array('id' => $categoryid));
+    $category = $DB->get_record('question_categories', ['id' => $categoryid]);
     if (!$category) {
-        print_error('invalidcategoryid', 'error');
+        new moodle_exception('invalidcategoryid');
     }
 
     $catcontext = context::instance_by_id($category->contextid);
     require_capability('moodle/question:useall', $catcontext);
 
+    // Tags for filter condition.
     $tags = \core_tag_tag::get_bulk($tagids, 'id, name');
     $tagstrings = [];
     foreach ($tags as $tag) {
-        $tagstrings[] = "{$tag->id},{$tag->name}";
+        $tagstrings [] = "{$tag->id},{$tag->name}";
     }
-
-    // Find existing random questions in this category that are
-    // not used by any quiz.
-    $existingquestions = $DB->get_records_sql(
-        "SELECT q.id, q.qtype
-               FROM {question} q
-               JOIN {question_versions} qv ON qv.questionid = q.id
-               JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
-              WHERE q.qtype = 'random'
-                AND qbe.questioncategoryid = ?
-                AND " . $DB->sql_compare_text('questiontext') . " = ?
-     AND NOT EXISTS (SELECT *
-                       FROM {quiz_slots}
-                      WHERE questionid = q.id)
-           ORDER BY q.id", array($category->id, $includesubcategories ? '1' : '0'));
-
+    // Create the selected number of random questions.
     for ($i = 0; $i < $number; $i++) {
-        // Take as many of orphaned "random" questions as needed.
-        if (!$question = array_shift($existingquestions)) {
-            $form = new stdClass();
-            $form->category = $category->id . ',' . $category->contextid;
-            $form->includesubcategories = $includesubcategories;
-            $form->fromtags = $tagstrings;
-            $form->defaultmark = 1;
-            $form->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
-            $form->stamp = make_unique_id_code(); // Set the unique code (not to be changed).
-            $question = new stdClass();
-            $question->qtype = 'random';
-            $question = question_bank::get_qtype('random')->save_question($question, $form);
-            if (!isset($question->id)) {
-                print_error('cannotinsertrandomquestion', 'quiz');
-            }
+        // Set the filter conditions.
+        $filtercondition = new stdClass();
+        $filtercondition->questioncategoryid = $categoryid;
+        $filtercondition->includingsubcategories = $includesubcategories ? 1 : 0;
+        if (!empty($tagstrings)) {
+            $filtercondition->tags = $tagstrings;
         }
 
+        // Slot data.
         $randomslotdata = new stdClass();
         $randomslotdata->quizid = $quiz->id;
-        $randomslotdata->questionid = $question->id;
-        $randomslotdata->questioncategoryid = $categoryid;
-        $randomslotdata->includingsubcategories = $includesubcategories ? 1 : 0;
+        $randomslotdata->usingcontextid = context_module::instance($quiz->cmid)->id;
+        $randomslotdata->questionscontextid = $category->contextid;
         $randomslotdata->maxmark = 1;
 
         $randomslot = new \mod_quiz\local\structure\slot_random($randomslotdata);
         $randomslot->set_quiz($quiz);
-        $randomslot->set_tags($tags);
+        $randomslot->set_filter_condition($filtercondition);
         $randomslot->insert($addonpage);
     }
 }
@@ -2619,7 +2653,8 @@ function quiz_is_overriden_calendar_event(\calendar_event $event) {
  */
 function quiz_retrieve_tags_for_slot_ids($slotids) {
     global $DB;
-
+    // TODO cleanup for slot tags table
+    return [];
     if (empty($slotids)) {
         return [];
     }
@@ -2726,4 +2761,15 @@ function quiz_create_attempt_handling_errors($attemptid, $cmid = null) {
     } else {
         return $attempobj;
     }
+}
+
+/**
+ * Get the set reference data for the slot.
+ *
+ * @param $slotid
+ * @return false|mixed|stdClass
+ */
+function quiz_get_set_reference($slotid) {
+    global $DB;
+    return $DB->get_record('question_set_references', ['itemid' => $slotid]);
 }

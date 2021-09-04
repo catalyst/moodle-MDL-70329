@@ -858,10 +858,8 @@ function question_preload_questions($questionids = null, $extrafields = '', $joi
         $orderby = 'ORDER BY ' . $orderby;
     }
 
-    $sql = "SELECT q.id, qc.id as category, q.parent, q.name, q.questiontext, q.questiontextformat,
-                   q.generalfeedback, q.generalfeedbackformat, q.defaultmark, q.penalty, q.qtype,
-                   q.length, q.stamp, q.timecreated, q.timemodified,
-                   q.createdby, q.modifiedby, qbe.idnumber,
+    $sql = "SELECT q.*,
+                   qc.id as category,
                    qv.status,
                    qv.id as versionid,
                    qv.version,
@@ -2029,20 +2027,6 @@ function save_question_versions(object $question, object $form, object $context,
         // Get the status field. It comes from the form, but for testing we can.
         $questionversion->status = $form->status ?? $question->status;
         $DB->update_record('question_versions', $questionversion);
-    }
-
-
-    // TODO: Update itemid after creating quiz_slot or maybe move this part to mod/quiz/locallib.php -> quiz_add_quiz_question.
-    // Also check its always doing an insert, shouldnt it update when created a new version? something to check with quiz changes.
-    if (isset($form->modulename)) {
-        $questionreference = new \stdClass();
-        $questionreference->usingcontextid = $context->id;
-        $questionreference->component = $form->modulename;
-        $questionreference->questionarea = 'slot';
-        $questionreference->itemid = 0;
-        $questionreference->questionbankentryid = $questionbankentry->id;
-        $questionreference->version = $questionversion->version;
-        $questionreference->id = $DB->insert_record('question_references', $questionreference);
     }
 }
 

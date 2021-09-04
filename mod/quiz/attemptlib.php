@@ -145,12 +145,17 @@ class quiz {
      * Load just basic information about all the questions in this quiz.
      */
     public function preload_questions() {
+        // TODO: join with quiz context? how do the join in set_reference??
         $this->questions = question_preload_questions(null,
-                'slot.maxmark, slot.id AS slotid, slot.slot, slot.page,
-                 slot.questioncategoryid AS randomfromcategory,
-                 slot.includingsubcategories AS randomincludingsubcategories',
-                '{quiz_slots} slot ON slot.quizid = :quizid AND q.id = slot.questionid',
-                array('quizid' => $this->quiz->id), 'slot.slot');
+                'slot.id AS slotid, slot.maxmark, slot.slot, slot.page',
+            '(SELECT s.*, null AS questioncategoryid, qr.questionbankentryid AS bankentry, qr.version AS version
+                     FROM {question_references} qr
+                     JOIN {quiz_slots} s ON s.id = qr.itemid
+                    UNION
+                   SELECT s.*, null AS questioncategoryid, null AS bankentry, null AS version
+                     FROM {question_set_references} qsr
+                     JOIN {quiz_slots} s ON s.id = qsr.itemid) slot ON slot.quizid = :quizid',
+                ['quizid' => $this->quiz->id], 'slot.slot');
     }
 
     /**
@@ -709,8 +714,7 @@ class quiz_attempt {
 
         $this->quba = question_engine::load_questions_usage_by_activity($this->attempt->uniqueid);
         $this->slots = $DB->get_records('quiz_slots',
-                array('quizid' => $this->get_quizid()), 'slot',
-                'slot, id, requireprevious, questionid, includingsubcategories');
+                array('quizid' => $this->get_quizid()), 'slot');
         $this->sections = array_values($DB->get_records('quiz_sections',
                 array('quizid' => $this->get_quizid()), 'firstslot'));
 
