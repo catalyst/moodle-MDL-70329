@@ -4922,10 +4922,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Also annotate them as question_created, we need
         // that later when remapping parents (keeping the old categoryid as parentid).
         $parentitemid = $this->get_new_parentid('question_versions');
-        //$versionmapping = $this->get_mapping('question_versions', $this->get_old_parentid('question_versions'));
-        //$entrymapping = $this->get_mapping('question_bank_entry', $versionmapping->parentitemid);
-        //$categoryid = $this->get_mappingid('question_category', $entrymapping->parentitemid);
-        $this->set_mapping('question_created', $oldid, $newitemid, false, null);
+        $this->set_mapping('question_created', $oldid, $newitemid);
         // Now update the question_versions table with the new question id.
         $version = new stdClass();
         $version->id = $parentitemid;
@@ -5717,7 +5714,12 @@ trait restore_questions_attempt_data_trait {
         $newitemid = $DB->insert_record('question_attempts', $data);
 
         $this->set_mapping($nameprefix . 'question_attempt', $oldid, $newitemid);
-        $this->qtypes[$newitemid] = $question->info->qtype;
+        if (isset($question->info->qtype)){
+            $qtype = $question->info->qtype;
+        } else {
+            $qtype = $DB->get_record('question', ['id' => $question->newitemid])->qtype;
+        }
+        $this->qtypes[$newitemid] = $qtype;
         $this->newquestionids[$newitemid] = $data->questionid;
     }
 
@@ -5743,7 +5745,7 @@ trait restore_questions_attempt_data_trait {
         unset($data->response);
 
         $data->questionattemptid = $this->get_new_parentid($nameprefix . 'question_attempt');
-        $data->userid      = $this->get_mappingid('user', $data->userid);
+        $data->userid = $this->get_mappingid('user', $data->userid);
 
         // Everything ready, insert and create mapping (needed by question_sessions)
         $newitemid = $DB->insert_record('question_attempt_steps', $data);
