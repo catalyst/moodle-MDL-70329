@@ -17,23 +17,39 @@
 {{!
     @template qbank_previewquestion/preview_question
 
+    The preview page for the question type preview.
+    * actionurl - Url to post to
+    * session - Moodle session
+    * slot - The identifying number of the first question that was added to this usage
+    * question - The html of the actual question from the engine
+    * restartdisabled - The attributes to enable or disable the button, same for finishdisabled and filldisabled
+    * techinfo - Technical information like fraction, state, behaviour etc
+    * exporttoxml - Link to export the question to xml
+    * redirecturl - Url to the base view
+    * comments - Comments api html
+    * extrapreviewelements - Any plugin implementing the callback and sending extra html to view something in the preview page
+
     Example context (json):
     {
         "previewdata": [
           {
                 "actionurl": "moodle_url",
-                "session": "moodle session",
+                "session": "E2PwCfrnzz",
                 "slot": "1",
-                "question": "question html",
-                "restartdisabled": "array of attributes",
-                "finishdisabled": "array of attributes",
-                "filldisabled": "array of attributes",
-                "techinfo": "tech info html"
+                "question": "<div>question html</div>",
+                "restartdisabled": "disabled='disabled'",
+                "finishdisabled": "disabled='disabled'",
+                "filldisabled": "disabled='disabled'",
+                "techinfo": "<div>Behaviour being used: Deferred feedback</div>",
+                "redirecturl": "moodle_url",
+                "exporttoxml": "Download this question in Moodle XML format",
+                "comments": "html from comments api",
+                "extrapreviewelements": "<div>callback to get html from plugins need to show info in preview</div>"
           }
         ]
     }
 }}
-<form id="responseform" method="post" action="{{{actionurl}}}" enctype="multipart/form-data" autocomplete="off">
+<form id="responseform" method="post" action="{{actionurl}}" enctype="multipart/form-data" autocomplete="off">
     <div>
         <input type="hidden" name="sesskey" value="{{session}}">
         <input type="hidden" name="slots" value="{{slot}}">

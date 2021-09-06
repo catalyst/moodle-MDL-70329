@@ -32,3 +32,19 @@ Feature: Use the qbank plugin manager page for previewquestion
     And I navigate to "Question bank > Questions" in current page administration
     And I click on "#action-menu-toggle-2" "css_element" in the "First question" "table_row"
     And I should see "Preview"
+
+  Scenario: Enable/disable preview button from question edit form
+    Given I log in as "admin"
+    When I navigate to "Plugins > Question bank plugins > Manage question bank plugins" in site administration
+    And I should see "Preview question"
+    And I click on "Disable" "link" in the "Preview question" "table_row"
+    And I am on the "Test quiz" "quiz activity" page
+    And I navigate to "Question bank > Questions" in current page administration
+    And I choose "Edit question" action for "First question" in the question bank
+    Then I should not see "Preview"
+    And I navigate to "Plugins > Question bank plugins > Manage question bank plugins" in site administration
+    And I click on "Enable" "link" in the "Preview question" "table_row"
+    And I am on the "Test quiz" "quiz activity" page
+    And I navigate to "Question bank > Questions" in current page administration
+    And I choose "Edit question" action for "First question" in the question bank
+    And I should see "Preview"
