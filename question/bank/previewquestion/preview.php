@@ -51,6 +51,7 @@ $version = optional_param('version', null, PARAM_INT);
 $returnurl = optional_param('returnurl', null, PARAM_RAW);
 if ($version) {
     $question = question_bank::load_question($version);
+    $question->id = $id;
 } else {
     $question = question_bank::load_question($id);
 }
@@ -91,7 +92,7 @@ $PAGE->set_url(previewquestion_helper::question_preview_url($id, $options->behav
 // Get and validate existing preview, or start a new one.
 $previewid = optional_param('previewid', 0, PARAM_INT);
 
-if ($previewid && !$version) {
+if ($previewid) {
     try {
         $quba = question_engine::load_questions_usage_by_activity($previewid);
 

@@ -29,8 +29,9 @@ Feature: A teacher can preview questions in the question bank
     Then the state of "What is pi to two d.p.?" question is shown as "Not yet answered"
     And I should see "Marked out of 1.00"
     And I should see "Technical information"
-    And I should see "Attempt options"
+    And I should see "Preview options"
     And I should see "Display options"
+    And I should see "Comments"
 
   Scenario: Preview lets the teacher see what happens when an answer is saved
     When I set the field "Answer:" to "1"
@@ -45,6 +46,7 @@ Feature: A teacher can preview questions in the question bank
   Scenario: Preview lets the teacher see what happens with different review options
     Given I set the field "Answer:" to "3.14"
     And I press "Submit and finish"
+    And I press "Display options"
     When I set the field "Whether correct" to "Not shown"
     And I set the field "Decimal places in grades" to "5"
     And I press "Update display options"
@@ -52,7 +54,8 @@ Feature: A teacher can preview questions in the question bank
     And I should see "1.00000"
 
   Scenario: Preview lets the teacher see what happens with different behaviours
-    When I set the field "How questions behave" to "Immediate feedback"
+    When I press "Preview options"
+    And I set the field "How questions behave" to "Immediate feedback"
     And I set the field "Marked out of" to "3"
     And I press "Start again with these options"
     And I set the field "Answer:" to "3.1"
@@ -72,9 +75,11 @@ Feature: A teacher can preview questions in the question bank
     Then the field "Answer:" matches value "3.14"
 
   Scenario: Preview has an option to export the individual quesiton.
-    Then following "Download this question in Moodle XML format" should download between "1000" and "2500" bytes
+    When I open the action menu in "action-menu-0-menubar" "region"
+    Then following "Export as Moodle XML" should download between "1000" and "2500" bytes
 
   Scenario: Preview a question with very small grade
-    When I set the field "Marked out of" to "0.00000123456789"
+    When I press "Preview options"
+    And I set the field "Marked out of" to "0.00000123456789"
     And I press "Start again with these options"
     Then the field "Marked out of" matches value "0.00000123456789"
