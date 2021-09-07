@@ -30,11 +30,18 @@ import $ from 'jquery';
  * @method init
  * @param {bool} redirect Redirect.
  */
-export const init = (redirect) => {
+export const init = (redirect, courseid) => {
+    const openedWindow = window.open();
     if (!redirect) {
         let closeButton = document.getElementById('close-previewquestion-page');
         closeButton.onclick = () => {
-            window.close();
+            if (openedWindow) {
+                openedWindow.close();
+            } else {
+                // /question/edit.php?
+                const url = location.origin;
+                location.href = url + '/question/edit.php?courseid=' + courseid;
+            }
         };
     }
     // Set up the form to be displayed.

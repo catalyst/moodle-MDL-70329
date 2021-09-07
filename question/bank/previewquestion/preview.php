@@ -282,21 +282,6 @@ foreach ($technical as $info) {
 }
 $previewdata['techinfo'] .= print_collapsible_region_end(true);
 
-// Output a link to export this single question.
-if (question_has_capability_on($question, 'view')) {
-    if (class_exists('qbank_exporttoxml\\exporttoxml_helper')) {
-        if (\core\plugininfo\qbank::is_plugin_enabled('qbank_exporttoxml')) {
-            $exportfunction = '\\qbank_exporttoxml\\exporttoxml_helper::question_get_export_single_question_url';
-            $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
-                    get_string('exportonequestion', 'question'));
-        }
-    } else {
-        $exportfunction = 'question_get_export_single_question_url';
-        $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
-                get_string('exportonequestion', 'question'));
-    }
-}
-
 // Display the settings form.
 $previewdata['options'] = $optionsform->render();
 
@@ -328,5 +313,5 @@ echo $PAGE->get_renderer('qbank_previewquestion')->render_preview_page($previewd
 $event = \core\event\question_viewed::create_from_question_instance($question, $context);
 $event->trigger();
 
-$PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect']]);
+$PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect'], $COURSE->id]);
 echo $OUTPUT->footer();
