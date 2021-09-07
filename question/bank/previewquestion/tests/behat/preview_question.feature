@@ -27,6 +27,7 @@ Feature: A teacher can preview questions in the question bank
 
   Scenario: Question preview shows the question and other information
     Then the state of "What is pi to two d.p.?" question is shown as "Not yet answered"
+    And I should see "(latest)"
     And I should see "Marked out of 1.00"
     And I should see "Technical information"
     And I should see "Preview options"
@@ -83,3 +84,33 @@ Feature: A teacher can preview questions in the question bank
     And I set the field "Marked out of" to "0.00000123456789"
     And I press "Start again with these options"
     Then the field "Marked out of" matches value "0.00000123456789"
+
+  Scenario: Question preview has an action menu
+    When I open the action menu in "action-menu-0-menubar" "region"
+    Then I should see "Edit question"
+    And I should see "Duplicate"
+    And I should see "Manage tags"
+    And I should see "Delete"
+    And I should see "Export as Moodle XML"
+
+  Scenario: Question version is updated when edited
+    When I open the action menu in "action-menu-0-menubar" "region"
+    And I choose "Edit question" in the open action menu
+    And I set the field "Question name" to "New version"
+    And I set the field "Question text" to "New text version"
+    And I click on "submitbutton" "button"
+    And I press "Preview options"
+    And I set the field "Question version" to "2"
+    And I press "Start again with these options"
+    Then I should see "Version 2"
+    And I should see "(latest)"
+    And I should see "New version"
+    And I should see "New text version"
+
+  Scenario: Question preview can be closed
+    When I open the action menu in "action-menu-0-menubar" "region"
+    And I choose "Edit question" in the open action menu
+    And I click on "cancel" "button"
+    And I click on "//input[@value='Close preview']" "xpath_element"
+    Then I should not see "(latest)"
+    And I should see "Course 1"
