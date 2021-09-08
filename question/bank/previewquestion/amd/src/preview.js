@@ -31,16 +31,15 @@ import $ from 'jquery';
  * @param {bool} redirect Redirect.
  */
 export const init = (redirect, courseid) => {
-    const openedWindow = window.open();
+    // const openedWindow = window.open();
     if (!redirect) {
         let closeButton = document.getElementById('close-previewquestion-page');
         closeButton.onclick = () => {
-            if (openedWindow) {
-                openedWindow.close();
-            } else {
-                // /question/edit.php?
+            if (window.opener === null) {
                 const url = location.origin;
                 location.href = url + '/question/edit.php?courseid=' + courseid;
+            } else {
+                window.close();
             }
         };
     }

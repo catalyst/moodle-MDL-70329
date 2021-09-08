@@ -111,6 +111,6 @@ Feature: A teacher can preview questions in the question bank
     When I open the action menu in "action-menu-0-menubar" "region"
     And I choose "Edit question" in the open action menu
     And I click on "cancel" "button"
-    And I click on "//input[@value='Close preview']" "xpath_element"
+    And I press "Close preview"
     Then I should not see "(latest)"
     And I should see "Course 1"
