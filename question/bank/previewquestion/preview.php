@@ -275,7 +275,7 @@ if (question_has_capability_on($question, 'view')) {
                     get_string('exportonequestion', 'question'));
         }
     } else {
-        $exportfunction = 'question_get_export_single_question_url';
+        $exportfunction = 'qbank_exporttoxml\\helper::question_get_export_single_question_url';
         $previewdata['exporttoxml'] = html_writer::link($exportfunction($question),
                 get_string('exportonequestion', 'question'));
     }
