@@ -32,7 +32,7 @@ Feature: A teacher can edit questions in the question bank
     And I press "id_submitbutton"
     Then I should see "Edited question name"
     And I should not see "Test question to be edited"
-    And "Edited question name" row "Created by" column of "categoryquestions" table should contain "Admin User"
+    And "Edited question name" row "Created by" column of "categoryquestions" table should contain "Teacher 1"
     And "Edited question name" row "Last modified by" column of "categoryquestions" table should contain "Teacher 1"
 
   Scenario: Editing a question can be cancelled

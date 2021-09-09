@@ -46,22 +46,19 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
     And I press "Save changes"
     Then I should not see "This ID number is already in use"
 
+@javascript
   Scenario: Question idnumber conflicts found when saving to a different category.
     When the following "question categories" exist:
       | contextlevel | reference | questioncategory | name       |
       | Course       | C1        | Top              | top        |
       | Course       | C1        | top              | Category 1 |
-      | Course       | C1        | top              | Category 2 |
     And the following "questions" exist:
       | questioncategory | qtype | name             | questiontext                  | idnumber |
       | Category 1       | essay | Question to edit | Write about whatever you want | q1       |
-      | Category 2       | essay | Other question   | Write about whatever you want | q2       |
+      | Category 1       | essay | Other question   | Write about whatever you want | q2       |
     And I navigate to "Question bank > Questions" in current page administration
     And I choose "Edit question" action for "Question to edit" in the question bank
-    And I set the following fields to these values:
-      | Use this category | 0          |
-      | ID number         | q2         |
-      | Save in category  | Category 2 |
+    And I set the field "ID number" to "q2"
     And I press "Save changes"
     Then I should see "This ID number is already in use"
 

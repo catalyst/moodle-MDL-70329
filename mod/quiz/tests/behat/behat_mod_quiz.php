@@ -212,7 +212,12 @@ class behat_mod_quiz extends behat_question_base {
             }
 
             // Question id, category and type.
-            $question = $DB->get_record('question', array('name' => $questiondata['question']), 'id, category, qtype', MUST_EXIST);
+            $sql = 'SELECT q.id, qbe.questioncategoryid, q.qtype
+                      FROM {question_bank_entry} qbe
+                      JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                      JOIN {question} q ON qv.questionid = q.id
+                     WHERE q.name = :name';
+            $question = $DB->get_record_sql($sql, ['name' => $questiondata['question']], MUST_EXIST);
 
             // Page number.
             $page = clean_param($questiondata['page'], PARAM_INT);
@@ -247,7 +252,7 @@ class behat_mod_quiz extends behat_question_base {
                 } else {
                     $includingsubcategories = clean_param($questiondata['includingsubcategories'], PARAM_BOOL);
                 }
-                quiz_add_random_questions($quiz, $page, $question->category, 1, $includingsubcategories);
+                quiz_add_random_questions($quiz, $page, $question->questioncategoryid, 1, $includingsubcategories);
             } else {
                 // Add the question.
                 quiz_add_quiz_question($question->id, $quiz, $page, $maxmark);
