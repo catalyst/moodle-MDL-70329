@@ -46,7 +46,6 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
     And I press "Save changes"
     Then I should not see "This ID number is already in use"
 
-@javascript
   Scenario: Question idnumber conflicts found when saving to a different category.
     When the following "question categories" exist:
       | contextlevel | reference | questioncategory | name       |
