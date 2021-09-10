@@ -307,12 +307,12 @@ if (!is_null($returnurl)) {
     $previewdata['redirect'] = true;
     $previewdata['redirecturl'] = $returnurl;
 }
-
+$closeurl = new moodle_url('/question/edit.php', ['courseid' => $COURSE->id]);
 echo $PAGE->get_renderer('qbank_previewquestion')->render_preview_page($previewdata);
 
 // Log the preview of this question.
 $event = \core\event\question_viewed::create_from_question_instance($question, $context);
 $event->trigger();
 
-$PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect'], $COURSE->id]);
+$PAGE->requires->js_call_amd('qbank_previewquestion/preview', 'init', [$previewdata['redirect'], $closeurl->__toString()]);
 echo $OUTPUT->footer();

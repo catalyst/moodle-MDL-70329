@@ -30,14 +30,12 @@ import $ from 'jquery';
  * @method init
  * @param {bool} redirect Redirect.
  */
-export const init = (redirect, courseid) => {
-    // const openedWindow = window.open();
+export const init = (redirect, url) => {
     if (!redirect) {
         let closeButton = document.getElementById('close-previewquestion-page');
         closeButton.onclick = () => {
             if (window.opener === null) {
-                const url = location.origin;
-                location.href = url + '/question/edit.php?courseid=' + courseid;
+                location.href = url;
             } else {
                 window.close();
             }
