@@ -66,7 +66,7 @@ Feature: A Teacher can reorder question categories
     And I type "A brand new category"
     And I set the field "Category info" to "A brand new description for a brand new category"
     And I click on "//button[contains(text(), 'Add category')]" "xpath_element"
-    Then I should see "A brand new category"
+    And I should see "A brand new category"
     And I should not see "A brand new description for a brand new category"
     And I click on "qbshowdescr" "checkbox"
     Then I should see "A brand new description for a brand new category"

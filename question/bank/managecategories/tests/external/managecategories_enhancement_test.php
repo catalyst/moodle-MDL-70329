@@ -41,7 +41,7 @@ use qbank_managecategories\external\submit_add_category_form;
 class managecategories_enhancement_test extends advanced_testcase {
     /**
      * Tests setting a new category order.
-     * 
+     *
      */
     public function test_set_category_order() {
         global $DB;
@@ -84,7 +84,7 @@ class managecategories_enhancement_test extends advanced_testcase {
 
     /**
      * Tests adding a new category order.
-     * 
+     *
      */
     public function test_submit_add_category_form() {
         global $DB;

@@ -195,7 +195,7 @@ class question_category_object {
         foreach ($this->editlists as $context => $list) {
             $listhtml = $list->to_html(0, ['str' => $this->str]);
             if ($listhtml) {
-                $ctxlvl = $list->context->contextlevel;
+                $ctxlvl = "contextlevel" . $list->context->contextlevel;
                 $fullcontext = context::instance_by_id($context);
                 $heading = get_string('questioncatsfor', 'question', $fullcontext->get_context_name());
                 $listdisplay = $listhtml;

@@ -160,7 +160,7 @@ class question_category_list_item extends list_item {
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
         if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
-            $handle = $OUTPUT->pix_icon('grip-vertical-solid', 'gripvsol', 'qbank_managecategories');
+            $handle = $OUTPUT->pix_icon('i/move_2d', 'gripvsol');
         } else {
             $handle = '';
         }
