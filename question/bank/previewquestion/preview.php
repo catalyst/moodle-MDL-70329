@@ -258,7 +258,9 @@ $PAGE->set_heading($title);
 echo $OUTPUT->header();
 
 $previewdata = [];
-$previewdata['questionid'] = $question->id;
+
+$previewdata['questionicon'] = print_question_icon($question);
+$previewdata['questionidumber'] = $question->idnumber;
 $previewdata['questiontitle'] = $question->name;
 $islatestversion = previewquestion_helper::is_latest($question->version, $question->questionbankentryid);
 if ($islatestversion) {
