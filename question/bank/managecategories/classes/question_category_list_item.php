@@ -16,8 +16,6 @@
 
 namespace qbank_managecategories;
 
-defined('MOODLE_INTERNAL') || die();
-
 use action_menu;
 use action_menu_link;
 use list_item;
@@ -144,21 +142,20 @@ class question_category_list_item extends list_item {
         if (class_exists('\\qbank_exportquestions\\form\\export_form')) {
             $exporturl = new moodle_url('/question/bank/exportquestions/export.php',
                 ['cat' => $category->id . ',' . $category->contextid]);
-        } else {
-            $exporturl = new moodle_url('/question/export.php',
-            ['cat' => $category->id . ',' . $category->contextid]);
+            if ($courseid !== 0) {
+                $exporturl->param('courseid', $courseid);
+            } else {
+                $exporturl->param('cmid', $cmid);
+            }
+
+            $menu->add(new action_menu_link(
+                $exporturl,
+                new pix_icon('t/download', 'download'),
+                get_string('exportasxml', 'question'),
+                false
+            ));
         }
-        if ($courseid !== 0) {
-            $exporturl->param('courseid', $courseid);
-        } else {
-            $exporturl->param('cmid', $cmid);
-        }
-        $menu->add(new action_menu_link(
-            $exporturl,
-            new pix_icon('t/download', 'download'),
-            get_string('exportasxml', 'question'),
-            false
-        ));
+
         // Menu to string/html.
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.

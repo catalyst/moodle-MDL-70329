@@ -62,6 +62,7 @@ class set_category_order extends external_api {
         self::validate_context($context);
         require_capability('moodle/category:manage', $context);
         // New order insertion.
+        $categories = clean_param($categories,  PARAM_TEXT);
         $categories = json_decode($categories, true);
         $neworder = $categories[0];
         $catid = (int)explode(' ', $categories[2])[1];

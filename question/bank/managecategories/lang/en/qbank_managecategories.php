@@ -29,6 +29,6 @@ $string['deleteallquestions'] = 'Delete all questions';
 $string['deletecategoryformname'] = 'Delete category';
 $string['deletecategorylabel'] = 'Delete';
 $string['movequestions'] = 'Move questions to category';
-$string['pluginname'] = 'Manage question bank categories feature';
+$string['pluginname'] = 'Manage categories';
 $string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';
 $string['showcategorydescription'] = 'Show descriptions';

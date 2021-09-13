@@ -25,8 +25,6 @@
 class CheckboxParam {
     /**
      * Sets events listenner for checkbox ticking change
-     *
-     * @returns
      */
     setEventListenner = () => {
         let checkbox = document.getElementsByName('qbshowdescr')[0];
@@ -37,4 +35,5 @@ class CheckboxParam {
         });
     };
 }
+
 export default CheckboxParam;
