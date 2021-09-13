@@ -29,10 +29,12 @@ class CheckboxParam {
     setEventListenner = () => {
         let checkbox = document.getElementsByName('qbshowdescr')[0];
         let checkboxform = document.getElementById('qbshowdescr-form');
-        checkbox.addEventListener('click', (e) => {
-            e.preventDefault();
-            checkboxform.submit();
-        });
+        if (checkbox !== undefined) {
+            checkbox.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkboxform.submit();
+            });
+        }
     };
 }
 
