@@ -377,6 +377,10 @@ function question_delete_question($questionid) {
     // Delete all tag instances.
     core_tag_tag::remove_all_item_tags('core_question', 'question', $question->id);
 
+    // Delete the custom filed data for the question.
+    $customfieldhandler = qbank_customfields\customfield\question_handler::create();
+    $customfieldhandler->delete_instance($question->id);
+
     // Now recursively delete all child questions
     if ($children = $DB->get_records('question',
             array('parent' => $questionid), '', 'id, qtype')) {
@@ -919,9 +923,10 @@ function _tidy_question($question, $category, array $tagobjects = null, array $f
  *         or just a single question object
  * @param bool $loadtags load the question tags from the tags table. Optional, default false.
  * @param stdClass[] $filtercourses The courses to filter the course tags by.
+ * @param bool $loadcustomfields load the question custom fields. Optional, default true.
  * @return bool Indicates success or failure.
  */
-function get_question_options(&$questions, $loadtags = false, $filtercourses = null) {
+function get_question_options(&$questions, $loadtags = false, $filtercourses = null, $loadcustomfields = true) {
     global $DB;
 
     $questionlist = is_array($questions) ? $questions : [$questions];
@@ -953,6 +958,13 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
             $tagobjects = null;
         } else {
             $tagobjects = $tagobjectsbyquestion[$question->id];
+        }
+
+        if ($loadcustomfields) {
+            $customfieldhandler = \qbank_customfields\customfield\question_handler::create();
+            $customfields = $customfieldhandler->get_instance_data($question->id);
+
+            $question->customfields = $customfields;
         }
 
         _tidy_question($question, $categories[$question->category], $tagobjects, $filtercourses);
