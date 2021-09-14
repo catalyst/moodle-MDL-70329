@@ -106,18 +106,18 @@ class question_category_list_item extends list_item {
         $menu->set_menu_trigger(get_string('edit'));
         if ($this->children->editable) {
             // Sets up edit link.
-            $editurl = new moodle_url('/question/bank/managecategories/category.php',
-                ['edit' => $category->id]);
-            if ($courseid !== 0) {
-                $editurl->param('courseid', $courseid);
-            } else {
-                $editurl->param('cmid', $cmid);
-            }
+
+            $thiscontext = (int)$this->item->contextid;
+            $editurl = new moodle_url('#');
+            $selector = '[data-action=editcategory-'. $category->id .']';
+            $PAGE->requires->js_call_amd('qbank_managecategories/editcategory_dialogue', 'initModal',
+                [$selector, $thiscontext, $category->id]);
             $menu->add(new action_menu_link(
                 $editurl,
                 new pix_icon('t/edit', 'edit'),
                 get_string('editsettings'),
-                false
+                false,
+                ['data-action' => "editcategory-{$category->id}"]
             ));
             // Don't allow delete if this is the top category, or the last editable category in this context.
             if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {

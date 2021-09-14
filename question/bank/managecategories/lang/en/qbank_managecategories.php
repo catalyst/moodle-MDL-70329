@@ -24,10 +24,7 @@
  */
 
 $string['addcategory'] = 'Add category';
-$string['alertcheckboxes'] = '<h4> Please check at least one category to delete</h4>';
-$string['deleteallquestions'] = 'Delete all questions';
-$string['deletecategoryformname'] = 'Delete category';
-$string['deletecategorylabel'] = 'Delete';
+$string['editcategory'] = 'Edit category';
 $string['movequestions'] = 'Move questions to category';
 $string['pluginname'] = 'Manage categories';
 $string['privacy:metadata'] = 'The Manage Categories plugin does not store any personal data.';

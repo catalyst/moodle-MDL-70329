@@ -105,26 +105,7 @@ if ($param->delete) {
     $questionstomove = 0;
 }
 
-if ($qcobject->catform->is_cancelled()) {
-    $thispageurl->remove_all_params();
-    if (!is_null($cmid)) {
-        $thispageurl->param('cmid', $cmid);
-    } else {
-        $thispageurl->param('courseid', $courseid);
-    }
-    redirect($thispageurl);
-} else if ($catformdata = $qcobject->catform->get_data()) {
-    $catformdata->infoformat = $catformdata->info['format'];
-    $catformdata->info       = $catformdata->info['text'];
-    if (!$catformdata->id) {// New category.
-        $qcobject->add_category($catformdata->parent, $catformdata->name,
-                $catformdata->info, false, $catformdata->infoformat, $catformdata->idnumber);
-    } else {
-        $qcobject->update_category($catformdata->id, $catformdata->parent,
-                $catformdata->name, $catformdata->info, $catformdata->infoformat, $catformdata->idnumber);
-    }
-    redirect($thispageurl);
-} else if ((!empty($param->delete) and (!$questionstomove) and confirm_sesskey())) {
+if ((!empty($param->delete) and (!$questionstomove) and confirm_sesskey())) {
     $qcobject->delete_category($param->delete);// Delete the category now no questions to move.
     $thispageurl->remove_params('cat', 'category');
     redirect($thispageurl);
@@ -146,9 +127,7 @@ echo $OUTPUT->header();
 $renderer = $PAGE->get_renderer('core_question', 'bank');
 echo $renderer->extra_horizontal_navigation();
 
-if (!empty($param->edit)) {
-    $qcobject->edit_single_category($param->edit);
-} else if ($questionstomove) {
+if ($questionstomove) {
     $qcobject->display_move_form($questionstomove, $category);
 } else {
     // Display the user interface.

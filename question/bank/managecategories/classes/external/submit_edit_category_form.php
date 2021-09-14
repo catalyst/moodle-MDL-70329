@@ -36,18 +36,19 @@ use external_api;
 use external_function_parameters;
 use external_value;
 use context;
+use qbank_managecategories\helper;
 use stdClass;
 use moodle_exception;
 
-class submit_add_category_form extends external_api {
+class submit_edit_category_form extends external_api {
     /**
-     * Describes the parameters for submit_add_category_form webservice.
+     * Describes the parameters for submit_edit_category_form webservice.
      * @return external_function_parameters
      */
     public static function execute_parameters() {
         return new external_function_parameters(
             [
-                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create group form, encoded as a json array')
+                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the edit group form, encoded as a json array')
             ]);
     }
 
@@ -58,7 +59,7 @@ class submit_add_category_form extends external_api {
      * @return int $categoryid category id.
      */
     public static function execute($jsonformdata) {
-        global $DB;
+        global $CFG, $USER, $DB;
 
         // We always must pass webservice params through validate_parameters.
         $params = self::validate_parameters(self::execute_parameters(),
@@ -66,57 +67,75 @@ class submit_add_category_form extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        require_capability('moodle/question:add', $context);
+        require_capability('moodle/question:editmine', $context);
 
         $serialiseddata = json_decode($params['jsonformdata'], true);
         $data = [];
         parse_str($serialiseddata, $data);
 
+        $updateid = $data['id'];
+        $newname = $data['name'];
         $newparent = $data['parent'];
-        $newcategory = $data['name'];
+        $updatedcategory = $data['name'];
         $newinfo = $data['info']['text'];
+        $newinfoformat = $data['info']['format'];
         $idnumber = $data['idnumber'];
 
-        if (empty($newcategory)) {
+        if (empty($newname)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
         }
-        list($parentid, $contextid) = explode(',', $newparent);
 
-        if ($parentid) {
-            if (!($DB->get_field('question_categories', 'contextid', ['id' => $parentid]) == $contextid)) {
-                throw new moodle_exception('cannotinsertquestioncatecontext', 'question', '',
-                    ['cat' => $newcategory, 'ctx' => $contextid]);
+        // Get the record we are updating.
+        $oldcat = $DB->get_record('question_categories', ['id' => $updateid]);
+        $lastcategoryinthiscontext = helper::question_is_only_child_of_top_category_in_context($updateid);
+
+        if (!empty($newparent) && !$lastcategoryinthiscontext) {
+            list($parentid, $tocontextid) = explode(',', $newparent);
+        } else {
+            $parentid = $oldcat->parent;
+            $tocontextid = $oldcat->contextid;
+        }
+
+        $fromcontext = context::instance_by_id($oldcat->contextid);
+        require_capability('moodle/question:editmine', $fromcontext);
+
+        // If moving to another context, check permissions some more, and confirm contextid,stamp uniqueness.
+        $newstamprequired = false;
+        if ($oldcat->contextid != $tocontextid) {
+            $tocontext = context::instance_by_id($tocontextid);
+            require_capability('moodle/question:editmine', $tocontext);
+
+            // Confirm stamp uniqueness in the new context. If the stamp already exists, generate a new one.
+            if ($DB->record_exists('question_categories', ['contextid' => $tocontextid, 'stamp' => $oldcat->stamp])) {
+                $newstamprequired = true;
             }
         }
 
         if ((string) $idnumber === '') {
             $idnumber = null;
-        } else if (!empty($contextid)) {
+        } else if (!empty($tocontextid)) {
             // While this check already exists in the form validation, this is a backstop preventing unnecessary errors.
-            if ($DB->record_exists('question_categories',
-                    ['idnumber' => $idnumber, 'contextid' => $contextid])) {
+            if ($DB->record_exists_select('question_categories',
+                    'idnumber = ? AND contextid = ? AND id <> ?',
+                    [$idnumber, $tocontextid, $updateid])) {
                 $idnumber = null;
             }
         }
 
+        // Update the category record.
         $cat = new stdClass();
-        $cat->parent = $parentid;
-        $cat->contextid = $contextid;
-        $cat->name = $newcategory;
+        $cat->id = $updateid;
+        $cat->name = $newname;
         $cat->info = $newinfo;
-        $cat->infoformat = FORMAT_HTML;
-        $cat->sortorder = 999;
-        $cat->stamp = make_unique_id_code();
+        $cat->infoformat = $newinfoformat;
+        $cat->parent = $parentid;
+        $cat->contextid = $tocontextid;
         $cat->idnumber = $idnumber;
-        $categoryid = $DB->insert_record("question_categories", $cat);
-
-        // Log the creation of this category.
-        $category = new stdClass();
-        $category->id = $categoryid;
-        $category->contextid = $contextid;
-        $event = \core\event\question_category_created::create_from_question_category_instance($category);
-        $event->trigger();
-        return $categoryid;
+        if ($newstamprequired) {
+            $cat->stamp = make_unique_id_code();
+        }
+        $success = $DB->update_record('question_categories', $cat);
+        return $success;
     }
 
     /**
@@ -125,6 +144,6 @@ class submit_add_category_form extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_INT, 'Category id');
+        return new external_value(PARAM_BOOL, 'Returns true on successful update');
     }
 }

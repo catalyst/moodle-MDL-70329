@@ -41,4 +41,11 @@ $functions = [
         'capabilities' => 'moodle/question:add',
         'ajax'         => true,
     ],
+    'qbank_managecategories_submit_edit_category_form' => [
+        'classname'    => 'qbank_managecategories\external\submit_edit_category_form',
+        'description'  => 'Edits a question category',
+        'type'         => 'write',
+        'capabilities' => 'moodle/question:editmine',
+        'ajax'         => true,
+    ],
 ];

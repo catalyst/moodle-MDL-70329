@@ -38,11 +38,26 @@ use qbank_managecategories\question_category_object;
  * @return null|string The rendered form.
  */
 function qbank_managecategories_output_fragment_new_category_form($args) {
+    global $DB;
     $args = (object) $args;
     $contexts = new question_edit_contexts($args->context);
     $contexts = $contexts->having_one_edit_tab_cap('categories');
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
     $mform = new question_category_edit_form(null, $customdata);
+    if ($args->id) {
+        $category = $DB->get_record("question_categories", ["id" => $args->id]);
+        if (empty($category)) {
+            throw new moodle_exception('invalidcategory', '', '', $args->id);
+        } else if ($category->parent == 0) {
+            throw new moodle_exception('cannotedittopcat', 'question', '', $args->id);
+        } else {
+            $category->parent = "{$category->parent},{$category->contextid}";
+            $category->submitbutton = get_string('savechanges');
+            $category->categoryheader = get_string('editcategory', 'qbank_managecategories');
+            $mform->set_data($category);
+        }
+    }
+
     return $mform->render();
 }
 
