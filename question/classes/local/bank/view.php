@@ -232,30 +232,30 @@ class view {
         $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin();
-            $pluginobjects = $pluginentrypointobject->get_question_columns($this);
+            $plugincolumnobjects = $pluginentrypointobject->get_question_columns($this);
             // Don't need the plugins without column objects.
-            if (empty($pluginobjects)) {
+            if (empty($plugincolumnobjects)) {
                 unset($plugins[$componentname]);
                 continue;
             }
-            foreach ($pluginobjects as $pluginobject) {
-                $classname = new \ReflectionClass(get_class($pluginobject));
+            foreach ($plugincolumnobjects as $columnobject) {
+                $columnname = $columnobject->get_column_name();
                 foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
                     if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
-                        unset($questionbankclasscolumns[$classname->getShortName()]);
+                        unset($questionbankclasscolumns[$columnname]);
                         continue;
                     }
                     // Check if it has custom preference selector to view/hide.
-                    if ($pluginobject->has_preference()) {
-                        if (!$pluginobject->get_preference()) {
+                    if ($columnobject->has_preference()) {
+                        if (!$columnobject->get_preference()) {
                             continue;
                         }
                     }
-                    if ($corequestionbankcolumn === $classname->getShortName()) {
-                        $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
+                    if ($corequestionbankcolumn === $columnname) {
+                        $questionbankclasscolumns[$columnname] = $columnobject;
                     } else {
                         // Any community plugin for column/action.
-                        $newpluginclasscolumns[$classname->getShortName()] = $pluginobject;
+                        $newpluginclasscolumns[$columnname] = $columnobject;
                     }
                 }
             }
@@ -288,7 +288,7 @@ class view {
             if (empty($classobject)) {
                 continue;
             }
-            $this->requiredcolumns[get_class($classobject)] = $classobject;
+            $this->requiredcolumns[$classobject->get_column_name()] = $classobject;
         }
 
         return $this->requiredcolumns;
@@ -301,7 +301,7 @@ class view {
      * @param string $columnname
      */
     protected function get_column_type($columnname) {
-        if (empty($this->requiredcolumns[$columnname])) {
+         if (empty($this->requiredcolumns[$columnname])) {
             $this->requiredcolumns[$columnname] = new $columnname($this);
         }
     }
@@ -335,9 +335,9 @@ class view {
         $this->extrarows = [];
         foreach ($wanted as $column) {
             if ($column->is_extra_row()) {
-                $this->extrarows[get_class($column)] = $column;
+                $this->extrarows[$column->get_column_name()] = $column;
             } else {
-                $this->visiblecolumns[get_class($column)] = $column;
+                $this->visiblecolumns[$column->get_column_name()] = $column;
             }
         }
 
@@ -878,7 +878,7 @@ class view {
     protected function create_new_question_form($category, $canadd): void {
         if (\core\plugininfo\qbank::is_plugin_enabled('qbank_editquestion')) {
             echo editquestion_helper::create_new_question_button($category->id,
-                    $this->requiredcolumns['qbank_editquestion\edit_action_column']->editquestionurl->params(), $canadd);
+                    $this->requiredcolumns['edit_action_column']->editquestionurl->params(), $canadd);
         }
     }
 
@@ -1067,7 +1067,7 @@ class view {
      */
     protected function print_table($questions): void {
         // Start of the table.
-        echo \html_writer::start_tag('table', ['id' => 'categoryquestions']);
+        echo \html_writer::start_tag('table', ['id' => 'categoryquestions', 'class' => 'table table-responsive ']);
 
         // Prints the table header.
         echo \html_writer::start_tag('thead');
@@ -1098,7 +1098,7 @@ class view {
      */
     protected function start_table() {
         debugging('Function start_table() is deprecated, please use print_table() instead.', DEBUG_DEVELOPER);
-        echo '<table id="categoryquestions">' . "\n";
+        echo '<table id="categoryquestions" class="table table-responsive">' . "\n";
         echo "<thead>\n";
         $this->print_table_headers();
         echo "</thead>\n";

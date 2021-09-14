@@ -1944,6 +1944,7 @@ class core_plugin_manager {
 
             'qbank' => [
                 'comment',
+                'customfields',
                 'deletequestion',
                 'editquestion',
                 'exporttoxml',
