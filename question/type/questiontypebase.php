@@ -1017,6 +1017,9 @@ class question_type {
         }
 
         $this->initialise_question_hints($question, $questiondata);
+
+        // Add the custom fields.
+        $this->initialise_custom_fields($question, $questiondata);
     }
 
     /**
@@ -1064,6 +1067,17 @@ class question_type {
      */
     protected function make_hint($hint) {
         return question_hint::load_from_record($hint);
+    }
+
+    /**
+     * Initialise question custom fields.
+     * @param question_definition $question the question_definition we are creating.
+     * @param object $questiondata the question data loaded from the database.
+     */
+    protected function initialise_custom_fields(question_definition $question, $questiondata) {
+        if (!empty($questiondata->customfields)) {
+             $question->customfields = $questiondata->customfields;
+        }
     }
 
     /**
