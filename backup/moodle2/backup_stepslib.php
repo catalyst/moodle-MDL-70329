@@ -2368,6 +2368,11 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $tag = new backup_nested_element('tag', array('id', 'contextid'), array('name', 'rawname'));
 
+        $customfields = new backup_nested_element('customfields');
+        $customfield = new backup_nested_element('customfield', array('id'), array(
+                'shortname', 'type', 'value', 'valueformat'
+        ));
+
         // Build the tree
 
         $qcategories->add_child($qcategory);
@@ -2378,6 +2383,9 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $question->add_child($tags);
         $tags->add_child($tag);
+
+        $question->add_child($customfields);
+        $customfields->add_child($customfield);
 
         // Define the sources
 
@@ -2407,6 +2415,18 @@ class backup_questions_structure_step extends backup_structure_step {
             [
                 backup::VAR_PARENTID
             ]);
+
+        // Backup custom field.
+        $customfield->set_source_sql("SELECT cfd.id, cff.shortname, cff.type,  cfd.value, cfd.valueformat
+                                            FROM {customfield_data} cfd
+                                            JOIN {customfield_field} cff ON cff.id = cfd.fieldid
+                                            JOIN {customfield_category} cfc ON cfc.id = cff.categoryid
+                                           WHERE cfc.component = 'core_question'
+                                                 AND cfc.area = 'question'
+                                                 AND cfd.instanceid = ?",
+                [
+                        backup::VAR_PARENTID
+                ]);;
 
         // don't need to annotate ids nor files
         // (already done by {@link backup_annotate_all_question_files}

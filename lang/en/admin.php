@@ -1106,6 +1106,7 @@ $string['purgeselectedcaches'] = 'Purge selected caches';
 $string['purgeselectedcachesfinished'] = 'The selected caches were purged.';
 $string['purgetemplates'] = 'Templates';
 $string['purgethemecache'] = 'Themes';
+$string['question_customfield'] = 'Question custom fields';
 $string['referrernone'] = 'Browser default';
 $string['referrerpolicy'] = 'Referrer policy';
 $string['referrerpolicydesc'] = 'Set the referrer policy header to be included with responses from your site.';

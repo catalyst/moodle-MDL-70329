@@ -83,6 +83,14 @@ $string['created'] = 'Created';
 $string['createdby'] = 'Created by';
 $string['createdmodifiedheader'] = 'Created / last saved';
 $string['createnewquestion'] = 'Create a new question ...';
+$string['customfield_islocked'] = 'Locked';
+$string['customfield_islocked_help'] = 'If the field is locked, only users with the capability to change locked custom fields will be able to change it in the question settings.';
+$string['customfield_notvisible'] = 'Nobody';
+$string['customfield_visibility'] = 'Visible to';
+$string['customfield_visibility_help'] = 'This setting determines who can view the custom field name and value.';
+$string['customfield_visibletoall'] = 'Everyone';
+$string['customfield_visibletoteachers'] = 'Teachers';
+$string['customfieldsettings'] = 'Common question custom fields settings';
 $string['cwrqpfs'] = 'Random questions selecting questions from sub categories.';
 $string['cwrqpfsinfo'] = '<p>During the upgrade to Moodle 1.9 we will separate question categories into
 different contexts. Some question categories and questions on your site will have to have their sharing

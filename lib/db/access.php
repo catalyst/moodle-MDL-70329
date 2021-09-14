@@ -1538,6 +1538,31 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/question:editall'
     ),
 
+    'moodle/question:changelockedcustomfields' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW
+        ),
+    ),
+
+    'moodle/question:configurecustomfields' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'clonepermissionsfrom' => 'moodle/site:config'
+    ),
+
+    'moodle/question:viewhiddencustomfields' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+    ),
+
     'moodle/site:doclinks' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,

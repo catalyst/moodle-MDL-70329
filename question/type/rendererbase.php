@@ -230,6 +230,21 @@ abstract class qtype_renderer extends plugin_renderer_base {
 
         return $this->output->pix_icon('i/grade_' . $feedbackclass, get_string($feedbackclass, 'question'));
     }
+
+    /**
+     * Get the custom field markup for the question.
+     *
+     * @param question_attempt $qa The question attempt object.
+     * @return string $fieldmarkup The custom fields html.
+     */
+    public function custom_field_markup(question_attempt $qa) {
+        $handler = \core_question\customfield\question_handler::create();
+        $fielddata = $handler->get_instance_data($qa->get_question_id());
+        $fieldmarkup = $handler->display_custom_fields_data($fielddata);
+
+        return $fieldmarkup;
+
+    }
 }
 
 /**

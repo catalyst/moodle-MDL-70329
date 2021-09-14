@@ -501,6 +501,14 @@ if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) 
         /** @var \core\plugininfo\qtype $plugin */
         $plugin->load_settings($ADMIN, 'qtypesettings', $hassiteconfig);
     }
+
+    // Settings for question custom fields.
+    $ADMIN->add('qtypesettings',
+            new admin_externalpage('question_customfield', new lang_string('question_customfield', 'admin'),
+                    $CFG->wwwroot . '/question/customfield.php',
+                    array('moodle/question:configurecustomfields')
+            )
+    );
 }
 
 // Plagiarism plugin settings

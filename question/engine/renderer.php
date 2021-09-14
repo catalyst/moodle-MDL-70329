@@ -112,6 +112,10 @@ class core_question_renderer extends plugin_renderer_base {
                     $this->manual_comment($qa, $behaviouroutput, $qtoutput, $options)),
                 array('class' => 'comment clearfix'));
         $output .= html_writer::nonempty_tag('div',
+                $this->add_part_heading(get_string('customfields', 'customfield'),
+                        $this->custom_fields($qa, $qtoutput)),
+                array('class' => 'formulation clearfix'));
+        $output .= html_writer::nonempty_tag('div',
                 $this->response_history($qa, $behaviouroutput, $qtoutput, $options),
                 array('class' => 'history clearfix border p-2'));
 
@@ -387,6 +391,18 @@ class core_question_renderer extends plugin_renderer_base {
         $output .= html_writer::nonempty_tag('div',
                 $behaviouroutput->controls($qa, $options), array('class' => 'im-controls'));
         return $output;
+    }
+
+    /**
+     * Generate the display of the question custom fields.
+     *
+     * @param question_attempt $qa The question attempt to display.
+     * @param qtype_renderer $qtoutput The renderer to output the question type.
+     * @return string $fieldmarkup The custom field rendered markup.
+     */
+    protected function custom_fields(question_attempt $qa, qtype_renderer $qtoutput) {
+        $fieldmarkup = $qtoutput->custom_field_markup($qa);
+        return $fieldmarkup;
     }
 
     /**

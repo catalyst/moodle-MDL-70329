@@ -4739,13 +4739,14 @@ class restore_create_categories_and_questions extends restore_structure_step {
     protected $cachedcategory = null;
 
     protected function define_structure() {
-
         $category = new restore_path_element('question_category', '/question_categories/question_category');
         $question = new restore_path_element('question', '/question_categories/question_category/questions/question');
         $hint = new restore_path_element('question_hint',
                 '/question_categories/question_category/questions/question/question_hints/question_hint');
 
         $tag = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
+        $customfield = new restore_path_element('customfield',
+                '/question_categories/question_category/questions/question/customfields/customfield');
 
         // Apply for 'qtype' plugins optional paths at question level
         $this->add_plugin_structure('qtype', $question);
@@ -4753,7 +4754,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Apply for 'local' plugins optional paths at question level
         $this->add_plugin_structure('local', $question);
 
-        return array($category, $question, $hint, $tag);
+        return array($category, $question, $hint, $tag, $customfield);
     }
 
     protected function process_question_category($data) {
@@ -4999,6 +5000,34 @@ class restore_create_categories_and_questions extends restore_structure_step {
                     context::instance_by_id($tagcontextid),
                     $tagname);
         }
+    }
+
+    /**
+     * Process custom fields
+     *
+     * @param array $data
+     */
+    protected function process_customfield($data) {
+        global $DB;
+
+        $newquestion = $this->get_new_parentid('question');
+
+        if (!empty($data->contextid) && $newcontextid = $this->get_mappingid('context', $data->contextid)) {
+            $fieldcontextid = $newcontextid;
+        } else {
+            // Get the category, so we can then later get the context.
+            $categoryid = $this->get_new_parentid('question_category');
+            if (empty($this->cachedcategory) || $this->cachedcategory->id != $categoryid) {
+                $this->cachedcategory = $DB->get_record('question_categories', array('id' => $categoryid));
+            }
+            $fieldcontextid = $this->cachedcategory->contextid;
+        }
+
+        $data['newquestion'] = $newquestion;
+        $data['fieldcontextid'] = $fieldcontextid;
+
+        $handler = core_question\customfield\question_handler::create();
+        $handler->restore_instance_data_from_backup($this->task, $data);
     }
 
     protected function after_execute() {
