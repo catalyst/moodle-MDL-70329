@@ -370,4 +370,12 @@ class helper {
 
         return $categories;
     }
+
+    public static function idnumber_exists(string $idnumber, int $categoryid) {
+        global $DB;
+
+        $idnumber = $DB->get_record('question_categories', ['idnumber' => $idnumber]);
+        $exists = isset($idnumber) ? true : false;
+        return $exists;
+    }
 }

@@ -59,7 +59,7 @@ class submit_edit_category_form extends external_api {
      * @return int $categoryid category id.
      */
     public static function execute($jsonformdata) {
-        global $CFG, $USER, $DB;
+        global $DB;
 
         // We always must pass webservice params through validate_parameters.
         $params = self::validate_parameters(self::execute_parameters(),
