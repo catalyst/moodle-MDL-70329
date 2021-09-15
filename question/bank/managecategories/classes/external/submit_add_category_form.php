@@ -32,12 +32,14 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . "/externallib.php");
 
 use context_system;
+use core\notification;
 use external_api;
 use external_function_parameters;
 use external_value;
 use context;
 use stdClass;
 use moodle_exception;
+use qbank_managecategories\helper;
 
 class submit_add_category_form extends external_api {
     /**
@@ -80,7 +82,16 @@ class submit_add_category_form extends external_api {
         if (empty($newcategory)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
         }
+
         list($parentid, $contextid) = explode(',', $newparent);
+
+        if (isset($idnumber)) {
+            $exists = helper::idnumber_exists($idnumber, $contextid);
+            if ($exists) {
+                notification::error(get_string('idnumberexists', 'qbank_managecategories'));
+                return false;
+            }
+        }
 
         if ($parentid) {
             if (!($DB->get_field('question_categories', 'contextid', ['id' => $parentid]) == $contextid)) {
@@ -116,7 +127,8 @@ class submit_add_category_form extends external_api {
         $category->contextid = $contextid;
         $event = \core\event\question_category_created::create_from_question_category_instance($category);
         $event->trigger();
-        return $categoryid;
+        $success = ($categoryid) ? true : false;
+        return $success;
     }
 
     /**
@@ -125,6 +137,6 @@ class submit_add_category_form extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_INT, 'Category id');
+        return new external_value(PARAM_BOOL, 'Success or failure');
     }
 }

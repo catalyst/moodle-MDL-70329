@@ -44,7 +44,7 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     $contexts = $contexts->having_one_edit_tab_cap('categories');
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
     $mform = new question_category_edit_form(null, $customdata);
-    if ($args->id) {
+    if (isset($args->id)) {
         $category = $DB->get_record("question_categories", ["id" => $args->id]);
         if (empty($category)) {
             throw new moodle_exception('invalidcategory', '', '', $args->id);

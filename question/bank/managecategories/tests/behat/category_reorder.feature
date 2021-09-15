@@ -45,9 +45,9 @@ Feature: A Teacher can reorder question categories
 
   @javascript
   Scenario: Teacher can reorder categories
-    When I drag "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-right']/span/img" "xpath_element" and I drop it in "Default for Miscellaneous" "text"
+    When I drag "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Default for Miscellaneous" "text"
     Then "Quiz category" "text" should appear before "Default for Miscellaneous" "text"
-    And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span/img" "xpath_element" and I drop it in "Quiz category" "text"
+    And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Quiz category" "text"
     Then "Course category 2" "text" should appear before "Quiz category 2" "text"
 
   @javascript

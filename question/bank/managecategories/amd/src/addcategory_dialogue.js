@@ -71,7 +71,14 @@ const displayModal = (selector, contextid, categoryid) => {
           modal.hide();
           location.reload();
         })
-        .catch((error) => error);
+        .catch(() => {
+          Str.get_string('idnumberexists', 'qbank_managecategories').then((string) => {
+            Notification.addNotification({
+              message: string,
+              type: 'error'
+            });
+          });
+        });
       });
     });
 };
@@ -120,12 +127,22 @@ const submitFormAjax = (modal, categoryid, e) => {
   if (categoryid === undefined) {
     methodname = 'qbank_managecategories_submit_add_category_form';
   }
-  return Promise.resolve(
-    Ajax.call([{
-    methodname: methodname,
-    args: {jsonformdata: JSON.stringify(formData)},
-    fail: Notification.exception
-  }]));
+  const promise = new Promise((resolve, reject) => {
+    const response = Ajax.call([{
+      methodname: methodname,
+      args: {jsonformdata: JSON.stringify(formData)},
+      fail: Notification.exception
+    }]);
+
+    response[0].then((resp) => {
+      if (JSON.parse(resp) === false) {
+        reject();
+    } else {
+        resolve();
+    }
+    });
+  });
+  return promise;
 };
 
 /**

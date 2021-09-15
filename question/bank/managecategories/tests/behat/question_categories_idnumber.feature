@@ -50,5 +50,5 @@ Feature: A teacher can put questions with idnumbers in categories with idnumbers
     And I navigate to "Question bank > Categories" in current page administration
     And I press "Edit"
     And I choose "Edit settings" in the open action menu
-    And I press "Save changes"
+    And I click on "//button[@data-action='save']" "xpath_element"
     Then I should not see "This ID number is already in use"

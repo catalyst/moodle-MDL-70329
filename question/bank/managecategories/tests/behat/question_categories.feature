@@ -49,7 +49,7 @@ Feature: A teacher can put questions in categories in the question bank
     And I choose "Edit settings" in the open action menu
     And I set the field "Name" to "New name"
     And I set the field "Category info" to "I was edited"
-    And I click on "Save changes" "button"
+    And I click on "//button[@data-action='save']" "xpath_element"
     And I click on "Show descriptions" "checkbox"
     Then I should see "New name"
     And I should see "I was edited"
