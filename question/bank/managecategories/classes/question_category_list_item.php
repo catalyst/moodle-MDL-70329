@@ -110,7 +110,7 @@ class question_category_list_item extends list_item {
             $thiscontext = (int)$this->item->contextid;
             $editurl = new moodle_url('#');
             $selector = '[data-action=editcategory-'. $category->id .']';
-            $PAGE->requires->js_call_amd('qbank_managecategories/editcategory_dialogue', 'initModal',
+            $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
                 [$selector, $thiscontext, $category->id]);
             $menu->add(new action_menu_link(
                 $editurl,

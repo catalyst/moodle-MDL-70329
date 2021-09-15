@@ -26,6 +26,7 @@
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
+import CheckboxParam from 'qbank_managecategories/checkbox_param';
 import $ from 'jquery';
 
 class OrderCategories {
@@ -125,4 +126,9 @@ class OrderCategories {
     };
 }
 
-export default OrderCategories;
+export const init = () => {
+    const checkboxParam = new CheckboxParam();
+    checkboxParam.setEventListenner();
+    const orderCat = new OrderCategories();
+    orderCat.setupSortableLists();
+};

@@ -48,6 +48,7 @@ if (!is_null($cmid)) {
 
 $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
     ['[data-action=addcategory]', $thiscontext]);
+$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
 
 // Get values from form for actions on this page.
 $param = new stdClass();

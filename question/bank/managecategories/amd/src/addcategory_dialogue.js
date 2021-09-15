@@ -29,8 +29,6 @@ import ModalEvents from 'core/modal_events';
 import Fragment from 'core/fragment';
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
-import CheckboxParam from 'qbank_managecategories/checkbox_param';
-import OrderCategories from 'qbank_managecategories/order_categories';
 
 /**
  * Function handling display of moodle form.
@@ -38,22 +36,28 @@ import OrderCategories from 'qbank_managecategories/order_categories';
  * @param {string} selector Selector to trigger form display on.
  * @param {int} contextid Context id for fragment.
  */
-const displayModal = (selector, contextid) => {
+const displayModal = (selector, contextid, categoryid) => {
+  let title = Str.get_string('addcategory', 'question');
+    if (categoryid !== undefined) {
+      title = Str.get_string('editcategory', 'question');
+    }
     const trigger = document.querySelector(selector);
     ModalFactory.create({
       type: ModalFactory.types.SAVE_CANCEL,
-      title: Str.get_string('addcategory', 'question'),
-      body: getBody(contextid),
+      title: title,
+      body: getBody(contextid, categoryid),
       large: true,
     })
     .done((modal) => {
       trigger.addEventListener('click', () => {
         modal.show();
       });
-      modal.setSaveButtonText(Str.get_string('addcategory', 'question'));
+      if (categoryid === undefined) {
+        modal.setSaveButtonText(Str.get_string('addcategory', 'question'));
+      }
       const root = modal.getRoot();
       root.on(ModalEvents.hidden, () => {
-        modal.setBody(getBody(contextid));
+        modal.setBody(getBody(contextid, categoryid));
       });
       root.on(ModalEvents.shown, () => {
         root.append('<style>[data-fieldtype=submit] { display: none ! important; }</style>');
@@ -62,7 +66,7 @@ const displayModal = (selector, contextid) => {
         submitForm(modal, e);
       });
       root.on('submit', 'form', (e) => {
-        submitFormAjax(modal, e)
+        submitFormAjax(modal, categoryid, e)
         .then(() => {
           modal.hide();
           location.reload();
@@ -78,8 +82,11 @@ const displayModal = (selector, contextid) => {
  * @param {int} contextid Context id for fragment.
  * @returns {Promise}
  */
-const getBody = (contextid) => {
-    const params = {};
+const getBody = (contextid, categoryid) => {
+    let params = {};
+    if (categoryid !== undefined) {
+      params = {id: categoryid};
+    }
     const htmlBody = Fragment.loadFragment('qbank_managecategories', 'new_category_form', contextid, params);
     return htmlBody;
 };
@@ -90,7 +97,7 @@ const getBody = (contextid) => {
  * @param {Object} modal Object representing form data.
  * @returns {Mixed}
  */
-const submitFormAjax = (modal, e) => {
+const submitFormAjax = (modal, categoryid, e) => {
   e.preventDefault();
   const changeEvent = document.createEvent('HTMLEvents');
   changeEvent.initEvent('change', true, true);
@@ -109,9 +116,13 @@ const submitFormAjax = (modal, e) => {
   }
 
   const formData =  modal.getRoot().find('form').serialize();
+  let methodname = 'qbank_managecategories_submit_edit_category_form';
+  if (categoryid === undefined) {
+    methodname = 'qbank_managecategories_submit_add_category_form';
+  }
   return Promise.resolve(
     Ajax.call([{
-    methodname: 'qbank_managecategories_submit_add_category_form',
+    methodname: methodname,
     args: {jsonformdata: JSON.stringify(formData)},
     fail: Notification.exception
   }]));
@@ -128,10 +139,6 @@ const submitForm = (modal, e) => {
   modal.getRoot().find('form').submit();
 };
 
-export const initModal = (selector, contextid) => {
-  displayModal(selector, contextid);
-  const checkboxParam = new CheckboxParam();
-  checkboxParam.setEventListenner();
-  const orderCat = new OrderCategories();
-  orderCat.setupSortableLists();
+export const initModal = (selector, contextid, categoryid) => {
+  displayModal(selector, contextid, categoryid);
 };
