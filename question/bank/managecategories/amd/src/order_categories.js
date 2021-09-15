@@ -59,7 +59,7 @@ class OrderCategories {
             // Call external function.
             this.setCatOrder(JSON.stringify(newOrder))
             .then(() => location.reload())
-            .catch((error) => error);
+            .catch(() => location.reload());
         });
     };
 
@@ -70,11 +70,21 @@ class OrderCategories {
      * @returns {Promise}
      */
     setCatOrder = (updatedCategories) => {
-        return Promise.resolve(Ajax.call([{
-            methodname: 'qbank_managecategories_set_category_order',
-            args: {categories: updatedCategories},
-            fail: Notification.exception
-        }]));
+        const promise = new Promise((resolve, reject) => {
+            const response = Ajax.call([{
+                methodname: 'qbank_managecategories_set_category_order',
+                args: {categories: updatedCategories},
+                fail: Notification.exception
+            }]);
+            response[0].then((resp) => {
+                if (JSON.parse(resp) === false) {
+                    reject();
+                } else {
+                    resolve();
+                }
+            });
+        });
+        return promise;
     };
 
     /**

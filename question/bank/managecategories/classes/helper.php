@@ -371,11 +371,17 @@ class helper {
         return $categories;
     }
 
-    public static function idnumber_exists(string $idnumber, int $categoryid) {
+    /**
+     * Checks if idnumber exists in given context.
+     *
+     * @param string $idnumber Id number to check for.
+     * @param string $contextid Contextid to check in.
+     * @return mixed Returns false or existing idnumber.
+     */
+    public static function idnumber_exists(string $idnumber, string $contextid) {
         global $DB;
 
-        $idnumber = $DB->get_record('question_categories', ['idnumber' => $idnumber]);
-        $exists = isset($idnumber) ? true : false;
-        return $exists;
+        $record = $DB->get_record('question_categories', ['idnumber' => $idnumber, 'contextid' => $contextid]);
+        return ($record) ? $record->idnumber : $record;
     }
 }

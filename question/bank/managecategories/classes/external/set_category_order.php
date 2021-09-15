@@ -32,6 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . "/externallib.php");
 
 use context_system;
+use core\notification;
 use external_api;
 use external_function_parameters;
 use external_value;
@@ -72,13 +73,20 @@ class set_category_order extends external_api {
         // Question_categories table modifications.
         if (!is_null($categories[1])) {
             // Retrieves top category parent where neighbor category is located.
-            $sql = 'SELECT id, contextid, parent, sortorder
+            $sql = 'SELECT id, contextid, parent, sortorder, idnumber
                       FROM {question_categories}
                      WHERE (contextid = ?) OR (id = ?)';
 
             $records = $DB->get_records_sql($sql, [$newctxid, $catid]);
             $destinationcontext = reset($records);
             $categorytoupdate = $records[$catid];
+            if (isset($categorytoupdate->idnumber)) {
+                $exists = helper::idnumber_exists($categorytoupdate->idnumber, $destinationcontext->contextid);
+                if ($exists) {
+                    notification::error(get_string('idnumberexists', 'qbank_managecategories'));
+                    return false;
+                }
+            }
             $categorytoupdate->parent = $destinationcontext->id;
             $updatedcontextcat = $categorytoupdate->contextid . ' ' . $categorytoupdate->id;
             $categorytoupdate->contextid = $newctxid;
@@ -107,9 +115,7 @@ class set_category_order extends external_api {
                 }
             }
         }
-
-        $categories = json_encode($categories);
-        return $categories;
+        return true;
     }
 
     /**
@@ -118,6 +124,6 @@ class set_category_order extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_RAW, 'Returns cleaned JSON string');
+        return new external_value(PARAM_BOOL, 'Returns success or failure');
     }
 }
