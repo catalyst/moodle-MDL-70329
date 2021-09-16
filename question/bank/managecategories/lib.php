@@ -43,7 +43,12 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     $contexts = new question_edit_contexts($args->context);
     $contexts = $contexts->having_one_edit_tab_cap('categories');
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
-    $mform = new question_category_edit_form(null, $customdata);
+
+    $formdata = [];
+    if (!empty($args->jsonformdata)) {
+        parse_str($args->jsonformdata, $formdata);
+    }
+    $mform = new question_category_edit_form(null, $customdata, 'post', '', null, true, $formdata);
     if (isset($args->id)) {
         $category = $DB->get_record("question_categories", ["id" => $args->id]);
         if (empty($category)) {
@@ -57,7 +62,10 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
             $mform->set_data($category);
         }
     }
-
+    // Form submission check.
+    if (!empty($args->jsonformdata)) {
+        $mform->is_validated();
+    }
     return $mform->render();
 }
 

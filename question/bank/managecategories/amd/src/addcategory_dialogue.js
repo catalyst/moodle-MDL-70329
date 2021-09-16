@@ -28,13 +28,13 @@ import ModalFactory from 'core/modal_factory';
 import ModalEvents from 'core/modal_events';
 import Fragment from 'core/fragment';
 import Ajax from 'core/ajax';
-import Notification from 'core/notification';
 
 /**
  * Function handling display of moodle form.
  *
  * @param {string} selector Selector to trigger form display on.
  * @param {int} contextid Context id for fragment.
+ * @param {int} categoryid Category id for edit form and data-action.
  */
 const displayModal = (selector, contextid, categoryid) => {
   let title = Str.get_string('addcategory', 'question');
@@ -66,19 +66,12 @@ const displayModal = (selector, contextid, categoryid) => {
         submitForm(modal, e);
       });
       root.on('submit', 'form', (e) => {
-        submitFormAjax(modal, categoryid, e)
+        submitFormAjax(modal, categoryid, contextid, e)
         .then(() => {
           modal.hide();
           location.reload();
         })
-        .catch(() => {
-          Str.get_string('idnumberexists', 'qbank_managecategories').then((string) => {
-            Notification.addNotification({
-              message: string,
-              type: 'error'
-            });
-          });
-        });
+        .catch(() => {});
       });
     });
 };
@@ -87,24 +80,45 @@ const displayModal = (selector, contextid, categoryid) => {
  * Get body for moodle form from fragment new_category_form.
  *
  * @param {int} contextid Context id for fragment.
+ * @param {int} categoryid Category id for edit form and data-action.
+ * @param {String} formdata Data from submited form to check.
  * @returns {Promise}
  */
-const getBody = (contextid, categoryid) => {
+const getBody = (contextid, categoryid, formdata) => {
     let params = {};
     if (categoryid !== undefined) {
-      params = {id: categoryid};
+      params.id = categoryid;
+    }
+    if (formdata !== undefined) {
+      params.jsonformdata = formdata;
     }
     const htmlBody = Fragment.loadFragment('qbank_managecategories', 'new_category_form', contextid, params);
     return htmlBody;
 };
 
 /**
- * Call external function add_category_form - inserts the newly added category in the question_categories table.
+ * Handle form submission failure and allows checks server side.
  *
  * @param {Object} modal Object representing form data.
+ * @param {int} contextid Context id for fragment.
+ * @param {int} categoryid Category id for edit form and data-action.
+ * @param {String} formdata Data from submited form to check.
+ */
+const handleFormSubmissionFailure = (modal, contextid, categoryid, formdata) => {
+  modal.setBody(getBody(contextid, categoryid, formdata));
+};
+
+/**
+ * Call external function add_category_form or edit_category_form,
+ * updates or insert newly added category in the question_categories table.
+ *
+ * @param {Object} modal Object representing form data.
+ * @param {int} categoryid Category id for edit form and data-action.
+ * @param {int} contextid Context id for fragment.
+ * @param {Event} e Form submission event.
  * @returns {Mixed}
  */
-const submitFormAjax = (modal, categoryid, e) => {
+const submitFormAjax = (modal, categoryid, contextid, e) => {
   e.preventDefault();
   const changeEvent = document.createEvent('HTMLEvents');
   changeEvent.initEvent('change', true, true);
@@ -131,15 +145,14 @@ const submitFormAjax = (modal, categoryid, e) => {
     const response = Ajax.call([{
       methodname: methodname,
       args: {jsonformdata: JSON.stringify(formData)},
-      fail: Notification.exception
+      fail: handleFormSubmissionFailure(modal, contextid, categoryid, formData)
     }]);
-
-    response[0].then((resp) => {
-      if (JSON.parse(resp) === false) {
+    response[0].then((resp) =>{
+      if (JSON.parse(resp) === false){
         reject();
-    } else {
+      } else {
         resolve();
-    }
+      }
     });
   });
   return promise;

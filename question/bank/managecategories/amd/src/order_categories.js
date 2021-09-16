@@ -33,7 +33,6 @@ class OrderCategories {
     /**
      * Sets up sortable list in the column sort order page.
      *
-     * @returns
      */
     setupSortableLists = () => {
         new SortableList(

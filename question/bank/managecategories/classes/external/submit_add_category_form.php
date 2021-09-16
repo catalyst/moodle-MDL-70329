@@ -32,14 +32,12 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . "/externallib.php");
 
 use context_system;
-use core\notification;
 use external_api;
 use external_function_parameters;
 use external_value;
-use context;
-use stdClass;
 use moodle_exception;
 use qbank_managecategories\helper;
+use stdClass;
 
 class submit_add_category_form extends external_api {
     /**
@@ -88,7 +86,6 @@ class submit_add_category_form extends external_api {
         if (isset($idnumber)) {
             $exists = helper::idnumber_exists($idnumber, $contextid);
             if ($exists) {
-                notification::error(get_string('idnumberexists', 'qbank_managecategories'));
                 return false;
             }
         }

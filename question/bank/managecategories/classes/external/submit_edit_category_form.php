@@ -31,14 +31,14 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . "/externallib.php");
 
+use context;
 use context_system;
 use external_api;
 use external_function_parameters;
 use external_value;
-use context;
+use moodle_exception;
 use qbank_managecategories\helper;
 use stdClass;
-use moodle_exception;
 
 class submit_edit_category_form extends external_api {
     /**
@@ -94,6 +94,13 @@ class submit_edit_category_form extends external_api {
         } else {
             $parentid = $oldcat->parent;
             $tocontextid = $oldcat->contextid;
+        }
+
+        if (isset($idnumber)) {
+            $exists = helper::idnumber_exists($idnumber, $tocontextid);
+            if ($exists) {
+                return false;
+            }
         }
 
         $fromcontext = context::instance_by_id($oldcat->contextid);

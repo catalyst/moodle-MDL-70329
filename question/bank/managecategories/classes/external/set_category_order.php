@@ -81,10 +81,13 @@ class set_category_order extends external_api {
             $destinationcontext = reset($records);
             $categorytoupdate = $records[$catid];
             if (isset($categorytoupdate->idnumber)) {
-                $exists = helper::idnumber_exists($categorytoupdate->idnumber, $destinationcontext->contextid);
-                if ($exists) {
-                    notification::error(get_string('idnumberexists', 'qbank_managecategories'));
-                    return false;
+                // We don't want errors when reordering in same context.
+                if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
+                    $exists = helper::idnumber_exists($categorytoupdate->idnumber, $destinationcontext->contextid);
+                    if ($exists) {
+                        notification::error(get_string('idnumberexists', 'qbank_managecategories'));
+                        return false;
+                    }
                 }
             }
             $categorytoupdate->parent = $destinationcontext->id;
