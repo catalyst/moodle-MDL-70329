@@ -66,7 +66,7 @@ class submit_add_category_form extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        require_capability('moodle/question:add', $context);
+        require_capability('moodle/category:manage', $context);
 
         $serialiseddata = json_decode($params['jsonformdata'], true);
         $data = [];

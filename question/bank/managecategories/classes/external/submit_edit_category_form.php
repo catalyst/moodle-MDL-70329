@@ -67,7 +67,7 @@ class submit_edit_category_form extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
-        require_capability('moodle/question:editmine', $context);
+        require_capability('moodle/category:manage', $context);
 
         $serialiseddata = json_decode($params['jsonformdata'], true);
         $data = [];

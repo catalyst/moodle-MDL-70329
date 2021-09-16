@@ -18,6 +18,7 @@ namespace qbank_managecategories;
 
 use action_menu;
 use action_menu_link;
+use context_system;
 use list_item;
 use moodle_url;
 use navigation_node;
@@ -83,6 +84,7 @@ class question_category_list_item extends list_item {
         global $PAGE, $OUTPUT;
         $str = $extraargs['str'];
         $category = $this->item;
+        $context = context_system::instance();
         $cmid = optional_param('cmid', 0, PARAM_INT);
         $courseid = optional_param('courseid', 0, PARAM_INT);
         // Each section adds html to be displayed as part of this list item.
@@ -106,35 +108,36 @@ class question_category_list_item extends list_item {
         $menu->set_menu_trigger(get_string('edit'));
         if ($this->children->editable) {
             // Sets up edit link.
-
-            $thiscontext = (int)$this->item->contextid;
-            $editurl = new moodle_url('#');
-            $selector = '[data-action=editcategory-'. $category->id .']';
-            $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
-                [$selector, $thiscontext, $category->id]);
-            $menu->add(new action_menu_link(
-                $editurl,
-                new pix_icon('t/edit', 'edit'),
-                get_string('editsettings'),
-                false,
-                ['data-action' => "editcategory-{$category->id}"]
-            ));
-            // Don't allow delete if this is the top category, or the last editable category in this context.
-            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
-                // Sets up delete link.
-                $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
-                    ['delete' => $category->id, 'sesskey' => sesskey()]);
-                if ($courseid !== 0) {
-                    $deleteurl->param('courseid', $courseid);
-                } else {
-                    $deleteurl->param('cmid', $cmid);
-                }
+            if (has_capability('moodle/category:manage', $context)) {
+                $thiscontext = (int)$this->item->contextid;
+                $editurl = new moodle_url('#');
+                $selector = '[data-action=editcategory-'. $category->id .']';
+                $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
+                    [$selector, $thiscontext, $category->id]);
                 $menu->add(new action_menu_link(
-                    $deleteurl,
-                    new pix_icon('t/delete', 'delete'),
-                    get_string('delete'),
-                    false
+                    $editurl,
+                    new pix_icon('t/edit', 'edit'),
+                    get_string('editsettings'),
+                    false,
+                    ['data-action' => "editcategory-{$category->id}"]
                 ));
+                // Don't allow delete if this is the top category, or the last editable category in this context.
+                if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                    // Sets up delete link.
+                    $deleteurl = new moodle_url('/question/bank/managecategories/category.php',
+                        ['delete' => $category->id, 'sesskey' => sesskey()]);
+                    if ($courseid !== 0) {
+                        $deleteurl->param('courseid', $courseid);
+                    } else {
+                        $deleteurl->param('cmid', $cmid);
+                    }
+                    $menu->add(new action_menu_link(
+                        $deleteurl,
+                        new pix_icon('t/delete', 'delete'),
+                        get_string('delete'),
+                        false
+                    ));
+                }
             }
         }
 
@@ -159,10 +162,12 @@ class question_category_list_item extends list_item {
         // Menu to string/html.
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
-        if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
-            $handle = $OUTPUT->pix_icon('i/move_2d', 'gripvsol');
-        } else {
-            $handle = '';
+        if (has_capability('moodle/category:manage', $context)) {
+            if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
+                $handle = $OUTPUT->pix_icon('i/move_2d', 'gripvsol');
+            } else {
+                $handle = '';
+            }
         }
         // Render each question category.
         $data =

@@ -22,6 +22,7 @@ namespace qbank_managecategories;
 define('QUESTION_PAGE_LENGTH', 25);
 
 use context;
+use context_system;
 use moodle_exception;
 use moodle_url;
 use question_bank;
@@ -166,11 +167,18 @@ class question_category_object {
     public function display_user_interface() {
         global $OUTPUT, $PAGE;
 
+        $context = context_system::instance();
         $helpstringhead = $OUTPUT->heading_with_help(get_string('editcategories', 'question'), 'editcategories', 'question');
+        if (has_capability('moodle/category:manage', $context)) {
+            $hascapability = true;
+        } else {
+            $hascapability = false;
+        }
         $dat = [
             'helpstringhead' => $helpstringhead,
             'checkbox' => $this->checkboxform->render(),
             'categoriesrendered' => $this->output_edit_lists(),
+            'hascapability' => $hascapability
         ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);
