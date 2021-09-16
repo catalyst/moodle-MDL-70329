@@ -97,11 +97,10 @@ class managecategories_enhancement_test extends advanced_testcase {
             "name=Dummy%20name&" .
             "info%5Btext%5D=%3Cp%20dir%3D%22ltr%22%20style%3D%22text-align%3A%20left%3B%22%3EDummy%20category%20info%3C%2Fp%3E&" .
             "info%5Bformat%5D=1&idnumber=Dummy%20id%20num\"";
-        $newcatid = submit_add_category_form::execute($jsonformdata);
-        $record = $DB->get_record('question_categories', ['id' => $newcatid]);
+        submit_add_category_form::execute($jsonformdata);
+        $record = $DB->get_record('question_categories', ['name' => 'Dummy name']);
 
         $this->assertNotEmpty($record);
-        $this->assertEquals($newcatid, $record->id);
         $this->assertEquals('Dummy name', $record->name);
         $this->assertEquals($category->contextid, $record->contextid);
         $this->assertEquals('<p dir="ltr" style="text-align: left;">Dummy category info</p>', $record->info);

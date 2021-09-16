@@ -35,12 +35,13 @@ Feature: A teacher can put questions with idnumbers in categories with idnumbers
     Then I should see "This ID number is already in use"
     # Correction to a unique idnumber for the context.
     And I set the field "ID number" to "c1unused"
-    And I press "Add category"
-    Then I should see "Sub used category"
+    And I click on "//div[@class='modal-footer']/button[@data-action='save']" "xpath_element"
+    Then I should see "New cat"
     And I should see "ID number"
     And I should see "c1unused"
     And I should see "(0)"
-    And I should see "Created as a test" in the "Sub used category" "list_item"
+    And I click on "Show descriptions" "checkbox"
+    And I should see "Created as a test" in the "New cat" "list_item"
 
   Scenario: A question category can be edited and saved without changing the idnumber
     When the following "question categories" exist:

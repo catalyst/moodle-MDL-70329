@@ -76,3 +76,18 @@ Feature: A Teacher can reorder question categories
     When I click on "Add category" "button"
     And I click on "//button[contains(text(), 'Add category')]" "xpath_element"
     Then I should see "- The category name cannot be blank."
+
+  @javascript
+  Scenario: Teacher cannot drag and drop a used idnumber in context
+    And I click on "//a[contains(text(),'System category')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    And I choose "Edit settings" in the open action menu
+    And I set the field "ID number" to "c1used"
+    And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
+    And I should see "c1used"
+    And I click on "//a[contains(text(),'Course category 2')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    And I choose "Edit settings" in the open action menu
+    And I set the field "ID number" to "c1used"
+    And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
+    And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "System category" "text"
+    Then "Course category 2" "text" should appear before "System category" "text"
+    And I should see "ID number already in use, please change it to move category"
