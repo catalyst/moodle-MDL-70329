@@ -98,7 +98,7 @@ class submit_edit_category_form extends external_api {
 
         if (isset($idnumber)) {
             $exists = helper::idnumber_exists($idnumber, $tocontextid);
-            if ($exists) {
+            if ($exists && $exists !== $updateid) {
                 return false;
             }
         }
