@@ -57,7 +57,7 @@ const displayModal = (selector, contextid, categoryid) => {
       }
       const root = modal.getRoot();
       root.on(ModalEvents.hidden, () => {
-        modal.setBody(getBody(contextid, categoryid));
+        modal.setBody(getBody(contextid, categoryid, undefined, modal.modalCount));
       });
       root.on(ModalEvents.shown, () => {
         root.append('<style>[data-fieldtype=submit] { display: none ! important; }</style>');
@@ -66,7 +66,7 @@ const displayModal = (selector, contextid, categoryid) => {
         submitForm(modal, e);
       });
       root.on('submit', 'form', (e) => {
-        submitFormAjax(modal, categoryid, contextid, e)
+        submitFormAjax(modal, categoryid, contextid, modal.modalCount, e)
         .then(() => {
           modal.hide();
           location.reload();
@@ -82,10 +82,14 @@ const displayModal = (selector, contextid, categoryid) => {
  * @param {int} contextid Context id for fragment.
  * @param {int} categoryid Category id for edit form and data-action.
  * @param {String} formdata Data from submited form to check.
+ * @param {int} modalid Id for the modal created - passed to avoid atto editor to send infos to other forms.
  * @returns {Promise}
  */
-const getBody = (contextid, categoryid, formdata) => {
+const getBody = (contextid, categoryid, formdata, modalid) => {
     let params = {};
+    if (modalid !== undefined) {
+      params.modalid = modalid;
+    }
     if (categoryid !== undefined) {
       params.id = categoryid;
     }
@@ -104,8 +108,8 @@ const getBody = (contextid, categoryid, formdata) => {
  * @param {int} categoryid Category id for edit form and data-action.
  * @param {String} formdata Data from submited form to check.
  */
-const handleFormSubmissionFailure = (modal, contextid, categoryid, formdata) => {
-  modal.setBody(getBody(contextid, categoryid, formdata));
+const handleFormSubmissionFailure = (modal, contextid, categoryid, formdata, modalid) => {
+  modal.setBody(getBody(contextid, categoryid, formdata, modalid));
 };
 
 /**
@@ -118,7 +122,7 @@ const handleFormSubmissionFailure = (modal, contextid, categoryid, formdata) => 
  * @param {Event} e Form submission event.
  * @returns {Mixed}
  */
-const submitFormAjax = (modal, categoryid, contextid, e) => {
+const submitFormAjax = (modal, categoryid, contextid, modalid, e) => {
   e.preventDefault();
   const changeEvent = document.createEvent('HTMLEvents');
   changeEvent.initEvent('change', true, true);
@@ -145,7 +149,7 @@ const submitFormAjax = (modal, categoryid, contextid, e) => {
     const response = Ajax.call([{
       methodname: methodname,
       args: {jsonformdata: JSON.stringify(formData)},
-      fail: handleFormSubmissionFailure(modal, contextid, categoryid, formData)
+      fail: handleFormSubmissionFailure(modal, contextid, categoryid, formData, modalid)
     }]);
     response[0].then((resp) =>{
       if (JSON.parse(resp) === false){

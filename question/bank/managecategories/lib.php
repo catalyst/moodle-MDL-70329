@@ -43,7 +43,9 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     $contexts = new question_edit_contexts($args->context);
     $contexts = $contexts->having_one_edit_tab_cap('categories');
     $customdata = ['contexts' => $contexts, 'top' => true, 'currentcat' => 0, 'nochildrenof' => 0];
-
+    if (isset($args->modalid)) {
+        $customdata['modalid'] = $args->modalid;
+    }
     $formdata = [];
     if (!empty($args->jsonformdata)) {
         parse_str($args->jsonformdata, $formdata);
