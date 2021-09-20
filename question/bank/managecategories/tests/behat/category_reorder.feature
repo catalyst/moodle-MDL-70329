@@ -33,7 +33,7 @@ Feature: A Teacher can reorder question categories
 
   @javascript
   Scenario: Teacher cannot move or delete single category under context
-    When I click on "//a[contains(text(), 'Default for Miscellaneous')]/../../div[@class='float-right']/div[@class='float-left']" "xpath_element"
+    When I click on "//a[contains(text(), 'Default for Category 1')]/../../div[@class='float-right']/div[@class='float-left']" "xpath_element"
     Then I should not see "Delete"
 
   @javascript
@@ -45,28 +45,30 @@ Feature: A Teacher can reorder question categories
 
   @javascript
   Scenario: Teacher can reorder categories
-    When I drag "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Default for Miscellaneous" "text"
-    Then "Quiz category" "text" should appear before "Default for Miscellaneous" "text"
+    When I drag "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Default for Category 1" "text"
+    Then "Quiz category" "text" should appear before "Default for Category 1" "text"
     And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Quiz category" "text"
     Then "Course category 2" "text" should appear before "Quiz category 2" "text"
 
   @javascript
   Scenario: Teacher can display and hide category descriptions
     When I click on "qbshowdescr" "checkbox"
-    Then I should see "The default category for questions shared in context 'Miscellaneous'."
+    Then I should see "The default category for questions shared in context 'Category 1'."
     And I click on "qbshowdescr" "checkbox"
-    And I should not see "The default category for questions shared in context 'Miscellaneous'."
+    And I should not see "The default category for questions shared in context 'Category 1'."
 
   @javascript
   Scenario: Teacher can add a new category
     When I click on "Add category" "button"
     And I click on "Parent category" "select"
-    And I click on "Top for Miscellaneous" "option"
+    And I click on "Top for Category 1" "option"
     And I click on "Name" "field"
     And I type "A brand new category"
     And I set the field "Category info" to "A brand new description for a brand new category"
+    And I set the field "ID number" to "12345"
     And I click on "//button[contains(text(), 'Add category')]" "xpath_element"
     And I should see "A brand new category"
+    And I should see "12345"
     And I should not see "A brand new description for a brand new category"
     And I click on "qbshowdescr" "checkbox"
     Then I should see "A brand new description for a brand new category"
@@ -91,3 +93,12 @@ Feature: A Teacher can reorder question categories
     And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "System category" "text"
     Then "Course category 2" "text" should appear before "System category" "text"
     And I should see "ID number already in use, please change it to move category"
+
+  @javascript
+  Scenario: Non editing teacher cannot drag and drop or see editing menus
+    When I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
+    And I navigate to "Question bank > Categories" in current page administration
+    And I should not see "Add category"
+    And I click on "//a[contains(text(),'Quiz category 2')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    Then I should not see "Edit settings"
+    And I should not see "Delete"
