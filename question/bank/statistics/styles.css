@@ -1,0 +1,10 @@
+#categoryquestions .facility_index {
+    width: 5em;
+    padding: 3px;
+}
+
+#categoryquestions .discriminative_efficiency,
+#categoryquestions .discrimination_index {
+    width: 8em;
+    padding: 3px;
+}
