@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir. '/listlib.php');
 
+use context_system;
 use moodle_list;
 use pix_icon;
 use stdClass;
@@ -147,6 +148,7 @@ class question_category_list extends moodle_list {
      */
     public function to_html($indent=0, $extraargs=[]) {
         global $OUTPUT;
+        $context = context_system::instance();
         $itemstab = [];
         if (count($this->items)) {
             $tabs = str_repeat("\t", $indent);
@@ -156,7 +158,9 @@ class question_category_list extends moodle_list {
             foreach ($this->items as $item) {
                 $last = (count($this->items) == $itemiter);
                 if ($this->editable) {
-                    $item->set_icon_html($first, $last, $lastitem);
+                    if (has_capability('moodle/category:manage', $context)) {
+                        $item->set_icon_html($first, $last, $lastitem);
+                    }
                 }
                 if ($itemhtml = $item->to_html($indent + 1, $extraargs)) {
                     $itemtab = $tabs . $itemhtml;

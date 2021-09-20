@@ -162,6 +162,7 @@ class question_category_list_item extends list_item {
         // Menu to string/html.
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
+        $handle = '';
         if (has_capability('moodle/category:manage', $context)) {
             if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
                 $handle = $OUTPUT->pix_icon('i/move_2d', 'gripvsol');
