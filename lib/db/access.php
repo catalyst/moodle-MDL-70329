@@ -1538,28 +1538,6 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/question:editall'
     ),
 
-    // Controls whether users can comment their own questions.
-    'moodle/question:commentmine' => [
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ],
-        'clonepermissionsfrom' => 'moodle/question:editmine'
-    ],
-
-    // Controls whether users can comment all questions.
-    'moodle/question:commentall' => [
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ],
-        'clonepermissionsfrom' => 'moodle/question:editall'
-    ],
-
     'moodle/site:doclinks' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,

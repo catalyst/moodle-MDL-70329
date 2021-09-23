@@ -83,7 +83,30 @@ class behat_qbank_comment extends behat_question_base {
             $commentstextarea = $this->find('css',
                                         '.modal-dialog .question-comment-view .comment-area textarea', $exception);
             $commentstextarea->setValue($comment);
-            $this->find_link(get_string('savecomment'))->click();
+
+            // We delay 1 second which is all we need.
+            $this->getSession()->wait(1000);
+
+        } else {
+            throw new ExpectationException('JavaScript not running', $this->getSession());
+        }
+    }
+
+    /**
+     * Adds the specified option to the question comments of the question preview.
+     *
+     * @Then I add :arg1 comment to question preview
+     * @param string $comment
+     */
+    public function i_add_comment_to_question_preview($comment) {
+
+        // Getting the textarea and setting the provided value.
+        $exception = new ElementNotFoundException($this->getSession(), 'Question ');
+
+        if ($this->running_javascript()) {
+            $commentstextarea = $this->find('css',
+                    '.question-comment-view .comment-area textarea', $exception);
+            $commentstextarea->setValue($comment);
 
             // We delay 1 second which is all we need.
             $this->getSession()->wait(1000);

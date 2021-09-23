@@ -58,9 +58,9 @@ function qbank_comment_comment_permissions($args): array {
 /**
  * Validate comment data before displaying comments.
  *
- * @param stdClass $comments
+ * @param array $comments
  * @param stdClass $args
- * @return stdClass
+ * @return array $comments
  */
 function qbank_comment_comment_display($comments, $args): array {
     if ($args->commentarea != 'core_question' && $args->component != 'qbank_comment') {

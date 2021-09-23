@@ -43,15 +43,44 @@ const commentEvent = (questionId, courseID, contextId) => {
     };
     let commentFragment = Fragment.loadFragment('qbank_comment', 'question_comment', contextId, args);
     ModalFactory.create({
-        type: ModalFactory.types.ALERT,
+        type: ModalFactory.types.SAVE_CANCEL,
         title: Str.get_string('commentheader', 'qbank_comment'),
         body: commentFragment,
         large: true,
     }).then((modal) => {
         let root = modal.getRoot();
+
+        // Don't display the default add comment link in the modal.
+        root.on(ModalEvents.bodyRendered, function() {
+            const submitlink = document.querySelectorAll("div.comment-area a")[0];
+            submitlink.style.display = 'none';
+        });
+
+        // Get the required strings and updated the modal button text labels.
+        Str.get_strings([
+            {key: 'addcomment', component: 'qbank_comment'},
+            {key: 'close', component: 'qbank_comment'},
+        ]).then((strings) => {
+            modal.setButtonText('save', strings[0]);
+            modal.setButtonText('cancel', strings[1]);
+        }).fail(Notification.exception);
+
         root.on(ModalEvents.cancel, function() {
             location.reload();
             modal.hide();
+        });
+
+        // Handle adding the comment when the button in the modal is clicked.
+        root.on(ModalEvents.save, function(e) {
+            e.preventDefault();
+            const submitlink = document.querySelectorAll("div.comment-area a")[0];
+            const textarea = document.querySelectorAll("div.comment-area textarea")[0];
+
+            // Check there is a valid comment to add, and trigger adding if there is.
+            if (textarea.value != textarea.getAttribute('aria-label') && textarea.value != '') {
+                submitlink.click();
+            }
+
         });
         root.on('click', 'button[data-action="hide"]', () => {
             location.reload();

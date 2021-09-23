@@ -29,6 +29,8 @@ $string['privacy:metadata:core_comment'] = 'Question comment plugin helps users 
 $string['comment'] = 'Comment';
 $string['commentplural'] = 'Comments';
 // Modal.
+$string['addcomment'] = 'Add comment';
+$string['close'] = 'Close';
 $string['commentheader'] = 'Question comments';
 $string['commentdisabled'] = 'Comment feature is disabled "sitewide",
  please ask your "Site administrator" to enable "usecomments" from "Advanced settings" in order to comment in this question.';
