@@ -1019,6 +1019,7 @@ class question_type {
 
     /**
      * Initialise the extra question fields.
+     *
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      */
@@ -1033,30 +1034,22 @@ class question_type {
                                                   JOIN {question_versions} qv ON qv.questionid = q.id
                                                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                                                  WHERE q.id = ?', [$questiondata->id]);
-        if (isset($questiondata->status)) {
-            $question->status = $questiondata->status;
-        } else {
-            $question->status = $extrarecord->status;
-        }
-        if (isset($questiondata->versionid)) {
-            $question->versionid = $questiondata->versionid;
-        } else {
-            $question->versionid = $extrarecord->versionid;
-        }
-        if (isset($questiondata->version)) {
-            $question->version = $questiondata->version;
-        } else {
-            $question->version = $extrarecord->version;
-        }
-        if (isset($questiondata->questionbankentryid)) {
-            $question->questionbankentryid = $questiondata->questionbankentryid;
-        } else {
-            $question->questionbankentryid = $extrarecord->questionbankentryid;
-        }
-        if (isset($questiondata->idnumber)) {
-            $question->idnumber = $questiondata->idnumber;
-        } else {
-            $question->idnumber = $extrarecord->idnumber;
+
+        $fields =
+            [
+                'status',
+                'versionid',
+                'version',
+                'questionbankentryid',
+                'idnumber',
+            ];
+
+        foreach ($fields as $field) {
+            if (isset($questiondata->{$field})) {
+                $question->{$field} = $questiondata->{$field};
+            } else if ($extrarecord) {
+                $question->{$field} = $extrarecord->{$field};
+            }
         }
     }
 
