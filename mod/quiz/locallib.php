@@ -2360,7 +2360,7 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
     $tags = \core_tag_tag::get_bulk($tagids, 'id, name');
     $tagstrings = [];
     foreach ($tags as $tag) {
-        $tagstrings [] = "{$tag->id},{$tag->name}";
+        $tagstrings[] = "{$tag->id},{$tag->name}";
     }
     // Create the selected number of random questions.
     for ($i = 0; $i < $number; $i++) {

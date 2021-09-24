@@ -40,6 +40,11 @@ class slot_random {
     protected $quiz = null;
 
     /**
+     * @var \core_tag_tag[] List of tags for this slot.
+     */
+    protected $tags = [];
+
+    /**
      * @var string filter condition
      */
     protected $filtercondition = null;
@@ -101,7 +106,39 @@ class slot_random {
         $this->record->quizid = $quiz->id;
     }
 
+    /**
+     * Set some tags for this quiz slot.
+     *
+     * @param \core_tag_tag[] $tags
+     */
+    public function set_tags($tags) {
+        $this->tags = [];
+        foreach ($tags as $tag) {
+            // We use $tag->id as the key for the array so not only it handles duplicates of the same tag being given,
+            // but also it is consistent with the behaviour of set_tags_by_id() below.
+            $this->tags[$tag->id] = $tag;
+        }
+    }
+
+    /**
+     * Set some tags for this quiz slot. This function uses tag ids to find tags.
+     *
+     * @param int[] $tagids
+     */
+    public function set_tags_by_id($tagids) {
+        $this->tags = \core_tag_tag::get_bulk($tagids, 'id, name');
+    }
+
+    /**
+     * Set filter condition.
+     *
+     * @param $filters
+     */
     public function set_filter_condition($filters) {
+        if (!empty($this->tags)) {
+            $filters->tags = $this->tags;
+        }
+
         $this->filtercondition = json_encode($filters);
     }
 
