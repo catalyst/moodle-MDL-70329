@@ -14,55 +14,45 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Base class class for qbank plugins.
- *
- * Every qbank plugin must extent this class.
- *
- * @package    core_question
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace core_question\local\bank;
 
 /**
- * Class plugin_features_base is the base class for qbank plugins.
+ * Class bulk_action_base is the base class for bulk actions ui.
  *
  * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_features_base {
+abstract class bulk_action_base {
 
     /**
-     * This method will return the array of objects to be rendered as a prt of question bank columns/actions.
+     * Title of the bulk action.
      *
-     * @param view $qbank
-     * @return array
+     * @return string
      */
-    public function get_question_columns(view $qbank): ?array {
-        return [];
-    }
+    abstract public function get_bulk_action_title(): string;
 
     /**
-     * This method will return the object for the navigation node.
+     * A unique key for the bulk action, this will be used in the api to identify the action data.
      *
-     * @return null|object
+     * @return string
      */
-    public function get_navigation_node(): ?object {
+    abstract public function get_bulk_action_key(): string;
+
+    /**
+     * URL of the bulk action redirect page.
+     *
+     * @return \moodle_url
+     */
+    abstract public function get_bulk_action_url(): \moodle_url;
+
+    /**
+     * Get the capabilities for the bulk action.
+     *
+     * @return array|null
+     */
+    public function get_bulk_action_capabilities(): ?array {
         return null;
     }
-
-    /**
-     * This method will return the array objects for the bulk actions ui.
-     *
-     * @return object|null
-     */
-    public function get_bulk_actions(): ?object {
-        return null;
-    }
-
 }

@@ -15,34 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin entrypoint for columns.
+ * Strings for component qbank_bulkmove, language 'en'
  *
- * @package    qbank_deletequestion
+ * @package    qbank_bulkmove
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qbank_deletequestion;
+$string['pluginname'] = 'Bulk move questions';
+$string['privacy:metadata'] = 'The bulk move questions plugin does not store any personal data.';
+$string['movequestions'] = 'Move questions';
 
-use core_question\local\bank\plugin_features_base;
-
-/**
- * Class columns is the entrypoint for the columns.
- *
- * @package    qbank_deletequestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class plugin_feature extends plugin_features_base {
-    public function get_question_columns($qbank): array {
-        return [
-            new delete_action_column($qbank),
-        ];
-    }
-
-    public function get_bulk_actions(): ?object {
-        return new bulk_delete_action();
-    }
-}
+// Move form.
+$string['close'] = 'Close';
+$string['bulkmoveheader'] = 'Move the selected questions';

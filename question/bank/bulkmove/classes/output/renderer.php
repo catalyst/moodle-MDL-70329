@@ -14,35 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qbank_bulkmove\output;
+
 /**
- * Plugin entrypoint for columns.
+ * Class renderer.
  *
- * @package    qbank_deletequestion
+ * @package    qbank_bulkmove
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class renderer extends \plugin_renderer_base {
 
-namespace qbank_deletequestion;
-
-use core_question\local\bank\plugin_features_base;
-
-/**
- * Class columns is the entrypoint for the columns.
- *
- * @package    qbank_deletequestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class plugin_feature extends plugin_features_base {
-    public function get_question_columns($qbank): array {
-        return [
-            new delete_action_column($qbank),
-        ];
+    /**
+     * Render bulk move.
+     *
+     * @param array $displaydata
+     * @return string
+     */
+    public function render_bulk_move_form($displaydata) {
+        return $this->render_from_template('qbank_bulkmove/bulk_move', $displaydata);
     }
 
-    public function get_bulk_actions(): ?object {
-        return new bulk_delete_action();
-    }
 }

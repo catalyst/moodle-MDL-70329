@@ -14,35 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qbank_bulkmove;
+
 /**
- * Plugin entrypoint for columns.
+ * Class bulk_move_action is the base class for moving questions.
  *
- * @package    qbank_deletequestion
+ * @package    qbank_bulkmove
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class bulk_move_action extends \core_question\local\bank\bulk_action_base {
 
-namespace qbank_deletequestion;
-
-use core_question\local\bank\plugin_features_base;
-
-/**
- * Class columns is the entrypoint for the columns.
- *
- * @package    qbank_deletequestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class plugin_feature extends plugin_features_base {
-    public function get_question_columns($qbank): array {
-        return [
-            new delete_action_column($qbank),
-        ];
+    public function get_bulk_action_title(): string {
+        return get_string('moveto', 'question');
     }
 
-    public function get_bulk_actions(): ?object {
-        return new bulk_delete_action();
+    public function get_bulk_action_key(): string {
+        return 'move';
+    }
+
+    public function get_bulk_action_url(): \moodle_url {
+        return new \moodle_url('/question/bank/bulkmove/move.php');
+    }
+
+    public function get_bulk_action_capabilities(): ?array {
+        return [
+            'moodle/question:moveall',
+            'moodle/question:add',
+        ];
     }
 }

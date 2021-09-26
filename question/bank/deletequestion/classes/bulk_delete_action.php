@@ -14,35 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Plugin entrypoint for columns.
- *
- * @package    qbank_deletequestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_deletequestion;
 
-use core_question\local\bank\plugin_features_base;
-
 /**
- * Class columns is the entrypoint for the columns.
+ * Class bulk_delete_action is the base class for delete bulk actions ui.
  *
  * @package    qbank_deletequestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends plugin_features_base {
-    public function get_question_columns($qbank): array {
-        return [
-            new delete_action_column($qbank),
-        ];
+class bulk_delete_action extends \core_question\local\bank\bulk_action_base {
+
+    public function get_bulk_action_title(): string {
+        return get_string('delete');
     }
 
-    public function get_bulk_actions(): ?object {
-        return new bulk_delete_action();
+    public function get_bulk_action_key(): string {
+        return 'deleteselected';
+    }
+
+    public function get_bulk_action_url(): \moodle_url {
+        return new \moodle_url('/question/bank/deletequestion/delete.php');
+    }
+
+    public function get_bulk_action_capabilities(): ?array {
+        return [
+            'moodle/question:editall',
+        ];
     }
 }
