@@ -40,9 +40,6 @@ $PAGE->set_url($url);
 $columnorder = new column_sort_order();
 $questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm, $columnorder);
 
-// TODO MDL-72076 - this one will become redundant after implementing bulk actions UI.
-$questionbank->process_actions();
-
 $context = $contexts->lowest();
 $streditingquestions = get_string('editquestions', 'question');
 $PAGE->set_title($streditingquestions);
