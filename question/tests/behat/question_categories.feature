@@ -31,6 +31,8 @@ Feature: A teacher can move questions between categories in the question bank
     When I navigate to "Question bank > Questions" in current page administration
     And I set the field "Select a category" to "Used category"
     And I click on "Test question to be moved" "checkbox" in the "Test question to be moved" "table_row"
+    And I click on "With selected" "button"
+    And I click on question bulk action "move"
     And I set the field "Question category" to "Subcategory"
     And I press "Move to >>"
     Then I should see "Test question to be moved"
