@@ -4752,7 +4752,10 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $tag = new restore_path_element('tag', '/question_categories/question_category/question_bank_entries/'.
                         'question_bank_entry/question_versions_entry/question_versions/questions/question/tags/tag');
 
-        // Apply for 'qtype' plugins optional paths at question level.
+        $comment = new restore_path_element('comment', '/question_categories/question_category/question_bank_entries/'.
+                'question_bank_entry/question_versions_entry/question_versions/questions/question/comments/comment');
+
+        // Apply for 'qtype' plugins optional paths at question level
         $this->add_plugin_structure('qtype', $question);
 
         // Apply for 'local' plugins optional paths at question level.
@@ -4761,7 +4764,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Apply for 'qbank' plugins optional paths at question level.
         $this->add_plugin_structure('qbank', $question);
 
-        return [$category, $questionbankentry, $questionversion, $question, $hint, $tag];
+        return [$category, $questionbankentry, $questionversion, $question, $hint, $tag, $comment];
     }
 
     protected function process_question_category($data) {
@@ -5029,6 +5032,25 @@ class restore_create_categories_and_questions extends restore_structure_step {
                     context::instance_by_id($tagcontextid),
                     $tagname);
         }
+    }
+
+    protected function process_comment($data) {
+        global $DB, $CFG;
+
+        $data = (object)$data;
+
+        $newquestionid = $this->get_new_parentid('question');
+        $questioncreated = (bool) $this->get_mappingid('question_created', $this->get_old_parentid('question'));
+        if (!$questioncreated) {
+            // This question already exists in the question bank. Nothing for us to do.
+            return;
+        }
+
+        if ($CFG->usecomments) {
+            $data->itemid = $newquestionid;
+            $DB->insert_record('comments', $data);
+        }
+
     }
 
     protected function after_execute() {

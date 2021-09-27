@@ -787,34 +787,32 @@ class backup_filters_structure_step extends backup_structure_step {
 }
 
 /**
- * structure step in charge of constructing the comments.xml file for all the comments found
- * in a given context
+ * Structure step in charge of constructing the comments.xml file for all the comments found in a given context.
  */
 class backup_comments_structure_step extends backup_structure_step {
 
     protected function define_structure() {
-
-        // Define each element separated
-
+        // Define each element separated.
         $comments = new backup_nested_element('comments');
 
         $comment = new backup_nested_element('comment', array('id'), array(
-            'commentarea', 'itemid', 'content', 'format',
+            'component', 'commentarea', 'itemid', 'content', 'format',
             'userid', 'timecreated'));
 
-        // Build the tree
-
+        // Build the tree.
         $comments->add_child($comment);
 
-        // Define sources
+        // Define sources.
+        $comment->set_source_sql(
+               "SELECT c.*
+                  FROM {comments} c
+                 WHERE c.contextid = ?
+                   AND c.commentarea != 'core_question'", [backup::VAR_CONTEXTID]);
 
-        $comment->set_source_table('comments', array('contextid' => backup::VAR_CONTEXTID));
-
-        // Define id annotations
-
+        // Define id annotations.
         $comment->annotate_ids('user', 'userid');
 
-        // Return the root element (comments)
+        // Return the root element (comments).
         return $comments;
     }
 }
@@ -2377,6 +2375,13 @@ class backup_questions_structure_step extends backup_structure_step {
 
         $tag = new backup_nested_element('tag', ['id', 'contextid'], ['name', 'rawname']);
 
+        $comments = new backup_nested_element('comments');
+
+        $comment = new backup_nested_element('comment', ['id'], ['component', 'commentarea', 'itemid', 'contextid',
+                                                                        'content', 'format', 'userid', 'timecreated']);
+
+        // Build the tree
+
         // Build the initial tree.
         $qcategories->add_child($qcategory);
         $qcategory->add_child($questionbankentries);
@@ -2391,6 +2396,11 @@ class backup_questions_structure_step extends backup_structure_step {
         // Add question tags.
         $question->add_child($tags);
         $tags->add_child($tag);
+
+        $question->add_child($comments);
+        $comments->add_child($comment);
+
+        // Define the sources
 
         $qcategory->set_source_sql("
             SELECT gc.*,
@@ -2429,6 +2439,14 @@ class backup_questions_structure_step extends backup_structure_step {
             [
                 backup::VAR_PARENTID
             ]);
+
+        $comment->set_source_sql("SELECT c.*
+                                        FROM {comments} c
+                                       WHERE c.commentarea = 'core_question'
+                                         AND c.component = 'qbank_comment'
+                                         AND c.itemid = ?", [backup::VAR_PARENTID]);
+
+        $comment->annotate_ids('user', 'userid');
 
         // don't need to annotate ids nor files
         // (already done by {@link backup_annotate_all_question_files}
