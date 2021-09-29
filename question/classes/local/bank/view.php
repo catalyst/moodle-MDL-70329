@@ -223,17 +223,14 @@ class view {
 
         foreach ($corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
-            if (!class_exists($fullname)) {
-                if (class_exists('core_question\\local\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\local\\bank\\' . $fullname;
-                } else if (class_exists('core_question\\bank\\' . $fullname)) {
-                    $fullname = 'core_question\\bank\\' . $fullname;
-                } else {
-                    throw new \coding_exception("No such class exists: $fullname");
-                }
+            if (class_exists('core_question\\local\\bank\\' . $fullname)) {
+                $fullname = 'core_question\\local\\bank\\' . $fullname;
+                $questionbankclasscolumns[$shortname] = new $fullname($this);
+            } else {
+                $questionbankclasscolumns[$shortname] = '';
             }
-            $questionbankclasscolumns[$shortname] = new $fullname($this);
         }
+        $uniquecounter = 'a';
         $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin();
@@ -243,25 +240,34 @@ class view {
                 unset($plugins[$componentname]);
                 continue;
             }
-            foreach ($pluginobjects as $pluginobject) {
+            $pluginobjectsdatas = [];
+            foreach ($pluginobjects as $pluginobjectdata) {
+                $classname = new \ReflectionClass(get_class($pluginobjectdata));
+                $classnameunique = $classname->getShortName();
+                if (array_key_exists($classname->getShortName(), $pluginobjectsdatas)) {
+                    $classnameunique = $classname->getShortName() . '_' . $uniquecounter;
+                    $uniquecounter ++;
+                }
+                $pluginobjectsdatas[$classnameunique] = $pluginobjectdata;
+            }
+            foreach ($pluginobjectsdatas as $keys => $pluginobject) {
                 $classname = new \ReflectionClass(get_class($pluginobject));
-                foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
-                    if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
-                        unset($questionbankclasscolumns[$classname->getShortName()]);
+                if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
+                    unset($questionbankclasscolumns[$keys]);
+                    continue;
+                }
+
+                // Check if it has custom preference selector to view/hide.
+                if ($pluginobject->has_preference()) {
+                    if (!$pluginobject->get_preference()) {
                         continue;
                     }
-                    // Check if it has custom preference selector to view/hide.
-                    if ($pluginobject->has_preference()) {
-                        if (!$pluginobject->get_preference()) {
-                            continue;
-                        }
-                    }
-                    if ($corequestionbankcolumn === $classname->getShortName()) {
-                        $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
-                    } else {
-                        // Any community plugin for column/action.
-                        $newpluginclasscolumns[$classname->getShortName()] = $pluginobject;
-                    }
+                }
+                if (in_array($keys, $corequestionbankcolumns)) {
+                    $questionbankclasscolumns[$keys] = $pluginobject;
+                } else {
+                    // Any community plugin for column/action.
+                    $newpluginclasscolumns[$keys] = $pluginobject;
                 }
             }
         }
@@ -269,6 +275,13 @@ class view {
         // New plugins added at the end of the array, will change in sorting feature.
         foreach ($newpluginclasscolumns as $key => $newpluginclasscolumn) {
             $questionbankclasscolumns[$key] = $newpluginclasscolumn;
+        }
+
+
+        foreach ($questionbankclasscolumns as $identifier => $questionbankclasscolumn) {
+            if (empty($questionbankclasscolumn)) {
+                unset($questionbankclasscolumns[$identifier]);
+            }
         }
 
         return $questionbankclasscolumns;
@@ -286,8 +299,8 @@ class view {
 
         if (empty($CFG->questionbankcolumns)) {
             $questionbankcolumns = $this->get_question_bank_plugins();
-            foreach ($questionbankcolumns as $classobject) {
-                $this->requiredcolumns[get_class($classobject)] = $classobject;
+            foreach ($questionbankcolumns as $key => $classobject) {
+                $this->requiredcolumns[$key] = $classobject;
             }
         } else {
             // Config overrides the array, but uses the deprecated classes.
@@ -303,7 +316,6 @@ class view {
                 $this->requiredcolumns[$fullname] = new $fullname($this);
             }
         }
-
         return $this->requiredcolumns;
     }
 
@@ -347,11 +359,11 @@ class view {
         // Now split columns into real columns and rows.
         $this->visiblecolumns = [];
         $this->extrarows = [];
-        foreach ($wanted as $column) {
+        foreach ($wanted as $key => $column) {
             if ($column->is_extra_row()) {
-                $this->extrarows[get_class($column)] = $column;
+                $this->extrarows[$key] = $column;
             } else {
-                $this->visiblecolumns[get_class($column)] = $column;
+                $this->visiblecolumns[$key] = $column;
             }
         }
 
@@ -900,7 +912,7 @@ class view {
     protected function create_new_question_form($category, $canadd): void {
         if (\core\plugininfo\qbank::is_plugin_enabled('qbank_editquestion')) {
             echo editquestion_helper::create_new_question_button($category->id,
-                    $this->requiredcolumns['qbank_editquestion\edit_action_column']->editquestionurl->params(), $canadd);
+                    $this->requiredcolumns['edit_action_column']->editquestionurl->params(), $canadd);
         }
     }
 
