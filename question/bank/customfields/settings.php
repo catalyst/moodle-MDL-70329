@@ -31,7 +31,7 @@ if ($hassiteconfig) {
             new admin_externalpage('qbank_customfields',
                     new lang_string('pluginname', 'qbank_customfields'),
                     $CFG->wwwroot . '/question/bank/customfields/customfield.php',
-                    array('moodle/question:configurecustomfields')
+                    array('qbank/customfields:configurecustomfields')
             )
     );
 }

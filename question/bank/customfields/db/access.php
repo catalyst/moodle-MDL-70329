@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
     // Controls if a user can can change the value of a locked custom field.
-    'moodle/question:changelockedcustomfields' => array(
+    'qbank/customfields:changelockedcustomfields' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
@@ -37,7 +37,7 @@ $capabilities = [
     ),
 
     // Controls if a user can configure question custom fields.
-    'moodle/question:configurecustomfields' => array(
+    'qbank/customfields:configurecustomfields' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
@@ -45,7 +45,7 @@ $capabilities = [
     ),
 
     // Controls if a user can view the content of hidden custom fields.
-   'moodle/question:viewhiddencustomfields' => array(
+   'qbank/customfields:viewhiddencustomfields' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(

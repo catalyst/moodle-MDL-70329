@@ -78,7 +78,7 @@ class question_handler extends \core_customfield\handler {
      * @return bool true if the current can configure custom fields, false otherwise
      */
     public function can_configure() : bool {
-        return has_capability('moodle/question:configurecustomfields', $this->get_configuration_context());
+        return has_capability('qbank/customfields:configurecustomfields', $this->get_configuration_context());
     }
 
     /**
@@ -96,7 +96,7 @@ class question_handler extends \core_customfield\handler {
         }
 
         return (!$field->get_configdata_property('locked') ||
-                has_capability('moodle/question:changelockedcustomfields', $context));
+                has_capability('qbank/customfields:changelockedcustomfields', $context));
     }
 
     /**
@@ -111,7 +111,7 @@ class question_handler extends \core_customfield\handler {
         if ($visibility == self::NOTVISIBLE) {
             return false;
         } else if ($visibility == self::VISIBLETOTEACHERS) {
-            return has_capability('moodle/question:viewhiddencustomfields', $this->get_instance_context($instanceid));
+            return has_capability('qbank/customfields:viewhiddencustomfields', $this->get_instance_context($instanceid));
         } else {
             return true;
         }
@@ -132,7 +132,7 @@ class question_handler extends \core_customfield\handler {
         if ($visibility == self::NOTVISIBLE) {
             return false;
         } else if ($visibility == self::VISIBLETOTEACHERS) {
-            return has_capability('moodle/question:viewhiddencustomfields', $context);
+            return has_capability('qbank/customfields:viewhiddencustomfields', $context);
         } else {
             return true;
         }
