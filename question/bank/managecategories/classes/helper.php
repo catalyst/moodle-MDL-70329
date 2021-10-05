@@ -382,6 +382,6 @@ class helper {
         global $DB;
 
         $record = $DB->get_record('question_categories', ['idnumber' => $idnumber, 'contextid' => $contextid]);
-        return ($record) ? $record->id : $record;
+        return ($record) ? (int)$record->id : $record;
     }
 }

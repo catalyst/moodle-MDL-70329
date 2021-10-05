@@ -23,6 +23,7 @@ use list_item;
 use moodle_url;
 use navigation_node;
 use pix_icon;
+use \core\plugininfo\qbank;
 
 /**
  * An item in a list of question categories.
@@ -98,7 +99,7 @@ class question_category_list_item extends list_item {
             $idnumber = $category->idnumber;
         }
         $questioncount = ' (' . $category->questioncount . ')';
-        $checked = get_user_preferences('question_bank_qbshowdescr');
+        $checked = get_user_preferences('qbank_managecategories_showdescr');
         if ($checked) {
             $categorydesc = format_text($category->info, $category->infoformat,
                 ['context' => $this->parentlist->context, 'noclean' => true]);
@@ -143,7 +144,7 @@ class question_category_list_item extends list_item {
         }
 
         // Sets up export to XML link.
-        if (class_exists('\\qbank_exportquestions\\form\\export_form')) {
+        if (qbank::is_plugin_enabled('qbank_exportquestions')) {
             $exporturl = new moodle_url('/question/bank/exportquestions/export.php',
                 ['cat' => $category->id . ',' . $category->contextid]);
             if ($courseid !== 0) {
@@ -163,12 +164,12 @@ class question_category_list_item extends list_item {
         // Menu to string/html.
         $menu = $OUTPUT->render($menu);
         // Don't allow movement if only subcat.
-        $handle = '';
+        $handle = false;
         if (has_capability('moodle/category:manage', $context)) {
             if (!helper::question_is_only_child_of_top_category_in_context($category->id)) {
-                $handle = $OUTPUT->pix_icon('i/move_2d', 'gripvsol');
+                $handle = true;
             } else {
-                $handle = '';
+                $handle = false;
             }
         }
         // Render each question category.

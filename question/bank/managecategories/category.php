@@ -114,9 +114,9 @@ if ((!empty($param->delete) and (!$questionstomove) and confirm_sesskey())) {
 
 if ($checkboxform = $qcobject->checkboxform->get_data()) {
     if (isset($checkboxform->qbshowdescr)) {
-        set_user_preference('question_bank_qbshowdescr', $checkboxform->qbshowdescr);
+        set_user_preference('qbank_managecategories_showdescr', $checkboxform->qbshowdescr);
     } else {
-        set_user_preference('question_bank_qbshowdescr', 0);
+        set_user_preference('qbank_managecategories_showdescr', 0);
     }
 }
 

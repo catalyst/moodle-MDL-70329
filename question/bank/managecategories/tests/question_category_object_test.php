@@ -26,6 +26,8 @@ use context_course;
 use context_module;
 use moodle_url;
 use question_edit_contexts;
+use qbank_managecategories\external\add_question_category;
+use qbank_managecategories\external\update_question_category;
 use stdClass;
 
 /**
@@ -118,137 +120,6 @@ class question_category_object_test extends \advanced_testcase {
     }
 
     /**
-     * Test creating a category.
-     *
-     * @covers ::add_category
-     */
-    public function test_add_category_no_idnumber() {
-        global $DB;
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'New category', '', true, FORMAT_HTML, ''); // No idnumber passed as '' to match form data.
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New category', $newcat->name);
-        $this->assertNull($newcat->idnumber);
-    }
-
-    /**
-     * Test creating a category with a tricky idnumber.
-     *
-     * @covers ::add_category
-     */
-    public function test_add_category_set_idnumber_0() {
-        global $DB;
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'New category', '', true, FORMAT_HTML, '0');
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New category', $newcat->name);
-        $this->assertSame('0', $newcat->idnumber);
-    }
-
-    /**
-     * Trying to add a category with duplicate idnumber blanks it.
-     * (In reality, this would probably get caught by form validation.)
-     *
-     * @covers ::add_category
-     */
-    public function test_add_category_try_to_set_duplicate_idnumber() {
-        global $DB;
-
-        $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'Existing category', '', true, FORMAT_HTML, 'frog');
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'New category', '', true, FORMAT_HTML, 'frog');
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New category', $newcat->name);
-        $this->assertNull($newcat->idnumber);
-    }
-
-    /**
-     * Test updating a category.
-     *
-     * @covers ::update_category
-     */
-    public function test_update_category() {
-        global $DB;
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'Old name', 'Description', true, FORMAT_HTML, 'frog');
-
-        $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-            'New name', 'New description', FORMAT_HTML, '0', false);
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New name', $newcat->name);
-        $this->assertSame('0', $newcat->idnumber);
-    }
-
-    /**
-     * Test updating a category to remove the idnumber.
-     *
-     * @covers ::update_category
-     */
-    public function test_update_category_removing_idnumber() {
-        global $DB;
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'Old name', 'Description', true, FORMAT_HTML, 'frog');
-
-        $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-            'New name', 'New description', FORMAT_HTML, '', false);
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New name', $newcat->name);
-        $this->assertNull($newcat->idnumber);
-    }
-
-    /**
-     * Test updating a category without changing the idnumber.
-     *
-     * @covers ::update_category
-     */
-    public function test_update_category_dont_change_idnumber() {
-        global $DB;
-
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'Old name', 'Description', true, FORMAT_HTML, 'frog');
-
-        $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-            'New name', 'New description', FORMAT_HTML, 'frog', false);
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New name', $newcat->name);
-        $this->assertSame('frog', $newcat->idnumber);
-    }
-
-    /**
-     * Trying to update a category so its idnumber duplicates idnumber blanks it.
-     * (In reality, this would probably get caught by form validation.)
-     *
-     * @covers ::update_category
-     */
-    public function test_update_category_try_to_set_duplicate_idnumber() {
-        global $DB;
-
-        $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'Existing category', '', true, FORMAT_HTML, 'toad');
-        $id = $this->qcobject->add_category($this->topcat->id . ',' . $this->topcat->contextid,
-            'old name', '', true, FORMAT_HTML, 'frog');
-
-        $this->qcobject->update_category($id, $this->topcat->id . ',' . $this->topcat->contextid,
-            'New name', '', FORMAT_HTML, 'toad', false);
-
-        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
-        $this->assertSame('New name', $newcat->name);
-        $this->assertNull($newcat->idnumber);
-    }
-
-    /**
      * Test the question category created event.
      *
      * @covers ::add_category
@@ -256,7 +127,7 @@ class question_category_object_test extends \advanced_testcase {
     public function test_question_category_created() {
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
-        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+        $categoryid = add_question_category::execute($this->defaultcategory, 'Old name', 'Old description', 1, 'frog');
         $events = $sink->get_events();
         $event = reset($events);
 
@@ -275,7 +146,7 @@ class question_category_object_test extends \advanced_testcase {
      */
     public function test_question_category_deleted() {
         // Create the category.
-        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+        $categoryid = add_question_category::execute($this->defaultcategory, 'Old name', 'Old description', 1, 'frog');
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
@@ -297,11 +168,11 @@ class question_category_object_test extends \advanced_testcase {
      */
     public function test_question_category_updated() {
         // Create the category.
-        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+        $categoryid = add_question_category::execute($this->defaultcategory, 'Old name', 'Old description', 1, 'frog');
 
         // Trigger and capture the event.
         $sink = $this->redirectEvents();
-        $this->qcobjectquiz->update_category($categoryid, $this->defaultcategory, 'updatedcategory', '', FORMAT_HTML, '', false);
+        update_question_category::execute($this->defaultcategory, 'new name', 'new cat info', 1, 'bla', $categoryid);
         $events = $sink->get_events();
         $event = reset($events);
 
@@ -321,7 +192,7 @@ class question_category_object_test extends \advanced_testcase {
      */
     public function test_question_category_viewed() {
         // Create the category.
-        $categoryid = $this->qcobjectquiz->add_category($this->defaultcategory, 'newcategory', '', true);
+        $categoryid = add_question_category::execute($this->defaultcategory, 'Old name', 'Old description', 1, 'frog');
 
         // Log the view of this category.
         $category = new stdClass();

@@ -33,21 +33,21 @@ Feature: A Teacher can reorder question categories
 
   @javascript
   Scenario: Teacher cannot move or delete single category under context
-    When I click on "//a[contains(text(), 'Default for Category 1')]/../../div[@class='float-right']/div[@class='float-left']" "xpath_element"
+    When I click on "Default for Category 1" edit menu in the question category list
     Then I should not see "Delete"
 
   @javascript
   Scenario: Teacher can see complete edit menu if multiples categories exist under context
-    When I click on "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-left']" "xpath_element"
+    When I click on "Quiz category" edit menu in the question category list
     Then I should see "Edit settings"
     And I should see "Delete"
     And I should see "Export as Moodle XML"
 
   @javascript
   Scenario: Teacher can reorder categories
-    When I drag "//a[contains(text(), 'Quiz category')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Default for Category 1" "text"
+    When I drag "Quiz category" and I drop it in "Default for Category 1" in the question category list
     Then "Quiz category" "text" should appear before "Default for Category 1" "text"
-    And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "Quiz category" "text"
+    And I drag "Course category 2" and I drop it in "Quiz category" in the question category list
     Then "Course category 2" "text" should appear before "Quiz category 2" "text"
 
   @javascript
@@ -81,16 +81,16 @@ Feature: A Teacher can reorder question categories
 
   @javascript
   Scenario: Teacher cannot drag and drop a used idnumber in context
-    And I click on "//a[contains(text(),'System category')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    And I click on "System category" edit menu in the question category list
     And I choose "Edit settings" in the open action menu
     And I set the field "ID number" to "c1used"
     And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
     And I should see "c1used"
-    And I click on "//a[contains(text(),'Course category 2')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    And I click on "Course category 2" edit menu in the question category list
     And I choose "Edit settings" in the open action menu
     And I set the field "ID number" to "c1used"
     And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
-    And I drag "//a[contains(text(), 'Course category 2')]/../../div[@class='float-right']/div[@class='float-right']/span" "xpath_element" and I drop it in "System category" "text"
+    And I drag "Course category 2" and I drop it in "System category" in the question category list
     Then "Course category 2" "text" should appear before "System category" "text"
     And I should see "ID number already in use, please change it to move category"
 
@@ -99,6 +99,6 @@ Feature: A Teacher can reorder question categories
     When I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
     And I navigate to "Question bank > Categories" in current page administration
     And I should not see "Add category"
-    And I click on "//a[contains(text(),'Quiz category 2')]/../../div/div[@class='float-left']//a[@class=' dropdown-toggle icon-no-margin']" "xpath_element"
+    And I click on "Quiz category 2" edit menu in the question category list
     Then I should not see "Edit settings"
     And I should not see "Delete"

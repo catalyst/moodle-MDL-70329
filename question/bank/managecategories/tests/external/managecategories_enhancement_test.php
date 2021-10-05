@@ -28,8 +28,9 @@ namespace qbank_managecategories;
 defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
-use qbank_managecategories\external\set_category_order;
-use qbank_managecategories\external\submit_add_category_form;
+use qbank_managecategories\external\update_category_order;
+use qbank_managecategories\external\add_question_category;
+use qbank_managecategories\external\update_question_category;
 
 /**
  * Unit tests for qbank_managecategories enhancememt component.
@@ -40,13 +41,56 @@ use qbank_managecategories\external\submit_add_category_form;
  */
 class managecategories_enhancement_test extends advanced_testcase {
     /**
+     * @var core_question_generator Generator for core_question.
+     */
+    private $generator;
+
+    /**
+     * @var object Question category.
+     */
+    private $category;
+
+    /**
+     * @var string Concatenated string containing idparent and contextid, ie: "6,21".
+     */
+    private $idparent;
+
+    /**
+     * @var string Category name.
+     */
+    private $name;
+
+    /**
+     * @var string Category description.
+     */
+    private $categoryinfo;
+
+    /**
+     * @var string Category idnumber.
+     */
+    private $idnumber;
+
+    /**
+     * Setup function. Will set an admin user, create a question category.
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        self::setAdminUser();
+        $this->resetAfterTest();
+
+        $this->generator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $this->category = $this->generator->create_question_category();
+        $this->idparent = $this->category->parent . ',' . $this->category->contextid;
+        $this->name = 'Dummy name';
+        $this->categoryinfo = 'Dummy category info';
+        $this->idnumber = 'Dummy id num';
+    }
+    /**
      * Tests setting a new category order.
      *
      */
-    public function test_set_category_order() {
+    public function test_update_category_order() {
         global $DB;
-        $this->resetAfterTest(true);
-        $this->setAdminUser();
 
         $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $course = $this->getDataGenerator()->create_course();
@@ -62,13 +106,10 @@ class managecategories_enhancement_test extends advanced_testcase {
         $this->assertNotEmpty($categories);
         $ordertoset = [];
         foreach ($categories as $category) {
-            $ordertoset[] = [$category->contextid . ' ' . $category->id];
+            $ordertoset[] = [$category->id . ',' . $category->contextid];
         }
-        $destination = $category4->contextid . ' ' . $category4->id;
-        $origin = $category2->contextid . ' ' . $category2->id;
-        $ordertoset = [$ordertoset, $destination, $origin];
         $ordertoset = json_encode($ordertoset);
-        set_category_order::execute($ordertoset);
+        update_category_order::execute($ordertoset, $category2->id, $category4->contextid, $category2->contextid);
 
         $newcategories = $DB->get_records('question_categories');
         $neworder = [];
@@ -76,36 +117,163 @@ class managecategories_enhancement_test extends advanced_testcase {
             if ((int)$category->id === $category2->id) {
                 $this->assertEquals($category->contextid, $category4->contextid);
             }
-            $neworder[] = [$category->contextid . ' ' . $category->id];
+            $neworder[] = [$category->id . ',' . $category->contextid];
         }
         $ordertoset = json_decode($ordertoset);
-        $this->assertNotEquals($ordertoset[0], $neworder);
+        $this->assertNotSame($ordertoset, $neworder);
     }
 
     /**
-     * Tests adding a new category order.
+     * Tests adding a new category.
      *
      */
-    public function test_submit_add_category_form() {
+    public function test_add_question_category() {
         global $DB;
-        $this->resetAfterTest(true);
-        $this->setAdminUser();
 
-        $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        $category = $generator->create_question_category();
-        $jsonformdata = "\"parent={$category->id}%2C{$category->contextid}&" .
-            "name=Dummy%20name&" .
-            "info%5Btext%5D=%3Cp%20dir%3D%22ltr%22%20style%3D%22text-align%3A%20left%3B%22%3EDummy%20category%20info%3C%2Fp%3E&" .
-            "info%5Bformat%5D=1&idnumber=Dummy%20id%20num\"";
-        submit_add_category_form::execute($jsonformdata);
-        $record = $DB->get_record('question_categories', ['name' => 'Dummy name']);
+        $id = add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $this->idnumber);
+        $record = $DB->get_record('question_categories', ['id' => $id]);
 
         $this->assertNotEmpty($record);
         $this->assertEquals('Dummy name', $record->name);
-        $this->assertEquals($category->contextid, $record->contextid);
-        $this->assertEquals('<p dir="ltr" style="text-align: left;">Dummy category info</p>', $record->info);
+        $this->assertEquals($this->category->contextid, $record->contextid);
+        $this->assertEquals('Dummy category info', $record->info);
         $this->assertEquals('1', $record->infoformat);
-        $this->assertEquals($category->id, $record->parent);
+        $this->assertEquals($id, $record->id);
         $this->assertEquals('Dummy id num', $record->idnumber);
+    }
+
+    /**
+     * Tests updating category order.
+     *
+     */
+    public function test_update_question_category() {
+        global $DB;
+
+        $id = add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $this->idnumber);
+        $record = $DB->get_record('question_categories', ['id' => $id]);
+
+        $this->assertNotEmpty($record);
+        $this->assertEquals('Dummy name', $record->name);
+        $this->assertEquals($this->category->contextid, $record->contextid);
+        $this->assertEquals('Dummy category info', $record->info);
+        $this->assertEquals('1', $record->infoformat);
+        $this->assertEquals($id, $record->id);
+        $this->assertEquals('Dummy id num', $record->idnumber);
+
+        $newname = 'Updated dummy name';
+        $newcategoryinfo = 'Updated dummy category info';
+        $newidnumber = 'Updated dummy id num';
+        update_question_category::execute($this->idparent, $newname, $newcategoryinfo, 1, $newidnumber, $this->category->id);
+        $record = $DB->get_record('question_categories', ['name' => 'Updated dummy name']);
+
+        $this->assertNotEmpty($record);
+        $this->assertEquals('Updated dummy name', $record->name);
+        $this->assertEquals($this->category->contextid, $record->contextid);
+        $this->assertEquals('Updated dummy category info', $record->info);
+        $this->assertEquals('1', $record->infoformat);
+        $this->assertEquals('Updated dummy id num', $record->idnumber);
+    }
+
+    /**
+     * Test creating a category.
+     *
+     * @covers ::add_category
+     */
+    public function test_add_category_no_idnumber() {
+        global $DB;
+        $idnumber = null;
+
+        add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $idnumber);
+
+        $newcat = $DB->get_record('question_categories', ['name' => $this->name], '*', MUST_EXIST);
+        $this->assertSame($this->name, $newcat->name);
+        $this->assertNull($newcat->idnumber);
+    }
+
+    /**
+     * Test creating a category with a tricky idnumber.
+     *
+     * @covers ::add_category
+     */
+    public function test_add_category_set_idnumber_0() {
+        global $DB;
+        $idnumber = 0;
+
+        add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $idnumber);
+
+        $newcat = $DB->get_record('question_categories', ['name' => $this->name], '*', MUST_EXIST);
+        $this->assertSame($this->name, $newcat->name);
+        $this->assertSame('0', $newcat->idnumber);
+    }
+
+    /**
+     * Trying to add a category with duplicate idnumber blanks it.
+     * (In reality, this would probably get caught by form validation.)
+     *
+     * @covers ::add_category
+     */
+    public function test_add_category_try_to_set_duplicate_idnumber() {
+        global $DB;
+        $idnumber = 'frog';
+        $firstadd = add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $idnumber);
+        $secondadd = add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $idnumber);
+        $this->assertIsInt($firstadd);
+        $this->assertFalse($secondadd);
+    }
+
+
+    /**
+     * Test updating a category to remove the idnumber.
+     *
+     * @covers ::update_category
+     */
+    public function test_update_category_removing_idnumber() {
+        global $DB;
+        $idnumber = 'frog';
+        $newidnumber = null;
+        $id = add_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $idnumber);
+        $categoryjustadded = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
+        update_question_category::execute($this->idparent, $this->name, $this->categoryinfo, 1, $newidnumber,
+            $categoryjustadded->id);
+
+        $newcat = $DB->get_record('question_categories', ['name' => $this->name], '*', MUST_EXIST);
+        $this->assertSame($this->name, $newcat->name);
+        $this->assertNull($newcat->idnumber);
+    }
+
+    /**
+     * Test updating a category without changing the idnumber.
+     *
+     * @covers ::update_category
+     */
+    public function test_update_category_dont_change_idnumber() {
+        global $DB;
+
+        $id = add_question_category::execute($this->idparent, 'Old name', 'Old description', 1, 'frog');
+
+        update_question_category::execute($this->idparent, 'New name', 'New description', 1, 'frog', $id);
+
+        $newcat = $DB->get_record('question_categories', ['id' => $id], '*', MUST_EXIST);
+        $this->assertSame('New name', $newcat->name);
+        $this->assertSame('frog', $newcat->idnumber);
+    }
+
+    /**
+     * Trying to update a category so its idnumber duplicates idnumber blanks it.
+     * (In reality, this would probably get caught by form validation.)
+     *
+     * @covers ::update_category
+     */
+    public function test_update_category_try_to_set_duplicate_idnumber() {
+        global $DB;
+
+        $id = add_question_category::execute($this->idparent, 'Old name', 'Old description', 1, 'frog');
+        $secondid = add_question_category::execute($this->idparent, 'Aborted update', 'Old description', 1, 'toad');
+
+        update_question_category::execute($this->idparent, 'Old name', 'Old description', 1, 'frog', $secondid);
+
+        $newcat = $DB->get_record('question_categories', ['id' => $secondid], '*', MUST_EXIST);
+        $this->assertSame('Aborted update', $newcat->name);
+        $this->assertSame($newcat->idnumber, 'toad');
     }
 }

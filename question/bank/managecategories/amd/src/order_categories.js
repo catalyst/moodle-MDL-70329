@@ -26,7 +26,6 @@
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
 import SortableList from 'core/sortable_list';
-import CheckboxParam from 'qbank_managecategories/checkbox_param';
 import $ from 'jquery';
 
 class OrderCategories {
@@ -57,30 +56,42 @@ class OrderCategories {
             $('li.list_item[style]').remove();
             const newOrder = this.getNewOrder(categoryListElements, oldContextId, oldCat);
             // Call external function.
-            this.setCatOrder(JSON.stringify(newOrder))
+            const newCatOrder = JSON.stringify(newOrder[0]);
+            const destination = newOrder[1].split(',');
+            const origin = newOrder[2].split(',');
+            const destinationContext = destination[1];
+            const originContext = origin[1];
+            const originCategory = origin[0];
+
+            this.setCatOrder(newCatOrder, originCategory, destinationContext, originContext)
             .then(() => location.reload())
             .catch(() => location.reload());
         });
     };
 
     /**
-     * Call external function set_category_order - inserts the updated column in the question_categories table.
+     * Call external function update_category_order - inserts the updated column in the question_categories table.
      *
      * @param {string} updatedCategories String containing new sortorder.
      * @returns {Promise}
      */
-    setCatOrder = (updatedCategories) => {
+    setCatOrder = (newCatOrder, originCategory, destinationContext, originContext) => {
         const promise = new Promise((resolve, reject) => {
             const response = Ajax.call([{
-                methodname: 'qbank_managecategories_set_category_order',
-                args: {categories: updatedCategories},
+                methodname: 'qbank_managecategories_update_category_order',
+                args: {
+                    neworder: newCatOrder,
+                    origincategory: originCategory,
+                    destinationcontext: destinationContext,
+                    origincontext: originContext
+                },
                 fail: Notification.exception
             }]);
             response[0].then((resp) => {
-                if (JSON.parse(resp) === false) {
-                    reject();
-                } else {
+                if (JSON.parse(resp) === true) {
                     resolve();
+                } else {
+                    reject();
                 }
             });
         });
@@ -88,7 +99,7 @@ class OrderCategories {
     };
 
     /**
-     * Retrieving the order on EVENT.DROP, also gets new parameter
+     * Retrieving the order on EVENT.DROP, also gets new parameter.
      *
      * @param {JQuery<HTMLElement>} categoryListElements List of HTML element to parse.
      * @param {int} oldContextId Old context id to change.
@@ -96,7 +107,7 @@ class OrderCategories {
      * @returns {array}
      */
     getNewOrder = (categoryListElements, oldContextId, oldCat) => {
-        const oldCtxCat = oldContextId + ' ' + oldCat;
+        const oldCtxCat = oldCat + ',' + oldContextId;
         const newCatOrder = [];
         let destinationCtx = [];
         for (let i = 0; i < categoryListElements.length; i++) {
@@ -111,7 +122,7 @@ class OrderCategories {
                 const cat = params.get('cat');
                 const contextId = cat.substr(cat.search(',') + 1);
                 cat = cat.substr(0, cat.search(','));
-                listOrder[j] = contextId + ' ' + cat;
+                listOrder[j] = cat + ',' + contextId;
                 if (listOrder[j] === oldCtxCat) {
                     destinationCtx.push(listOrder);
                 }
@@ -125,9 +136,22 @@ class OrderCategories {
     };
 }
 
+/**
+ * Sets events listenner for checkbox ticking change.
+ */
+const setEventListenner = () => {
+    let checkbox = document.getElementsByName('qbshowdescr')[0];
+    let checkboxform = document.getElementById('qbshowdescr-form');
+    if (checkbox !== undefined) {
+        checkbox.addEventListener('click', (e) => {
+            e.preventDefault();
+            checkboxform.submit();
+        });
+    }
+};
+
 export const init = () => {
-    const checkboxParam = new CheckboxParam();
-    checkboxParam.setEventListenner();
+    setEventListenner();
     const orderCat = new OrderCategories();
     orderCat.setupSortableLists();
 };

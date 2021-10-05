@@ -37,43 +37,51 @@ use stdClass;
  * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class submit_add_category_form extends external_api {
+class add_question_category extends external_api {
     /**
-     * Describes the parameters for submit_add_category_form webservice.
+     * Describes the parameters for add_question_category webservice.
      * @return external_function_parameters
      */
     public static function execute_parameters() {
         return new external_function_parameters(
             [
-                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the create group form, encoded as a json array')
+                'parent' => new external_value(PARAM_TEXT, 'parent'),
+                'name' => new external_value(PARAM_TEXT, 'name'),
+                'info' => new external_value(PARAM_RAW, 'info'),
+                'infoformat' => new external_value(PARAM_INT, 'infoformat'),
+                'idnumber' => new external_value(PARAM_TEXT, 'idnumber')
             ]);
     }
 
     /**
-     * Submit the add category form.
+     * Adds a question category.
      *
-     * @param string $jsonformdata The data from the form, encoded as a json array.
+     * @param string $parent Parent of the category.
+     * @param string $name Category's new name.
+     * @param string $info Category's new information(s)/description.
+     * @param int $infoformat description format. One of the FORMAT_ constants.
+     * @param string $idnumber Category idnumber.
      * @return int $categoryid category id.
      */
-    public static function execute($jsonformdata) {
+    public static function execute($parent, $name, $info, $infoformat, $idnumber) {
         global $DB;
 
         // We always must pass webservice params through validate_parameters.
         $params = self::validate_parameters(self::execute_parameters(),
-                                            ['jsonformdata' => $jsonformdata]);
+                                            ['parent' => $parent,
+                                            'name' => $name,
+                                            'info' => $info,
+                                            'infoformat' => $infoformat,
+                                            'idnumber' => $idnumber]);
 
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('moodle/category:manage', $context);
 
-        $serialiseddata = json_decode($params['jsonformdata'], true);
-        $data = [];
-        parse_str($serialiseddata, $data);
-
-        $newparent = $data['parent'];
-        $newcategory = $data['name'];
-        $newinfo = $data['info']['text'];
-        $idnumber = $data['idnumber'];
+        $newparent = $params['parent'];
+        $newcategory = $params['name'];
+        $newinfo = format_text($params['info'], $params['infoformat'], ['noclean' => false]);
+        $idnumber = $params['idnumber'];
 
         if (empty($newcategory)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
@@ -106,11 +114,11 @@ class submit_add_category_form extends external_api {
         }
 
         $cat = new stdClass();
-        $cat->parent = $parentid;
-        $cat->contextid = $contextid;
+        $cat->parent = clean_param($parentid, PARAM_INT);
+        $cat->contextid = clean_param($contextid, PARAM_INT);
         $cat->name = $newcategory;
         $cat->info = $newinfo;
-        $cat->infoformat = FORMAT_HTML;
+        $cat->infoformat = $params['infoformat'];
         $cat->sortorder = 999;
         $cat->stamp = make_unique_id_code();
         $cat->idnumber = $idnumber;
@@ -118,11 +126,11 @@ class submit_add_category_form extends external_api {
 
         // Log the creation of this category.
         $category = new stdClass();
-        $category->id = $categoryid;
-        $category->contextid = $contextid;
+        $category->id = clean_param($categoryid, PARAM_INT);
+        $category->contextid = clean_param($contextid, PARAM_INT);
         $event = \core\event\question_category_created::create_from_question_category_instance($category);
         $event->trigger();
-        $success = ($categoryid) ? true : false;
+        $success = ($categoryid) ? $categoryid : -1;
         return $success;
     }
 
@@ -132,6 +140,6 @@ class submit_add_category_form extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL, 'Success or failure');
+        return new external_value(PARAM_INT, 'Added question category id if successful -1 if fail');
     }
 }

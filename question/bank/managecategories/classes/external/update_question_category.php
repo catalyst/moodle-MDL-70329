@@ -38,46 +38,55 @@ use stdClass;
  * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class submit_edit_category_form extends external_api {
+class update_question_category extends external_api {
     /**
-     * Describes the parameters for submit_edit_category_form webservice.
+     * Describes the parameters for update_question_category webservice.
      * @return external_function_parameters
      */
     public static function execute_parameters() {
         return new external_function_parameters(
             [
-                'jsonformdata' => new external_value(PARAM_RAW, 'The data from the edit group form, encoded as a json array')
+                'parent' => new external_value(PARAM_TEXT, 'parent'),
+                'name' => new external_value(PARAM_TEXT, 'name'),
+                'info' => new external_value(PARAM_RAW, 'info'),
+                'infoformat' => new external_value(PARAM_INT, 'infoformat'),
+                'idnumber' => new external_value(PARAM_TEXT, 'idnumber'),
+                'id' => new external_value(PARAM_INT, 'categoryid')
             ]);
     }
 
     /**
-     * Submit the add category form.
+     * Updates question category.
      *
-     * @param string $jsonformdata The data from the form, encoded as a json array.
-     * @return int $categoryid category id.
+     * @param string $parent Parent of the category.
+     * @param string $name Category's new name.
+     * @param string $info Category's new information(s)/description.
+     * @param int $infoformat description format. One of the FORMAT_ constants.
+     * @param string $idnumber Category idnumber.
+     * @param int $id Category id that we are updating.
+     * @return int $id category id.
      */
-    public static function execute($jsonformdata) {
+    public static function execute($parent, $name, $info, $infoformat, $idnumber, $id) {
         global $DB;
 
         // We always must pass webservice params through validate_parameters.
         $params = self::validate_parameters(self::execute_parameters(),
-                                            ['jsonformdata' => $jsonformdata]);
+                                            ['parent' => $parent,
+                                            'name' => $name,
+                                            'info' => $info,
+                                            'infoformat' => $infoformat,
+                                            'idnumber' => $idnumber,
+                                            'id' => $id]);
 
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('moodle/category:manage', $context);
 
-        $serialiseddata = json_decode($params['jsonformdata'], true);
-        $data = [];
-        parse_str($serialiseddata, $data);
-
-        $updateid = $data['id'];
-        $newname = $data['name'];
-        $newparent = $data['parent'];
-        $updatedcategory = $data['name'];
-        $newinfo = $data['info']['text'];
-        $newinfoformat = $data['info']['format'];
-        $idnumber = $data['idnumber'];
+        $updateid = $params['id'];
+        $newname = $params['name'];
+        $newparent = $params['parent'];
+        $newinfo = format_text($params['info'], $params['infoformat'], ['noclean' => false]);
+        $idnumber = $params['idnumber'];
 
         if (empty($newname)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');
@@ -132,14 +141,17 @@ class submit_edit_category_form extends external_api {
         $cat->id = $updateid;
         $cat->name = $newname;
         $cat->info = $newinfo;
-        $cat->infoformat = $newinfoformat;
-        $cat->parent = $parentid;
-        $cat->contextid = $tocontextid;
+        $cat->infoformat = $params['infoformat'];
+        $cat->parent = clean_param($parentid, PARAM_INT);
+        $cat->contextid = clean_param($tocontextid, PARAM_INT);
         $cat->idnumber = $idnumber;
         if ($newstamprequired) {
             $cat->stamp = make_unique_id_code();
         }
         $success = $DB->update_record('question_categories', $cat);
+        // Log the update of this category.
+        $event = \core\event\question_category_updated::create_from_question_category_instance($cat);
+        $event->trigger();
         return $success;
     }
 

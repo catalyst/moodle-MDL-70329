@@ -155,7 +155,7 @@ class question_category_object {
             $this->catform->set_data(['parent' => $defaultcategory]);
         }
         // Checkbox Form.
-        $checked = get_user_preferences('question_bank_qbshowdescr');
+        $checked = get_user_preferences('qbank_managecategories_showdescr');
         $customdata = ['checked' => $checked, 'cmidorcourseid' => $cmidorcourseid, 'iscmid' => $iscmid];
         $this->checkboxform = new question_category_checkbox_form(null, $customdata, 'post', null, ['id' => 'qbshowdescr-form']);
     }
@@ -242,8 +242,13 @@ class question_category_object {
      * Edit a category.
      *
      * @param int $categoryid Category id.
+     * @deprecated since Moodle 4.0 MDL-72397 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.4 MDL-72438.
+     * @see qbank_managecategories\external\update_question_category::execute()
      */
     public function edit_single_category(int $categoryid): void {
+        debugging('edit_single_category() is deprecated.
+            Please use qbank_managecategories\external\update_question_category::execute() instead.', DEBUG_DEVELOPER);
         // Interface for adding a new category.
         global $DB;
         // Interface for editing existing categories.
@@ -444,9 +449,14 @@ class question_category_object {
      * @param int|string $newinfoformat description format. One of the FORMAT_ constants.
      * @param int $idnumber the idnumber. '' is converted to null.
      * @param bool $redirect if true, will redirect once the DB is updated (default).
+     * @deprecated since Moodle 4.0 MDL-72397 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.4 MDL-72438.
+     * @see qbank_managecategories\external\update_question_category::execute()
      */
     public function update_category($updateid, $newparent, $newname, $newinfo, $newinfoformat = FORMAT_HTML,
             $idnumber = null, $redirect = true): void {
+        debugging('update_category() is deprecated.
+            Please use qbank_managecategories\external\update_question_category::execute() instead.', DEBUG_DEVELOPER);
         global $CFG, $DB;
         if (empty($newname)) {
             throw new moodle_exception('categorynamecantbeblank', 'question');

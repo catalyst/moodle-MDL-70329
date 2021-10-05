@@ -27,22 +27,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = [
-    'qbank_managecategories_set_category_order' => [
-        'classname'    => 'qbank_managecategories\external\set_category_order',
+    'qbank_managecategories_update_category_order' => [
+        'classname'    => 'qbank_managecategories\external\update_category_order',
         'description'  => 'Returns question category order',
         'type'         => 'write',
         'capabilities' => 'moodle/question:managecategory',
         'ajax'         => true,
     ],
-    'qbank_managecategories_submit_add_category_form' => [
-        'classname'    => 'qbank_managecategories\external\submit_add_category_form',
+    'qbank_managecategories_add_question_category' => [
+        'classname'    => 'qbank_managecategories\external\add_question_category',
         'description'  => 'Adds a new question category',
         'type'         => 'write',
         'capabilities' => 'moodle/question:add',
         'ajax'         => true,
     ],
-    'qbank_managecategories_submit_edit_category_form' => [
-        'classname'    => 'qbank_managecategories\external\submit_edit_category_form',
+    'qbank_managecategories_update_question_category' => [
+        'classname'    => 'qbank_managecategories\external\update_question_category',
         'description'  => 'Edits a question category',
         'type'         => 'write',
         'capabilities' => 'moodle/question:editmine',

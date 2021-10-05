@@ -14,7 +14,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Javascript module handling creation of Modal form.
+ * Javascript module for addition or edition of category as a modal form.
+ * Clicking "Add category" or "Edit > Edit settings" will trigger this modal.
  *
  * @package    qbank_managecategories
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -143,18 +144,29 @@ const submitFormAjax = (modal, categoryid, contextid, modalid, e) => {
   }
 
   const formData = modal.getRoot().find('form').serialize();
-  let methodname = 'qbank_managecategories_submit_edit_category_form';
+  const idparent = modal.getRoot().find('#id_parent')[0].value;
+  const name = modal.getRoot().find('#id_name')[0].value;
+  let categoryinfo = modal.getRoot().find('#id_infoeditable')[0];
+  // Handles any change of id when idnumber exists or missing name;
+  if (categoryinfo === undefined) {
+    let id = '#' + modalid + 'editable';
+    categoryinfo = modal.getRoot().find(id)[0].textContent;
+  } else {
+    categoryinfo = categoryinfo.textContent;
+  }
+  const idnumber = modal.getRoot().find('#id_idnumber')[0].value;
+  let methodname = 'qbank_managecategories_update_question_category';
   if (categoryid === undefined) {
-    methodname = 'qbank_managecategories_submit_add_category_form';
+    methodname = 'qbank_managecategories_add_question_category';
   }
   const promise = new Promise((resolve, reject) => {
     const response = Ajax.call([{
       methodname: methodname,
-      args: {jsonformdata: JSON.stringify(formData)},
+      args: {parent: idparent, name: name, info: categoryinfo, infoformat: 1, idnumber: idnumber, id: categoryid},
       fail: handleFormSubmissionFailure(modal, contextid, categoryid, formData, modalid)
     }]);
     response[0].then((resp) => {
-      if (JSON.parse(resp) === false) {
+      if (JSON.parse(resp) === false || JSON.parse(resp) === -1) {
         reject();
       } else {
         resolve();
