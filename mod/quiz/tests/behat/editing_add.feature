@@ -1,4 +1,4 @@
-@mod @mod_quiz
+@mod @mod_quiz @problem_behat
 Feature: Edit quiz page - adding things
   In order to build the quiz I want my students to attempt
   As a teacher
