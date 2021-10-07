@@ -2223,11 +2223,17 @@ function quiz_require_question_use($questionid) {
  */
 function quiz_has_question_use($quiz, $slot) {
     global $DB;
-    $question = $DB->get_record_sql("
-            SELECT q.*
+
+    $sql = 'SELECT q.*
               FROM {quiz_slots} slot
-              JOIN {question} q ON q.id = slot.questionid
-             WHERE slot.quizid = ? AND slot.slot = ?", array($quiz->id, $slot));
+              JOIN {question_references} qre ON qre.itemid = slot.id
+              JOIN {question_bank_entries} qbe ON qbe.id = qre.questionbankentryid
+              JOIN {question_versions} qve ON qve.questionbankentryid = qbe.id
+              JOIN {question} q ON q.id = qve.questionid
+             WHERE slot.quizid = ? AND slot.slot = ?';
+
+    $question = $DB->get_record_sql($sql, [$quiz->id, $slot]);
+
     if (!$question) {
         return false;
     }
@@ -2250,6 +2256,11 @@ function quiz_has_question_use($quiz, $slot) {
  */
 function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) {
     global $DB;
+
+    if (!isset($quiz->cmid)) {
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+        $quiz->cmid = $cm->id;
+    }
 
     // Make sue the question is not of the "random" type.
     $questiontype = $DB->get_field('question', 'qtype', array('id' => $questionid));
@@ -2437,6 +2448,11 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
         $filtercondition->includingsubcategories = $includesubcategories ? 1 : 0;
         if (!empty($tagstrings)) {
             $filtercondition->tags = $tagstrings;
+        }
+
+        if (!isset($quiz->cmid)) {
+            $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+            $quiz->cmid = $cm->id;
         }
 
         // Slot data.
