@@ -212,7 +212,12 @@ class behat_mod_quiz extends behat_question_base {
             }
 
             // Question id, category and type.
-            $question = $DB->get_record('question', array('name' => $questiondata['question']), 'id, category, qtype', MUST_EXIST);
+            $sql = 'SELECT q.id, qbe.questioncategoryid, q.qtype
+                      FROM {question_bank_entry} qbe
+                      JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                      JOIN {question} q ON qv.questionid = q.id
+                     WHERE q.name = :name';
+            $question = $DB->get_record_sql($sql, ['name' => $questiondata['question']], MUST_EXIST);
 
             // Page number.
             $page = clean_param($questiondata['page'], PARAM_INT);

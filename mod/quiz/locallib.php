@@ -2202,6 +2202,11 @@ function quiz_has_question_use($quiz, $slot) {
 function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) {
     global $DB;
 
+    if (!isset($quiz->cmid)) {
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+        $quiz->cmid = $cm->id;
+    }
+
     // Make sue the question is not of the "random" type.
     $questiontype = $DB->get_field('question', 'qtype', array('id' => $questionid));
     if ($questiontype == 'random') {
