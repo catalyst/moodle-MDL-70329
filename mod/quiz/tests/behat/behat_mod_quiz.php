@@ -252,7 +252,7 @@ class behat_mod_quiz extends behat_question_base {
                 } else {
                     $includingsubcategories = clean_param($questiondata['includingsubcategories'], PARAM_BOOL);
                 }
-                quiz_add_random_questions($quiz, $page, $question->category, 1, $includingsubcategories);
+                quiz_add_random_questions($quiz, $page, $question->questioncategoryid, 1, $includingsubcategories);
             } else {
                 // Add the question.
                 quiz_add_quiz_question($question->id, $quiz, $page, $maxmark);

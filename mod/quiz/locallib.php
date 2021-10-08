@@ -2395,6 +2395,11 @@ function quiz_add_random_questions($quiz, $addonpage, $categoryid, $number,
             $filtercondition->tags = $tagstrings;
         }
 
+        if (!isset($quiz->cmid)) {
+            $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+            $quiz->cmid = $cm->id;
+        }
+
         // Slot data.
         $randomslotdata = new stdClass();
         $randomslotdata->quizid = $quiz->id;

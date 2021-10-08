@@ -572,7 +572,7 @@ class quiz_statistics_report extends quiz_default_report {
 
         // Fill in the data for each question.
         foreach ($questionstatistics as $questionstatistic) {
-            $number = $questions[$questionstatistic->slot]->number;
+            $number = $questions[$questionstatistic->questionid]->number;
             $xdata[$number] = $number;
 
             foreach ($fieldstoplot as $fieldtoplot => $notused) {
