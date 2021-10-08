@@ -129,7 +129,7 @@ class editquestion extends external_api {
         $course = get_course($params['courseid']);
         $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
         ob_start();
-        $questionbank->display_question_list($pagevars, 'questions');
+        $questionbank->display_for_api($pagevars['cat']);
         $tablehtml = ob_get_flush();
 
         return [

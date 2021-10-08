@@ -1095,15 +1095,8 @@ class view {
         echo \html_writer::end_tag('div');
     }
 
-    public function display_for_api() {
-//        $questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
-//        $questionbank->process_actions();
-//        $questionbank->display($pagevars, 'questions');
-//        $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
-//            $this->contexts->having_cap('moodle/question:add'));
-        ob_start();
-        $this->display_question_list();
-        return ob_get_flush();
+    public function display_for_api($categoryandcontext) {
+        return $this->display_question_list($this->baseurl, $categoryandcontext);
     }
 
     /**
