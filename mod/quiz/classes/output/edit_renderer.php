@@ -778,7 +778,10 @@ class edit_renderer extends \plugin_renderer_base {
             $alwaysuselatest->versionvalue = get_string('alwayslatest', 'quiz');
             array_unshift($versionsoptions, $alwaysuselatest);
             $referencedata = $structure->get_slot_by_id($slotid);
-            if ($referencedata->version === null) {
+            //if ($referencedata->version === null) {
+
+            //$referencedata = qbank_helper::get_reference_data($slotid);
+            if (!isset($referencedata->version) || ($referencedata->version === null)) {
                 $currentversion = 0;
             } else {
                 $currentversion = $referencedata->version;
