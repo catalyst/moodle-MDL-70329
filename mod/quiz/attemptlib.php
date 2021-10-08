@@ -705,7 +705,7 @@ class quiz_attempt {
 
         $this->quba = question_engine::load_questions_usage_by_activity($this->attempt->uniqueid);
         $this->slots = $DB->get_records('quiz_slots',
-                array('quizid' => $this->get_quizid()), 'slot');
+                array('quizid' => $this->get_quizid()), 'slot', 'slot, id, quizid, page, requireprevious, maxmark');
         $this->sections = array_values($DB->get_records('quiz_sections',
                 array('quizid' => $this->get_quizid()), 'firstslot'));
 
@@ -734,9 +734,6 @@ class quiz_attempt {
                 $section->lastslot = count($this->slots);
             }
             for ($slot = $section->firstslot; $slot <= $section->lastslot; $slot += 1) {
-                if (!isset($this->slots[$slot])) {
-                    $this->slots[$slot] = new stdClass();
-                }
                 $this->slots[$slot]->section = $section;
             }
         }
@@ -1207,6 +1204,7 @@ class quiz_attempt {
             foreach ($this->pagelayout as $numbersonpage) {
                 $numbers = array_merge($numbers, $numbersonpage);
             }
+            //var_dump($numbers);die;
             return $numbers;
         } else {
             return $this->pagelayout[$page];
@@ -2448,6 +2446,7 @@ class quiz_attempt {
                 if (!$becomingoverdue) {
                     foreach ($this->get_slots() as $slot) {
                         if (optional_param('redoslot' . $slot, false, PARAM_BOOL)) {
+                            //var_dump($slot);die;
                             $this->process_redo_question($slot, $timenow);
                         }
                     }
