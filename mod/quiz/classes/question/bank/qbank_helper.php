@@ -411,25 +411,73 @@ class qbank_helper {
                 }
             }
         }
-        $secondsets = self::get_report_structure_random_data($questionids);
-        $slotcount = 0;
-        foreach ($secondsets as $secondset) {
+
+        $secondsets = array_values(self::get_report_structure_random_data($questionids));
+        $conditions = self::get_conditions($questionids);
+        foreach($conditions as $condition) {
+            // Get the question sets if belong to the same context and category.
+            $questionsets = [];
+            foreach ($secondsets as $secondset) {
+                if ($condition->contextid === $secondset->contextid
+                    && $condition->categoryid === $secondset->categoryid) {
+                      $questionsets[] = $secondset;
+                }
+            }
+
+            // Now create an array with the random slots to be matched with each attempted question.
+            $randomslotobjects = [];
+            $position = 0;
             foreach ($randomslots as $randomslot) {
                 $filtercondition = json_decode($randomslot->filtercondition);
-                if ($secondset->contextid === $randomslot->questionscontextid &&
-                    $secondset->categoryid === $filtercondition->questioncategoryid) {
-                    $questionrecord = new \stdClass();
-                    $questionrecord->id = $secondset->id;
-                    $questionrecord->qtype = $secondset->qtype;
-                    $questionrecord->length = $secondset->length;
-                    $questionrecord->maxmark = $randomslot->maxmark;
-                    $questionrecord->slot = $randomslot->slot + $slotcount;
-                    $firstsets [] = $questionrecord;
-                    $slotcount ++;
+                if ($condition->contextid === $randomslot->questionscontextid
+                    && $condition->categoryid === $filtercondition->questioncategoryid) {
+                    $randomslotobject = new \stdClass();
+                    $randomslotobject->questionscontextid = $randomslot->questionscontextid;
+                    $randomslotobject->questioncategoryid = $filtercondition->questioncategoryid;
+                    $randomslotobject->slot = $randomslot->slot;
+                    $randomslotobject->maxmark = $randomslot->maxmark;
+                    $randomslotobjects[$position] = $randomslotobject;
+                    $position++;
                 }
+            }
+
+            // Create the question record and add it to the set.
+            foreach ($randomslotobjects as $key => $randomslotobject) {
+                $questionrecord = new \stdClass();
+                $questionrecord->id = $questionsets[$key]->id;
+                $questionrecord->qtype = $questionsets[$key]->qtype;
+                $questionrecord->length = $questionsets[$key]->length;
+                $questionrecord->maxmark = $randomslotobject->maxmark;
+                $questionrecord->slot = $randomslotobject->slot;
+                $firstsets[] = $questionrecord;
             }
         }
         return $firstsets;
     }
 
+    /**
+     * Get the contexts and categories for question ids.
+     *
+     * @param array $questionids
+     * @return array
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function get_conditions(array $questionids): array {
+        global $DB;
+        if (empty($questionids)) {
+            return [];
+        }
+        list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
+        $condition = 'WHERE q.id ' . $condition;
+        $sql = "SELECT DISTINCT qc.contextid, qc.id as categoryid
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                  $condition";
+
+        $conditions = $DB->get_records_sql($sql, $param);
+        return $conditions;
+    }
 }
