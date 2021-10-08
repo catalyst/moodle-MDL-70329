@@ -2798,7 +2798,15 @@ $functions = array(
         'description' => 'Get question table content raw html',
         'type'        => 'read',
         'ajax'        => true,
-        'loginrequired' => false,
+        'loginrequired' => true,
+    ],
+    'core_qbank_dummy' => [
+        'classname'   => 'core_question\external\dummy',
+        'methodname'  => 'get_questions',
+        'description' => 'Get dummy question table content raw html',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
     ],
 );
 
