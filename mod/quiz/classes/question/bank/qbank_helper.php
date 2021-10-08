@@ -318,10 +318,10 @@ class qbank_helper {
         //          $condition
         //          GROUP BY q.id
         //          ORDER BY qs.slot";
-        $sql = "SELECT q.id,
+        $sql = "SELECT slot.slot,
+                       q.id,
                        q.qtype,
                        q.length,
-                       slot.slot,
                        slot.maxmark
                   FROM {quiz_slots} slot
              LEFT JOIN {question_references} qr ON qr.itemid = slot.id
@@ -397,13 +397,13 @@ class qbank_helper {
         global $DB;
         $questionids = self::get_questionids_for_attempts_in_quiz($quizid);
         $firstsets = self::get_question_report_structure_data($quizid, $questionids);
-        $randomslots = $DB->get_records_sql('SELECT qs.id as slotid,
-                                                        qs.slot,
-                                                        qs.maxmark,
-                                                        qsr.*
-                                                   FROM {quiz_slots} qs
-                                                   JOIN {question_set_references} qsr ON qsr.itemid = qs.id
-                                                   WHERE qs.quizid = ?', [$quizid]);
+        $randomslots = $DB->get_records_sql('SELECT qs.slot,
+                                                    qs.id as slotid,
+                                                    qs.maxmark,
+                                                    qsr.*
+                                               FROM {quiz_slots} qs
+                                               JOIN {question_set_references} qsr ON qsr.itemid = qs.id
+                                              WHERE qs.quizid = ?', [$quizid]);
         foreach ($firstsets as $firstset) {
             foreach ($questionids as $key => $questionid) {
                 if ($firstset->id === $questionid) {
