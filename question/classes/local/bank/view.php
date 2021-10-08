@@ -744,7 +744,7 @@ class view {
      * @param bool $showquestiontext whether the text of each question should be shown in the list
      */
     public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
+        global $CFG, $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
         $thiscontext = $this->get_most_specific_context();
@@ -755,20 +755,33 @@ class view {
         if ($this->enablefilters) {
             if (is_array($this->customfilterobjects)) {
                 foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
+                    $this->add_searchcondition($filterobjects);
                 }
             } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
+//                if ($CFG->usetags) {
+//                    $tags = new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids);
+//                    array_unshift($this->searchconditions, $tags);
+//                }
+//                $hiddencondition = new \core_question\bank\search\hidden_condition(!$showhidden);
+//                array_unshift($this->searchconditions, $hiddencondition);
+//                $categorycondition = new \core_question\bank\search\category_condition(
+//                    $cat, $recurse, $editcontexts, $this->baseurl, $this->course);
+//                array_unshift($this->searchconditions, $categorycondition);
 
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+                $this->searchconditions['category'] = new \core_question\bank\search\category_condition(
+                    $cat, $recurse, $editcontexts, $this->baseurl, $this->course);
+
+                $this->searchconditions['hidden'] = new \core_question\bank\search\hidden_condition(!$showhidden);
+
+                if ($CFG->usetags) {
+                    $this->searchconditions['tag'] = new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids);
+                }
             }
         }
         $this->display_options_form($showquestiontext);
+
+        // Render the question bank filters.
+        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions);
     }
 
     /**
@@ -1080,6 +1093,17 @@ class view {
                 ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
         echo \html_writer::end_tag('div');
+    }
+
+    public function display_for_api() {
+//        $questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
+//        $questionbank->process_actions();
+//        $questionbank->display($pagevars, 'questions');
+//        $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
+//            $this->contexts->having_cap('moodle/question:add'));
+        ob_start();
+        $this->display_question_list();
+        return ob_get_flush();
     }
 
     /**
