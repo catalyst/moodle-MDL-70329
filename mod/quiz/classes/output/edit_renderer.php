@@ -740,7 +740,6 @@ class edit_renderer extends \plugin_renderer_base {
         $canedit = $structure->can_be_edited();
         $checkbox = $this->get_checkbox_render($structure, $slot);
         $slotid = $structure->get_slot_id_for_slot($slot);
-        $quizid = $structure->get_quizid();
         $questionnumber = $this->question_number($structure->get_displayed_number_for_slot($slot));
         $questionname = $this->get_question_name_render($structure, $slot, $pageurl);
         $questionicons = $this->get_action_icons_render($structure, $slot, $pageurl);

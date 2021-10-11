@@ -90,6 +90,7 @@ class qbank_helper {
      * @return array
      */
     public static function question_array_sort($array, $on, $order = SORT_ASC): array {
+        // TODO: Remove as is not used.
         $new_array = array();
         $sortable_array = array();
 
@@ -244,8 +245,8 @@ class qbank_helper {
         } else {
             $selectstart = 'slot.id AS slotid, q.*,';
         }
-        $sql = "SELECT $selectstart
-                       slot.slot,
+        $sql = "SELECT slot.slot,
+                       $selectstart
                        q.id AS questionid,
                        slot.page,
                        slot.maxmark,
@@ -290,7 +291,10 @@ class qbank_helper {
                 }
             }
         }
-        return self::question_array_sort(array_merge($firstslotsets, $secondslotsets), 'slot');
+
+        $sets = $firstslotsets + $secondslotsets;
+        ksort($sets);
+        return array_values($sets);
     }
 
     /**
