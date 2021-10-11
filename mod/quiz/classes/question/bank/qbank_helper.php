@@ -16,8 +16,6 @@
 
 namespace mod_quiz\question\bank;
 
-use core_analytics\stats;
-
 /**
  * Helper class for question bank and its associated data.
  *
@@ -60,6 +58,13 @@ class qbank_helper {
         return $versionsoptions;
     }
 
+    /**
+     * Get the reference data for a slotid.
+     *
+     * @param $slotid
+     * @return false|mixed|\stdClass
+     * @throws \dml_exception
+     */
     public static function get_reference_data($slotid) {
         global $DB;
         return $DB->get_record('question_references', ['itemid' => $slotid]);
@@ -171,7 +176,7 @@ class qbank_helper {
                   JOIN {question_usages} qu ON qu.id = qa.uniqueid
                   JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
                   JOIN {question} q ON q.id = qatt.questionid
-                   WHERE qatt.questionid = ?
+                 WHERE qatt.questionid = ?
                        AND qa.preview = 0';
         return $DB->count_records_sql($sql, [$questionid]);
     }
@@ -189,7 +194,7 @@ class qbank_helper {
                   FROM {quiz_slots} qs
                   JOIN {question_references} qr ON qr.itemid = qs.id
                  WHERE qr.version IS NULL
-                   AND qs.quizid = ?';
+                       AND qs.quizid = ?';
         $entryids = $DB->get_records_sql($sql, [$quizid]);
         $questionentries = [];
         foreach ($entryids as $entryid) {
@@ -204,10 +209,10 @@ class qbank_helper {
                           FROM {question} q
                           JOIN {question_versions} qv ON qv.questionid = q.id
                          WHERE qv.version = (SELECT MAX(v.version)
-                                                FROM {question_versions} v
-                                                JOIN {question_bank_entry} be
-                                                  ON be.id = v.questionbankentryid
-                                               WHERE be.id = qv.questionbankentryid)
+                                               FROM {question_versions} v
+                                               JOIN {question_bank_entry} be
+                                                 ON be.id = v.questionbankentryid
+                                              WHERE be.id = qv.questionbankentryid)
                          $extracondition";
         $questions = $DB->get_records_sql($questionsql, $params);
         foreach ($questions as $question) {
@@ -379,7 +384,7 @@ class qbank_helper {
                   JOIN {question_usages} qu ON qu.id = qa.uniqueid
                   JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
                   JOIN {question} q ON q.id = qatt.questionid
-                  WHERE qz.id = ?';
+                 WHERE qz.id = ?';
         $questions = $DB->get_records_sql($sql, [$quizid]);
         foreach ($questions as $question) {
             $questionids [] = $question->id;
@@ -470,7 +475,7 @@ class qbank_helper {
         }
         list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
         $condition = 'WHERE q.id ' . $condition;
-        $sql = "SELECT DISTINCT qc.contextid, qc.id as categoryid
+        $sql = "SELECT DISTINCT qc.id as categoryid, qc.contextid
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
