@@ -70,6 +70,12 @@ class editquestion extends external_api {
                 VALUE_OPTIONAL,
                 false,
             ),
+            'qpage' => new external_value(
+                PARAM_INT,
+                'The page number',
+                VALUE_OPTIONAL,
+                0
+            ),
             'qbshowtext' => new external_value(
                 PARAM_BOOL,
                 'Flag to show question text',
@@ -98,6 +104,7 @@ class editquestion extends external_api {
      * @param string $category
      * @param string $qtagids
      * @param int $qperpage
+     * @param int $qpage
      * @param bool $qbshowtext
      * @param bool $recurse
      * @param bool $showhidden
@@ -108,6 +115,7 @@ class editquestion extends external_api {
         ?string $category = null,
         ?string $qtagids = null,
         ?int $qperpage = null,
+        ?int $qpage = null,
         bool $qbshowtext = false,
         bool $recurse = false,
         bool $showhidden = false
@@ -119,6 +127,7 @@ class editquestion extends external_api {
             'category' => $category,
             'qtagids' => $qtagids,
             'qperpage' => $qperpage,
+            'qpage' => $qpage,
             'qbshowtext' => $qbshowtext,
             'recurse' => $recurse,
             'showhidden' => $showhidden,
