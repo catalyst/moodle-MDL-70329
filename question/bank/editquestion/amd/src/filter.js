@@ -22,13 +22,66 @@
  */
 
 import * as CoreFilter from 'core/filter';
+import ajax from 'core/ajax';
 
 /**
  * Initialise the question bank filter on the element with the given id.
  *
  * @param {String} filterRegionId
+ * @param {String} courseid
+ * @param {String} defaultcategoryid
  */
-export const init = (filterRegionId) => {
-    CoreFilter.init(filterRegionId, 'QbankTable');
+export const init = (filterRegionId, defaultcourseid, defaultcategoryid) => {
+    CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
+        applyFilter(filterdata, pendingPromise);
+    });
+
+    /**
+     * Retrieve table data.
+     *
+     * @param {Object} filter data
+     * @param {Promise} filter pending promise
+     */
+    const applyFilter = (filterdata, pendingPromise) => {
+        if (filterdata) {
+            var courseid = filterdata['courseid'].values.toString();
+            var categories = filterdata['category'] ? filterdata['category'].values.toString() : '';
+            var qtagids = filterdata['tag'] ? filterdata['tag'].values.toString() : '';
+        } else {
+            var courseid = defaultcourseid;
+            var categories = defaultcategoryid;
+            var qtagids = '';
+        }
+
+        var qperpage = 10;
+        var qbshowtext = false;
+        var recurse = false;
+        var showhidden = false;
+
+        var promises = ajax.call([{
+            methodname: 'core_qbank_dummy', args: {
+                    courseid: courseid,
+                    category: categories,
+                     qtagids: qtagids,
+                    qperpage: qperpage,
+                  qbshowtext: qbshowtext,
+                     recurse: recurse,
+                  showhidden: showhidden
+                }
+            }
+        ]);
+
+        promises[0].done(function(response) {
+            var questionscontainer = document.getElementById('questionscontainer');
+            var html = '<div className="categoryquestionscontainer" id="questionscontainer">' + response.html + '</div>';
+            questionscontainer.innerHTML = html;
+            if (pendingPromise) {
+                pendingPromise.resolve();
+            }
+        });
+
+    };
+
+    applyFilter();
 };
 

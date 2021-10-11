@@ -96,6 +96,15 @@ class category_condition extends condition {
     }
 
     /**
+     * Return default category
+     *
+     * @return \stdClass default category
+     */
+    public function get_default_category(): \stdClass {
+        return $this->category;
+    }
+
+    /**
      * SQL fragment to add to the where clause.
      *
      * @return string

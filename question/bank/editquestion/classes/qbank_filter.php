@@ -76,7 +76,7 @@ class qbank_filter extends \core\output\filter {
      */
     protected function get_tag_filter(): ?stdClass {
         global $CFG;
-        if ($CFG->usetags) {
+        if (!$CFG->usetags) {
             return null;
         }
 
@@ -126,14 +126,14 @@ class qbank_filter extends \core\output\filter {
      * @return stdClass Data in a format compatible with a mustache template.
      */
     public function export_for_template(renderer_base $output): stdClass {
+        $defaultcategory = $this->searchconditions['category']->get_default_category();
         return (object) [
             'tableregionid' => $this->tableregionid,
             'courseid' => $this->context->instanceid,
             'filtertypes' => $this->get_filtertypes(),
             'selected' => 'category',
             'rownumber' => 1,
+            'defaultcategoryid' => $defaultcategory->id,
         ];
-
-        return $data;
     }
 }
