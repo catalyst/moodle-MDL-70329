@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @copyright  2018 Shamim Rezaie <shamim@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @todo resolve this after implementing pre 4.0 course restore
  */
 class mod_quiz_tags_testcase extends advanced_testcase {
     public function test_restore_random_question_by_tag() {

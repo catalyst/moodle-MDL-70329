@@ -54,8 +54,7 @@ class qbank_helper {
                                                    JOIN {question} q ON qv.questionid = q.id
                                                   WHERE q.id = ?)";
 
-        $versionsoptions = $DB->get_records_sql($sql, [$questionid]);
-        return $versionsoptions;
+        return $DB->get_records_sql($sql, [$questionid]);
     }
 
     /**
@@ -90,10 +89,8 @@ class qbank_helper {
      * @return array
      */
     public static function question_array_sort($array, $on, $order = SORT_ASC): array {
-        // TODO: Remove as is not used.
         $new_array = array();
         $sortable_array = array();
-
         if (count($array) > 0) {
             foreach ($array as $k => $v) {
                 if (is_array($v)) {
@@ -313,20 +310,6 @@ class qbank_helper {
             $condition = 'AND q.id ' . $condition;
             $params = array_merge($params, $param);
         }
-
-        //$sql = "SELECT q.id,
-        //               q.qtype,
-        //               q.length,
-        //               qs.maxmark
-        //          FROM {quiz_slots} qs
-        //          LEFT JOIN {quiz_attempts} qa ON qa.quiz = qs.quizid
-        //          LEFT JOIN {question_usages} qu ON qu.id = qa.uniqueid
-        //          LEFT JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
-        //          LEFT JOIN {question} q ON q.id = qatt.questionid
-        //          WHERE qs.quizid = :quizid
-        //          $condition
-        //          GROUP BY q.id
-        //          ORDER BY qs.slot";
         $sql = "SELECT slot.slot,
                        q.id,
                        q.qtype,
@@ -369,8 +352,7 @@ class qbank_helper {
                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                   JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                   $condition";
-        $questions = $DB->get_records_sql($sql, $param);
-        return $questions;
+        return $DB->get_records_sql($sql, $param);
     }
 
     /**
@@ -486,7 +468,6 @@ class qbank_helper {
                   JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                   $condition";
 
-        $conditions = $DB->get_records_sql($sql, $param);
-        return $conditions;
+        return $DB->get_records_sql($sql, $param);
     }
 }
