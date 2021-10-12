@@ -367,9 +367,13 @@ class dummy extends external_api {
 <span class="date">
     17 September 2021, 3:39 AM
 </span></td></tr></tbody></table>';
+        // Todo count $numberofrecords.
+        $numberofrecords = 100;
+        $totalpage = !empty($qperpage) ? $numberofrecords / $qperpage : 0;
 
         return [
             'html' => $tablehtml,
+            'totalpage' => $totalpage,
             'warnings' => []
         ];
     }
@@ -382,6 +386,7 @@ class dummy extends external_api {
     public static function get_questions_returns(): external_single_structure {
         return new external_single_structure([
             'html' => new external_value(PARAM_RAW, 'The raw html of the requested table.'),
+            'totalpage' => new external_value(PARAM_INT, 'Total number of page'),
             'warnings' => new external_warnings()
         ]);
     }

@@ -23,15 +23,19 @@
 
 import * as CoreFilter from 'core/filter';
 import ajax from 'core/ajax';
+import $ from 'jquery';
+import Templates from 'core/templates';
+import PagedContentFactory from 'core/paged_content_factory';
 
 /**
  * Initialise the question bank filter on the element with the given id.
  *
  * @param {String} filterRegionId
- * @param {String} courseid
+ * @param {String} defaultcourseid
  * @param {String} defaultcategoryid
+ * @param {int} perpage
  */
-export const init = (filterRegionId, defaultcourseid, defaultcategoryid) => {
+export const init = (filterRegionId, defaultcourseid, defaultcategoryid, perpage) => {
     CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
         applyFilter(filterdata, pendingPromise);
     });
@@ -53,17 +57,19 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid) => {
             var qtagids = '';
         }
 
-        var qperpage = 10;
-        var qbshowtext = false;
-        var recurse = false;
-        var showhidden = false;
+        let qperpage = perpage;
+        let qpage = 0;
+        let qbshowtext = false;
+        let recurse = false;
+        let showhidden = false;
 
-        var promises = ajax.call([{
+        let promises = ajax.call([{
             methodname: 'core_qbank_dummy', args: {
                     courseid: courseid,
                     category: categories,
                      qtagids: qtagids,
                     qperpage: qperpage,
+                       qpage: qpage,
                   qbshowtext: qbshowtext,
                      recurse: recurse,
                   showhidden: showhidden
@@ -72,13 +78,68 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid) => {
         ]);
 
         promises[0].done(function(response) {
-            var questionscontainer = document.getElementById('questionscontainer');
-            var html = '<div className="categoryquestionscontainer" id="questionscontainer">' + response.html + '</div>';
-            questionscontainer.innerHTML = html;
+            let questionscontainer = document.getElementById('questionscontainer');
+            let totalpage = response.totalpage;
+            let pagination = renderPagination(qpage, qperpage, totalpage);
+            let html = '<div className="categoryquestionscontainer" id="questionscontainer">' +
+                pagination +
+                response.html +
+                '</div>';
+            // questionscontainer.innerHTML = html;
+
             if (pendingPromise) {
                 pendingPromise.resolve();
             }
         });
+
+    };
+    /**
+     * Render pagination
+     *
+     * @param {int} page
+     * @param {int} perpage
+     * @param {int} totalpage
+     */
+    const renderPagination = (page, perpage, totalpage) => {
+
+
+        // Some container for your paged content.
+        var container = $('#questionscontainer');
+        PagedContentFactory.createWithLimit(
+            // Show 10 items per page.
+            10,
+            // Callback to load and render the items as the user clicks on the pages.
+            function(pagesData, actions) {
+                return pagesData.map(function(pageData) {
+                    // Your function to load the data for the given limit and offset.
+                    // actions.allItemsLoaded(1);
+                    console.log(pageData);
+                    // return loadData(pageData.limit, pageData.offset)
+                        // .then(function(data) {
+                        //     // You criteria for when all of the data has been loaded.
+                        //     if (data.length > 100) {
+                        //         // Tell the page content code everything has been loaded now.
+                        //         actions.allItemsLoaded(pageData.pageNumber);
+                        //     }
+                        //
+                        //     // Your function to render the data you've loaded.
+                        //     // return renderData(data);
+                        // });
+                });
+            },
+            // Config to set up the paged content.
+            {
+                controlPlacementBottom: true,
+                eventNamespace: 'example-paged-content',
+                persistentLimitKey: 'example-paged-content-limit-key'
+            }
+        ).then(function(html, js) {
+            // Add the paged content into the page.
+            console.log(html);
+            Templates.replaceNodeContents(container, html, js);
+        });
+
+        return '<div> Total page:' + totalpage + ' </div>';
 
     };
 

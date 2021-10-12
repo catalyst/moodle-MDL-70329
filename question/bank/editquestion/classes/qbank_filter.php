@@ -38,14 +38,18 @@ class qbank_filter extends \core\output\filter {
     /** @var array $searchconditions Searchconditions for the filter. */
     protected $searchconditions = array();
 
+    /** @var int $perpage number of records per page. */
+    protected $perpage = 0;
+
     /**
      * Set searchcondition.
      *
      * @param array $searchconditions
      * @return self
      */
-    public function set_searchconditions(array $searchconditions): self {
+    public function set_searchconditions(array $searchconditions, int $perpage): self {
         $this->searchconditions = $searchconditions;
+        $this->perpage = $perpage;
         return $this;
     }
 
@@ -134,6 +138,7 @@ class qbank_filter extends \core\output\filter {
             'selected' => 'category',
             'rownumber' => 1,
             'defaultcategoryid' => $defaultcategory->id,
+            'perpage' => $this->perpage,
         ];
     }
 }

@@ -724,7 +724,7 @@ class view {
         $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
 
         // Show the filters and search options.
-        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
+        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage);
 
         // Continues with list of questions.
         $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
@@ -742,8 +742,9 @@ class view {
      * @param int $recurse Whether to include subcategories
      * @param array $editcontexts parent contexts
      * @param bool $showquestiontext whether the text of each question should be shown in the list
+     * @param bool $perpage pergage number of records per page
      */
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
+    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage = 0): void {
         global $CFG, $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
@@ -781,7 +782,7 @@ class view {
         $this->display_options_form($showquestiontext);
 
         // Render the question bank filters.
-        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions);
+        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions, $perpage);
     }
 
     /**
