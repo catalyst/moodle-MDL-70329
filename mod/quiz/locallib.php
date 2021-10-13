@@ -170,10 +170,12 @@ function quiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $time
 
     // First load all the non-random questions.
     $randomfound = false;
+    $randomtestfound = false;
     $slot = 0;
     $questions = array();
     $maxmark = array();
     $page = array();
+    $questiondatarandom = [];
     foreach ($quizobj->get_questions() as $questiondata) {
         $slot += 1;
         $maxmark[$slot] = $questiondata->maxmark;
@@ -182,6 +184,16 @@ function quiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $time
             $randomfound = true;
             continue;
         }
+
+        // Intended for testing purposes only.
+        foreach ($questionids as $key => $questionid) {
+            if ($questionid !== (int)$questiondata->id && $slot === $key) {
+                $randomtestfound = true;
+                $questiondatarandom[$key] = $questiondata;
+                continue 2;
+            }
+        }
+
         if (!$quizobj->get_quiz()->shuffleanswers) {
             $questiondata->options->shuffleanswers = false;
         }
@@ -193,6 +205,14 @@ function quiz_start_new_attempt($quizobj, $quba, $attempt, $attemptnumber, $time
         throw new coding_exception(
             'Using "random" questions directly in an attempt is deprecated. Please use question_set_references table instead.'
         );
+    }
+
+    // Then find a question to go in place of each random question. Intended for testing purposes only.
+    if ($randomtestfound) {
+        foreach ($questiondatarandom as $slot => $questiondata) {
+            // Deal with fixed random choices for testing.
+            $questions[$slot] = question_bank::load_question($questionids[$slot], $quizobj->get_quiz()->shuffleanswers);
+        }
     }
 
     // Finally add them all to the usage.
