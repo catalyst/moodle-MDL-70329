@@ -2792,6 +2792,22 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => true,
     ],
+    'core_qbank_edit' => [
+        'classname'   => 'core_question\external\editquestion',
+        'methodname'  => 'get_questions',
+        'description' => 'Get question table content raw html',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
+    'core_qbank_dummy' => [
+        'classname'   => 'core_question\external\dummy',
+        'methodname'  => 'get_questions',
+        'description' => 'Get dummy question table content raw html',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
 );
 
 $services = array(

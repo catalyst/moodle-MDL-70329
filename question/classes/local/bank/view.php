@@ -150,6 +150,11 @@ class view {
     public $customfilterobjects = null;
 
     /**
+     * @var int|null Number of questions.
+     */
+    protected $totalcount = null;
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -573,9 +578,12 @@ class view {
      * Get the number of questions.
      * @return int
      */
-    protected function get_question_count(): int {
+    public function get_question_count(): int {
         global $DB;
-        return $DB->count_records_sql($this->countsql, $this->sqlparams);
+        if (is_null($this->totalcount)) {
+            $this->totalcount = $DB->count_records_sql($this->countsql, $this->sqlparams);
+        }
+        return $this->totalcount;
     }
 
     /**
@@ -724,10 +732,9 @@ class view {
      * @param bool $showquestiontext whether the text of each question should be shown in the list
      */
     public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
+        global $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
         // Category selection form.
         $this->display_question_bank_header();
 
@@ -735,20 +742,16 @@ class view {
         if ($this->enablefilters) {
             if (is_array($this->customfilterobjects)) {
                 foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
+                    $this->add_searchcondition($filterobjects);
                 }
             } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+                $this->add_standard_searchcondition($cat, $tagids, $showhidden, $recurse, $editcontexts);
             }
         }
         $this->display_options_form($showquestiontext);
+
+        // Render the question bank filters.
+        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions);
     }
 
     /**
@@ -1060,6 +1063,11 @@ class view {
         echo \html_writer::end_tag('div');
     }
 
+    public function display_for_api($pagevars) {
+        return $this->display_question_list($this->baseurl, $pagevars['cat'], $pagevars['recurse'],
+            $pagevars['qpage'], $pagevars['qperpage'], $this->contexts->having_cap('moodle/question:add'));
+    }
+
     /**
      * Prints the actual table with question.
      *
@@ -1296,9 +1304,28 @@ class view {
     /**
      * Add another search control to this view.
      * @param condition $searchcondition the condition to add.
+     * @param string|null $fieldname
      */
-    public function add_searchcondition($searchcondition): void {
-        $this->searchconditions[] = $searchcondition;
+    public function add_searchcondition($searchcondition, ?string $fieldname = null): void {
+        if (is_null($fieldname)) {
+            $this->searchconditions[] = $searchcondition;
+        } else {
+            $this->searchconditions[$fieldname] = $searchcondition;
+        }
+    }
+
+    public function add_standard_searchcondition($cat, $tagids, $showhidden, $recurse) {
+        global $CFG;
+        list(, $contextid) = explode(',', $cat);
+        $catcontext = \context::instance_by_id($contextid);
+        $thiscontext = $this->get_most_specific_context();
+        $editcontexts = $this->contexts->having_one_edit_tab_cap('questions');
+        $this->searchconditions['category'] = new \core_question\bank\search\category_condition(
+            $cat, $recurse, $editcontexts, $this->baseurl, $this->course);
+        $this->searchconditions['hidden'] = new \core_question\bank\search\hidden_condition(!$showhidden);
+        if ($CFG->usetags) {
+            $this->searchconditions['tag'] = new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids);
+        }
     }
 
 }
