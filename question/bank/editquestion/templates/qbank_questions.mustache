@@ -21,28 +21,7 @@
 
     Example context (json):
     {
-        "filtertypes": [
-            {
-                "name": "status",
-                "title": "Status",
-                "values": [
-                    {
-                        "value": 1,
-                        "title": "Active"
-                    },
-                    {
-                        "value": 0,
-                        "title": "Suspended"
-                    }
-                ]
-            }
-        ]
+        "html": ""
     }
 }}
-{{> core/filter }}
-
-{{#js}}
-    require(['qbank_editquestion/filter'], function(Filter) {
-        Filter.init('core-filter-{{uniqid}}', '{{courseid}}', {{defaultcategoryid}}, {{perpage}});
-    });
-{{/js}}
+{{{html}}}

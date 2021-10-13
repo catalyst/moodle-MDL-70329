@@ -25,6 +25,10 @@ namespace qbank_editquestion;
 
 use renderer_base;
 use stdClass;
+<<<<<<< HEAD
+=======
+use qbank_managecategories\helper;
+>>>>>>> master_MDL-72321_Nathan_temp
 
 /**
  * Class for rendering qbank filters on the qbank filter page.
@@ -37,14 +41,18 @@ class qbank_filter extends \core\output\filter {
     /** @var array $searchconditions Searchconditions for the filter. */
     protected $searchconditions = array();
 
+    /** @var int $perpage number of records per page. */
+    protected $perpage = 0;
+
     /**
      * Set searchcondition.
      *
      * @param array $searchconditions
      * @return self
      */
-    public function set_searchconditions(array $searchconditions): self {
+    public function set_searchconditions(array $searchconditions, int $perpage): self {
         $this->searchconditions = $searchconditions;
+        $this->perpage = $perpage;
         return $this;
     }
 
@@ -117,14 +125,15 @@ class qbank_filter extends \core\output\filter {
      * @return stdClass Data in a format compatible with a mustache template.
      */
     public function export_for_template(renderer_base $output): stdClass {
+        $defaultcategory = $this->searchconditions['category']->get_default_category();
         return (object) [
             'tableregionid' => $this->tableregionid,
             'courseid' => $this->context->instanceid,
             'filtertypes' => $this->get_filtertypes(),
             'selected' => 'category',
             'rownumber' => 1,
+            'defaultcategoryid' => $defaultcategory->id,
+            'perpage' => $this->perpage,
         ];
-
-        return $data;
     }
 }
