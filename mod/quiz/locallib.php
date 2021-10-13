@@ -2174,11 +2174,17 @@ function quiz_require_question_use($questionid) {
  */
 function quiz_has_question_use($quiz, $slot) {
     global $DB;
-    $question = $DB->get_record_sql("
-            SELECT q.*
+
+    $sql = 'SELECT q.*
               FROM {quiz_slots} slot
-              JOIN {question} q ON q.id = slot.questionid
-             WHERE slot.quizid = ? AND slot.slot = ?", array($quiz->id, $slot));
+              JOIN {question_references} qre ON slot.id = qre.itemid
+              JOIN {question_bank_entry} qbe ON qre.questionbankentryid = qbe.id
+              JOIN {question_versions} qve ON qve.questionbankentryid = qbe.id
+              JOIN {question} q ON q.id = qve.questionid
+             WHERE slot.quizid = ? AND slot.slot = ?';
+
+    $question = $DB->get_record_sql($sql, [$quiz->id, $slot]);
+
     if (!$question) {
         return false;
     }

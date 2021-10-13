@@ -30,10 +30,10 @@ Feature: Edit quiz page - remove multiple questions
       | Test questions   | truefalse | Question B | This is question 02 |
       | Test questions   | truefalse | Question C | This is question 03 |
     And quiz "Quiz 1" contains the following questions:
-      | question   | page |
-      | Question A | 1    |
-      | Question B | 1    |
-      | Question C | 2    |
+      | question   | page | maxmark |
+      | Question A | 1    | 1       |
+      | Question B | 1    | 1       |
+      | Question C | 2    | 1       |
     And I am on the "Quiz 1" "mod_quiz > Edit" page
 
     # Confirm the starting point.
