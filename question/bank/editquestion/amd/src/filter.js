@@ -23,8 +23,8 @@
 
 import * as CoreFilter from 'core/filter';
 import ajax from 'core/ajax';
-import $ from 'jquery';
 import Templates from 'core/templates';
+import Notification from 'core/notification';
 import PagedContentFactory from 'core/paged_content_factory';
 
 /**
@@ -36,9 +36,49 @@ import PagedContentFactory from 'core/paged_content_factory';
  * @param {int} perpage
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid, perpage) => {
+    var courseid;
+    var categories;
+    var qtagids;
+    var qbshowtext = false;
+    var recurse = 0;
+    var showhidden = false;
+
+    var TEMPLATE_NAME = 'qbank_editquestion/qbank_questions';
+
     CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
         applyFilter(filterdata, pendingPromise);
     });
+
+    /**
+     * Ajax call to retrieve question via ws functions
+     *
+     * @param {String} courseid course id
+     * @param {String} categories sequence of categories
+     * @param {String} qtagids sequence of tags
+     * @param {int} qperpage number of questions perpage
+     * @param {int} qpage current page
+     * @param {int} qbshowtext
+     * @param {int} recurse
+     * @param {int} showhidden
+     * @returns {*}
+     */
+    var requestQuestions = function(courseid, categories, qtagids, qperpage, qpage, qbshowtext, recurse, showhidden) {
+        var request = {
+            methodname: 'core_qbank_dummy',
+            args: {
+                courseid: courseid,
+                category: categories,
+                qtagids: qtagids,
+                qperpage: qperpage,
+                qpage: qpage,
+                qbshowtext: qbshowtext,
+                recurse: recurse,
+                showhidden: showhidden
+            }
+        };
+
+        return ajax.call([request])[0];
+    };
 
     /**
      * Retrieve table data.
@@ -48,101 +88,69 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid, perpage
      */
     const applyFilter = (filterdata, pendingPromise) => {
         if (filterdata) {
-            var courseid = filterdata['courseid'].values.toString();
-            var categories = filterdata['category'] ? filterdata['category'].values.toString() : '';
-            var qtagids = filterdata['tag'] ? filterdata['tag'].values.toString() : '';
+            courseid = filterdata['courseid'].values.toString();
+            categories = filterdata['category'] ? filterdata['category'].values.toString() : '';
+            qtagids = filterdata['tag'] ? filterdata['tag'].values.toString() : '';
         } else {
-            var courseid = defaultcourseid;
-            var categories = defaultcategoryid;
-            var qtagids = '';
+            courseid = defaultcourseid;
+            categories = defaultcategoryid;
+            qtagids = '';
         }
 
-        let qperpage = perpage;
-        let qpage = 0;
-        let qbshowtext = false;
-        let recurse = false;
-        let showhidden = false;
+        // Load first page.
+        var qpage = 0;
 
-        let promises = ajax.call([{
-            methodname: 'core_qbank_dummy', args: {
-                    courseid: courseid,
-                    category: categories,
-                     qtagids: qtagids,
-                    qperpage: qperpage,
-                       qpage: qpage,
-                  qbshowtext: qbshowtext,
-                     recurse: recurse,
-                  showhidden: showhidden
+        requestQuestions(courseid, categories, qtagids, perpage, qpage, qbshowtext, recurse, showhidden)
+            .then(function(response) {
+                let totalquestions = response.totalquestions;
+                let firstpagehtml = response.html;
+                return renderPagination(perpage, totalquestions, firstpagehtml);
+            })
+            .then(function(html, js) {
+                let questionscontainer = document.getElementById('questionscontainer');
+                Templates.replaceNodeContents(questionscontainer, html, js);
+                if (pendingPromise) {
+                    pendingPromise.resolve();
                 }
-            }
-        ]);
-
-        promises[0].done(function(response) {
-            let questionscontainer = document.getElementById('questionscontainer');
-            let totalpage = response.totalpage;
-            let pagination = renderPagination(qpage, qperpage, totalpage);
-            let html = '<div className="categoryquestionscontainer" id="questionscontainer">' +
-                pagination +
-                response.html +
-                '</div>';
-            // questionscontainer.innerHTML = html;
-
-            if (pendingPromise) {
-                pendingPromise.resolve();
-            }
-        });
-
+                return;
+            })
+            .fail(Notification.exception);
     };
+
     /**
-     * Render pagination
+     * Render table and pagination.
      *
-     * @param {int} page
      * @param {int} perpage
-     * @param {int} totalpage
+     * @param {int} totalquestions
+     * @param {string} firstpagehtml
      */
-    const renderPagination = (page, perpage, totalpage) => {
-
-
-        // Some container for your paged content.
-        var container = $('#questionscontainer');
-        PagedContentFactory.createWithLimit(
-            // Show 10 items per page.
-            10,
-            // Callback to load and render the items as the user clicks on the pages.
-            function(pagesData, actions) {
+    const renderPagination = (perpage, totalquestions, firstpagehtml) => {
+        return PagedContentFactory.createFromAjax(
+            totalquestions,
+            perpage,
+            function(pagesData) {
                 return pagesData.map(function(pageData) {
-                    // Your function to load the data for the given limit and offset.
-                    // actions.allItemsLoaded(1);
-                    console.log(pageData);
-                    // return loadData(pageData.limit, pageData.offset)
-                        // .then(function(data) {
-                        //     // You criteria for when all of the data has been loaded.
-                        //     if (data.length > 100) {
-                        //         // Tell the page content code everything has been loaded now.
-                        //         actions.allItemsLoaded(pageData.pageNumber);
-                        //     }
-                        //
-                        //     // Your function to render the data you've loaded.
-                        //     // return renderData(data);
-                        // });
+                    let pageNumber = pageData.pageNumber;
+                    // Page number start at 1.
+                    let qpage = pageNumber - 1;
+
+                    // Render first page
+                    if (qpage == 0) {
+                        return Templates.render(TEMPLATE_NAME, {html: firstpagehtml});
+                    } else {
+                        // Load data for selected page.
+                        return requestQuestions(courseid, categories, qtagids, perpage, qpage, qbshowtext, recurse, showhidden)
+                        .then(function(response) {
+                            return Templates.render(TEMPLATE_NAME, {html: response.html});
+                        })
+                        .fail(Notification.exception);
+                    }
                 });
-            },
-            // Config to set up the paged content.
-            {
-                controlPlacementBottom: true,
-                eventNamespace: 'example-paged-content',
-                persistentLimitKey: 'example-paged-content-limit-key'
             }
-        ).then(function(html, js) {
-            // Add the paged content into the page.
-            console.log(html);
-            Templates.replaceNodeContents(container, html, js);
-        });
-
-        return '<div> Total page:' + totalpage + ' </div>';
-
+        );
     };
 
+    // Run apply filter at page load.
     applyFilter();
 };
 
