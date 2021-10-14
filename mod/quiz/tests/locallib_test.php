@@ -518,11 +518,12 @@ class mod_quiz_locallib_testcase extends advanced_testcase {
         // Get the random question's slotid. It is at the second slot.
         $slotid = $DB->get_field('quiz_slots', 'id', array('quizid' => $quiz->id, 'slot' => 2));
         $slottags = quiz_retrieve_slot_tags($slotid);
+        sort($slottags);
 
         $this->assertEquals(
                 [
-                    "{$tags['bar']->id},{$tags['bar']->name}",
                     "{$tags['foo']->id},{$tags['foo']->name}",
+                    "{$tags['bar']->id},{$tags['bar']->name}",
 
                 ],
             $slottags);
@@ -543,11 +544,12 @@ class mod_quiz_locallib_testcase extends advanced_testcase {
         // Now remove the foo tag and check again.
         core_tag_tag::delete_tags([$tags['foo']->id]);
         $slottags = quiz_retrieve_slot_tags($slotid);
+        sort($slottags);
 
         $this->assertEquals(
             [
-                "{$tags['bar']->id},{$tags['bar']->name}",
                 "{$tags['foo']->id},{$tags['foo']->name}",
+                "{$tags['bar']->id},{$tags['bar']->name}",
 
             ],
             $slottags);
