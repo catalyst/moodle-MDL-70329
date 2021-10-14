@@ -1336,6 +1336,7 @@ function quiz_attempt_state_name($state) {
  * @param object $question the question.
  * @param string $returnurl url to return to after action is done.
  * @param int $variant which question variant to preview (optional).
+ * @param bool $random if question is random, true.
  * @return string html for a number of icons linked to action pages for a
  * question - preview and edit / view icons depending on user capabilities.
  */
@@ -1401,9 +1402,10 @@ function quiz_question_edit_button($cmid, $question, $returnurl, $contentafteric
  * @param object $quiz the quiz settings
  * @param object $question the question
  * @param int $variant which question variant to preview (optional).
+ * @param bool $random Specifies if a question is random.
  * @return moodle_url to preview this question with the options from this quiz.
  */
-function quiz_question_preview_url($quiz, $question, $variant = null) {
+function quiz_question_preview_url($quiz, $question, $variant = null, $random = null) {
     // Get the appropriate display options.
     $displayoptions = mod_quiz_display_options::make_from_quiz($quiz,
             mod_quiz_display_options::DURING);
@@ -1415,7 +1417,7 @@ function quiz_question_preview_url($quiz, $question, $variant = null) {
 
     // Work out the correcte preview URL.
     return \qbank_previewquestion\helper::question_preview_url($question->id, $quiz->preferredbehaviour,
-            $maxmark, $displayoptions, $variant);
+            $maxmark, $displayoptions, $variant, null, null, null, $random, $quiz->id);
 }
 
 /**
@@ -1423,9 +1425,10 @@ function quiz_question_preview_url($quiz, $question, $variant = null) {
  * @param object $question the question
  * @param bool $label if true, show the preview question label after the icon
  * @param int $variant which question variant to preview (optional).
+ * @param bool $random if question is random, true.
  * @return the HTML for a preview question icon.
  */
-function quiz_question_preview_button($quiz, $question, $label = false, $variant = null) {
+function quiz_question_preview_button($quiz, $question, $label = false, $variant = null, $random = null) {
     global $PAGE;
     if (!question_has_capability_on($question, 'use')) {
         return '';
