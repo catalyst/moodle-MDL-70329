@@ -138,8 +138,8 @@ class editquestion extends external_api {
             question_build_edit_resources('questions', '/question/edit.php', $params);
         $course = get_course($courseid);
         $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
-        $questionbank->add_standard_searchcondition($pagevars['cat'], $pagevars['qtagids'], $pagevars['showhidden'],
-            $pagevars['recurse']);
+        $questionbank->set_pagevars($pagevars);
+        $questionbank->add_standard_searchcondition();
         ob_start();
         $questionbank->display_for_api($pagevars);
         $tablehtml = ob_get_clean();

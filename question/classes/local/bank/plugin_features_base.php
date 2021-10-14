@@ -60,7 +60,7 @@ class plugin_features_base {
         return [];
     }
 
-    public function get_search_conditions(): ?array {
+    public function get_question_bank_search_conditions(\core_question\local\bank\view $view): ?array {
         return [];
     }
 
