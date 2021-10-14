@@ -752,7 +752,13 @@ class view {
         $this->display_options_form($showquestiontext);
 
         // Render the question bank filters.
-        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions, $perpage);
+        $additionalparams = [
+            'perpage' => $perpage,
+            'recurse' => $recurse,
+            'showhidden' => $showhidden,
+            'showquestiontext' => $showquestiontext
+        ];
+        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
     }
 
     /**
