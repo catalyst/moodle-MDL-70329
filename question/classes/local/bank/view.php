@@ -1238,4 +1238,13 @@ class view {
     public function get_visiblecolumns(): array {
         return $this->visiblecolumns;
     }
+
+    /**
+     * Get required columns.
+     *
+     * @return array Required columns.
+     */
+    public function get_requiredcolumns(): array {
+        return $this->requiredcolumns;
+    }
 }

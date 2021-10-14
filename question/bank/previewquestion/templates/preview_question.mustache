@@ -50,6 +50,21 @@
     }
 }}
 <form id="responseform" method="post" action="{{{actionurl}}}" enctype="multipart/form-data" autocomplete="off">
+    <div class="d-flex">
+        <h2 class="mt-2">{{{questionicon}}}</h2>
+        <h2 class="ml-2 mt-2"> {{questiontitle}}</h2>
+        <h3 class="px-2 py-1 ml-2 mt-2 badge-primary">{{versiontitle}}</h3>
+        <div class="ml-auto p-2" id="cogwheelmenu">
+            {{{cogwheelmenu}}}
+        </div>
+    </div>
+    <div class="d-flex">
+        <div class="badge-primary h-50 px-2 mt-n2">
+            <span class="accesshide">ID number</span>
+            {{questionidumber}}
+        </div>
+    </div>
+    <br>
     <div>
         <input type="hidden" name="sesskey" value="{{session}}">
         <input type="hidden" name="slots" value="{{slot}}">
@@ -69,21 +84,21 @@
         {{/redirect}}
     </div>
 </form>
-{{{techinfo}}}
-{{{exporttoxml}}}
+<br>
 {{#comments}}
-    <div class="row">
-        <div class="col-6 text-left">
-            {{{options}}}
-        </div>
-        <div class="col-6 question-comment-view">
-            {{{comments}}}
-        </div>
+    <a data-toggle="collapse" href="#commentcollapse" role="button" aria-expanded="false" aria-controls="commentcollapse">
+        {{#pix}} t/collapsed, core {{/pix}}
+        {{#str}} commentplural, qbank_comment{{/str}}
+    </a>
+    <div class="collapse" id="commentcollapse">
+        {{{comments}}}
     </div>
+    {{{options}}}
 {{/comments}}
 {{^comments}}
     {{{options}}}
 {{/comments}}
+{{{techinfo}}}
 {{#extrapreviewelements}}
     {{{extrapreviewelements}}}
 {{/extrapreviewelements}}
