@@ -721,6 +721,9 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
             question_bank::get_qtype($question->qtype)->move_files(
                     $question->id, $question->contextid, $newcategorydata->contextid);
         }
+        // Move set_reference records to new category.
+        move_question_set_references($question->category, $newcategoryid,
+            $question->contextid, $newcategorydata->contextid, true);
         // Check whether there could be a clash of idnumbers in the new category.
         list($idnumberclash, $rec) = idnumber_exist_in_question_category($question->idnumber, $newcategoryid);
         if ($idnumberclash) {
@@ -739,19 +742,6 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
             $qbankentry->idnumber = $question->idnumber . '_' . $unique;
             $DB->update_record('question_bank_entry', $qbankentry);
         }
-
-        // TODO: Now is commented because we are deciding if we should have an area: core_question.
-        // Update the reference to point to the new category context.
-        /*$references = $DB->get_records('question_references',
-            [
-                'questionbankentryid' => $question->entryid,
-                'versionid' => $question->versionid
-            ]
-        );
-        foreach ($references as $reference) {
-            $reference->usingcontextid = $newcategorydata->contextid;
-            $DB->update_record('question_references', $reference);
-        }*/
 
         // Update the entry to the new category id.
         $entry = new stdClass();
@@ -776,6 +766,39 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
     }
 
     return true;
+}
+
+/**
+ * Update the questioncontextid field for all question_set_references records given a new context id
+ *
+ * @param int $oldcategoryid Old category to be moved.
+ * @param int $newcatgoryid New category that will receive the questions.
+ * @param int $oldcontextid Old context to be moved.
+ * @param int $newcontextid New context that will receive the questions.
+ * @param bool $delete If the action is delete.
+ * @throws dml_exception
+ */
+function move_question_set_references(int $oldcategoryid, int $newcatgoryid,
+                                      int $oldcontextid, int $newcontextid, bool $delete = false): void {
+    global $DB;
+
+    if ($delete || $oldcontextid !== $newcontextid) {
+        $setreferences = $DB->get_recordset('question_set_references', ['questionscontextid' => $oldcontextid]);
+        foreach ($setreferences as $setreference) {
+            $filter = json_decode($setreference->filtercondition);
+            if (isset($filter->questioncategoryid)) {
+                if ((int)$filter->questioncategoryid === $oldcategoryid) {
+                    $setreference->questionscontextid = $newcontextid;
+                    if ($oldcategoryid !== $newcatgoryid) {
+                        $filter->questioncategoryid = $newcatgoryid;
+                        $setreference->filtercondition = json_encode($filter);
+                    }
+                    $DB->update_record('question_set_references', $setreference);
+                }
+            }
+        }
+        $setreferences->close();
+    }
 }
 
 /**
