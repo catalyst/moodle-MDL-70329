@@ -125,4 +125,31 @@ class tag_condition extends condition {
 
         return $OUTPUT->render_from_template('core_question/tag_condition', $context);
     }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        $tags = \core_tag_tag::get_tags_by_area_in_contexts('core_question', 'question', $this->contexts);
+        $values = [];
+        foreach ($tags as $tag) {
+            $values[] = [
+                'value' => $tag->id,
+                'title' => html_entity_decode($tag->name),
+                'selected' => in_array($tag->id, $this->selectedtagids)
+            ];
+        }
+        $filteroptions = [
+            'name' => 'tag',
+            'title' => get_string('tag', 'tag'),
+            'custom' => true,
+            'multiple' => true,
+            'filterclass' => null,
+            'values' => $values,
+            'allowempty' => true,
+        ];
+        return $filteroptions;
+    }
 }

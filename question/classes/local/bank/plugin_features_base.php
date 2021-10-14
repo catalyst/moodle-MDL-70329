@@ -56,4 +56,12 @@ class plugin_features_base {
         return null;
     }
 
+    public function get_filters(): ?array {
+        return [];
+    }
+
+    public function get_search_conditions(): ?array {
+        return [];
+    }
+
 }
