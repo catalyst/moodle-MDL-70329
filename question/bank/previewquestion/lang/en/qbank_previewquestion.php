@@ -23,5 +23,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Preview question';
-$string['privacy:metadata'] = 'Preview question plugin does not store any user data.';
+$string['pluginname'] = 'Preview question bank feature';
+$string['privacy:metadata'] = 'Preview question plugin shows a question in a pop-up, it does not store any user data.';
+// Tag related errors.
+$string['tagclosebutton'] = 'Close';
+$string['tagerror'] = 'No question was found with following tags: {$a}. Please change or remove tags filtering.';
+$string['tagsnotfound'] = 'Tags not found';
+// Form string(s).
+$string['previewoptions'] = 'Preview options';
+$string['questionversion'] = 'Question version';
+// Preview title.
+$string['versiontitle'] = 'Version {$a}';
+$string['versiontitlelatest'] = 'Version {$a} (latest)';
