@@ -66,4 +66,13 @@ abstract class condition {
     public function display_options() {
         return false;
     }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        return [];
+    }
 }

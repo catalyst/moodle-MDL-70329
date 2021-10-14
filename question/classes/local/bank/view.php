@@ -150,6 +150,11 @@ class view {
     public $customfilterobjects = null;
 
     /**
+     * @var int|null Number of questions.
+     */
+    protected $totalcount = null;
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -199,7 +204,7 @@ class view {
      *
      * @return array
      */
-    protected function get_question_bank_plugins(): array {
+    protected function get_question_bank_plugins_columns(): array {
         $questionbankclasscolumns = [];
         $newpluginclasscolumns = [];
         $corequestionbankcolumns = [
@@ -283,7 +288,7 @@ class view {
      */
     protected function wanted_columns(): array {
         $this->requiredcolumns = [];
-        $questionbankcolumns = $this->get_question_bank_plugins();
+        $questionbankcolumns = $this->get_question_bank_plugins_columns();
         foreach ($questionbankcolumns as $classobject) {
             if (empty($classobject)) {
                 continue;
@@ -573,9 +578,12 @@ class view {
      * Get the number of questions.
      * @return int
      */
-    protected function get_question_count(): int {
+    public function get_question_count(): int {
         global $DB;
-        return $DB->count_records_sql($this->countsql, $this->sqlparams);
+        if (is_null($this->totalcount)) {
+            $this->totalcount = $DB->count_records_sql($this->countsql, $this->sqlparams);
+        }
+        return $this->totalcount;
     }
 
     /**
@@ -704,7 +712,7 @@ class view {
         $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
 
         // Show the filters and search options.
-        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
+        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage);
 
         // Continues with list of questions.
         $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
@@ -722,12 +730,12 @@ class view {
      * @param int $recurse Whether to include subcategories
      * @param array $editcontexts parent contexts
      * @param bool $showquestiontext whether the text of each question should be shown in the list
+     * @param bool $perpage pergage number of records per page
      */
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
+    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage = 0): void {
+        global $CFG, $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
         // Category selection form.
         $this->display_question_bank_header();
 
@@ -735,20 +743,16 @@ class view {
         if ($this->enablefilters) {
             if (is_array($this->customfilterobjects)) {
                 foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
+                    $this->add_searchcondition($filterobjects);
                 }
             } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+                $this->add_standard_searchcondition($cat, $tagids, $showhidden, $recurse);
             }
         }
         $this->display_options_form($showquestiontext);
+
+        // Render the question bank filters.
+        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions, $perpage);
     }
 
     /**
@@ -1060,6 +1064,11 @@ class view {
         echo \html_writer::end_tag('div');
     }
 
+    public function display_for_api($pagevars) {
+        return $this->display_question_list($this->baseurl, $pagevars['cat'], $pagevars['recurse'],
+            $pagevars['qpage'], $pagevars['qperpage'], $this->contexts->having_cap('moodle/question:add'));
+    }
+
     /**
      * Prints the actual table with question.
      *
@@ -1296,9 +1305,59 @@ class view {
     /**
      * Add another search control to this view.
      * @param condition $searchcondition the condition to add.
+     * @param string|null $fieldname
      */
-    public function add_searchcondition($searchcondition): void {
-        $this->searchconditions[] = $searchcondition;
+    public function add_searchcondition($searchcondition, ?string $fieldname = null): void {
+        if (is_null($fieldname)) {
+            $this->searchconditions[] = $searchcondition;
+        } else {
+            $this->searchconditions[$fieldname] = $searchcondition;
+        }
+    }
+
+    public function add_standard_searchcondition($cat, $tagids, $showhidden, $recurse) {
+        global $CFG;
+        list(, $contextid) = explode(',', $cat);
+        $catcontext = \context::instance_by_id($contextid);
+        $thiscontext = $this->get_most_specific_context();
+        $editcontexts = $this->contexts->having_one_edit_tab_cap('questions');
+        $this->searchconditions['category'] = new \core_question\bank\search\category_condition(
+            $cat, $recurse, $editcontexts, $this->baseurl, $this->course);
+        $this->searchconditions['hidden'] = new \core_question\bank\search\hidden_condition(!$showhidden);
+        $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
+        foreach ($plugins as $componentname => $plugin) {
+            $pluginentrypointobject = new $plugin();
+            $pluginobjects = $pluginentrypointobject->get_question_columns($this);
+            // Don't need the plugins without column objects.
+            if (empty($pluginobjects)) {
+                unset($plugins[$componentname]);
+                continue;
+            }
+            foreach ($pluginobjects as $pluginobject) {
+                $classname = new \ReflectionClass(get_class($pluginobject));
+                foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
+                    if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
+                        unset($questionbankclasscolumns[$classname->getShortName()]);
+                        continue;
+                    }
+                    // Check if it has custom preference selector to view/hide.
+                    if ($pluginobject->has_preference()) {
+                        if (!$pluginobject->get_preference()) {
+                            continue;
+                        }
+                    }
+                    if ($corequestionbankcolumn === $classname->getShortName()) {
+                        $questionbankclasscolumns[$classname->getShortName()] = $pluginobject;
+                    } else {
+                        // Any community plugin for column/action.
+                        $newpluginclasscolumns[$classname->getShortName()] = $pluginobject;
+                    }
+                }
+            }
+        }
+        if ($CFG->usetags) {
+            $this->searchconditions['tag'] = new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids);
+        }
     }
 
 }

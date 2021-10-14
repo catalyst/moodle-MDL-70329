@@ -96,6 +96,15 @@ class category_condition extends condition {
     }
 
     /**
+     * Return default category
+     *
+     * @return \stdClass default category
+     */
+    public function get_default_category(): \stdClass {
+        return $this->category;
+    }
+
+    /**
      * SQL fragment to add to the where clause.
      *
      * @return string
@@ -198,5 +207,44 @@ class category_condition extends condition {
         } else {
             return format_text($category->info, $category->infoformat, $formatoptions, $this->course->id);
         }
+    }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        $displaydata = [];
+        $catmenu = helper::question_category_options($this->contexts, true, 0, true, -1, false);
+        $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
+            array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
+        $displaydata['categorydesc'] = $this->print_category_info($this->category);
+        $values = [];
+        foreach ($catmenu as $menu) {
+            foreach ($menu as $cat => $catlist) {
+                $values[] = (object) [
+                    'value' => 0,
+                    'title' => html_entity_decode($cat),
+                ];
+                foreach ($catlist as $key => $value) {
+                    $values[] = (object) [
+                        'value' => $key,
+                        'title' => html_entity_decode($value),
+                        'selected' => ($key === $this->cat),
+                    ];
+                }
+            }
+        }
+        $filteroptions = [
+            'name' => 'category',
+            'title' => get_string('category', 'core_question'),
+            'custom' => true,
+            'multiple' => false,
+            'filterclass' => null,
+            'values' => $values,
+            'allowempty' => true,
+        ];
+        return $filteroptions;
     }
 }
