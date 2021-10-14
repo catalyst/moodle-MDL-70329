@@ -43,6 +43,7 @@
 
 {{#js}}
     require(['qbank_editquestion/filter'], function(Filter) {
-        Filter.init('core-filter-{{uniqid}}', '{{courseid}}', {{defaultcategoryid}}, {{perpage}});
+        Filter.init('core-filter-{{uniqid}}', '{{courseid}}', {{defaultcategoryid}},
+        {{perpage}}, {{recurse}}, {{showhidden}}, {{showquestiontext}});
     });
 {{/js}}
