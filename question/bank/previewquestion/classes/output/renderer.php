@@ -64,5 +64,4 @@ class renderer extends \plugin_renderer_base {
     public function render_preview_page($previewdata) {
         return $this->render_from_template('qbank_previewquestion/preview_question', $previewdata);
     }
-
 }
