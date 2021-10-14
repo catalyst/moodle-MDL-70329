@@ -31,9 +31,6 @@ import PagedContentFactory from 'core/paged_content_factory';
  * Initialise the question bank filter on the element with the given id.
  *
  * @param {String} filterRegionId
- */
-export const init = (filterRegionId) => {
-    CoreFilter.init(filterRegionId, 'QbankTable');
  * @param {String} defaultcourseid
  * @param {String} defaultcategoryid
  * @param {int} perpage

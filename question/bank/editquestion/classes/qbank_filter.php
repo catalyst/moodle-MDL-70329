@@ -25,10 +25,7 @@ namespace qbank_editquestion;
 
 use renderer_base;
 use stdClass;
-<<<<<<< HEAD
-=======
 use qbank_managecategories\helper;
->>>>>>> master_MDL-72321_Nathan_temp
 
 /**
  * Class for rendering qbank filters on the qbank filter page.
