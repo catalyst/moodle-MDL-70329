@@ -24,6 +24,7 @@
  */
 
 namespace mod_quiz\question;
+require_once($CFG->dirroot.'/mod/quiz/attemptlib.php');
 defined('MOODLE_INTERNAL') || die();
 
 
