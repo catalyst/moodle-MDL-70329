@@ -33,4 +33,18 @@ class plugin_feature extends plugin_features_base{
             new tags_action_column($qbank),
         ];
     }
+
+    public function get_question_bank_search_conditions(\core_question\local\bank\view $view): ?array {
+        global $CFG;
+        $searchconditions = [];
+        if ($CFG->usetags) {
+            list(, $contextid) = explode(',', $view->get_pagevars('cat'));
+            $catcontext = \context::instance_by_id($contextid);
+            $thiscontext = $view->get_most_specific_context();
+            $contexts = [$catcontext, $thiscontext];
+            $tagids = $view->get_pagevars('qtagids');
+            $searchconditions['tag'] = new \core_question\bank\search\tag_condition($contexts, $tagids);
+        }
+        return $searchconditions;
+    }
 }

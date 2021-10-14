@@ -17,15 +17,14 @@
 /**
  * For rendering qbank filters on the edit qbank page.
  *
- * @package    qbank_editquestion
- * @copyright  2020 Michael Hawkins <michaelh@moodle.com>
+ * @package    core_question\bank
+ * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace qbank_editquestion;
+namespace core_question\bank;
 
 use renderer_base;
 use stdClass;
-use qbank_managecategories\helper;
 
 /**
  * Class for rendering qbank filters on the qbank filter page.
