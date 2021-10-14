@@ -1309,4 +1309,12 @@ class view {
         $this->searchconditions[] = $searchcondition;
     }
 
+    /**
+     * Get required columns.
+     *
+     * @return question_bank_column_base Required columns.
+     */
+    public function get_requiredcolumns(): array {
+        return $this->requiredcolumns;
+    }
 }

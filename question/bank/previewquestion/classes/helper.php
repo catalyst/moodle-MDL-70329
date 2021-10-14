@@ -16,8 +16,21 @@
 
 namespace qbank_previewquestion;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/editlib.php');
+
+use action_menu;
+use comment;
+use context_module;
 use context;
+use core\plugininfo\qbank;
+use core_question\local\bank\edit_menu_column;
+use core_question\local\bank\view;
+use core_question\lib\question_edit_contexts;
 use moodle_url;
+use question_bank;
+use question_definition;
 use question_display_options;
 use question_engine;
 use stdClass;
@@ -144,7 +157,8 @@ class helper {
      * @param object $context
      * @param moodle_url $returnurl
      */
-    public static function restart_preview($previewid, $questionid, $displayoptions, $context, $returnurl = null): void {
+    public static function restart_preview($previewid, $questionid, $displayoptions, $context,
+        $returnurl = null, $version = null): void {
         global $DB;
 
         if ($previewid) {
@@ -153,7 +167,7 @@ class helper {
             $transaction->allow_commit();
         }
         redirect(self::question_preview_url($questionid, $displayoptions->behaviour,
-                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context, $returnurl));
+                $displayoptions->maxmark, $displayoptions, $displayoptions->variant, $context, $returnurl, $version));
     }
 
     /**
@@ -170,10 +184,19 @@ class helper {
      * @return moodle_url the URL.
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
-            $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null): moodle_url {
+            $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null,
+            $version = null, $random = null, $quizid = null): moodle_url {
 
         $params = ['id' => $questionid];
 
+        if (!is_null($random)) {
+            $params['random'] = $random;
+            $params['quizid'] = $quizid;
+        }
+
+        if (!is_null($version)) {
+            $params['version'] = $version;
+        }
         if (is_null($context)) {
             global $PAGE;
             $context = $PAGE->context;
@@ -227,11 +250,11 @@ class helper {
     /**
      * Get the extra elements for preview from qbank plugins.
      *
-     * @param \question_definition $question
-     * @param int $courseid
+     * @param  question_definition $question
+     * @param  int $courseid
      * @return array
      */
-    public static function get_preview_extra_elements(\question_definition $question, int $courseid): array {
+    public static function get_preview_extra_elements(question_definition $question, int $courseid): array {
         $plugintype = 'qbank';
         $functionname = 'preview_display';
         $extrahtml = [];
@@ -246,5 +269,167 @@ class helper {
             $extrahtml[] = $pluginhtml;
         }
         return [$comment, $extrahtml];
+    }
+
+    /**
+     * Checks if question is the latest version.
+     *
+     * @param string $version Question version to check.
+     * @param string $questionbankentryid Entry to check against.
+     * @return bool
+     */
+    public static function is_latest(string $version, string $questionbankentryid) : bool {
+        global $DB;
+
+        $sql = 'SELECT MAX(version)
+                  FROM {question_versions}
+                 WHERE questionbankentryid = ?';
+        $latestversion = $DB->get_record_sql($sql, [$questionbankentryid]);
+
+        if (isset($latestversion->max)) {
+            return ($version === $latestversion->max) ? true : false;
+        }
+        return false;
+    }
+
+    /**
+     * Renders question preview cog wheel menu.
+     *
+     * @param  object $question Question informations.
+     * @return string $menu Cog wheel menu to render.
+     */
+    public static function display_edit_menu(object $question) : string {
+        global $OUTPUT, $COURSE, $PAGE;
+
+        $thiscontext = context::instance_by_id($question->contextid);;
+        $questioneditcontexts = new question_edit_contexts($thiscontext);
+        $menu = new action_menu();
+        $qbankview = new view($questioneditcontexts, $PAGE->url, $COURSE, null);
+        $editmenucolumn = new edit_menu_column($qbankview);
+        $editmenucolumn->claim_menuable_columns($qbankview->get_requiredcolumns());
+        $qtype = explode('_', get_class($question->qtype))[1];
+        $questionobject = (object)(array)$question;
+        $questionobject->qtype = $qtype;
+
+        foreach ($editmenucolumn->get_actions() as $actioncolumn) {
+            $action = $actioncolumn->get_action_menu_link($questionobject);
+            if ($action && get_class($actioncolumn) === 'qbank_tagquestion\\tags_action_column') {
+                $action->url = new moodle_url('#');
+                $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#cogwheelmenu']);
+            }
+            if ($action && get_class($actioncolumn) !== 'qbank_previewquestion\\preview_action_column') {
+                $menu->add($action);
+            }
+        }
+
+        $menu = $OUTPUT->render($menu);
+        return $menu;
+    }
+
+    /**
+     * Loads question version ids for current question.
+     *
+     * @param  string $questionbankentryid Question bank entry id.
+     * @return array  $questionids Array containing question id as key and version as value.
+     */
+    public static function load_versions(string $questionbankentryid) : array {
+        global $DB;
+
+        $questionids = [];
+        $sql = 'SELECT version, questionid
+                  FROM {question_versions}
+                 WHERE questionbankentryid = ?';
+
+        $versions = $DB->get_records_sql($sql, [$questionbankentryid]);
+        foreach ($versions as $key => $version) {
+            $questionids[$version->questionid] = $key;
+        }
+        return $questionids;
+    }
+
+    /**
+     * Returns a random question.
+     *
+     * @param  int $quizid Question informations.
+     * @return object $question|$tagerror Question or error with tags not found.
+     */
+    public static function get_random_question($quizid): object {
+        global $DB, $USER;
+        $extrafields = 'slot.id AS slotid, slot.maxmark, slot.slot, slot.page';
+        $join = '(SELECT s.*, null AS questioncategoryid, qr.questionbankentryid AS bankentry, qr.version AS version
+                  FROM {question_references} qr
+                  JOIN {quiz_slots} s ON s.id = qr.itemid) slot ON slot.quizid = :quizid
+                  AND slot.bankentry = qbe.id and slot.version = qv.version';
+        $questiondata = question_preload_questions(null, $extrafields, $join, ['quizid' => $quizid], 'slot.slot');
+
+        $sql = 'SELECT slot.id AS slotid,
+                       slot.maxmark,
+                       slot.slot,
+                       slot.page,
+                       qsr.filtercondition
+                 FROM {question_set_references} qsr
+                 JOIN {quiz_slots} slot ON slot.id = qsr.itemid
+                WHERE slot.quizid = ?';
+        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
+
+        $randomquestions = [];
+        // Questions already added.
+        $usedquestionids = [];
+        foreach ($questiondata as $question) {
+            if (isset($usedquestions[$question->id])) {
+                $usedquestionids[$question->id] += 1;
+            } else {
+                $usedquestionids[$question->id] = 1;
+            }
+        }
+        // Usages for this user's previous quiz attempts.
+        $qubaids = new \mod_quiz\question\qubaids_for_users_attempts($quizid, $USER->id);
+        $randomloader = new \core_question\local\bank\random_question_loader($qubaids, $usedquestionids);
+
+        foreach ($randomquestiondatas as $randomquestiondata) {
+            $filtercondition = json_decode($randomquestiondata->filtercondition);
+            $tagids = [];
+            $tagstrings = [];
+            if (isset($filtercondition->tags)) {
+                foreach ($filtercondition->tags as $tag) {
+                    $tagstring = explode(',', $tag);
+                    $tagids [] = $tagstring[0];
+                    $tagstrings[] = $tagstring[1];
+                }
+            }
+            $randomquestiondata->randomfromcategory = $filtercondition->questioncategoryid;
+            $randomquestiondata->randomincludingsubcategories = $filtercondition->includingsubcategories;
+            $randomquestiondata->questionid = $randomloader->get_next_question_id($randomquestiondata->randomfromcategory,
+                $randomquestiondata->randomincludingsubcategories, $tagids);
+            $randomquestions [] = $randomquestiondata;
+        }
+
+        foreach ($randomquestions as $randomquestion) {
+            // Should not add if there is no question found from the ramdom question loader, maybe empty category.
+            if ($randomquestion->questionid === null) {
+                continue;
+            }
+            $question = new stdClass();
+            $question->slotid = $randomquestion->slotid;
+            $question->maxmark = $randomquestion->maxmark;
+            $question->slot = $randomquestion->slot;
+            $question->page = $randomquestion->page;
+            $qdatas = question_preload_questions($randomquestion->questionid);
+            $qdatas = reset($qdatas);
+            foreach ($qdatas as $key => $qdata) {
+                $question->$key = $qdata;
+            }
+            $questiondata[$question->id] = $question;
+        }
+
+        if (!empty($tagids) && empty($questiondata)) {
+            $tagsnotfound = implode(', ', $tagstrings);
+            $tagerror = new stdClass();
+            $tagerror->error = $tagsnotfound;
+            return $tagerror;
+        }
+        $randomid = reset($questiondata)->id;
+        $question = question_bank::load_question($randomid);
+        return $question;
     }
 }
