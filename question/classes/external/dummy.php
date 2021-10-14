@@ -52,6 +52,11 @@ class dummy extends external_api {
                 'Course ID',
                 VALUE_REQUIRED,
             ),
+            'filterverb' => new external_value(
+                PARAM_INT,
+                'Main join types',
+                VALUE_OPTIONAL,
+            ),
             'category' => new external_value(
                 PARAM_SEQUENCE,
                 'Question category ID',
@@ -110,6 +115,7 @@ class dummy extends external_api {
      */
     public static function get_questions(
         int $courseid,
+        ?int $filterverb,
         ?string $category = null,
         ?string $qtagids = null,
         ?int $qperpage = null,
@@ -122,6 +128,7 @@ class dummy extends external_api {
 
         $params = self::validate_parameters(self::get_questions_parameters(), [
             'courseid' => $courseid,
+            'filterverb' => $filterverb,
             'category' => $category,
             'qtagids' => $qtagids,
             'qperpage' => $qperpage,
@@ -367,6 +374,8 @@ class dummy extends external_api {
 <span class="date">
     17 September 2021, 3:39 AM
 </span></td></tr></tbody></table>';
+        // TODO build query with join types: filterset::JOINTYPE_DEFAULT, filterset::JOINTYPE_NONE, filterset::JOINTYPE_ALL
+
         // Todo count $numberofrecords.
         $totalquestions = 100;
 

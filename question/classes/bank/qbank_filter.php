@@ -44,11 +44,12 @@ class qbank_filter extends \core\output\filter {
      * Set searchcondition.
      *
      * @param array $searchconditions
+     * @param array $additionalparams
      * @return self
      */
-    public function set_searchconditions(array $searchconditions, int $perpage): self {
+    public function set_searchconditions(array $searchconditions, array $additionalparams): self {
         $this->searchconditions = $searchconditions;
-        $this->perpage = $perpage;
+        $this->additionalparams = $additionalparams;
         return $this;
     }
 
@@ -94,7 +95,10 @@ class qbank_filter extends \core\output\filter {
             'selected' => 'category',
             'rownumber' => 1,
             'defaultcategoryid' => $defaultcategory->id,
-            'perpage' => $this->perpage,
+            'perpage' => $this->additionalparams['perpage'] ?? 0,
+            'recurse' => $this->additionalparams['recurse'] ?? 0,
+            'showhidden' => $this->additionalparams['showhidden'] ?? 0,
+            'showquestiontext' => $this->additionalparams['showquestiontext'] ?? 0,
         ];
     }
 }
