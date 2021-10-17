@@ -40,7 +40,7 @@ use external_warnings;
  * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class editquestion extends external_api {
+class bank extends external_api {
 
     /**
      * Describes the parameters for fetching the table html.
@@ -53,6 +53,11 @@ class editquestion extends external_api {
                 PARAM_INT,
                 'Course ID',
                 VALUE_REQUIRED,
+            ),
+            'filterverb' => new external_value(
+                PARAM_INT,
+                'Main join types',
+                VALUE_OPTIONAL,
             ),
             'category' => new external_value(
                 PARAM_SEQUENCE,
@@ -102,10 +107,11 @@ class editquestion extends external_api {
      * External function to get the table view content.
      *
      * @param int $courseid
-     * @param string $category
-     * @param array $qtagids
-     * @param int $qperpage
-     * @param int $qpage
+     * @param ?int $filterverb
+     * @param ?string $category
+     * @param ?array $qtagids
+     * @param ?int $qperpage
+     * @param ?int $qpage
      * @param bool $qbshowtext
      * @param bool $recurse
      * @param bool $showhidden
@@ -113,6 +119,7 @@ class editquestion extends external_api {
      */
     public static function get_questions(
         int $courseid,
+        ?int $filterverb,
         ?string $category = null,
         ?array $qtagids = [],
         ?int $qperpage = null,
@@ -121,10 +128,10 @@ class editquestion extends external_api {
         bool $recurse = false,
         bool $showhidden = false
     ): array {
-        global $PAGE;
 
         $params = [
             'courseid' => $courseid,
+            'filterverb' => $filterverb,
             'category' => $category,
             'qtagids' => $qtagids,
             'qperpage' => $qperpage,
@@ -141,7 +148,7 @@ class editquestion extends external_api {
         $questionbank->set_pagevars($pagevars);
         $questionbank->add_standard_searchcondition();
         ob_start();
-        $questionbank->display_for_api($pagevars);
+        $questionbank->display_for_api();
         $tablehtml = ob_get_clean();
 
         $totalquestions = $questionbank->get_question_count();

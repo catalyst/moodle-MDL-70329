@@ -22,7 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank\search;
+namespace qbank_tagquestion;
+
+use core_question\bank\search\condition;
 
 /**
  * Question bank search class to allow searching/filtering by tags on a question.
@@ -49,7 +51,7 @@ class tag_condition extends condition {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function __construct(array $contexts, array $selectedtagids = []) {
+    public function __construct(array $contexts, array $selectedtagids = [], $filterverb = self::JOINTYPE_DEFAULT) {
         global $DB;
 
         $this->contexts = $contexts;

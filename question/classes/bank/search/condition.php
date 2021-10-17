@@ -33,6 +33,19 @@ namespace core_question\bank\search;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class condition {
+
+    /** @var int The default filter type (ALL) */
+    const JOINTYPE_DEFAULT = 2;
+
+    /** @var int None of the following match */
+    const JOINTYPE_NONE = 0;
+
+    /** @var int Any of the following match */
+    const JOINTYPE_ANY = 1;
+
+    /** @var int All of the following match */
+    const JOINTYPE_ALL = 2;
+
     /**
      * Return an SQL fragment to be ANDed into the WHERE clause to filter which questions are shown.
      * @return string SQL fragment. Must use named parameters.

@@ -2889,7 +2889,7 @@ $functions = array(
         'ajax'        => true,
     ],
     'core_qbank_edit' => [
-        'classname'   => 'core_question\external\editquestion',
+        'classname'   => 'core_question\external\bank',
         'methodname'  => 'get_questions',
         'description' => 'Get question table content raw html',
         'type'        => 'read',
