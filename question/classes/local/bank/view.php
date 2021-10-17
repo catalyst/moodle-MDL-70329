@@ -1096,8 +1096,12 @@ class view {
         echo \html_writer::end_tag('div');
     }
 
-    public function display_for_api($pagevars) {
-        return $this->display_question_list($this->baseurl, $pagevars['cat'], $pagevars['recurse'],
+    /**
+     * Show a list of questions by HTML for API.
+     */
+    public function display_for_api(): void {
+        $pagevars = $this->get_pagevars();
+        $this->display_question_list($this->baseurl, $pagevars['cat'], $pagevars['recurse'],
             $pagevars['qpage'], $pagevars['qperpage'], $this->contexts->having_cap('moodle/question:add'));
     }
 
@@ -1339,7 +1343,7 @@ class view {
      * @param condition $searchcondition the condition to add.
      * @param string|null $fieldname
      */
-    public function add_searchcondition($searchcondition, ?string $fieldname = null): void {
+    public function add_searchcondition(condition $searchcondition, ?string $fieldname = null): void {
         if (is_null($fieldname)) {
             $this->searchconditions[] = $searchcondition;
         } else {
