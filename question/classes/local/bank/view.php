@@ -956,17 +956,6 @@ class view {
         if ($totalnumber == 0) {
             return;
         }
-        $questionsrs = $this->load_page_questions($page, $perpage);
-        $questions = [];
-        foreach ($questionsrs as $question) {
-            if (!empty($question->id)) {
-                $questions[$question->id] = $question;
-            }
-        }
-        $questionsrs->close();
-        foreach ($this->requiredcolumns as $name => $column) {
-            $column->load_additional_data($questions);
-        }
 
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post']);
@@ -974,7 +963,7 @@ class view {
         echo \html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo \html_writer::input_hidden_params($this->baseurl);
 
-        $this->display_questions($questions);
+        $this->display_questions_container();
 
         $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
 
@@ -1083,14 +1072,13 @@ class view {
     }
 
     /**
-     * Display the questions.
+     * Display the questions container.
      *
-     * @param array $questions
      */
-    protected function display_questions($questions): void {
+    protected function display_questions_container(): void {
         echo \html_writer::start_tag('div',
                 ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
-        $this->print_table($questions);
+        $this->print_table([]);
         echo \html_writer::end_tag('div');
     }
 
