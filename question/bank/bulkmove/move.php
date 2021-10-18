@@ -25,6 +25,9 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once(__DIR__ . '/../../editlib.php');
+
+use \core_question\lib\question_edit_contexts;
+
 global $DB, $OUTPUT, $PAGE, $COURSE;
 
 $moveselected = optional_param('move', false, PARAM_BOOL);
