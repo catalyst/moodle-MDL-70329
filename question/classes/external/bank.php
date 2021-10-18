@@ -26,9 +26,9 @@ namespace core_question\external;
 
 require_once($CFG->dirroot . '/question/editlib.php');
 
+use core_question\local\bank\plugin_features_base;
 use external_api;
 use external_function_parameters;
-use external_multiple_structure;
 use external_single_structure;
 use external_value;
 use external_warnings;
@@ -48,7 +48,8 @@ class bank extends external_api {
      * @return external_function_parameters
      */
     public static function get_questions_parameters(): external_function_parameters {
-        return new external_function_parameters ([
+
+        $params = [
             'courseid' => new external_value(
                 PARAM_INT,
                 'Course ID',
@@ -63,12 +64,7 @@ class bank extends external_api {
                 PARAM_SEQUENCE,
                 'Question category ID',
                 VALUE_DEFAULT,
-            ),
-            'qtagids' => new external_multiple_structure(
-                new external_value(PARAM_INT, 'Tag ID'),
-                'Tag IDs',
-                VALUE_DEFAULT,
-                [],
+                '',
             ),
             'qperpage' => new external_value(
                 PARAM_INT,
@@ -100,7 +96,18 @@ class bank extends external_api {
                 VALUE_DEFAULT,
                 false,
             ),
-        ]);
+        ];
+
+        $plugins = plugin_features_base::get_qbank_plugin_list();
+        foreach ($plugins as $plugin) {
+            $pluginentrypointobject = new $plugin();
+            $param = $pluginentrypointobject->get_external_function_parameter();
+            if (!empty($param)) {
+                $params = array_merge($params, $param);
+            }
+        }
+
+        return new external_function_parameters($params);
     }
 
     /**
@@ -109,7 +116,7 @@ class bank extends external_api {
      * @param int $courseid
      * @param ?int $filterverb
      * @param ?string $category
-     * @param ?array $qtagids
+     * @param ?string $qtagids
      * @param ?int $qperpage
      * @param ?int $qpage
      * @param bool $qbshowtext
@@ -121,7 +128,7 @@ class bank extends external_api {
         int $courseid,
         ?int $filterverb,
         ?string $category = null,
-        ?array $qtagids = [],
+        ?string $qtagids = null,
         ?int $qperpage = null,
         ?int $qpage = null,
         bool $qbshowtext = false,
@@ -129,11 +136,30 @@ class bank extends external_api {
         bool $showhidden = false
     ): array {
 
+        $categories = explode(',', $qtagids);
+        $categoryfilterverb = 1;
+        $category = '';
+        if (count($categories) > 1) {
+            // TODO: implement filterverb
+            // TODO: can be multiple ids
+            // First one is filterverb, then categoryids.
+            $categoryfilterverb = array_unshift($categories);
+            $category = implode(',', $categories);
+        }
+
+        $tags = explode(',', $qtagids);
+        $tagfilterverb = 1;
+        if (count($tags) > 1) {
+            // TODO: implement filterverb
+            // TODO: params should be from plugin
+            // First one is filterverb, then tagids.
+            $tagfilterverb = array_unshift($tags);
+        }
         $params = [
             'courseid' => $courseid,
             'filterverb' => $filterverb,
             'category' => $category,
-            'qtagids' => $qtagids,
+            'qtagids' => $tags,
             'qperpage' => $qperpage,
             'qpage' => $qpage,
             'qbshowtext' => $qbshowtext,
