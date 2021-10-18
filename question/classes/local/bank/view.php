@@ -968,12 +968,6 @@ class view {
             $column->load_additional_data($questions);
         }
 
-        $pageingurl = new \moodle_url($pageurl, $pageurl->params());
-        $pagingbar = new \paging_bar($totalnumber, $page, $perpage, $pageingurl);
-        $pagingbar->pagevar = 'qpage';
-
-        $this->display_top_pagnation($OUTPUT->render($pagingbar));
-
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post']);
         echo \html_writer::start_tag('fieldset', ['class' => 'invisiblefieldset', 'style' => "display: block;"]);
@@ -981,8 +975,6 @@ class view {
         echo \html_writer::input_hidden_params($this->baseurl);
 
         $this->display_questions($questions);
-
-        $this->display_bottom_pagination($OUTPUT->render($pagingbar), $totalnumber, $perpage, $pageurl);
 
         $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
 
