@@ -790,7 +790,7 @@ class view {
             'showhidden' => $showhidden,
             'showquestiontext' => $showquestiontext
         ];
-        echo $PAGE->get_renderer('qbank_editquestion')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
+        echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
     }
 
     /**
