@@ -16,7 +16,7 @@
 /**
  * Question bank filter managemnet.
  *
- * @module     qbank_editquestion/filter
+ * @module     core_question/filter
  * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,28 +30,46 @@ import PagedContentFactory from 'core/paged_content_factory';
 /**
  * Initialise the question bank filter on the element with the given id.
  *
- * @param {String} filterRegionId
- * @param {String} defaultcourseid
- * @param {String} defaultcategoryid
- * @param {int} perpage
- * @param {boolean} recurse
- * @param {boolean} showhidden
- * @param {boolean} qbshowtext
+ * @param {String} filterRegionId id of the filter region
+ * @param {String} defaultcourseid default course id
+ * @param {String} defaultcategoryid default category id
+ * @param {int} perpage number of question per page
+ * @param {boolean} recurse if loading sub categories
+ * @param {boolean} showhidden if loading hidden question
+ * @param {boolean} qbshowtext if loading question text
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                      perpage, recurse, showhidden, qbshowtext) => {
 
-    var courseid = defaultcourseid;
-    var filterverb = 0;
-    var categories = defaultcategoryid;
-    var qtagids = '';
-    var qperpage = perpage;
-    var recurse = recurse;
-    var showhidden = showhidden;
-    var qbshowtext = qbshowtext;
+    // Default filter params for WS function.
+    let filter = {
+        courseid: defaultcourseid,
+        // Default value filterset::JOINTYPE_DEFAULT.
+        filterverb: 2,
+        category: defaultcategoryid,
+        qtagids: '',
+        qperpage: perpage,
+        qpage: 0,
+        qbshowtext: qbshowtext,
+        recurse: recurse,
+        showhidden: showhidden
+    };
 
-    var TEMPLATE_NAME = 'qbank_editquestion/qbank_questions';
+    // HTML <div> ID of question container.
+    var SELECTORS = {
+        QUESTION_CONTAINER_ID: 'questionscontainer',
+    };
 
+    // Default Pagination config.
+    var DEFAULT_PAGED_CONTENT_CONFIG = {
+        ignoreControlWhileLoading: true,
+        controlPlacementBottom: false,
+    };
+
+    // Template to renden return value from ws function.
+    var TEMPLATE_NAME = 'core_question/qbank_questions';
+
+    // Init function with apply callback.
     CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
         applyFilter(filterdata, pendingPromise);
     });
@@ -59,33 +77,11 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     /**
      * Ajax call to retrieve question via ws functions
      *
-     * @param {int} courseid course id
-     * @param {int} filterverb main join type
-     * @param {String} categories join type plus sequence of categories
-     * @param {String} qtagids join type plus sequence of tags
-     * @param {int} qperpage number of questions perpage
-     * @param {int} qpage current page
-     * @param {boolean} qbshowtext
-     * @param {boolean} recurse
-     * @param {boolean} showhidden
      * @returns {*}
+     * @param {Object} filter filter object
      */
-    var requestQuestions = function(courseid, filterverb, categories, qtagids, qperpage, qpage, qbshowtext, recurse, showhidden) {
-        let request = {
-            methodname: 'core_qbank_dummy',
-            args: {
-                courseid: courseid,
-                filterverb: filterverb,
-                category: categories,
-                qtagids: qtagids,
-                qperpage: qperpage,
-                qpage: qpage,
-                qbshowtext: qbshowtext,
-                recurse: recurse,
-                showhidden: showhidden
-            }
-        };
-
+    var requestQuestions = function(filter) {
+        let request = {methodname: 'core_qbank_dummy', args: filter};
         return ajax.call([request])[0];
     };
 
@@ -96,28 +92,28 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @param {Promise} filter pending promise
      */
     const applyFilter = (filterdata, pendingPromise) => {
+        // Getting filter data.
         if (filterdata) {
-            courseid = filterdata['courseid'].values.toString();
-            categories = filterdata['category'] ?
+            filter['courseid'] = filterdata['courseid'].values.toString();
+            filter['category'] = filterdata['category'] ?
                 filterdata['category'].jointype + ',' + filterdata['category'].values.toString() : '';
-            qtagids = filterdata['tag'] ?
+            filter['qtagids'] = filterdata['tag'] ?
                 filterdata['tag'].jointype + ',' + filterdata['tag'].values.toString() : '';
-            filterverb = filterdata['filterverb'];
+            filter['filterverb'] = filterdata['filterverb'];
         }
 
-        // Load first page.
-        let qpage = 0;
-
-        requestQuestions(courseid, filterverb, categories, qtagids, qperpage, qpage,
-            qbshowtext, recurse, showhidden)
+        // Load questions for first page.
+        requestQuestions(filter)
             .then(function(response) {
                 let totalquestions = response.totalquestions;
                 let firstpagehtml = response.html;
-                return renderPagination(totalquestions, firstpagehtml);
+                return renderPagination(filter, totalquestions, firstpagehtml);
             })
+            // Render questions for first page and pagination.
             .then(function(html, js) {
-                let questionscontainer = document.getElementById('questionscontainer');
+                let questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
                 Templates.replaceNodeContents(questionscontainer, html, js);
+                // Resolve filter promise.
                 if (pendingPromise) {
                     pendingPromise.resolve();
                 }
@@ -129,10 +125,11 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     /**
      * Render table and pagination.
      *
+     * @param {Object} filter params
      * @param {int} totalquestions
      * @param {string} firstpagehtml
      */
-    const renderPagination = (totalquestions, firstpagehtml) => {
+    const renderPagination = (filter, totalquestions, firstpagehtml) => {
         return PagedContentFactory.createFromAjax(
             totalquestions,
             perpage,
@@ -147,19 +144,19 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                         return Templates.render(TEMPLATE_NAME, {html: firstpagehtml});
                     } else {
                         // Load data for selected page.
-                        return requestQuestions(courseid, filterverb, categories, qtagids, qperpage, qpage,
-                            qbshowtext, recurse, showhidden)
+                        filter['qpage'] = qpage;
+                        return requestQuestions(filter)
                         .then(function(response) {
                             return Templates.render(TEMPLATE_NAME, {html: response.html});
                         })
                         .fail(Notification.exception);
                     }
                 });
-            }
+            },
+            DEFAULT_PAGED_CONTENT_CONFIG
         );
     };
 
     // Run apply filter at page load.
     applyFilter();
 };
-

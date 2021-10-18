@@ -15,35 +15,13 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template qbank_editquestion/filter
+    @template core_question/filter
 
     Template for the form containing one or more filter rows.
 
     Example context (json):
     {
-        "filtertypes": [
-            {
-                "name": "status",
-                "title": "Status",
-                "values": [
-                    {
-                        "value": 1,
-                        "title": "Active"
-                    },
-                    {
-                        "value": 0,
-                        "title": "Suspended"
-                    }
-                ]
-            }
-        ]
+        "html": ""
     }
 }}
-{{> core/filter }}
-
-{{#js}}
-    require(['qbank_editquestion/filter'], function(Filter) {
-        Filter.init('core-filter-{{uniqid}}', '{{courseid}}', {{defaultcategoryid}},
-        {{perpage}}, {{recurse}}, {{showhidden}}, {{showquestiontext}});
-    });
-{{/js}}
+{{{html}}}
