@@ -1,5 +1,5 @@
 @mod @mod_quiz
-Feature: Quiz question versionning
+Feature: Quiz question versioning
   In order to manage question versions
   As a teacher
   I need to be able to choose which versions can be displayed in a quiz
@@ -62,4 +62,4 @@ Feature: Quiz question versionning
     And I set the field "id_rightanswer" to "Shown"
     And I press "id_saveupdate"
     And I click on "finish" "button"
-    And I should see "The correct answer is 'False'."
+    Then I should see "The correct answer is 'False'."
