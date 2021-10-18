@@ -49,4 +49,14 @@ class plugin_feature extends plugin_features_base{
         }
         return $searchconditions;
     }
+
+    public function get_external_function_parameter(): array {
+        return [
+            'qtagids' => new \external_value(
+            PARAM_SEQUENCE,
+            'Tag ID',
+            VALUE_DEFAULT,
+            '',
+        )];
+    }
 }

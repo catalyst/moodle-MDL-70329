@@ -1371,7 +1371,7 @@ class view {
             $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
         $this->add_searchcondition(new \core_question\bank\search\hidden_condition(!$showhidden), 'hidden');
 
-        $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
+        $plugins = plugin_features_base::get_qbank_plugin_list();
         foreach ($plugins as $plugin) {
             $pluginentrypointobject = new $plugin();
             $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
