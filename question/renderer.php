@@ -223,10 +223,25 @@ class core_question_bank_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_questionbank_filter(\context $context, array $searchconditions, $additionalparams): string {
+        global $PAGE;
         $filter = new \core_question\bank\qbank_filter($context, 'qbank-table');
         $filter->set_searchconditions($searchconditions, $additionalparams);
         $templatecontext = $filter->export_for_template($this->output);
-        return $this->render_from_template('core_question/qbank_filter', $templatecontext);
-    }
+        $renderedtemplate = $this->render_from_template('core_question/qbank_filter', $templatecontext);
 
+        // Building params for filter js.
+        $mustache = $this->get_mustache();
+        $uniqidhelper = $mustache->getHelper('uniqid');
+        $params = [
+            'filterRegionId' => "core-filter-$uniqidhelper",
+            'defaultcourseid' => $templatecontext->courseid,
+            'defaultcategoryid' => $templatecontext->defaultcategoryid,
+            'perpage' => $templatecontext->perpage,
+            'recurse' => $templatecontext->recurse,
+            'showhidden' => $templatecontext->showhidden,
+            'showquestiontext' => $templatecontext->showquestiontext,
+        ];
+        $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
+        return $renderedtemplate;
+    }
 }

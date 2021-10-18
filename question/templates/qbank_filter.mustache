@@ -40,10 +40,3 @@
     }
 }}
 {{> core/filter }}
-
-{{#js}}
-    require(['core_question/filter'], function(Filter) {
-        Filter.init('core-filter-{{uniqid}}', '{{courseid}}', {{defaultcategoryid}},
-        {{perpage}}, {{recurse}}, {{showhidden}}, {{showquestiontext}});
-    });
-{{/js}}
