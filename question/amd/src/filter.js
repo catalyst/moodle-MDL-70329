@@ -16,7 +16,7 @@
 /**
  * Question bank filter managemnet.
  *
- * @module     qbank_editquestion/filter
+ * @module     core_question/filter
  * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
