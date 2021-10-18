@@ -50,7 +50,16 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     var showhidden = showhidden;
     var qbshowtext = qbshowtext;
 
-    var TEMPLATE_NAME = 'qbank_editquestion/qbank_questions';
+    var SELECTORS = {
+        QUESTION_CONTAINER_ID: 'questionscontainer',
+    };
+
+    var DEFAULT_PAGED_CONTENT_CONFIG = {
+        ignoreControlWhileLoading: true,
+        controlPlacementBottom: false,
+    };
+
+    var TEMPLATE_NAME = 'core_question/qbank_questions';
 
     CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
         applyFilter(filterdata, pendingPromise);
@@ -116,7 +125,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 return renderPagination(totalquestions, firstpagehtml);
             })
             .then(function(html, js) {
-                let questionscontainer = document.getElementById('questionscontainer');
+                let questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
                 Templates.replaceNodeContents(questionscontainer, html, js);
                 if (pendingPromise) {
                     pendingPromise.resolve();
@@ -155,7 +164,8 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                         .fail(Notification.exception);
                     }
                 });
-            }
+            },
+            DEFAULT_PAGED_CONTENT_CONFIG
         );
     };
 
