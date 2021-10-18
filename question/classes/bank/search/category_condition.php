@@ -220,15 +220,15 @@ class category_condition extends condition {
         $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
             array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
         $displaydata['categorydesc'] = $this->print_category_info($this->category);
-        $filteroptions = [];
+        $values = [];
         foreach ($catmenu as $menu) {
             foreach ($menu as $cat => $catlist) {
-                $filteroptions[] = (object) [
+                $values[] = (object) [
                     'value' => 0,
                     'title' => html_entity_decode($cat),
                 ];
                 foreach ($catlist as $key => $value) {
-                    $filteroptions[] = (object) [
+                    $values[] = (object) [
                         'value' => $key,
                         'title' => html_entity_decode($value),
                         'selected' => ($key === $this->cat),
@@ -236,6 +236,15 @@ class category_condition extends condition {
                 }
             }
         }
+        $filteroptions = [
+            'name' => 'category',
+            'title' => get_string('category', 'core_question'),
+            'custom' => true,
+            'multiple' => false,
+            'filterclass' => null,
+            'values' => $values,
+            'allowempty' => true,
+        ];
         return $filteroptions;
     }
 }

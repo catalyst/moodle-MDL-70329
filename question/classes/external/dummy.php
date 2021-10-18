@@ -138,7 +138,7 @@ class dummy extends external_api {
             'showhidden' => $showhidden,
         ]);
 
-        $tablehtml = $qpage . '<table id="categoryquestions"><thead><tr><th class="header checkbox" scope="col">
+        $tablehtml = '<table id="categoryquestions"><thead><tr><th class="header checkbox" scope="col">
             <span title="Select questions for bulk actions"><input id="qbheadercheckbox" name="qbheadercheckbox" type="checkbox" value="1" data-action="toggle" data-toggle="master" data-togglegroup="qbank" data-toggle-selectall="Select all" data-toggle-deselectall="Deselect all">
     <label for="qbheadercheckbox" class="accesshide">Select all</label></span>
 </th><th class="header qtype" scope="col">

@@ -17,6 +17,7 @@
 namespace qbank_tagquestion;
 
 use core_question\local\bank\plugin_features_base;
+use core_question\local\bank\view;
 
 /**
  * Class columns is the entrypoint for the columns.
@@ -32,5 +33,20 @@ class plugin_feature extends plugin_features_base{
         return [
             new tags_action_column($qbank),
         ];
+    }
+
+    public function get_question_bank_search_conditions(view $qbank): array {
+        global $CFG;
+        $searchconditions = [];
+        if ($CFG->usetags) {
+            list(, $contextid) = explode(',', $qbank->get_pagevars('cat'));
+            $catcontext = \context::instance_by_id($contextid);
+            $thiscontext = $qbank->get_most_specific_context();
+            $contexts = [$catcontext, $thiscontext];
+            $tagids = $qbank->get_pagevars('qtagids');
+            $filterverb = $qbank->get_pagevars('filterverb');
+            $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
+        }
+        return $searchconditions;
     }
 }
