@@ -4930,7 +4930,8 @@ class restore_create_categories_and_questions extends restore_structure_step {
         // Also annotate them as question_created, we need
         // that later when remapping parents (keeping the old categoryid as parentid).
         $parentitemid = $this->get_new_parentid('question_versions');
-        $this->set_mapping('question_created', $oldid, $newitemid);
+        $parentcatid = $this->get_old_parentid('question_category');
+        $this->set_mapping('question_created', $oldid, $newitemid, false, null, $parentcatid);
         // Now update the question_versions table with the new question id.
         $version = new stdClass();
         $version->id = $parentitemid;
@@ -5177,13 +5178,11 @@ class restore_create_question_files extends restore_execution_step {
 
         // Parentitemids of question_createds in backup_ids_temp are the category it is in.
         // MUST use a recordset, as there is no unique key in the first (or any) column.
-        $catqtypes = $DB->get_recordset_sql("SELECT DISTINCT qbe.questioncategoryid AS categoryid, q.qtype as qtype
+        $catqtypes = $DB->get_recordset_sql("SELECT DISTINCT bi.parentitemid AS categoryid, q.qtype as qtype
                                                    FROM {backup_ids_temp} bi
                                                    JOIN {question} q ON q.id = bi.newitemid
-                                                   JOIN {question_versions} qv ON qv.id = qv.questionid
-                                                   JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                                                   WHERE bi.backupid = ?
-                                                    AND bi.itemname = 'question_created'
+                                                        AND bi.itemname = 'question_created'
                                                ORDER BY categoryid ASC", array($this->get_restoreid()));
 
         $currentcatid = -1;
