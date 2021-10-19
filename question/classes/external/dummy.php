@@ -47,54 +47,59 @@ class dummy extends external_api {
      */
     public static function get_questions_parameters(): external_function_parameters {
         return new external_function_parameters ([
-            'courseid' => new external_value(
+            'filterverb' => new external_value(
+                PARAM_INT,
+                'Main join types',
+                VALUE_DEFAULT,
+                2
+            ),
+            'filters' => new external_multiple_structure (
+                new external_single_structure(
+                    array(
+                        'filtertype' => new external_value(PARAM_ALPHANUM,'Filter type'),
+                        'jointype' => new external_value(PARAM_INT, 'Join type'),
+                        'values' => new external_value(PARAM_RAW, 'list of ids'),
+                    )
+                ), 'Filter params', VALUE_DEFAULT, array()
+            ),
+            'defaultcourseid' => new external_value(
                 PARAM_INT,
                 'Course ID',
                 VALUE_REQUIRED,
             ),
-            'filterverb' => new external_value(
+            'defaultcategoryid' => new external_value(
                 PARAM_INT,
-                'Main join types',
-                VALUE_OPTIONAL,
-            ),
-            'category' => new external_value(
-                PARAM_SEQUENCE,
-                'Question category ID',
-                VALUE_OPTIONAL,
-            ),
-            'qtagids' => new external_value(
-                PARAM_SEQUENCE,
-                'Tag ID',
-                VALUE_OPTIONAL,
+                'default question category ID',
+                VALUE_REQUIRED,
             ),
             'qperpage' => new external_value(
                 PARAM_INT,
                 'The number of records per page',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
                 false,
             ),
             'qpage' => new external_value(
                 PARAM_INT,
                 'The page number',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
                 0
             ),
             'qbshowtext' => new external_value(
                 PARAM_BOOL,
                 'Flag to show question text',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
                 false,
             ),
             'recurse' => new external_value(
                 PARAM_BOOL,
                 'Type of join to join all filters together',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
                 false,
             ),
             'showhidden' => new external_value(
                 PARAM_BOOL,
                 'Flag to show question text',
-                VALUE_OPTIONAL,
+                VALUE_DEFAULT,
                 false,
             ),
         ]);
@@ -103,9 +108,8 @@ class dummy extends external_api {
     /**
      * External function to get the table view content.
      *
-     * @param int $courseid
-     * @param string $category
-     * @param string $qtagids
+     * @param int $defaultcourseid
+     * @param int $defaultcategoryid
      * @param int $qperpage
      * @param int $qpage
      * @param bool $qbshowtext
@@ -114,12 +118,12 @@ class dummy extends external_api {
      * @return array
      */
     public static function get_questions(
-        int $courseid,
-        ?int $filterverb,
-        ?string $category = null,
-        ?string $qtagids = null,
-        ?int $qperpage = null,
-        ?int $qpage = null,
+        int $filterverb,
+        array $filters = [],
+        int $defaultcourseid,
+        int $defaultcategoryid,
+        int $qperpage = 0,
+        int $qpage = 0,
         bool $qbshowtext = false,
         bool $recurse = false,
         bool $showhidden = false
@@ -127,10 +131,10 @@ class dummy extends external_api {
         global $PAGE;
 
         $params = self::validate_parameters(self::get_questions_parameters(), [
-            'courseid' => $courseid,
             'filterverb' => $filterverb,
-            'category' => $category,
-            'qtagids' => $qtagids,
+            'filters' => $filters,
+            'defaultcourseid' => $defaultcourseid,
+            'defaultcategoryid' => $defaultcategoryid,
             'qperpage' => $qperpage,
             'qpage' => $qpage,
             'qbshowtext' => $qbshowtext,
