@@ -91,17 +91,19 @@ class quiz_question_restore_test extends \advanced_testcase {
      * Count the questions for the context.
      *
      * @param $context
+     * @param string $extracondition
      * @return int
      */
-    public function question_count($context) {
+    public function question_count($context, $extracondition = ''): int {
         global $DB;
         return $DB->count_records_sql(
-            'SELECT COUNT(q.id)
+            "SELECT COUNT(q.id)
                    FROM {question} q
                    JOIN {question_versions} qv ON qv.questionid = q.id
                    JOIN {question_bank_entry} qbe ON qbe.id = qv.questionbankentryid
                    JOIN {question_categories} qc on qc.id = qbe.questioncategoryid
-                  WHERE qc.contextid = ?', [$context]);
+                  WHERE qc.contextid = ?
+                  $extracondition", [$context]);
     }
 
     /**
@@ -167,5 +169,104 @@ class quiz_question_restore_test extends \advanced_testcase {
         $userattempts = quiz_get_user_attempts($module->id, $this->student->id);
         $this->assertEquals(1, count($userattempts));
         $this->assertEquals(3, count(\mod_quiz\question\bank\qbank_helper::get_question_structure($module->id)));
+    }
+
+    /**
+     * Test pre 4.0 quiz restore for regular questions.
+     */
+    public function test_pre_4_quiz_restore_for_regular_questions(){
+        global $CFG, $USER, $DB;
+
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $backupid = 'abc';
+        $backuppath = make_backup_temp_directory($backupid);
+        get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(
+            __DIR__ . "/fixtures/moodle_28_quiz.mbz", $backuppath);
+
+        // Do the restore to new course with default settings.
+        $categoryid = $DB->get_field_sql("SELECT MIN(id) FROM {course_categories}");
+        $newcourseid = restore_dbops::create_new_course('Test fullname', 'Test shortname', $categoryid);
+        $rc = new restore_controller($backupid, $newcourseid, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id,
+            backup::TARGET_NEW_COURSE);
+
+        $this->assertTrue($rc->execute_precheck());
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Get the information about the resulting course and check that it is set up correctly.
+        $modinfo = get_fast_modinfo($newcourseid);
+        $quiz = array_values($modinfo->get_instances_of('quiz'))[0];
+        $quizobj = quiz::create($quiz->instance);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+
+        // Are the correct slots returned?
+        $slots = $structure->get_slots();
+        $this->assertCount(2, $slots);
+
+        $quizobj->preload_questions();
+        $quizobj->load_questions();
+        $questions = $quizobj->get_questions();
+        $this->assertCount(2, $questions);
+
+        // Count the questions in quiz qbank.
+        $context = context_module::instance(get_coursemodule_from_instance("quiz", $quizobj->get_quizid(), $newcourseid)->id);
+        $this->assertEquals(2, $this->question_count($context->id));
+    }
+
+    /**
+     * Test pre 4.0 quiz restore for random questions.
+     */
+    public function test_pre_4_quiz_restore_for_random_questions(){
+        global $CFG, $USER, $DB;
+
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $backupid = 'abc';
+        $backuppath = make_backup_temp_directory($backupid);
+        get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(
+            __DIR__ . "/fixtures/random_by_tag_quiz.mbz", $backuppath);
+
+        // Do the restore to new course with default settings.
+        $categoryid = $DB->get_field_sql("SELECT MIN(id) FROM {course_categories}");
+        $newcourseid = restore_dbops::create_new_course('Test fullname', 'Test shortname', $categoryid);
+        $rc = new restore_controller($backupid, $newcourseid, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id,
+            backup::TARGET_NEW_COURSE);
+
+        $this->assertTrue($rc->execute_precheck());
+        $rc->execute_plan();
+        $rc->destroy();
+
+        // Get the information about the resulting course and check that it is set up correctly.
+        $modinfo = get_fast_modinfo($newcourseid);
+        $quiz = array_values($modinfo->get_instances_of('quiz'))[0];
+        $quizobj = quiz::create($quiz->instance);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+
+        // Are the correct slots returned?
+        $slots = $structure->get_slots();
+        $this->assertCount(1, $slots);
+
+        $quizobj->preload_questions();
+        $quizobj->load_questions();
+        $questions = $quizobj->get_questions();
+        $this->assertCount(1, $questions);
+
+        // Count the questions for course question bank.
+        $this->assertEquals(7, $this->question_count(\context_course::instance($newcourseid)->id));
+        $this->assertEquals(6, $this->question_count(\context_course::instance($newcourseid)->id,
+            "AND q.qtype <> 'random'"));
+
+        // Count the questions in quiz qbank.
+        $context = context_module::instance(get_coursemodule_from_instance("quiz", $quizobj->get_quizid(), $newcourseid)->id);
+        $this->assertEquals(0, $this->question_count($context->id));
     }
 }

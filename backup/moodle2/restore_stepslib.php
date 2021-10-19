@@ -4740,30 +4740,65 @@ class restore_create_categories_and_questions extends restore_structure_step {
 
     protected function define_structure() {
 
-        $category = new restore_path_element('question_category', '/question_categories/question_category');
-        $questionbankentry = new restore_path_element('question_bank_entry',
-                    '/question_categories/question_category/question_bank_entries/question_bank_entry');
-        $questionversion = new restore_path_element('question_versions', '/question_categories/question_category/'.
-                        'question_bank_entries/question_bank_entry/question_versions_entry/question_versions');
-        $question = new restore_path_element('question', '/question_categories/question_category/'.
-                        'question_bank_entries/question_bank_entry/question_versions_entry/question_versions/questions/question');
-        $hint = new restore_path_element('question_hint', '/question_categories/question_category/question_bank_entries/'.
-                        'question_bank_entry/question_versions_entry/question_versions/questions/question/question_hints/question_hint');
-        $tag = new restore_path_element('tag', '/question_categories/question_category/question_bank_entries/'.
-                        'question_bank_entry/question_versions_entry/question_versions/questions/question/tags/tag');
+        // Check if the backup is a pre 4.0 one.
+        $backuprelease = $this->get_task()->get_info()->backup_release; // The major version: 2.9, 3.0, 3.10...
+        preg_match('/(\d{8})/', $this->get_task()->get_info()->moodle_release, $matches);
+        $backupbuild = (int)$matches[1];
+        $before40 = false;
+        if (version_compare($backuprelease, '4.0', '<') || $backupbuild < 20211015) {
+            $before40 = true;
+        }
+        // Start creating the path, category should be the first one.
+        $paths = [];
+        $paths [] = new restore_path_element('question_category', '/question_categories/question_category');
+        // For the backups done before 4.0.
+        if ($before40) {
+            // This path is to recreate the bank entry and version for the legacy question objets.
+            $question = new restore_path_element('question', '/question_categories/question_category/questions/question');
 
-        // Apply for 'qtype' plugins optional paths at question level.
-        $this->add_plugin_structure('qtype', $question);
+            // Apply for 'qtype' plugins optional paths at question level.
+            $this->add_plugin_structure('qtype', $question);
 
-        // Apply for 'qbank' plugins optional paths at question level.
-        $this->add_plugin_structure('qbank', $question);
+            // Apply for 'local' plugins optional paths at question level
+            $this->add_plugin_structure('local', $question);
 
-        // Apply for 'local' plugins optional paths at question level
-        $this->add_plugin_structure('local', $question);
+            $paths [] = $question;
+            $paths [] = new restore_path_element('question_hint',
+                '/question_categories/question_category/questions/question/question_hints/question_hint');
+            $paths [] = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
+        } else {
+            // For all the new backups.
+            $paths [] = new restore_path_element('question_bank_entry',
+                '/question_categories/question_category/question_bank_entries/question_bank_entry');
+            $paths [] = new restore_path_element('question_versions', '/question_categories/question_category/'.
+                'question_bank_entries/question_bank_entry/question_versions_entry/question_versions');
+            $question = new restore_path_element('question', '/question_categories/question_category/'.
+                'question_bank_entries/question_bank_entry/question_versions_entry/question_versions/questions/question');
 
-        return [$category, $questionbankentry, $questionversion, $question, $hint, $tag];
+            // Apply for 'qtype' plugins optional paths at question level.
+            $this->add_plugin_structure('qtype', $question);
+
+            // Apply for 'qbank' plugins optional paths at question level.
+            $this->add_plugin_structure('qbank', $question);
+
+            // Apply for 'local' plugins optional paths at question level
+            $this->add_plugin_structure('local', $question);
+
+            $paths [] = $question;
+            $paths [] = new restore_path_element('question_hint', '/question_categories/question_category/question_bank_entries/'.
+                'question_bank_entry/question_versions_entry/question_versions/questions/question/question_hints/question_hint');
+            $paths [] = new restore_path_element('tag', '/question_categories/question_category/question_bank_entries/'.
+                'question_bank_entry/question_versions_entry/question_versions/questions/question/tags/tag');
+        }
+
+        return $paths;
     }
 
+    /**
+     * Process question category restore.
+     *
+     * @param $data
+     */
     protected function process_question_category($data) {
         global $DB;
 
@@ -4837,6 +4872,49 @@ class restore_create_categories_and_questions extends restore_structure_step {
         }
     }
 
+    /**
+     * Process pre 4.0 question data where in creates the record for version and entry table.
+     *
+     * @param $data
+     */
+    protected function process_question_legacy_data($data) {
+        global $DB;
+
+        $oldid = $data->id;
+        // Process question bank entry.
+        $entrydata = new stdClass();
+        $entrydata->questioncategoryid = $data->category;
+        $userid = $this->get_mappingid('user', $data->createdby);
+        if ($userid) {
+            $entrydata->ownerid = $userid;
+        } else {
+            if (!$this->task->is_samesite()) {
+                $entrydata->ownerid = $this->task->get_userid();
+            }
+        }
+        // The idnumber if it exists also needs to be unique within a category or reset it to null.
+        if (isset($data->idnumber) && !$DB->record_exists('question_bank_entry',
+                ['idnumber' => $data->idnumber, 'questioncategoryid' => $data->category])) {
+            $entrydata->idnumber = $data->idnumber;
+        }
+
+        $newentryid = $DB->insert_record('question_bank_entry', $entrydata);
+        // Process question versions.
+        $versiondata = new stdClass();
+        $versiondata->questionbankentryid = $newentryid;
+        $versiondata->version = 1;
+        // Question id is updated after inserting the question.
+        $versiondata->questionid = 0;
+        $versiondata->status = $data->hidden;
+        $newversionid = $DB->insert_record('question_versions', $versiondata);
+        $this->set_mapping('question_version_created', $oldid, $newversionid);
+    }
+
+    /**
+     * Process question bank entry data.
+     *
+     * @param $data
+     */
     protected function process_question_bank_entry($data) {
         global $DB;
 
@@ -4871,6 +4949,11 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $this->set_mapping('question_bank_entry', $oldid, $newitemid);
     }
 
+    /**
+     * Process question versions.
+     *
+     * @param $data
+     */
     protected function process_question_versions($data) {
         global $DB;
 
@@ -4884,11 +4967,38 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $this->set_mapping('question_versions', $oldid, $newitemid);
     }
 
+    /**
+     * Process the actual question.
+     *
+     * @param $data
+     */
     protected function process_question($data) {
         global $DB;
 
         $data = (object)$data;
         $oldid = $data->id;
+
+        // Check if the backup is a pre 4.0 one.
+        $backuprelease = $this->get_task()->get_info()->backup_release; // The major version: 2.9, 3.0, 3.10...
+        preg_match('/(\d{8})/', $this->get_task()->get_info()->moodle_release, $matches);
+        $backupbuild = (int)$matches[1];
+        $before40 = false;
+        if (version_compare($backuprelease, '4.0', '<') || $backupbuild < 20211015) {
+            $before40 = true;
+        }
+        if ($before40) {
+            // Check we have one mapping for this question
+            if (!$questionmapping = $this->get_mapping('question', $oldid)) {
+                return; // No mapping = this question doesn't need to be created/mapped
+            }
+
+            // Get the mapped category (cannot use get_new_parentid() because not
+            // all the categories have been created, so it is not always available
+            // Instead we get the mapping for the question->parentitemid because
+            // we have loaded qcatids there for all parsed questions
+            $data->category = $this->get_mappingid('question_category', $questionmapping->parentitemid);
+            $this->process_question_legacy_data($data);
+        }
 
         // In the past, there were some very sloppy values of penalty. Fix them.
         if ($data->penalty >= 0.33 && $data->penalty <= 0.34) {
@@ -4929,18 +5039,18 @@ class restore_create_categories_and_questions extends restore_structure_step {
         $this->set_mapping('question', $oldid, $newitemid);
         // Also annotate them as question_created, we need
         // that later when remapping parents (keeping the old categoryid as parentid).
-        $parentitemid = $this->get_new_parentid('question_versions');
         $parentcatid = $this->get_old_parentid('question_category');
         $this->set_mapping('question_created', $oldid, $newitemid, false, null, $parentcatid);
-        // Now update the question_versions table with the new question id.
+        // Now update the question_versions table with the new question id. we dont need to do that for random qtypes.
+        $legacyquestiondata = $this->get_mappingid('question_version_created', $oldid) ? true : false;
+        if ($legacyquestiondata) {
+            $parentitemid = $this->get_mappingid('question_version_created', $oldid);
+        } else {
+            $parentitemid = $this->get_new_parentid('question_versions');
+        }
         $version = new stdClass();
         $version->id = $parentitemid;
         $version->questionid = $newitemid;
-        if ($data->qtype === 'random') {
-            // Ensure that this newly created question is considered by
-            // \qtype_random\task\remove_unused_questions.
-            $version->status = 0;
-        }
         $DB->update_record('question_versions', $version);
 
         // Note, we don't restore any question files yet
