@@ -42,17 +42,17 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                      perpage, recurse, showhidden, qbshowtext) => {
 
     // Default filter params for WS function.
-    let filter = {
-        courseid: defaultcourseid,
+    let wsfilter = {
         // Default value filterset::JOINTYPE_DEFAULT.
         filterverb: 2,
-        category: defaultcategoryid,
-        qtagids: '',
+        filters: [],
+        defaultcourseid: defaultcourseid,
+        defaultcategoryid: defaultcategoryid,
         qperpage: perpage,
         qpage: 0,
         qbshowtext: qbshowtext,
         recurse: recurse,
-        showhidden: showhidden
+        showhidden: showhidden,
     };
 
     // HTML <div> ID of question container.
@@ -89,25 +89,32 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * Retrieve table data.
      *
      * @param {Object} filter data
+     * @param {int} filterverb outermost join types
      * @param {Promise} filter pending promise
      */
-    const applyFilter = (filterdata, pendingPromise) => {
+    const applyFilter = (filterdata, filterverb, pendingPromise) => {
         // Getting filter data.
+        // Otherwise, the ws function should retrieves question based on default courseid and cateogryid.
         if (filterdata) {
-            filter['courseid'] = filterdata['courseid'].values.toString();
-            filter['category'] = filterdata['category'] ?
-                filterdata['category'].jointype + ',' + filterdata['category'].values.toString() : '';
-            filter['qtagids'] = filterdata['tag'] ?
-                filterdata['tag'].jointype + ',' + filterdata['tag'].values.toString() : '';
-            filter['filterverb'] = filterdata['filterverb'];
+            // Main join types.
+            wsfilter['filterverb'] = filterverb;
+
+            // Clean old filter
+            wsfilter['filters'] = [];
+
+            // Retrieve fitter info.
+            for (const [key, value] of Object.entries(filterdata)) {
+                let filter = {'filtertype': key, 'jointype': value.jointype, 'values': value.values.toString()};
+                wsfilter['filters'].push(filter);
+            }
         }
 
         // Load questions for first page.
-        requestQuestions(filter)
+        requestQuestions(wsfilter)
             .then(function(response) {
                 let totalquestions = response.totalquestions;
                 let firstpagehtml = response.html;
-                return renderPagination(filter, totalquestions, firstpagehtml);
+                return renderPagination(wsfilter, totalquestions, firstpagehtml);
             })
             // Render questions for first page and pagination.
             .then(function(html, js) {
