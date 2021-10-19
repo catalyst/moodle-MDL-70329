@@ -26,9 +26,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/question/classes/question_bank.php');
 require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->libdir . '/questionlib.php');
 
+use core_question\question_bank_manager;
 
 /**
  * This is the base class for Moodle question types.
@@ -492,8 +494,9 @@ class question_type {
             $newquestion = false;
         }
 
+        $questionbankmanager = new question_bank_manager();
         // Create a new version, bank_entry and reference for each question.
-        save_question_versions($question, $form, $context, $questionbankentry, $newquestion);
+        $questionbankmanager->save_question_versions($question, $form, $context, $questionbankentry, $newquestion);
 
         // Now, whether we are updating a existing question, or creating a new
         // one, we have to do the files processing and update the record.
