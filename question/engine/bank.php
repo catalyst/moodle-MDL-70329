@@ -499,14 +499,15 @@ class question_finder implements cache_data_source {
             $extraconditions = ' AND (' . $extraconditions . ')';
         }
 
+        $readystatus = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $sql = "SELECT q.id, q.id AS id2
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                  WHERE qbe.questioncategoryid {$qcsql}
-                   AND q.parent = 0
-                   AND qv.status = 0
-                   {$extraconditions}";
+                       AND q.parent = 0
+                       AND qv.status = $readystatus
+                       {$extraconditions}";
 
         return $DB->get_records_sql_menu($sql, $qcparams + $extraparams);
     }
@@ -550,6 +551,7 @@ class question_finder implements cache_data_source {
 
         list($qcsql, $qcparams) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'qc');
 
+        $readystatus = \core_question\local\bank\constants::QUESTION_STATUS_READY;
         $select = "q.id, (SELECT COUNT(1)
                             FROM " . $qubaids->from_question_attempts('qa') . "
                            WHERE qa.questionid = q.id AND " . $qubaids->where() . "
@@ -560,7 +562,7 @@ class question_finder implements cache_data_source {
         $from = $from . " " . $join;
         $where  = "qbe.questioncategoryid {$qcsql}
                AND q.parent = 0
-               AND qv.status = 0
+               AND qv.status = " . $readystatus . "
                AND qv.version = (SELECT MAX(v.version)
                                   FROM {question_versions} v
                                   JOIN {question_bank_entries} be
