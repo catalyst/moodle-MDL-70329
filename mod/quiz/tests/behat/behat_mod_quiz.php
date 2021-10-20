@@ -212,10 +212,10 @@ class behat_mod_quiz extends behat_question_base {
             }
 
             // Question id, category and type.
-            $sql = 'SELECT q.id, qbe.questioncategoryid, q.qtype
-                      FROM {question_bank_entry} qbe
-                      JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
-                      JOIN {question} q ON qv.questionid = q.id
+            $sql = 'SELECT q.id AS id, qbe.questioncategoryid AS category, q.qtype AS qtype
+                      FROM {question} q
+                      JOIN {question_versions} qv ON qv.questionid = q.id
+                      JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                      WHERE q.name = :name';
             $question = $DB->get_record_sql($sql, ['name' => $questiondata['question']], MUST_EXIST);
 
@@ -252,7 +252,7 @@ class behat_mod_quiz extends behat_question_base {
                 } else {
                     $includingsubcategories = clean_param($questiondata['includingsubcategories'], PARAM_BOOL);
                 }
-                quiz_add_random_questions($quiz, $page, $question->questioncategoryid, 1, $includingsubcategories);
+                quiz_add_random_questions($quiz, $page, $question->category, 1, $includingsubcategories);
             } else {
                 // Add the question.
                 quiz_add_quiz_question($question->id, $quiz, $page, $maxmark);
@@ -942,4 +942,55 @@ class behat_mod_quiz extends behat_question_base {
 
         $this->set_user();
     }
+
+    /**
+     * Checks, that page contains specified text or another. It also checks if the text is visible when running Javascript tests.
+     *
+     * @Then /^I should see "(?P<text_string>(?:[^"]|\\")*)" or "(?P<text_string2>(?:[^"]|\\")*)"$/
+     * @throws ExpectationException
+     * @param string $text
+     * @param string $secondtext
+     */
+    public function i_should_see_or($text, $secondtext) {
+        // Looking for all the matching nodes without any other descendant matching the
+       // same xpath (we are using contains(., ....).
+       $xpathliteral = behat_context_helper::escape($text);
+       $secondxpathliteral = behat_context_helper::escape($secondtext);
+
+       $xpath = "/descendant-or-self::*[contains(., $xpathliteral) or contains(., $secondxpathliteral)]" .
+           "[count(descendant::*[contains(., $xpathliteral) or contains(., $secondxpathliteral)]) = 0]";
+
+       try {
+           $nodes = $this->find_all('xpath', $xpath);
+       } catch (ElementNotFoundException $e) {
+           throw new ExpectationException('"' . $text . '" text was not found in the page', $this->getSession());
+       }
+
+       // If we are not running javascript we have enough with the
+       // element existing as we can't check if it is visible.
+       if (!$this->running_javascript()) {
+           return;
+       }
+
+       // We spin as we don't have enough checking that the element is there, we
+       // should also ensure that the element is visible. Using microsleep as this
+       // is a repeated step and global performance is important.
+       $this->spin(
+           function($context, $args) {
+
+               foreach ($args['nodes'] as $node) {
+                   if ($node->isVisible()) {
+                       return true;
+                   }
+               }
+
+               // If non of the nodes is visible we loop again.
+               throw new ExpectationException('"' . $args['text'] . '" text was found but was not visible', $context->getSession());
+           },
+           array('nodes' => $nodes, 'text' => $text),
+           false,
+           false,
+           true
+       );
+   }
 }

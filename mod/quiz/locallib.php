@@ -2177,8 +2177,8 @@ function quiz_has_question_use($quiz, $slot) {
 
     $sql = 'SELECT q.*
               FROM {quiz_slots} slot
-              JOIN {question_references} qre ON slot.id = qre.itemid
-              JOIN {question_bank_entry} qbe ON qre.questionbankentryid = qbe.id
+              JOIN {question_references} qre ON qre.itemid = slot.id
+              JOIN {question_bank_entries} qbe ON qbe.id = qre.questionbankentryid
               JOIN {question_versions} qve ON qve.questionbankentryid = qbe.id
               JOIN {question} q ON q.id = qve.questionid
              WHERE slot.quizid = ? AND slot.slot = ?';
