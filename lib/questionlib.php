@@ -2065,14 +2065,14 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
 /**
  * Create a new version, bank_entry and reference for each question.
  *
- * @param $question object question object with all the information required for additional tables.
- * @param $form object Form data object.
- * @param $context object Context object.
- * @param object|null $questionbankentry object Question bank entry object.
+ * @param stdClass $question object question object with all the information required for additional tables.
+ * @param stdClass $form object Form data object.
+ * @param stdClass $context object Context object.
+ * @param stdClass|null $questionbankentry object Question bank entry object.
  * @param bool $newquestion
  * @throws dml_exception
  */
-function save_question_versions(object $question, object $form, object $context, object $questionbankentry = null,
+function save_question_versions(stdClass $question, stdClass $form, stdClass $context, stdClass $questionbankentry = null,
                                 bool $newquestion = true) : void {
     global $DB;
 
