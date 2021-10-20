@@ -48,9 +48,7 @@ class question_status_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        global $DB;
-        $version = $DB->get_record('question_versions', ['questionid' => $question->id], 'status');
-        echo \html_writer::tag('a', editquestion_helper::get_question_status_string($version->status));
+        echo \html_writer::tag('div', editquestion_helper::get_question_status_string($question->status));
     }
 
 }

@@ -204,8 +204,17 @@ abstract class question_edit_form extends question_wizard_form {
         }
 
         if (!empty($this->question->id)) {
+            // Add extra information from plugins when editing a question (e.g.: Authors, version control and usage).
+            $functionname = 'edit_form_display';
+            $questiondata = [];
+            $plugins = get_plugin_list_with_function('qbank', $functionname);
+            foreach ($plugins as $componentname => $plugin) {
+                $element = new StdClass();
+                $element->pluginhtml = component_callback($componentname, $functionname, [$this->question]);
+                $questiondata['editelements'][] = $element;
+            }
             $mform->addElement('static', 'versioninfo', get_string('versioninfo', 'qbank_editquestion'),
-                                \qbank_editquestion\editquestion_helper::get_edit_form_extra_elements($this->question));
+                $PAGE->get_renderer('qbank_editquestion')->render_question_info($questiondata));
         }
 
         $mform->addElement('text', 'name', get_string('questionname', 'question'),

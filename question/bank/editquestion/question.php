@@ -212,10 +212,9 @@ $toform->returnurl = $originalreturnurl;
 $toform->makecopy = $makecopy;
 $toform->idnumber = null;
 if (isset($question->id)) {
-    $versiondata = $DB->get_record('question_versions', ['questionid' => $question->id]);
-    $toform->status = $versiondata->status;
-    $entrydata = $DB->get_record('question_bank_entries', ['id' => $versiondata->questionbankentryid]);
-    $toform->idnumber = $entrydata->idnumber;
+    $questionobject = question_bank::load_question($question->id);
+    $toform->status = $questionobject->status;
+    $toform->idnumber = $questionobject->idnumber;
 } else {
     $toform->status = \core_question\local\bank\constants::QUESTION_STATUS_READY;
 }
