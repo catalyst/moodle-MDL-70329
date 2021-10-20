@@ -26,10 +26,12 @@ namespace core_question\external;
 
 require_once($CFG->dirroot . '/question/editlib.php');
 
+use core_question\bank\search\condition;
 use core_question\local\bank\plugin_features_base;
 use external_api;
 use external_function_parameters;
 use external_single_structure;
+use external_multiple_structure;
 use external_value;
 use external_warnings;
 
@@ -50,21 +52,33 @@ class bank extends external_api {
     public static function get_questions_parameters(): external_function_parameters {
 
         $params = [
-            'courseid' => new external_value(
-                PARAM_INT,
-                'Course ID',
-                VALUE_REQUIRED,
-            ),
             'filterverb' => new external_value(
                 PARAM_INT,
                 'Main join types',
-                VALUE_OPTIONAL,
-            ),
-            'category' => new external_value(
-                PARAM_SEQUENCE,
-                'Question category ID',
                 VALUE_DEFAULT,
-                '',
+                condition::JOINTYPE_DEFAULT,
+            ),
+            'filters' => new external_multiple_structure (
+                new external_single_structure(
+                    [
+                        'filtertype' => new external_value(PARAM_ALPHANUM,'Filter type'),
+                        'jointype' => new external_value(PARAM_INT, 'Join type'),
+                        'values' => new external_value(PARAM_RAW, 'list of ids'),
+                    ]
+                ),
+                'Filter params',
+                VALUE_DEFAULT,
+                [],
+            ),
+            'defaultcourseid' => new external_value(
+                PARAM_INT,
+                'Default course ID',
+                VALUE_REQUIRED,
+            ),
+            'defaultcategoryid' => new external_value(
+                PARAM_INT,
+                'Default question category ID',
+                VALUE_REQUIRED,
             ),
             'qperpage' => new external_value(
                 PARAM_INT,
@@ -98,63 +112,64 @@ class bank extends external_api {
             ),
         ];
 
-        $plugins = plugin_features_base::get_qbank_plugin_list();
-        foreach ($plugins as $plugin) {
-            $pluginentrypointobject = new $plugin();
-            $param = $pluginentrypointobject->get_external_function_parameter();
-            if (!empty($param)) {
-                $params = array_merge($params, $param);
-            }
-        }
-
         return new external_function_parameters($params);
     }
 
     /**
      * External function to get the table view content.
      *
-     * @param int $courseid
-     * @param ?int $filterverb
-     * @param ?string $category
-     * @param ?string $qtagids
-     * @param ?int $qperpage
-     * @param ?int $qpage
+     * @param int $filterverb
+     * @param array $filters
+     * @param int $defaultcourseid
+     * @param int $defaultcategoryid
+     * @param int $qperpage
+     * @param int $qpage
      * @param bool $qbshowtext
      * @param bool $recurse
      * @param bool $showhidden
      * @return array
      */
     public static function get_questions(
-        int $courseid,
-        ?int $filterverb,
-        ?string $category = null,
-        ?string $qtagids = null,
-        ?int $qperpage = null,
-        ?int $qpage = null,
+        int $filterverb,
+        array $filters = [],
+        int $defaultcourseid,
+        int $defaultcategoryid,
+        int $qperpage = 20,
+        int $qpage = 0,
         bool $qbshowtext = false,
         bool $recurse = false,
         bool $showhidden = false
     ): array {
+        global $DB;
 
-        $categories = explode(',', $qtagids);
-        $categoryfilterverb = 1;
+        $courseid = $defaultcourseid;
         $category = '';
-        if (count($categories) > 1) {
-            // TODO: implement filterverb
-            // TODO: can be multiple ids
-            // First one is filterverb, then categoryids.
-            $categoryfilterverb = array_unshift($categories);
-            $category = implode(',', $categories);
+        $tags = [];
+
+        foreach ($filters as $filter) {
+            switch ($filter['filtertype']) {
+                case 'category':
+                    // TODO: Capability check.
+                    // TODO: Multiple categories.
+                    $categories = intval($filter['values']);
+                    $categories = $DB->get_records('question_categories', ['id' => $categories]);
+                    $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+                    $category = array_pop($categories);
+                    $category = $category->id;
+                    // TODO: Join type.
+                    $jointype = $filter['jointype'];
+                    break;
+                case 'tag':
+                    // TODO: Filter should be from plugin.
+                    // TODO: Join type.
+                    $tags = explode(',', $filter['values']);
+                    $jointype = $filter['jointype'];
+                    break;
+                default:
+                    break;
+            }
         }
 
-        $tags = explode(',', $qtagids);
-        $tagfilterverb = 1;
-        if (count($tags) > 1) {
-            // TODO: implement filterverb
-            // TODO: params should be from plugin
-            // First one is filterverb, then tagids.
-            $tagfilterverb = array_unshift($tags);
-        }
         $params = [
             'courseid' => $courseid,
             'filterverb' => $filterverb,
@@ -198,4 +213,5 @@ class bank extends external_api {
             'warnings' => new external_warnings()
         ]);
     }
+
 }

@@ -223,14 +223,12 @@ class category_condition extends condition {
         $values = [];
         foreach ($catmenu as $menu) {
             foreach ($menu as $cat => $catlist) {
-                $values[] = (object) [
-                    'value' => 0,
-                    'title' => html_entity_decode($cat),
-                ];
                 foreach ($catlist as $key => $value) {
+                    // TODO: Need to show the parent cat?
                     $values[] = (object) [
-                        'value' => $key,
-                        'title' => html_entity_decode($value),
+                        // Remove contextid from value.
+                        'value' => strpos($key, ',') === false ? $key : substr($key, 0, strpos($key, ',')),
+                        'title' => trim(html_entity_decode($value)),
                         'selected' => ($key === $this->cat),
                     ];
                 }

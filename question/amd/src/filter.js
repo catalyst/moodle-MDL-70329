@@ -81,7 +81,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @param {Object} filter filter object
      */
     var requestQuestions = function(filter) {
-        let request = {methodname: 'core_qbank_dummy', args: filter};
+        let request = {methodname: 'core_qbank_get_questions', args: filter};
         return ajax.call([request])[0];
     };
 

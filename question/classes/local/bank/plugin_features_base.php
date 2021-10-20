@@ -72,7 +72,7 @@ class plugin_features_base {
         return [];
     }
 
-    public function get_external_function_parameter(): array {
+    public function get_external_function_parameters(): array {
         return [];
     }
 

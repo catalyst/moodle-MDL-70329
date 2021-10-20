@@ -57,19 +57,4 @@ class renderer extends \plugin_renderer_base {
         return $this->render_from_template('qbank_editquestion/add_new_question', $addquestiondata);
     }
 
-    /**
-     * Render the data required for the questionbank filter on the questionbank edit page.
-     *
-     * @param \context $context The context of the course being displayed
-     * @param array $searchconditions The context of the course being displayed
-     * @param array $additionalparams Additional filter parameters
-     * @return string
-     */
-    public function render_questionbank_filter(\context $context, array $searchconditions, $additionalparams): string {
-        $filter = new \core_question\bank\qbank_filter($context, 'qbank-table');
-        $filter->set_searchconditions($searchconditions, $additionalparams);
-        $templatecontext = $filter->export_for_template($this->output);
-        return $this->render_from_template('qbank_editquestion/qbank_filter', $templatecontext);
-    }
-
 }

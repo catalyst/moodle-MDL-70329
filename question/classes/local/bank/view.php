@@ -780,17 +780,16 @@ class view {
             } else {
                 $this->add_standard_searchcondition($cat, $tagids, $showhidden, $recurse);
             }
+            // Render the question bank filters.
+            $additionalparams = [
+                'perpage' => $perpage,
+                'recurse' => $recurse,
+                'showhidden' => $showhidden,
+                'showquestiontext' => $showquestiontext
+            ];
+            echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
         }
         $this->display_options_form($showquestiontext);
-
-        // Render the question bank filters.
-        $additionalparams = [
-            'perpage' => $perpage,
-            'recurse' => $recurse,
-            'showhidden' => $showhidden,
-            'showquestiontext' => $showquestiontext
-        ];
-        echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
     }
 
     /**
