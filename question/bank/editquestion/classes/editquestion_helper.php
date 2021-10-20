@@ -117,30 +117,4 @@ class editquestion_helper {
         return $statuslist;
     }
 
-    /**
-     * Get the extra elements for preview from qbank plugins.
-     *
-     * @param object $question
-     * @return string
-     */
-    public static function get_edit_form_extra_elements($question): string {
-        global $PAGE;
-        $plugintype = 'qbank';
-        $functionname = 'edit_form_display';
-        $questiondata = [];
-        $extrahtml = [];
-        $questiondata['version'] = '';
-        $plugins = get_plugin_list_with_function($plugintype, $functionname);
-        foreach ($plugins as $componentname => $plugin) {
-            $pluginhtml = component_callback($componentname, $functionname, [$question]);
-            if ($componentname === 'qbank_viewcreator') {
-                $questiondata['version'] = $pluginhtml;
-                continue;
-            }
-            $extrahtml[] = $pluginhtml;
-        }
-        $questiondata['extraelements'] = $extrahtml;
-        return $PAGE->get_renderer('qbank_editquestion')->render_question_info($questiondata);
-    }
-
 }

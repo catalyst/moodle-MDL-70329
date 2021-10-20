@@ -19,19 +19,14 @@
 
     Example context (json):
     {
-        "addquestiondata": [
-          {
-                "version": "version html",
-                "extrahtml": "HTML for elements",
-          }
+        "elements": [
+          {"pluginhtml":"<div>Version: 1</div>"},
+          {"pluginhtml":"<div>Usage: 1</div>"},
         ]
     }
 }}
-<div class="question-version-elements">
-    {{{version}}}
-</div>
-<div class="question-edit-extra-elements">
-    {{#extraelements}}
-        {{{extraelements}}}
-    {{/extraelements}}
+<div class="question-edit-elements">
+    {{#editelements}}
+        {{{pluginhtml}}}
+    {{/editelements}}
 </div>
