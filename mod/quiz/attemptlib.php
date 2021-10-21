@@ -157,7 +157,7 @@ class quiz {
             $questiondata = array_merge($questiondata, $latestquestiondata);
         }
         $allquestiondata = \mod_quiz\question\bank\qbank_helper::question_array_sort(
-            question_load_random_questions($this->quiz->id, $questiondata), 'slot');
+            \mod_quiz\question\bank\qbank_helper::question_load_random_questions($this->quiz->id, $questiondata), 'slot');
         $this->questions = $allquestiondata;
     }
 

@@ -842,76 +842,6 @@ function question_move_category_to_context($categoryid, $oldcontextid, $newconte
 }
 
 /**
- * Load random questions.
- *
- * @param int $quizid
- * @param array $questiondata
- * @return array
- */
-function question_load_random_questions($quizid, $questiondata) {
-    global $DB, $USER;
-    $sql = 'SELECT slot.id AS slotid,
-                   slot.maxmark,
-                   slot.slot,
-                   slot.page,
-                   qsr.filtercondition
-             FROM {question_set_references} qsr
-             JOIN {quiz_slots} slot ON slot.id = qsr.itemid
-            WHERE slot.quizid = ?';
-    $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
-
-    $randomquestions = [];
-    // Questions already added.
-    $usedquestionids = [];
-    foreach ($questiondata as $question) {
-        if (isset($usedquestions[$question->id])) {
-            $usedquestionids[$question->id] += 1;
-        } else {
-            $usedquestionids[$question->id] = 1;
-        }
-    }
-    // Usages for this user's previous quiz attempts.
-    $qubaids = new \mod_quiz\question\qubaids_for_users_attempts($quizid, $USER->id);
-    $randomloader = new \core_question\local\bank\random_question_loader($qubaids, $usedquestionids);
-
-    foreach ($randomquestiondatas as $randomquestiondata) {
-        $filtercondition = json_decode($randomquestiondata->filtercondition);
-        $tagids = [];
-        if (isset($filtercondition->tags)) {
-            foreach ($filtercondition->tags as $tag) {
-                $tagstring = explode(',', $tag);
-                $tagids [] = $tagstring[0];
-            }
-        }
-        $randomquestiondata->randomfromcategory = $filtercondition->questioncategoryid;
-        $randomquestiondata->randomincludingsubcategories = $filtercondition->includingsubcategories;
-        $randomquestiondata->questionid = $randomloader->get_next_question_id($randomquestiondata->randomfromcategory,
-            $randomquestiondata->randomincludingsubcategories, $tagids);
-        $randomquestions [] = $randomquestiondata;
-    }
-
-    foreach ($randomquestions as $randomquestion) {
-        // Should not add if there is no question found from the ramdom question loader, maybe empty category.
-        if ($randomquestion->questionid === null) {
-            continue;
-        }
-        $question = new stdClass();
-        $question->slotid = $randomquestion->slotid;
-        $question->maxmark = $randomquestion->maxmark;
-        $question->slot = $randomquestion->slot;
-        $question->page = $randomquestion->page;
-        $qdatas = question_preload_questions($randomquestion->questionid);
-        $qdatas = reset($qdatas);
-        foreach ($qdatas as $key => $qdata) {
-            $question->$key = $qdata;
-        }
-        $questiondata[$question->id] = $question;
-    }
-
-    return $questiondata;
-}
-
-/**
  * Given a list of ids, load the basic information about a set of questions from
  * the questions table. The $join and $extrafields arguments can be used together
  * to pull in extra data. See, for example, the usage in mod/quiz/attemptlib.php, and
@@ -2123,298 +2053,7 @@ function get_next_version(int $questionbankentryid): int {
     return 1;
 }
 
-// Deprecated classes and functions from Moodle 4.0.
-
-/**
- * Converts contextlevels to strings and back to help with reading/writing contexts to/from import/export files.
- *
- * @copyright  1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated Since Moodle 4.0
- * @see        \core_question\lib\context_to_string_translator
- * @todo       MDL-72004 delete the class
- */
-class context_to_string_translator {
-
-    /**
-     * @var array used to translate between contextids and strings for this context.
-     */
-    protected $contexttostringarray = [];
-
-    /**
-     * context_to_string_translator constructor.
-     *
-     * @param context $contexts
-     */
-    public function __construct($contexts) {
-        debugging('Class context_to_string_translator is deprecated and
-         moved to \core_question\lib\context_to_string_translator,
-         please use new \core_question\lib\context_to_string_translator($contexts) instead.', DEBUG_DEVELOPER);
-        $this->generate_context_to_string_array($contexts);
-    }
-
-    /**
-     * Context to string.
-     *
-     * @param int $contextid
-     * @return mixed
-     */
-    public function context_to_string($contextid) {
-        return $this->contexttostringarray[$contextid];
-    }
-
-    /**
-     * String to context.
-     *
-     * @param string $contextname
-     * @return false|int|string
-     */
-    public function string_to_context($contextname) {
-        $contextid = array_search($contextname, $this->contexttostringarray);
-        return $contextid;
-    }
-
-    /**
-     * Generate context to array.
-     *
-     * @param context $contexts
-     */
-    protected function generate_context_to_string_array($contexts) {
-        if (!$this->contexttostringarray) {
-            $catno = 1;
-            foreach ($contexts as $context) {
-                switch ($context->contextlevel) {
-                    case CONTEXT_MODULE :
-                        $contextstring = 'module';
-                        break;
-                    case CONTEXT_COURSE :
-                        $contextstring = 'course';
-                        break;
-                    case CONTEXT_COURSECAT :
-                        $contextstring = "cat$catno";
-                        $catno++;
-                        break;
-                    case CONTEXT_SYSTEM :
-                        $contextstring = 'system';
-                        break;
-                }
-                $this->contexttostringarray[$context->id] = $contextstring;
-            }
-        }
-    }
-
-}
-
-/**
- * Tracks all the contexts related to the one we are currently editing questions and provides helper methods to check permissions.
- *
- * @copyright  2007 Jamie Pratt me@jamiep.org
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @deprecated Since Moodle 4.0
- * @see        \core_question\lib\context_to_string_translator
- * @todo       MDL-72004 delete the class
- */
-class question_edit_contexts {
-
-    /**
-     * @var \string[][] array of the capabilities.
-     */
-    public static $caps = [
-            'editq' => [
-                    'moodle/question:add',
-                    'moodle/question:editmine',
-                    'moodle/question:editall',
-                    'moodle/question:viewmine',
-                    'moodle/question:viewall',
-                    'moodle/question:usemine',
-                    'moodle/question:useall',
-                    'moodle/question:movemine',
-                    'moodle/question:moveall'],
-            'questions' => [
-                    'moodle/question:add',
-                    'moodle/question:editmine',
-                    'moodle/question:editall',
-                    'moodle/question:viewmine',
-                    'moodle/question:viewall',
-                    'moodle/question:movemine',
-                    'moodle/question:moveall'],
-            'categories' => [
-                    'moodle/question:managecategory'],
-            'import' => [
-                    'moodle/question:add'],
-            'export' => [
-                    'moodle/question:viewall',
-                    'moodle/question:viewmine']];
-
-    /**
-     * @var array of contexts.
-     */
-    protected $allcontexts;
-
-    /**
-     * Constructor
-     * @param \context $thiscontext the current context.
-     */
-    public function __construct(\context $thiscontext) {
-        debugging('Class question_edit_contexts is deprecated and
-         moved to \core_question\lib\question_edit_contexts,
-         please use new \core_question\lib\question_edit_contexts($thiscontext) instead.', DEBUG_DEVELOPER);
-        $this->allcontexts = array_values($thiscontext->get_parent_contexts(true));
-    }
-
-    /**
-     * Get all the contexts.
-     *
-     * @return \context[] all parent contexts
-     */
-    public function all() {
-        return $this->allcontexts;
-    }
-
-    /**
-     * Get the lowest context.
-     *
-     * @return \context lowest context which must be either the module or course context
-     */
-    public function lowest() {
-        return $this->allcontexts[0];
-    }
-
-    /**
-     * Get the contexts having cap.
-     *
-     * @param string $cap capability
-     * @return \context[] parent contexts having capability, zero based index
-     */
-    public function having_cap($cap) {
-        $contextswithcap = [];
-        foreach ($this->allcontexts as $context) {
-            if (has_capability($cap, $context)) {
-                $contextswithcap[] = $context;
-            }
-        }
-        return $contextswithcap;
-    }
-
-    /**
-     * Get the contexts having at least one cap.
-     *
-     * @param array $caps capabilities
-     * @return \context[] parent contexts having at least one of $caps, zero based index
-     */
-    public function having_one_cap($caps) {
-        $contextswithacap = [];
-        foreach ($this->allcontexts as $context) {
-            foreach ($caps as $cap) {
-                if (has_capability($cap, $context)) {
-                    $contextswithacap[] = $context;
-                    break; // Done with caps loop.
-                }
-            }
-        }
-        return $contextswithacap;
-    }
-
-    /**
-     * Context having at least one cap.
-     *
-     * @param string $tabname edit tab name
-     * @return \context[] parent contexts having at least one of $caps, zero based index
-     */
-    public function having_one_edit_tab_cap($tabname) {
-        return $this->having_one_cap(self::$caps[$tabname]);
-    }
-
-    /**
-     * Contexts for adding question and also using it.
-     *
-     * @return \context[] those contexts where a user can add a question and then use it.
-     */
-    public function having_add_and_use() {
-        $contextswithcap = [];
-        foreach ($this->allcontexts as $context) {
-            if (!has_capability('moodle/question:add', $context)) {
-                continue;
-            }
-            if (!has_any_capability(['moodle/question:useall', 'moodle/question:usemine'], $context)) {
-                continue;
-            }
-            $contextswithcap[] = $context;
-        }
-        return $contextswithcap;
-    }
-
-    /**
-     * Has at least one parent context got the cap $cap?
-     *
-     * @param string $cap capability
-     * @return boolean
-     */
-    public function have_cap($cap) {
-        return (count($this->having_cap($cap)));
-    }
-
-    /**
-     * Has at least one parent context got one of the caps $caps?
-     *
-     * @param array $caps capability
-     * @return boolean
-     */
-    public function have_one_cap($caps) {
-        foreach ($caps as $cap) {
-            if ($this->have_cap($cap)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Has at least one parent context got one of the caps for actions on $tabname
-     *
-     * @param string $tabname edit tab name
-     * @return boolean
-     */
-    public function have_one_edit_tab_cap($tabname) {
-        return $this->have_one_cap(self::$caps[$tabname]);
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got the cap $cap
-     *
-     * @param string $cap capability
-     */
-    public function require_cap($cap) {
-        if (!$this->have_cap($cap)) {
-            throw new \moodle_exception('nopermissions', '', '', $cap);
-        }
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got one of the caps $caps
-     *
-     * @param array $caps capabilities
-     */
-    public function require_one_cap($caps) {
-        if (!$this->have_one_cap($caps)) {
-            $capsstring = join(', ', $caps);
-            throw new \moodle_exception('nopermissions', '', '', $capsstring);
-        }
-    }
-
-    /**
-     * Throw error if at least one parent context hasn't got one of the caps $caps
-     *
-     * @param string $tabname edit tab name
-     */
-    public function require_one_edit_tab_cap($tabname) {
-        if (!$this->have_one_edit_tab_cap($tabname)) {
-            throw new \moodle_exception('nopermissions', '', '', 'access question edit tab '.$tabname);
-        }
-    }
-}
+// Deprecated functions from Moodle 4.0.
 
 /**
  * Generate the URL for starting a new preview of a given question with the given options.
@@ -2429,13 +2068,14 @@ class question_edit_contexts {
  * @return moodle_url the URL.
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_url()
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_preview_url($questionid, $preferredbehaviour = null,
                               $maxmark = null, $displayoptions = null, $variant = null, $context = null) {
     debugging('Function question_preview_url() has been deprecated and moved to qbank_previewquestion plugin,
     Please use qbank_previewquestion\previewquestion_helper::question_preview_url() instead.', DEBUG_DEVELOPER);
 
-    return \qbank_previewquestion\previewquestion_helper::question_preview_url($questionid, $preferredbehaviour,
+    return \qbank_previewquestion\helper::question_preview_url($questionid, $preferredbehaviour,
         $maxmark, $displayoptions, $variant, $context);
 }
 
@@ -2443,12 +2083,13 @@ function question_preview_url($questionid, $preferredbehaviour = null,
  * @return array that can be passed as $params to the {@link popup_action} constructor.
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_popup_params()
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_preview_popup_params() {
     debugging('Function question_preview_popup_params() has been deprecated and moved to qbank_previewquestion plugin,
     Please use qbank_previewquestion\previewquestion_helper::question_preview_popup_params() instead.', DEBUG_DEVELOPER);
 
-    return \qbank_previewquestion\previewquestion_helper::question_preview_popup_params();
+    return \qbank_previewquestion\helper::question_preview_popup_params();
 }
 
 /**
@@ -2460,6 +2101,7 @@ function question_preview_popup_params() {
  * @param object $question
  * @return string A unique version stamp
  * @deprecated since Moodle 4.0
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_hash($question) {
     debugging('Function question_hash() has been deprecated without replacement.', DEBUG_DEVELOPER);
@@ -2478,6 +2120,7 @@ function question_hash($question) {
  * @param moodle_url export file url
  * @deprecated since Moodle 4.0 MDL-71573
  * @see qbank_exportquestions\exportquestions_helper
+ * @todo Final deprecation on Moodle 4.4 MDL-72438
  */
 function question_make_export_url($contextid, $categoryid, $format, $withcategories,
                                   $withcontexts, $filename) {
