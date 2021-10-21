@@ -20249,6 +20249,26 @@ span[data-flexitour="container"][x-placement="right"], span[data-flexitour="cont
   .modal .close:not(:disabled):not(.disabled):hover, .modal .close:not(:disabled):not(.disabled):focus {
     opacity: inherit; }
 
+.modal-table {
+  cursor: pointer;
+  display: inline-block;
+  padding: .25em .4em;
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.5rem;
+  background-color: #0f6cbf;
+  border: 3px solid transparent;
+  margin: 0.25rem; }
+  .modal-table:hover {
+    color: #fff;
+    text-decoration: none;
+    border: 3px solid #000; }
+
 .layout.fullscreen {
   height: 100vh;
   position: fixed;
