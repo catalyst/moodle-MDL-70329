@@ -81,7 +81,7 @@ class qbank_helper {
      * @param int $slotid
      * @return mixed
      */
-    public static function get_question_id_from_slot($slotid) {
+    public static function get_question_for_redo($slotid) {
         global $DB;
         $referencerecord = $DB->get_record('question_references', ['itemid' => $slotid]);
         if ($referencerecord->version === null) {
@@ -94,7 +94,7 @@ class qbank_helper {
                                                      ON be.id = v.questionbankentryid
                                                   WHERE be.id = qv.questionbankentryid)
                                AND qv.questionbankentryid = ?';
-            $questionid = $DB->get_record_sql($questionsql, [$referencerecord->questionbankentryid]);
+            $questionid = $DB->get_record_sql($questionsql, [$referencerecord->questionbankentryid])->id;
         } else {
             $questionid = $DB->get_field('question_versions', 'questionid',
                 ['questionbankentryid' => $referencerecord->questionbankentryid,
@@ -112,38 +112,6 @@ class qbank_helper {
     public static function get_random_question_data_from_slot($slotid) {
         global $DB;
         return $DB->get_record('question_set_references', ['itemid' => $slotid]);
-    }
-
-    /**
-     * Get the usage count for the question in quiz.
-     *
-     * @param int $questionid
-     * @return int
-     */
-    public static function get_question_usage_count_in_quiz($questionid) {
-        global $DB;
-        $questiondata = \question_bank::load_question($questionid);
-        return $DB->count_records('question_references', ['questionbankentryid' => $questiondata->questionbankentryid,
-                                                                'version' => $questiondata->version]);
-    }
-
-    /**
-     * Get question attempt count for the question.
-     *
-     * @param int $questionid
-     * @return int
-     */
-    public static function get_question_attempt_count($questionid) {
-        global $DB;
-        $sql = 'SELECT COUNT(qatt.id)
-                  FROM {quiz_slots} qs
-                  JOIN {quiz_attempts} qa ON qa.quiz = qs.quizid
-                  JOIN {question_usages} qu ON qu.id = qa.uniqueid
-                  JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
-                  JOIN {question} q ON q.id = qatt.questionid
-                   WHERE qatt.questionid = ?
-                       AND qa.preview = 0';
-        return $DB->count_records_sql($sql, [$questionid]);
     }
 
     /**

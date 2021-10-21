@@ -69,9 +69,10 @@ class qtype_multianswer_edit_form extends question_edit_form {
         if (isset($question->id) && $question->id != 0) {
             // TODO MDL-43779 should not have quiz-specific code here.
             $this->savedquestiondisplay = fullclone($question);
-            $this->nbofquiz = \mod_quiz\question\bank\qbank_helper::get_question_usage_count_in_quiz($question->id);
+            $questiondata = question_bank::load_question($question->id);
+            $this->nbofquiz = \qbank_usage\helper::get_question_entry_usage_count($questiondata);
             $this->usedinquiz = $this->nbofquiz > 0;
-            $this->nbofattempts = \mod_quiz\question\bank\qbank_helper::get_question_attempt_count($question->id);
+            $this->nbofattempts = \qbank_usage\helper::get_question_attempts_count_in_quiz($question->id);
         }
 
         parent::__construct($submiturl, $question, $category, $contexts, $formeditable);

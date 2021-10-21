@@ -2096,7 +2096,7 @@ class quiz_attempt {
 
         // Choose the replacement question.
         if (!\mod_quiz\question\bank\qbank_helper::is_random($this->slots[$slot]->id)) {
-            $newqusetionid = \mod_quiz\question\bank\qbank_helper::get_question_id_from_slot($this->slots[$slot]->id);
+            $newqusetionid = \mod_quiz\question\bank\qbank_helper::get_question_for_redo($this->slots[$slot]->id);
         } else {
             $tagids = [];
             $randomquestiondata = \mod_quiz\question\bank\qbank_helper::get_random_question_data_from_slot($this->slots[$slot]->id);
