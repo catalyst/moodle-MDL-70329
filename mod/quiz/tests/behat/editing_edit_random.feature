@@ -51,5 +51,5 @@ Feature: Editing random questions already in a quiz based on category and tags
     And I press "Save changes"
     Then I should see "Random question" on quiz page "1"
     And I should see "Random question" on quiz page "2"
-    And I click on "//span[@class='slotnumber'][contains(text(),'2')]/../div/a[@title='Configure question']" "xpath_element"
+    And I click on "Configure question" "link" in the "2" list item
     And "hard" "autocomplete_selection" should be visible
