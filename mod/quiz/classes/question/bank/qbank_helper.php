@@ -270,27 +270,51 @@ class qbank_helper {
      */
     public static function get_question_report_structure_data($quizid, $questionids = []) {
         global $DB;
-        $params = ['quizid' => $quizid];
+        $params = ['quizid' => $quizid, 'quizidforrandom' => $quizid];
         $condition = '';
         if (!empty($questionids)) {
             list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
             $condition = 'AND q.id ' . $condition;
             $params = array_merge($params, $param);
         }
-        $selectstart = 'slot.slot, q.id,';
+        $selectstart = 'data.slot, data.id,';
         $sql = "SELECT $selectstart
-                       q.qtype,
-                       q.length,
-                       slot.maxmark,
-                       q.qtype as type
-                  FROM {quiz_slots} slot
-             LEFT JOIN {question_references} qr ON qr.itemid = slot.id
-             LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
-             LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
-             LEFT JOIN {question} q ON q.id = qv.questionid
-                 WHERE slot.quizid = :quizid
-             $condition
-             ORDER BY slot.slot";
+                       data.qtype,
+                       data.length,
+                       data.maxmark,
+                       data.type
+                  FROM (SELECT slot.slot,
+                               q.id,
+                               q.qtype,
+                               q.length,
+                               slot.maxmark,
+                               q.qtype as type
+                          FROM {quiz_slots} slot
+                          JOIN {question_references} qr ON qr.itemid = slot.id
+                          JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
+                          JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                          JOIN {question} q ON q.id = qv.questionid
+                         WHERE slot.quizid = :quizid
+                               AND (qv.version = qr.version
+                                   OR (qr.version is null AND (qv.version = (SELECT MAX(qv1.version)
+                                                                               FROM {question_versions} qv1
+                                                                              WHERE q.id = qv.questionid))))
+                               $condition
+                         UNION
+                        SELECT slot.slot,
+                               q.id,
+                               q.qtype,
+                               q.length,
+                               slot.maxmark,
+                               q.qtype as type
+                          FROM {quiz_slots} slot
+                     LEFT JOIN {question_references} qr ON qr.itemid = slot.id
+                     LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
+                     LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
+                     LEFT JOIN {question} q ON q.id = qv.questionid
+                         WHERE slot.quizid = :quizidforrandom
+                               AND q.id is null) data
+              ORDER BY data.slot";
         $questiondatas = $DB->get_records_sql($sql, $params);
         if (!empty($questiondatas)) {
             return $questiondatas;
