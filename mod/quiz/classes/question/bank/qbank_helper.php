@@ -58,22 +58,6 @@ class qbank_helper {
         return $DB->get_records_sql($sql, [$questionid]);
     }
 
-    public static function get_reference_data($slotid) {
-        global $DB;
-        return $DB->get_record('question_references', ['itemid' => $slotid]);
-    }
-
-    /**
-     * Get the current version.
-     *
-     * @param int $questionid
-     * @return false|mixed|\stdClass
-     */
-    public static function get_current_version($questionid) {
-        global $DB;
-        return $DB->get_record('question_versions', ['questionid' => $questionid]);
-    }
-
     /**
      * Sort the elements of an array according to a key.
      *
@@ -100,8 +84,22 @@ class qbank_helper {
     public static function get_question_id_from_slot($slotid) {
         global $DB;
         $referencerecord = $DB->get_record('question_references', ['itemid' => $slotid]);
-        $questionid = $DB->get_record('question_versions', ['questionbankentryid' => $referencerecord->questionbankentryid,
-                                                                    'version' => $referencerecord->version])->questionid;
+        if ($referencerecord->version === null) {
+            $questionsql = 'SELECT q.id
+                              FROM {question} q
+                              JOIN {question_versions} qv ON qv.questionid = q.id
+                             WHERE qv.version = (SELECT MAX(v.version)
+                                                   FROM {question_versions} v
+                                                   JOIN {question_bank_entries} be
+                                                     ON be.id = v.questionbankentryid
+                                                  WHERE be.id = qv.questionbankentryid)
+                               AND qv.questionbankentryid = ?';
+            $questionid = $DB->get_record_sql($questionsql, [$referencerecord->questionbankentryid]);
+        } else {
+            $questionid = $DB->get_field('question_versions', 'questionid',
+                ['questionbankentryid' => $referencerecord->questionbankentryid,
+                'version' => $referencerecord->version]);
+        }
         return $questionid;
     }
 
@@ -124,10 +122,9 @@ class qbank_helper {
      */
     public static function get_question_usage_count_in_quiz($questionid) {
         global $DB;
-        $bankentry = get_question_bank_entry($questionid);
-        $versiondata = self::get_current_version($questionid);
-        return $DB->count_records('question_references', ['questionbankentryid' => $bankentry->id,
-                                                                'version' => $versiondata->version]);
+        $questiondata = \question_bank::load_question($questionid);
+        return $DB->count_records('question_references', ['questionbankentryid' => $questiondata->questionbankentryid,
+                                                                'version' => $questiondata->version]);
     }
 
     /**
@@ -432,7 +429,7 @@ class qbank_helper {
             if ($randomquestion->questionid === null) {
                 continue;
             }
-            $question = new stdClass();
+            $question = new \stdClass();
             $question->slotid = $randomquestion->slotid;
             $question->maxmark = $randomquestion->maxmark;
             $question->slot = $randomquestion->slot;
