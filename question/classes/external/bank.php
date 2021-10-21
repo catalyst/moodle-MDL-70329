@@ -143,44 +143,20 @@ class bank extends external_api {
         global $DB;
 
         $courseid = $defaultcourseid;
-        $category = '';
-        $tags = [];
-
-        foreach ($filters as $filter) {
-            switch ($filter['filtertype']) {
-                case 'category':
-                    // TODO: Capability check.
-                    // TODO: Multiple categories.
-                    $categories = intval($filter['values']);
-                    $categories = $DB->get_records('question_categories', ['id' => $categories]);
-                    $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
-                    $category = array_pop($categories);
-                    $category = $category->id;
-                    // TODO: Join type.
-                    $jointype = $filter['jointype'];
-                    break;
-                case 'tag':
-                    // TODO: Filter should be from plugin.
-                    // TODO: Join type.
-                    $tags = explode(',', $filter['values']);
-                    $jointype = $filter['jointype'];
-                    break;
-                default:
-                    break;
-            }
-        }
 
         $params = [
             'courseid' => $courseid,
             'filterverb' => $filterverb,
-            'category' => $category,
-            'qtagids' => $tags,
             'qperpage' => $qperpage,
             'qpage' => $qpage,
             'qbshowtext' => $qbshowtext,
             'recurse' => $recurse,
             'showhidden' => $showhidden,
         ];
+
+        foreach ($filters as $filter) {
+            $params[$filter['filtertype']] = $filter['values'];
+        }
 
         list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
             question_build_edit_resources('questions', '/question/edit.php', $params);

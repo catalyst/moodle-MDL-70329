@@ -222,9 +222,8 @@ class category_condition extends condition {
         $displaydata['categorydesc'] = $this->print_category_info($this->category);
         $values = [];
         foreach ($catmenu as $menu) {
-            foreach ($menu as $cat => $catlist) {
+            foreach ($menu as $catlist) {
                 foreach ($catlist as $key => $value) {
-                    // TODO: Need to show the parent cat?
                     $values[] = (object) [
                         // Remove contextid from value.
                         'value' => strpos($key, ',') === false ? $key : substr($key, 0, strpos($key, ',')),

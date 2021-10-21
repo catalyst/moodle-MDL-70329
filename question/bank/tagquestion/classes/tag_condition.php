@@ -66,7 +66,8 @@ class tag_condition extends condition {
             // we reduce the question list to questions that are tagged with both
             // "foo" AND "bar". Any question that does not have ALL of the specified
             // tags will be omitted.
-            list($tagsql, $tagparams) = $DB->get_in_or_equal($selectedtagids, SQL_PARAMS_NAMED);
+            $equal = !($filterverb === self::JOINTYPE_NONE);
+            list($tagsql, $tagparams) = $DB->get_in_or_equal($selectedtagids, SQL_PARAMS_NAMED, 'param', $equal);
             $tagparams['tagcount'] = count($selectedtagids);
             $tagparams['questionitemtype'] = 'question';
             $tagparams['questioncomponent'] = 'core_question';
@@ -77,8 +78,11 @@ class tag_condition extends condition {
                                       WHERE ti.itemtype = :questionitemtype
                                             AND ti.component = :questioncomponent
                                             AND ti.tagid {$tagsql}
-                                   GROUP BY ti.itemid
-                                     HAVING COUNT(itemid) = :tagcount)";
+                                   GROUP BY ti.itemid ";
+            if ($filterverb === self::JOINTYPE_ALL) {
+                $this->where .= "HAVING COUNT(itemid) = :tagcount) ";
+            }
+            $this->where .= ") ";
 
         } else {
             $this->selectedtagids = [];
@@ -144,7 +148,7 @@ class tag_condition extends condition {
             ];
         }
         $filteroptions = [
-            'name' => 'tag',
+            'name' => 'qtagids',
             'title' => get_string('tag', 'tag'),
             'custom' => true,
             'multiple' => true,

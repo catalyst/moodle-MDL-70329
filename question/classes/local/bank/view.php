@@ -1340,7 +1340,7 @@ class view {
      * Add standard search conditions.
      * Params must be set into this object before calling this function.
      */
-    public function add_standard_searchcondition() {
+    public function add_standard_searchcondition(): void {
         $cat = $this->get_pagevars('cat');
         $showhidden = $this->get_pagevars('showhidden');
         $recurse = $this->get_pagevars('recurse');
@@ -1356,6 +1356,43 @@ class view {
             $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
             foreach ($pluginobjects as $fieldname => $pluginobject) {
                 $this->add_searchcondition($pluginobject, $fieldname);
+            }
+        }
+    }
+
+    public function apply_filter($params): void {
+        $plugins = plugin_features_base::get_qbank_plugin_list();
+        foreach ($plugins as $plugin) {
+            $pluginentrypointobject = new $plugin();
+            $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
+            foreach ($pluginobjects as $fieldname => $pluginobject) {
+                $this->add_searchcondition($pluginobject, $fieldname);
+            }
+        }
+
+        foreach ($filters as $filter) {
+            switch ($filter['filtertype']) {
+                case 'category':
+                    // TODO: Capability check.
+                    // TODO: Multiple categories.
+                    $categories = intval($filter['values']);
+                    $categories = $DB->get_records('question_categories', ['id' => $categories]);
+                    $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+                    $category = array_pop($categories);
+                    $category = $category->id;
+                    $params['category'] = $category;
+                    // TODO: Join type.
+                    $jointype = $filter['jointype'];
+                    break;
+                case 'tag':
+                    // TODO: Filter should be from plugin.
+                    // TODO: Join type.
+                    $tags = explode(',', $filter['values']);
+                    $params['qtagids'] = $tags;
+                    $jointype = $filter['jointype'];
+                    break;
+                default:
+                    break;
             }
         }
     }

@@ -269,7 +269,11 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     }
 
     if (!empty($params['qtagids'])) {
-        $cleanparams['qtagids'] = clean_param_array($params['qtagids'], PARAM_INT);
+        $qtagids = $params['qtagids'];
+        if (!is_array($qtagids) && strpos($qtagids, ',') !== false) {
+            $qtagids = explode(',', $qtagids);
+        }
+        $cleanparams['qtagids'] = clean_param_array($qtagids, PARAM_INT);
     }
 
     $cmid = $cleanparams['cmid'];
