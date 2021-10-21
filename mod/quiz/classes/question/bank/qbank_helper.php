@@ -243,7 +243,7 @@ class qbank_helper {
             $params = array_merge($params, $param);
         }
         $selectstart = 'slot.slot, q.id,';
-        $sql = "SELECT $selectstart
+        $sql = "SELECT slot.id, slot.slot, q.id,
                        q.qtype,
                        q.length,
                        slot.maxmark,
@@ -257,6 +257,7 @@ class qbank_helper {
              $condition
              ORDER BY slot.slot";
         $questiondatas = $DB->get_records_sql($sql, $params);
+        //var_dump($questiondatas);die;
         if (!empty($questiondatas)) {
             return $questiondatas;
         }
@@ -304,7 +305,7 @@ class qbank_helper {
                   JOIN {question_usages} qu ON qu.id = qa.uniqueid
                   JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
                   JOIN {question} q ON q.id = qatt.questionid
-                  WHERE qz.id = ?';
+                 WHERE qz.id = ?';
         $questions = $DB->get_records_sql($sql, [$quizid]);
         foreach ($questions as $question) {
             $questionids [] = $question->id;
@@ -327,7 +328,7 @@ class qbank_helper {
                                                         qsr.*
                                                    FROM {quiz_slots} qs
                                                    JOIN {question_set_references} qsr ON qsr.itemid = qs.id
-                                                   WHERE qs.quizid = ?', [$quizid]);
+                                                  WHERE qs.quizid = ?', [$quizid]);
         foreach ($firstsets as $firstset) {
             if ($firstset->qtype === null) {
                 $firstset->qtype = 'random';
@@ -353,13 +354,13 @@ class qbank_helper {
     public static function question_load_random_questions($quizid, $questiondata) {
         global $DB, $USER;
         $sql = 'SELECT slot.id AS slotid,
-                   slot.maxmark,
-                   slot.slot,
-                   slot.page,
-                   qsr.filtercondition
-             FROM {question_set_references} qsr
-             JOIN {quiz_slots} slot ON slot.id = qsr.itemid
-            WHERE slot.quizid = ?';
+                       slot.maxmark,
+                       slot.slot,
+                       slot.page,
+                       qsr.filtercondition
+                 FROM {question_set_references} qsr
+                 JOIN {quiz_slots} slot ON slot.id = qsr.itemid
+                WHERE slot.quizid = ?';
         $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
 
         $randomquestions = [];
