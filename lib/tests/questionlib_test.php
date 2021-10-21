@@ -110,22 +110,15 @@ class core_questionlib_testcase extends advanced_testcase {
     }
 
     /**
-     * Get all questions that belong to a category.
+     * Assert that a category contains a specific number of questions.
      *
-     * @param $categoryid int Category id.
-     * @return null|array Questions in a category.
-     * @throws dml_exception
+     * @param int $categoryid int Category id.
+     * @param int $numberofquestions Number of question in a category.
+     * @return void Questions in a category.
      */
-    function get_questions_in_category(int $categoryid): ?array {
-        global $DB;
-
-        $sql = "SELECT DISTINCT q.*
-                  FROM {question} q
-                  JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                 WHERE qbe.questioncategoryid = ?";
-
-        return $DB->get_records_sql($sql, [$categoryid]);
+    function assert_category_contains_questions(int $categoryid, int $numberofquestions): void {
+        $questionsid = question_bank::get_finder()->get_questions_from_categories([$categoryid], null);
+        $this->assertEquals($numberofquestions, count($questionsid));
     }
 
     public function test_question_reorder_qtypes() {
@@ -348,8 +341,7 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $questionscat = $this->get_questions_in_category($qcat->id);
-        $this->assertEquals(0, count($questionscat));
+        $this->assert_category_contains_questions($qcat->id, 0);
 
         // Verify question not deleted.
         $criteria = array('id' => $questions[0]->id);
@@ -376,8 +368,7 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $questions = $this->get_questions_in_category($qcat->id);
-        $this->assertEquals(0, count($questions));
+        $this->assert_category_contains_questions($qcat->id, 0);
     }
 
     /**
@@ -398,8 +389,7 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $questions = $this->get_questions_in_category($qcat->id);
-        $this->assertEquals(0, count($questions));
+        $this->assert_category_contains_questions($qcat->id, 0);
     }
 
     /**
@@ -420,8 +410,7 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $questions = $this->get_questions_in_category($qcat->id);
-        $this->assertEquals(0, count($questions));
+        $this->assert_category_contains_questions($qcat->id, 0);
     }
 
     /**
@@ -442,8 +431,7 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals(0, $DB->count_records('question_categories', $criteria));
 
         // Verify questions deleted or moved.
-        $questions = $this->get_questions_in_category($qcat->id);
-        $this->assertEquals(0, count($questions));
+        $this->assert_category_contains_questions($qcat->id, 0);
     }
 
     /**
@@ -2076,8 +2064,7 @@ class core_questionlib_testcase extends advanced_testcase {
 
         // Move the question from quiz 1 to quiz 2.
         question_move_questions_to_category($questionsidtomove, $questioncat2->id);
-        $questionsmoved = $this->get_questions_in_category($questioncat2->id);
-        $this->assertCount(4, $questionsmoved);
+        $this->assert_category_contains_questions($questioncat2->id, 4);
     }
 
     /**

@@ -461,7 +461,7 @@ class question_type {
                 $sql = "SELECT qbe.id
                           FROM {question_bank_entries} qbe
                          WHERE qbe.idnumber = :idnumber
-                           AND qbe.questioncategoryid = :categoryid
+                               AND qbe.questioncategoryid = :categoryid
                            $andcondition";
                 if (!$DB->record_exists_sql($sql, $params)) {
                     $question->idnumber = $form->idnumber;

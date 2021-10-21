@@ -288,12 +288,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
     global $DB;
 
     // Look at each question in the category.
-    $questionentries = $DB->get_records('question_bank_entries', ['questioncategoryid' => $categoryid], '', 'id');
-    $questionids = [];
-    foreach ($questionentries as $questionentry) {
-        array_merge($questionids, $DB->get_records('question_versions',
-                    ['questionbankentryid' => $questionentry], '', 'questionid, 1'));
-    }
+    $questionids = question_bank::get_finder()->get_questions_from_categories([$categoryid], null);
     if ($questionids) {
         if (questions_in_use(array_keys($questionids))) {
             return true;
@@ -324,7 +319,7 @@ function question_category_in_use($categoryid, $recursive = false): bool {
  */
 function delete_question_bank_entry($entryid): void {
     global $DB;
-    if ($DB->count_records('question_versions', ['questionbankentryid' => $entryid]) == 0) {
+    if (!$DB->record_exists('question_versions', ['questionbankentryid' => $entryid])) {
         $DB->delete_records('question_bank_entries', ['id' => $entryid]);
     }
 }
