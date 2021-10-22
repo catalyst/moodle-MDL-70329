@@ -46,33 +46,33 @@ $hiddenstatus = \core_question\local\bank\constants::QUESTION_STATUS_HIDDEN;
 $draftstatus = \core_question\local\bank\constants::QUESTION_STATUS_DRAFT;
 
 $sql = "SELECT result.qtype,
-               SUM(result.numquestions) as numquestions,
-               SUM(result.numhidden) as numhidden,
-               SUM(result.numdraft) as numdraft
+               SUM(result.numquestions) AS numquestions,
+               SUM(result.numhidden) AS numhidden,
+               SUM(result.numdraft) AS numdraft
           FROM (
             SELECT data.qtype,
-            COUNT(data.numquestions) as numquestions,
+            COUNT(data.numquestions) AS numquestions,
                 (SELECT COUNT(qv.id)
                    FROM {question_versions} qv
                   WHERE qv.id = data.versionid
-                    AND qv.status = $hiddenstatus) as numhidden,
+                        AND qv.status = :hiddenstatus) AS numhidden,
                 (SELECT COUNT(qv.id)
                    FROM {question_versions} qv
                   WHERE qv.id = data.versionid
-                    AND qv.status = $draftstatus) as numdraft
+                        AND qv.status = :draftstatus) AS numdraft
               FROM (
-                SELECT q.qtype, qv.id as versionid, 1 as numquestions
+                SELECT q.qtype, qv.id AS versionid, 1 AS numquestions
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                   AND qv.version = (SELECT MAX(v.version)
-                                       FROM {question_versions} v
-                                       JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
-                                      WHERE be.id = qbe.id)) data
+                       AND qv.version = (SELECT MAX(v.version)
+                                           FROM {question_versions} v
+                                           JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
+                                          WHERE be.id = qbe.id)) data
           GROUP BY data.qtype, data.versionid) result
       GROUP BY result.qtype";
 
-$counts = $DB->get_records_sql($sql, []);
+$counts = $DB->get_records_sql($sql, ['hiddenstatus' => $hiddenstatus, 'draftstatus' => $draftstatus]);
 $needed = [];
 foreach ($qtypes as $qtypename => $qtype) {
     if (!isset($counts[$qtypename])) {
