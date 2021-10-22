@@ -919,8 +919,8 @@ class qformat_default {
 
         foreach ($questions as $question) {
             // used by file api
-            $questionbankentry = get_question_bank_entry($question->id);
-            $qcategory = $questionbankentry->questioncategoryid;
+            $questionbankentry = question_bank::load_question($question->id);
+            $qcategory = $questionbankentry->category;
             $contextid = $DB->get_field('question_categories', 'contextid', ['id' => $qcategory]);
             $question->contextid = $contextid;
             $question->idnumber = $questionbankentry->idnumber;

@@ -249,7 +249,6 @@ class view {
                 'export_xml_action_column',
                 'question_status_column',
                 'creator_name_column',
-                'modifier_name_column',
                 'comment_count_column'
         ];
         if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
