@@ -184,11 +184,29 @@ class qbank_helper_test extends \advanced_testcase {
         $questiongenerator->update_question($numq, null, ['name' => 'This is the second version']);
         $questiongenerator->update_question($numq, null, ['name' => 'This is the third version']);
         quiz_add_quiz_question($numq->id, $quiz);
-        //$this->add_random_questions($questiongenerator, $quiz, ['contextid' => $context->id]);
-        //$this->add_regular_questions($questiongenerator, $quiz, ['contextid' => $context->id]);
         list($quizobj, $quba, $attemptobj) = $this->attempt_quiz($quiz, $this->student);
         $structurereport = qbank_helper::get_questions_report_structure($quiz->id);
         $structurereport = reset($structurereport);
         $this->assertEquals($attemptobj->get_question_attempt(1)->get_question()->id, $structurereport->id);
+    }
+
+    /**
+     * Test question report structure for random questions.
+     */
+    public function test_question_report_structure_for_random_questions() {
+        $quiz = $this->create_test_quiz($this->course);
+        // Test for questions from a different context.
+        $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+        $questiongenerator->create_question('truefalse', null, array('category' => $cat->id));
+        $questiongenerator->create_question('essay', null, array('category' => $cat->id));
+        quiz_add_random_questions($quiz, 0, $cat->id, 1, false);
+        list($quizobj, $quba, $attemptobj) = $this->attempt_quiz($quiz, $this->student);
+        $structurereport = qbank_helper::get_questions_report_structure($quiz->id);
+        $structurereport = reset($structurereport);
+        $this->assertEquals($cat->id, $structurereport->category);
+        $this->assertEquals('random', $structurereport->type);
     }
 }

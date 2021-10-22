@@ -228,34 +228,6 @@ class qbank_helper {
         return self::question_array_sort(array_merge($firstslotsets, $secondslotsets), 'slot');
     }
 
-
-
-    /**
-     * Get the question data for the ids.
-     *
-     * @param array $questionids
-     * @return false|mixed
-     */
-    public static function get_report_structure_random_data($questionids) {
-        global $DB;
-        if (empty($questionids)) {
-            return [];
-        }
-        list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
-        $condition = 'WHERE q.id ' . $condition;
-        $sql = "SELECT q.id,
-                       q.qtype,
-                       q.length,
-                       qc.contextid,
-                       qc.id as categoryid
-                  FROM {question} q
-                  JOIN {question_versions} qv ON qv.questionid = q.id
-                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-                  $condition";
-        return $DB->get_records_sql($sql, $param);
-    }
-
     /**
      * Get the question ids for the quiz attempts.
      *
@@ -290,13 +262,6 @@ class qbank_helper {
         $quizobj = \quiz::create($quizid);
         $structure = \mod_quiz\structure::create_for_quiz($quizobj);
         $slots = $structure->get_slots();
-        $randomslots = $DB->get_records_sql('SELECT qs.slot,
-                                                        qs.id as slotid,
-                                                        qs.maxmark,
-                                                        qsr.*
-                                                   FROM {quiz_slots} qs
-                                                   JOIN {question_set_references} qsr ON qsr.itemid = qs.id
-                                                  WHERE qs.quizid = ?', [$quizid]);
         $slotreports = [];
         foreach ($slots as $slot) {
             $slotreport = new \stdClass();
@@ -307,10 +272,9 @@ class qbank_helper {
             $slotreport->maxmark = $slot->maxmark;
             $slotreport->type = $slot->qtype;
             if ($slot->qtype === 'random') {
-                $filtercondition = json_decode($randomslots[$slot->slot]->filtercondition);
-                $categoryobject = $DB->get_record('question_categories', ['id' => $filtercondition->questioncategoryid]);
+                $categoryobject = $DB->get_record('question_categories', ['id' => $slot->category]);
                 $slotreport->categoryobject = $categoryobject;
-                $slotreport->category = $filtercondition->questioncategoryid;
+                $slotreport->category = $slot->category;
             }
             $slotreports [$slotreport->slot] = $slotreport;
         }

@@ -627,6 +627,7 @@ class structure {
             $slot->requireprevious = $slotdata->requireprevious;
             $slot->qtype = $slotdata->qtype;
             $slot->length = $slotdata->length;
+            $slot->category = $slotdata->category;
             $slot->questionbankentryid = $slotdata->questionbankentryid ?? null;
             $slot->version = $slotdata->version ?? null;
 
