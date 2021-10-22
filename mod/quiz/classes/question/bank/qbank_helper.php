@@ -309,8 +309,8 @@ class qbank_helper {
             if ($slot->qtype === 'random') {
                 $filtercondition = json_decode($randomslots[$slot->slot]->filtercondition);
                 $categoryobject = $DB->get_record('question_categories', ['id' => $filtercondition->questioncategoryid]);
-                $slot->categoryobject = $categoryobject;
-                $slot->category = $filtercondition->questioncategoryid;
+                $slotreport->categoryobject = $categoryobject;
+                $slotreport->category = $filtercondition->questioncategoryid;
             }
             $slotreports [$slotreport->slot] = $slotreport;
         }
