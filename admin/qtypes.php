@@ -51,15 +51,15 @@ $sql = "SELECT result.qtype,
                SUM(result.numdraft) AS numdraft
           FROM (
             SELECT data.qtype,
-            COUNT(data.numquestions) AS numquestions,
-                (SELECT COUNT(qv.id)
-                   FROM {question_versions} qv
-                  WHERE qv.id = data.versionid
-                        AND qv.status = :hiddenstatus) AS numhidden,
-                (SELECT COUNT(qv.id)
-                   FROM {question_versions} qv
-                  WHERE qv.id = data.versionid
-                        AND qv.status = :draftstatus) AS numdraft
+                   COUNT(data.numquestions) AS numquestions,
+                   (SELECT COUNT(qv.id)
+                      FROM {question_versions} qv
+                    WHERE qv.id = data.versionid
+                           AND qv.status = :hiddenstatus) AS numhidden,
+                   (SELECT COUNT(qv.id)
+                      FROM {question_versions} qv
+                     WHERE qv.id = data.versionid
+                           AND qv.status = :draftstatus) AS numdraft
               FROM (
                 SELECT q.qtype, qv.id AS versionid, 1 AS numquestions
                   FROM {question} q
