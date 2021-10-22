@@ -43,13 +43,6 @@ function qbank_viewcreator_edit_form_display($question): string {
         $versiondata['createdby'] = get_string('created', 'question') . ' ' .
                                     get_string('byandon', 'question', $a) ;
     }
-    if (!empty($question->modifiedby)) {
-        $a = new stdClass();
-        $a->time = userdate($question->timemodified);
-        $a->user = fullname($DB->get_record('user', ['id' => $question->modifiedby]));
-        $versiondata['modifiedby'] = get_string('modified', 'question') . ' ' .
-                                        get_string('byandon', 'question', $a) ;
-    }
     return $PAGE->get_renderer('qbank_viewcreator')->render_version_info($versiondata);
 
 }
