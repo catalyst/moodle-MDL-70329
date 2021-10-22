@@ -625,6 +625,8 @@ class structure {
             $slot->questionid = $slotdata->questionid;
             $slot->maxmark = $slotdata->maxmark;
             $slot->requireprevious = $slotdata->requireprevious;
+            $slot->qtype = $slotdata->qtype;
+            $slot->length = $slotdata->length;
             $slot->questionbankentryid = $slotdata->questionbankentryid ?? null;
             $slot->version = $slotdata->version ?? null;
 

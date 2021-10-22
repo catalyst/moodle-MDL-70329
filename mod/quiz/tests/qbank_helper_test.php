@@ -145,6 +145,9 @@ class qbank_helper_test extends \advanced_testcase {
         $this->assertEquals($structuredata->id, $question->id);
     }
 
+    /**
+     * Test question attempts match with question ids for the attempts.
+     */
     public function test_get_questionids_for_attempts_in_quiz() {
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
@@ -163,5 +166,29 @@ class qbank_helper_test extends \advanced_testcase {
         $attemptedquestion = reset($questions);
         $attemptedquestionids = qbank_helper::get_questionids_for_attempts_in_quiz($quiz->id);
         $this->assertEquals($attemptedquestion->id, reset($attemptedquestionids));
+    }
+
+    /**
+     * Test question report structure.
+     */
+    public function test_question_report_structure() {
+        $quiz = $this->create_test_quiz($this->course);
+        // Test for questions from a different context.
+        $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+        $numq = $questiongenerator->create_question('essay', null,
+            ['category' => $cat->id, 'name' => 'This is the first version']);
+        // Create two version.
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the second version']);
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the third version']);
+        quiz_add_quiz_question($numq->id, $quiz);
+        //$this->add_random_questions($questiongenerator, $quiz, ['contextid' => $context->id]);
+        //$this->add_regular_questions($questiongenerator, $quiz, ['contextid' => $context->id]);
+        list($quizobj, $quba, $attemptobj) = $this->attempt_quiz($quiz, $this->student);
+        $structurereport = qbank_helper::get_questions_report_structure($quiz->id);
+        $structurereport = reset($structurereport);
+        $this->assertEquals($attemptobj->get_question_attempt(1)->get_question()->id, $structurereport->id);
     }
 }

@@ -179,6 +179,8 @@ class qbank_helper {
         }
         $sql = "SELECT $selectstart
                        q.id AS questionid,
+                       q.qtype,
+                       q.length,
                        slot.page,
                        slot.maxmark,
                        slot.requireprevious,
@@ -226,43 +228,7 @@ class qbank_helper {
         return self::question_array_sort(array_merge($firstslotsets, $secondslotsets), 'slot');
     }
 
-    /**
-     * Get the question structure report data for the given quiz or question ids.
-     *
-     * @param null $quizid
-     * @param array $questionids
-     * @return array|void
-     */
-    public static function get_question_report_structure_data($quizid, $questionids = []) {
-        global $DB;
-        $params = ['quizid' => $quizid];
-        $condition = '';
-        if (!empty($questionids)) {
-            list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
-            $condition = 'AND q.id ' . $condition;
-            $params = array_merge($params, $param);
-        }
-        $selectstart = 'slot.slot, q.id,';
-        $sql = "SELECT slot.id, slot.slot, q.id,
-                       q.qtype,
-                       q.length,
-                       slot.maxmark,
-                       q.qtype as type
-                  FROM {quiz_slots} slot
-             LEFT JOIN {question_references} qr ON qr.itemid = slot.id
-             LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
-             LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
-             LEFT JOIN {question} q ON q.id = qv.questionid
-                 WHERE slot.quizid = :quizid
-             $condition
-             ORDER BY slot.slot";
-        $questiondatas = $DB->get_records_sql($sql, $params);
-        //var_dump($questiondatas);die;
-        if (!empty($questiondatas)) {
-            return $questiondatas;
-        }
-        return [];
-    }
+
 
     /**
      * Get the question data for the ids.
@@ -319,9 +285,11 @@ class qbank_helper {
      * @param int $quizid
      * @return array
      */
-    public static function get_question_report_structure($quizid) {
+    public static function get_questions_report_structure($quizid) {
         global $DB;
-        $firstsets = self::get_question_report_structure_data($quizid, []);
+        $quizobj = \quiz::create($quizid);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $slots = $structure->get_slots();
         $randomslots = $DB->get_records_sql('SELECT qs.slot,
                                                         qs.id as slotid,
                                                         qs.maxmark,
@@ -329,19 +297,25 @@ class qbank_helper {
                                                    FROM {quiz_slots} qs
                                                    JOIN {question_set_references} qsr ON qsr.itemid = qs.id
                                                   WHERE qs.quizid = ?', [$quizid]);
-        foreach ($firstsets as $firstset) {
-            if ($firstset->qtype === null) {
-                $firstset->qtype = 'random';
-                $firstset->type = 'random';
-                $firstset->length = '1'; // Might need to check later.
-                $firstset->setreference = $randomslots[$firstset->slot];
-                $filtercondition = json_decode($randomslots[$firstset->slot]->filtercondition);
+        $slotreports = [];
+        foreach ($slots as $slot) {
+            $slotreport = new \stdClass();
+            $slotreport->slot = $slot->slot;
+            $slotreport->id = $slot->questionid;
+            $slotreport->qtype = $slot->qtype;
+            $slotreport->length = $slot->length;
+            $slotreport->maxmark = $slot->maxmark;
+            $slotreport->type = $slot->qtype;
+            if ($slot->qtype === 'random') {
+                $filtercondition = json_decode($randomslots[$slot->slot]->filtercondition);
                 $categoryobject = $DB->get_record('question_categories', ['id' => $filtercondition->questioncategoryid]);
-                $firstset->categoryobject = $categoryobject;
-                $firstset->category = $filtercondition->questioncategoryid;
+                $slot->categoryobject = $categoryobject;
+                $slot->category = $filtercondition->questioncategoryid;
             }
+            $slotreports [$slotreport->slot] = $slotreport;
         }
-        return $firstsets;
+
+        return $slotreports;
     }
 
     /**

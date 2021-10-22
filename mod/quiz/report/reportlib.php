@@ -107,7 +107,7 @@ function quiz_attempts_exist($quizid) {
  *      ->slot, ->id, ->maxmark, ->number, ->length.
  */
 function quiz_report_get_significant_questions($quiz) {
-    $qsbyslot = \mod_quiz\question\bank\qbank_helper::get_question_report_structure($quiz->id);
+    $qsbyslot = \mod_quiz\question\bank\qbank_helper::get_questions_report_structure($quiz->id);
     $qsbyslot = \mod_quiz\question\bank\qbank_helper::question_array_sort($qsbyslot, 'slot');
     $number = 1;
     foreach ($qsbyslot as $question) {
