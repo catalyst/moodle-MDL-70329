@@ -947,7 +947,6 @@ function _tidy_question($question, $category, array $tagobjects = null, array $f
         $question->questiontext = html_writer::tag('p', get_string('warningmissingtype',
                 'qtype_missingtype')) . $question->questiontext;
     }
-    question_bank::get_qtype($question->qtype)->get_question_options($question);
 
     // Convert numeric fields to float (Prevents these being displayed as 1.0000000.).
     $question->defaultmark += 0;
@@ -958,6 +957,7 @@ function _tidy_question($question, $category, array $tagobjects = null, array $f
     }
 
     $question->categoryobject = $category;
+    question_bank::get_qtype($question->qtype)->get_question_options($question);
 
     if (!is_null($tagobjects)) {
         $categorycontext = context::instance_by_id($category->contextid);

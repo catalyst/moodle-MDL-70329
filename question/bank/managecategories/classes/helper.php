@@ -246,21 +246,24 @@ class helper {
      * Get all the category objects, including a count of the number of questions in that category,
      * for all the categories in the lists $contexts.
      *
-     * @param mixed $contexts either a single contextid, or a comma-separated list of context ids.
+     * @param $contexts
      * @param string $sortorder used as the ORDER BY clause in the select statement.
      * @param bool $top Whether to return the top categories or not.
+     * @param int $showallversions 1 to show all versions not only the latest.
+     * @param int|null $statustocount The version status to count. If null will get all except hidden.
      * @return array of category objects.
      * @throws \dml_exception
      */
     public static function get_categories_for_contexts($contexts, string $sortorder = 'parent, sortorder, name ASC',
-                                                       bool $top = false, $showallversions = 0,
-                                                       $status = null): array {
+                                                       bool $top = false, int $showallversions = 0,
+                                                       ?int $statustocount = null): array {
         global $DB;
         $topwhere = $top ? '' : 'AND c.parent <> 0';
-        if (empty($status)) {
-            $statuscondition = 'AND (qv.status = '. constants::QUESTION_STATUS_READY .' OR qv.status = ' . constants::QUESTION_STATUS_DRAFT . ' )';
+        if (empty($statustocount)) {
+            $statuscondition = 'AND (qv.status = '. constants::QUESTION_STATUS_READY .
+                ' OR qv.status = ' . constants::QUESTION_STATUS_DRAFT . ' )';
         } else {
-            $statuscondition = "AND qv.status = $status";
+            $statuscondition = "AND qv.status = $statustocount";
         }
 
         $sql = "SELECT c.*,
@@ -268,18 +271,17 @@ class helper {
                        FROM {question} q
                        JOIN {question_versions} qv ON qv.questionid = q.id
                        JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                       JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                       WHERE q.parent = '0'
                         $statuscondition
-                        AND c.id = qbe.questioncategoryid
-                        AND ($showallversions = 1
-                            OR (qv.version = (SELECT MAX(v.version)
-                                                FROM {question_versions} v
-                                                JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
-                                               WHERE be.id = qbe.id)
-                               )
-                            )
-                        ) AS questioncount
+                            AND c.id = qbe.questioncategoryid
+                            AND ($showallversions = 1
+                                OR (qv.version = (SELECT MAX(v.version)
+                                                    FROM {question_versions} v
+                                                    JOIN {question_bank_entries} be ON be.id = v.questionbankentryid
+                                                   WHERE be.id = qbe.id)
+                                   )
+                                )
+                            ) AS questioncount
                   FROM {question_categories} c
                  WHERE c.contextid IN ($contexts) $topwhere
               ORDER BY $sortorder";
