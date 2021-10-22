@@ -712,8 +712,11 @@ function question_move_questions_to_category($questionids, $newcategoryid): bool
               JOIN {question_versions} qv ON qv.questionid = q.id
               JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
               JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-             WHERE q.id $questionidcondition";
+             WHERE q.id $questionidcondition
+                   OR (q.parent <> 0 AND q.parent $questionidcondition)";
 
+    // Also, we need to move children questions.
+    $params = array_merge($params, $params);
     $questions = $DB->get_records_sql($sql, $params);
     foreach ($questions as $question) {
         if ($newcategorydata->contextid != $question->contextid) {
@@ -996,10 +999,15 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
 
     foreach ($questionlist as $question) {
         $questionids[] = $question->id;
-        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
+        if (isset($question->category)) {
+            $qcategoryid = $question->category;
+        } else {
+            $qcategoryid = get_question_bank_entry($question->id)->questioncategoryid;
+            $question->questioncategoryid = $qcategoryid;
+        }
 
-        if (!in_array($qcategory, $categoryids)) {
-            $categoryids[] = $qcategory;
+        if (!in_array($qcategoryid, $categoryids)) {
+            $categoryids[] = $qcategoryid;
         }
     }
 
@@ -1017,7 +1025,8 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
         } else {
             $tagobjects = $tagobjectsbyquestion[$question->id];
         }
-        $qcategory = get_question_bank_entry($question->id)->questioncategoryid;
+        $qcategoryid = $question->category ?? $question->questioncategoryid ??
+            get_question_bank_entry($question->id)->questioncategoryid;
 
         if ($loadcustomfields) {
             $customfieldhandler = \qbank_customfields\customfield\question_handler::create();
@@ -1026,7 +1035,7 @@ function get_question_options(&$questions, $loadtags = false, $filtercourses = n
             $question->customfields = $customfields;
         }
 
-        _tidy_question($question, $categories[$qcategory], $tagobjects, $filtercourses);
+        _tidy_question($question, $categories[$qcategoryid], $tagobjects, $filtercourses);
     }
 
     return true;

@@ -2335,24 +2335,52 @@ class backup_questions_structure_step extends backup_structure_step {
         $qcategories = new backup_nested_element('question_categories');
 
         $qcategory = new backup_nested_element('question_category', ['id'],
-                                                ['name', 'contextid', 'contextlevel', 'contextinstanceid', 'info', 'infoformat',
-                                                 'stamp', 'parent', 'sortorder', 'idnumber']);
+            [
+                'name',
+                'contextid',
+                'contextlevel',
+                'contextinstanceid',
+                'info',
+                'infoformat',
+                'stamp',
+                'parent',
+                'sortorder',
+                'idnumber',
+            ]);
 
         $questionbankentries = new backup_nested_element('question_bank_entries');
 
-        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'], ['questioncategoryid', 'idnumber', 'ownerid']);
+        $questionbankentry = new backup_nested_element('question_bank_entry', ['id'],
+            [
+                'questioncategoryid',
+                'idnumber',
+                'ownerid',
+            ]);
 
-        $questionversions = new backup_nested_element('question_versions_entry');
+        $questionversions = new backup_nested_element('question_version');
 
         $questionverion = new backup_nested_element('question_versions', ['id'], ['version', 'status']);
 
         $questions = new backup_nested_element('questions');
 
         $question = new backup_nested_element('question', ['id'],
-                                                ['parent', 'name', 'questiontext', 'questiontextformat',
-                                                'generalfeedback', 'generalfeedbackformat', 'defaultmark',
-                                                'penalty', 'qtype', 'length', 'stamp', 'timecreated',
-                                                'timemodified', 'createdby', 'modifiedby']);
+            [
+                'parent',
+                'name',
+                'questiontext',
+                'questiontextformat',
+                'generalfeedback',
+                'generalfeedbackformat',
+                'defaultmark',
+                'penalty',
+                'qtype',
+                'length',
+                'stamp',
+                'timecreated',
+                'timemodified',
+                'createdby',
+                'modifiedby',
+            ]);
 
         // Attach qtype plugin structure to $question element, only one allowed.
         $this->add_plugin_structure('qtype', $question, false);
@@ -2366,7 +2394,13 @@ class backup_questions_structure_step extends backup_structure_step {
         $qhints = new backup_nested_element('question_hints');
 
         $qhint = new backup_nested_element('question_hint', ['id'],
-                                            ['hint', 'hintformat', 'shownumcorrect', 'clearwrong', 'options']);
+            [
+                'hint',
+                'hintformat',
+                'shownumcorrect',
+                'clearwrong',
+                'options',
+            ]);
 
         $tags = new backup_nested_element('tags');
 

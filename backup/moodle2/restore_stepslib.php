@@ -4771,9 +4771,9 @@ class restore_create_categories_and_questions extends restore_structure_step {
             $paths [] = new restore_path_element('question_bank_entry',
                 '/question_categories/question_category/question_bank_entries/question_bank_entry');
             $paths [] = new restore_path_element('question_versions', '/question_categories/question_category/'.
-                'question_bank_entries/question_bank_entry/question_versions_entry/question_versions');
+                'question_bank_entries/question_bank_entry/question_version/question_versions');
             $question = new restore_path_element('question', '/question_categories/question_category/'.
-                'question_bank_entries/question_bank_entry/question_versions_entry/question_versions/questions/question');
+                'question_bank_entries/question_bank_entry/question_version/question_versions/questions/question');
 
             // Apply for 'qtype' plugins optional paths at question level.
             $this->add_plugin_structure('qtype', $question);
@@ -4786,9 +4786,9 @@ class restore_create_categories_and_questions extends restore_structure_step {
 
             $paths [] = $question;
             $paths [] = new restore_path_element('question_hint', '/question_categories/question_category/question_bank_entries/'.
-                'question_bank_entry/question_versions_entry/question_versions/questions/question/question_hints/question_hint');
+                'question_bank_entry/question_version/question_versions/questions/question/question_hints/question_hint');
             $paths [] = new restore_path_element('tag', '/question_categories/question_category/question_bank_entries/'.
-                'question_bank_entry/question_versions_entry/question_versions/questions/question/tags/tag');
+                'question_bank_entry/question_version/question_versions/questions/question/tags/tag');
         }
 
         return $paths;
