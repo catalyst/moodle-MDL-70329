@@ -1026,17 +1026,6 @@ class question_type {
      * @param object $questiondata the question data loaded from the database.
      */
     protected function initialise_question_extra_record(question_definition $question, $questiondata) {
-        global $DB;
-        $extrarecord = $DB->get_record_sql('SELECT qv.status,
-                                                       qv.version,
-                                                       qv.id as versionid,
-                                                       qv.questionbankentryid,
-                                                       qbe.idnumber
-                                                  FROM {question} q
-                                                  JOIN {question_versions} qv ON qv.questionid = q.id
-                                                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                                                 WHERE q.id = ?', [$questiondata->id]);
-
         $fields =
             [
                 'status',
@@ -1049,8 +1038,6 @@ class question_type {
         foreach ($fields as $field) {
             if (isset($questiondata->{$field})) {
                 $question->{$field} = $questiondata->{$field};
-            } else if ($extrarecord) {
-                $question->{$field} = $extrarecord->{$field};
             }
         }
     }
