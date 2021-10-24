@@ -45,9 +45,9 @@ class plugin_feature extends plugin_features_base{
             $contexts = [$catcontext, $thiscontext];
             $filters = $qbank->get_pagevars('filters');
             $filter = $filters['qtagids'] ?? [];
-            $tagids = $filter['values'] ?? '';
+            $tagids = !empty($filter['values']) ? explode(',', $filter['values']) : [];
             $filterverb = $filter['filterverb'] ?? tag_condition::JOINTYPE_DEFAULT;
-            $searchconditions['tag'] = new tag_condition($contexts, explode(',', $tagids), $filterverb);
+            $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
         }
         return $searchconditions;
     }
