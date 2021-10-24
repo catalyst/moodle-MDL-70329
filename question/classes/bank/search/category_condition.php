@@ -171,15 +171,24 @@ class category_condition extends condition {
     }
 
     /**
-     * Look up the category record based on cateogry ID and context
+     * Print the text if category id not available.
+     */
+    public static function print_choose_category_message(): void {
+        echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
+        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
+        echo \html_writer::end_tag('p');
+    }
+
+    /**
+     * Look up the category record based on category ID and context
      * @param string $categoryandcontext categoryID,contextID as used with question_bank_view->display()
      * @return \stdClass The category record
      */
-    protected function get_current_category($categoryandcontext) {
+    public static function get_current_category($categoryandcontext) {
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         if (!$categoryid) {
-            $this->print_choose_category_message($categoryandcontext);
+            self::print_choose_category_message($categoryandcontext);
             return false;
         }
 

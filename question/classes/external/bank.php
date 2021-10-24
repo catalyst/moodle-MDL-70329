@@ -143,9 +143,14 @@ class bank extends external_api {
         global $DB;
 
         $courseid = $defaultcourseid;
+        $categories = $DB->get_records('question_categories', ['id' => $defaultcategoryid]);
+        $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+        $category = array_pop($categories);
+        $category = $category->id;
 
         $params = [
             'courseid' => $courseid,
+            'cat' => $category,
             'filterverb' => $filterverb,
             'qperpage' => $qperpage,
             'qpage' => $qpage,
@@ -155,14 +160,16 @@ class bank extends external_api {
         ];
 
         foreach ($filters as $filter) {
-            $params[$filter['filtertype']] = $filter['values'];
+            $params['filters'][$filter['filtertype']] = $filter;
         }
-
-        list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
-            question_build_edit_resources('questions', '/question/edit.php', $params);
+        require_login($courseid, false);
+        $thispageurl = new \moodle_url('/question/edit.php');
+        $thiscontext = \context_course::instance($courseid);
+        $contexts = new \question_edit_contexts($thiscontext);
         $course = get_course($courseid);
+        $cm = null;
         $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
-        $questionbank->set_pagevars($pagevars);
+        $questionbank->set_pagevars($params);
         $questionbank->add_standard_searchcondition();
         ob_start();
         $questionbank->display_for_api();

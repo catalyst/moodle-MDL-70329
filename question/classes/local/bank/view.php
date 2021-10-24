@@ -24,6 +24,7 @@
 
 namespace core_question\local\bank;
 
+use core_question\bank\search\category_condition;
 use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
@@ -793,39 +794,6 @@ class view {
     }
 
     /**
-     * Print the text if category id not available.
-     */
-    protected function print_choose_category_message(): void {
-        echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
-        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
-        echo \html_writer::end_tag('p');
-    }
-
-    /**
-     * Gets current selected category.
-     * @param string $categoryandcontext
-     * @return false|mixed|\stdClass
-     */
-    protected function get_current_category($categoryandcontext) {
-        global $DB, $OUTPUT;
-        list($categoryid, $contextid) = explode(',', $categoryandcontext);
-        if (!$categoryid) {
-            $this->print_choose_category_message();
-            return false;
-        }
-
-        if (!$category = $DB->get_record('question_categories',
-                ['id' => $categoryid, 'contextid' => $contextid])) {
-            echo $OUTPUT->box_start('generalbox questionbank');
-            echo $OUTPUT->notification('Category not found!');
-            echo $OUTPUT->box_end();
-            return false;
-        }
-
-        return $category;
-    }
-
-    /**
      * Display the form with options for which questions are displayed and how they are displayed.
      *
      * @param bool $showquestiontext Display the text of the question within the list.
@@ -941,7 +909,7 @@ class view {
         // Note: We do not call this in the loop because quiz ob_ captures this function (see raise() PHP doc).
         \core_php_time_limit::raise(300);
 
-        $category = $this->get_current_category($categoryandcontext);
+        $category = category_condition::get_current_category($categoryandcontext);
 
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         $catcontext = \context::instance_by_id($contextid);

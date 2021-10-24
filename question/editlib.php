@@ -269,11 +269,7 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     }
 
     if (!empty($params['qtagids'])) {
-        $qtagids = $params['qtagids'];
-        if (!is_array($qtagids) && strpos($qtagids, ',') !== false) {
-            $qtagids = explode(',', $qtagids);
-        }
-        $cleanparams['qtagids'] = clean_param_array($qtagids, PARAM_INT);
+        $cleanparams['qtagids'] = clean_param_array($params['qtagids'], PARAM_INT);
     }
 
     $cmid = $cleanparams['cmid'];
@@ -282,9 +278,6 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     $cat = $cleanparams['cat'] ?: 0;
     $category = $cleanparams['category'] ?: 0;
     $qperpage = $cleanparams['qperpage'];
-    $recurse = $cleanparams['recurse'];
-    $showhidden = $cleanparams['showhidden'];
-    $qbshowtext = $cleanparams['qbshowtext'];
     $cpage = $cleanparams['cpage'] ?: 1;
     $recurse = $cleanparams['recurse'];
     $showhidden = $cleanparams['showhidden'];

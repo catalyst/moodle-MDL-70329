@@ -80,7 +80,7 @@ class tag_condition extends condition {
                                             AND ti.tagid {$tagsql}
                                    GROUP BY ti.itemid ";
             if ($filterverb === self::JOINTYPE_ALL) {
-                $this->where .= "HAVING COUNT(itemid) = :tagcount) ";
+                $this->where .= "HAVING COUNT(itemid) = :tagcount ";
             }
             $this->where .= ") ";
 

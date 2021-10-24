@@ -43,9 +43,11 @@ class plugin_feature extends plugin_features_base{
             $catcontext = \context::instance_by_id($contextid);
             $thiscontext = $qbank->get_most_specific_context();
             $contexts = [$catcontext, $thiscontext];
-            $tagids = $qbank->get_pagevars('qtagids');
-            $filterverb = $qbank->get_pagevars('filterverb');
-            $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
+            $filters = $qbank->get_pagevars('filters');
+            $filter = $filters['qtagids'] ?? [];
+            $tagids = $filter['values'] ?? '';
+            $filterverb = $filter['filterverb'] ?? tag_condition::JOINTYPE_DEFAULT;
+            $searchconditions['tag'] = new tag_condition($contexts, explode(',', $tagids), $filterverb);
         }
         return $searchconditions;
     }
