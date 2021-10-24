@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version information for qbank_editquestion.
- *
- * @package    qbank_editquestion
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace qbank_editquestion\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'qbank_editquestion';
-$plugin->version   = 2021102500;
-$plugin->requires  = 2021052500;
-$plugin->maturity  = MATURITY_STABLE;
+require_once($CFG->dirroot . '/lib/formslib.php');
+
+class question_status_form extends \moodleform {
+
+    public function definition() {
+        $mform = $this->_form;
+        $mform->disable_form_change_checker();
+        $mform->addElement('select', 'status', get_string('status', 'qbank_editquestion'),
+            \qbank_editquestion\editquestion_helper::get_question_status_list());
+    }
+}
