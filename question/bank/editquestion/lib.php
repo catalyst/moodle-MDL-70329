@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_editquestion, language 'en'.
+ * Helper functions and callbacks.
  *
  * @package    qbank_editquestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -23,17 +23,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Edit questions';
-$string['privacy:metadata'] = 'The Edit questions question bank plugin does not store any user data.';
+defined('MOODLE_INTERNAL') || die();
 
-// Question status.
-$string['questionstatus'] = 'Status';
-$string['questionstatusready'] = 'Ready';
-$string['questionstatushidden'] = 'Hidden';
-$string['questionstatusdraft'] = 'Draft';
-$string['questionstatusunknown'] = 'Unknown';
-$string['questionstatusheader'] = 'Change question status';
+/**
+ * Question status fragment callback.
+ *
+ * @param array $args
+ * @return string rendered output
+ */
+function qbank_editquestion_output_fragment_question_status($args): string {
+    global $CFG;
+    require_once($CFG->dirroot . '/question/engine/bank.php');
+    $question = question_bank::load_question($args['questionid']);
+    $mform = new \qbank_editquestion\form\question_status_form();
+    $data = ['status' => $question->status];
+    $mform->set_data($data);
 
-// Edit form.
-$string['versioninfo'] = 'Authors, version control and usage';
-$string['status'] = 'Question status';
+    return $mform->render();
+}
