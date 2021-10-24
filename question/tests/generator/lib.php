@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core_question\local\bank\constants;
+use core_question\local\bank\question_version_status;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -97,7 +97,7 @@ class core_question_generator extends component_generator_base {
         $question->qtype = $qtype;
         $question->createdby = 0;
         $question->idnumber = null;
-        $question->status = constants::QUESTION_STATUS_READY;
+        $question->status = question_version_status::QUESTION_STATUS_READY;
 
         return $this->update_question($question, $which, $overrides);
     }
