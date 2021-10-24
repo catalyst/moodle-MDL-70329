@@ -1295,19 +1295,13 @@ function upgrade_calendar_override_events_fix(stdClass $info, bool $output = tru
 function upgrade_migrate_question_table(): void {
     global $DB;
 
-    /**
-     * @var int Maximum size of array.
-     */
+    /** @var int Maximum size of array. */
     $maxlength = 30000;
 
-    /**
-     * @var array Array of question_versions objects.
-     */
+    /** @var array Array of question_versions objects. */
     $questionversions = [];
 
-    /**
-     * @var array Array of question_set_references objects.
-     */
+    /** @var array Array of question_set_references objects. */
     $questionsetreferences = [];
 
     // The actual update/insert done with multiple DB access, so we do it in a transaction.
