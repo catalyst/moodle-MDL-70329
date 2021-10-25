@@ -732,7 +732,7 @@ class view {
         if (empty($pagevars['qtagids'])) {
             $pagevars['qtagids'] = [];
         }
-        $tagids = $pagevars['qtagids'];
+        $pagevars['tabname'] = $tabname;
         $this->set_pagevars($pagevars);
 
         echo \html_writer::start_div('questionbankwindow boxwidthwide boxaligncenter');
@@ -742,10 +742,8 @@ class view {
             return;
         }
 
-        $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
-
         // Show the filters and search options.
-        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage);
+        $this->wanted_filters($cat, $showhidden, $recurse, $showquestiontext, $perpage);
 
         // Continues with list of questions.
         $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
@@ -758,14 +756,12 @@ class view {
      * The filters for the question bank.
      *
      * @param string $cat 'categoryid,contextid'
-     * @param array $tagids current list of selected tags
      * @param bool $showhidden whether deleted questions should be displayed
      * @param int $recurse Whether to include subcategories
-     * @param array $editcontexts parent contexts
      * @param bool $showquestiontext whether the text of each question should be shown in the list
      * @param bool $perpage pergage number of records per page
      */
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext, $perpage = 0): void {
+    public function wanted_filters($cat, $showhidden, $recurse, $showquestiontext, $perpage = 0): void {
         global $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
@@ -779,7 +775,7 @@ class view {
                     $this->add_searchcondition($filterobjects);
                 }
             } else {
-                $this->add_standard_searchcondition($cat, $tagids, $showhidden, $recurse);
+                $this->add_standard_searchcondition();
             }
             // Render the question bank filters.
             $additionalparams = [
@@ -1312,7 +1308,7 @@ class view {
         $cat = $this->get_pagevars('cat');
         $showhidden = $this->get_pagevars('showhidden');
         $recurse = $this->get_pagevars('recurse');
-        $editcontexts = $this->contexts->having_one_edit_tab_cap('questions');
+        $editcontexts = $this->contexts->having_one_edit_tab_cap($this->get_pagevars('tabname'));
 
         $this->add_searchcondition(new \core_question\bank\search\category_condition(
             $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');

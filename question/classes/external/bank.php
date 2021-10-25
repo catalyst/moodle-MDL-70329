@@ -143,25 +143,41 @@ class bank extends external_api {
         global $DB;
 
         $courseid = $defaultcourseid;
-        $categories = $DB->get_records('question_categories', ['id' => $defaultcategoryid]);
-        $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
-        $category = array_pop($categories);
-        $category = $category->id;
 
         $params = [
             'courseid' => $courseid,
-            'cat' => $category,
             'filterverb' => $filterverb,
             'qperpage' => $qperpage,
             'qpage' => $qpage,
             'qbshowtext' => $qbshowtext,
             'recurse' => $recurse,
             'showhidden' => $showhidden,
+            'tabname' => 'questions'
         ];
 
         foreach ($filters as $filter) {
-            $params['filters'][$filter['filtertype']] = $filter;
+            $params['filters'][$filter['filtertype']] = [
+                'jointype' => $filter['jointype'],
+                'values' => empty($filter['values'])? [] : explode(',', $filter['values']),
+            ];
         }
+
+        // Set default category if it's empty.
+        if (empty($filters['category'])) {
+            $params['filters']['category'] = [
+                'values' => [$defaultcategoryid],
+            ];
+        }
+        // Add contextID for the category filter.
+        $categoryids = $params['filters']['category']['values'];
+        // Currently, we support only one category for the list because of new/edit/delete buttons.
+        $categoryid = array_pop($categoryids);
+        $categories = $DB->get_records('question_categories', ['id' => $categoryid]);
+        $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+        $category = array_pop($categories);
+        $category = $category->id;
+        $params['cat'] = $category;
+
         require_login($courseid, false);
         $thispageurl = new \moodle_url('/question/edit.php');
         $thiscontext = \context_course::instance($courseid);

@@ -83,14 +83,14 @@ class category_condition extends condition {
      */
     private function init() {
         global $DB;
-        if (!$this->category = $this->get_current_category($this->cat)) {
-            return;
-        }
-        if ($this->recurse) {
-            $categoryids = question_categorylist($this->category->id);
-        } else {
-            $categoryids = [$this->category->id];
-        }
+            if (!$this->category = $this->get_current_category($this->cat)) {
+                return;
+            }
+            if ($this->recurse) {
+                $categoryids = question_categorylist($this->category->id);
+            } else {
+                $categoryids = [$this->category->id];
+            }
         list($catidtest, $this->params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
         $this->where = 'q.category ' . $catidtest;
     }
@@ -188,7 +188,7 @@ class category_condition extends condition {
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         if (!$categoryid) {
-            self::print_choose_category_message($categoryandcontext);
+            self::print_choose_category_message();
             return false;
         }
 

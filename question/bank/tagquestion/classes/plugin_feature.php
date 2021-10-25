@@ -36,16 +36,26 @@ class plugin_feature extends plugin_features_base{
     }
 
     public function get_question_bank_search_conditions(view $qbank): array {
-        global $CFG;
+        global $CFG, $DB;
         $searchconditions = [];
         if ($CFG->usetags) {
-            list(, $contextid) = explode(',', $qbank->get_pagevars('cat'));
-            $catcontext = \context::instance_by_id($contextid);
+            $cat = $qbank->get_pagevars('cat');
+            $contexts = [];
+            if (is_array($cat)) {
+                foreach ($cat as $value) {
+                    list(, $contextid) = explode(',', $value);
+                    $catcontext = \context::instance_by_id($contextid);
+                    $contexts[] = $catcontext;
+                }
+            } else {
+                list(, $contextid) = explode(',', $qbank->get_pagevars('cat'));
+                $catcontext = \context::instance_by_id($contextid);
+                $contexts[] = $catcontext;
+            }
             $thiscontext = $qbank->get_most_specific_context();
-            $contexts = [$catcontext, $thiscontext];
+            $contexts[] = $thiscontext;
             $filters = $qbank->get_pagevars('filters');
-            $filter = $filters['qtagids'] ?? [];
-            $tagids = !empty($filter['values']) ? explode(',', $filter['values']) : [];
+            $tagids = $filters['qtagids']['values'] ?? [];
             $filterverb = $filter['filterverb'] ?? tag_condition::JOINTYPE_DEFAULT;
             $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
         }
