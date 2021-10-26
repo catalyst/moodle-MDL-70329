@@ -24,6 +24,7 @@ Feature: A teacher can edit questions in the question bank
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
 
+  @javascript
   Scenario: Edit a previously created question
     When I choose "Edit question" action for "Test question to be edited" in the question bank
     And I set the following fields to these values:
@@ -34,6 +35,7 @@ Feature: A teacher can edit questions in the question bank
     And I should not see "Test question to be edited"
     And "Edited question name" row "Created by" column of "categoryquestions" table should contain "Teacher 1"
 
+  @javascript
   Scenario: Editing a question can be cancelled
     When I choose "Edit question" action for "Test question to be edited" in the question bank
     And I set the field "Question name" to "Edited question name"
@@ -41,6 +43,7 @@ Feature: A teacher can edit questions in the question bank
     Then I should see "Test question to be edited"
     And "Test question to be edited" row "Created by" column of "categoryquestions" table should contain "Admin User"
 
+  @javascript
   Scenario: A question can have its idnumber removed
     Given the following "questions" exist:
       | questioncategory | qtype | name                   | idnumber |
@@ -52,6 +55,7 @@ Feature: A teacher can edit questions in the question bank
     And I press "id_submitbutton"
     Then I should not see "frog" in the "Question with idnumber" "table_row"
 
+  @javascript
   Scenario: If the question type is no longer installed, then most edit actions are not present
     Given the following "questions" exist:
       | questioncategory | qtype       | name            | questiontext    |

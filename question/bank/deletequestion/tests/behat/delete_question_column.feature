@@ -1,4 +1,4 @@
-@qbank @qbank_deletequestion
+@qbank @qbank_deletequestion @javascript
 Feature: Use the qbank plugin manager page for deletequestion
   In order to check the plugin behaviour with enable and disable
 
@@ -33,7 +33,6 @@ Feature: Use the qbank plugin manager page for deletequestion
     And I click on ".dropdown-toggle" "css_element" in the "First question" "table_row"
     And I should see "Delete" in the "region-main" "region"
 
-  @javascript
   Scenario: Enable/disable delete questions bulk action from the base view
     Given I log in as "admin"
     When I navigate to "Plugins > Question bank plugins > Manage question bank plugins" in site administration
@@ -50,7 +49,6 @@ Feature: Use the qbank plugin manager page for deletequestion
     And I click on "With selected" "button"
     And I should see question bulk action "deleteselected"
 
-  @javascript
   Scenario: I should not see the deleted questions in the base view
     Given I log in as "admin"
     And I am on the "Test quiz" "quiz activity" page

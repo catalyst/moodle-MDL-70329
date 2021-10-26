@@ -126,60 +126,29 @@ class helper_test extends \advanced_testcase {
      * @covers ::bulk_move_questions
      */
     public function test_bulk_move_questions() {
+        global $DB;
         $this->helper_setup();
-        // Verify that the questions are available in the current view.
-        $view = new \core_question\local\bank\view($this->contexts, new \moodle_url('/'), $this->course);
-        ob_start();
-        $pagevars = [
-            'qpage' => 0,
-            'qperpage' => 20,
-            'cat' => $this->cat->id . ',' . $this->context->id,
-            'recurse' => false,
-            'showhidden' => false,
-            'qbshowtext' => false
-        ];
-        $view->display($pagevars, 'editq');
-        $html = ob_get_clean();
-        $this->assertStringContainsString('Example question', $html);
-        $this->assertStringContainsString('Example question second', $html);
+
+        $sql = 'SELECT COUNT(q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                 WHERE qc.id = ?';
 
         // Get the processed question ids.
         $questionlist = $this->process_question_ids_test();
 
+        // Verify that the questions are available in the current view.
+        $this->assertEquals(2, $DB->count_records_sql($sql, [$this->cat->id]));
+
         helper::bulk_move_questions($questionlist, $this->secondcategory);
 
         // Verify the questions are not in the current category.
-        $view = new \core_question\local\bank\view($this->contexts, new \moodle_url('/'), $this->course);
-        ob_start();
-        $pagevars = [
-            'qpage' => 0,
-            'qperpage' => 20,
-            'cat' => $this->cat->id . ',' . $this->context->id,
-            'recurse' => false,
-            'showhidden' => false,
-            'qbshowtext' => false
-        ];
-        $view->display($pagevars, 'editq');
-        $html = ob_get_clean();
-        $this->assertStringNotContainsString('Example question', $html);
-        $this->assertStringNotContainsString('Example question second', $html);
+        $this->assertEquals(0, $DB->count_records_sql($sql, [$this->cat->id]));
 
         // Verify the questions are in the new category.
-        $view = new \core_question\local\bank\view($this->contexts, new \moodle_url('/'), $this->course);
-        ob_start();
-        $pagevars = [
-            'qpage' => 0,
-            'qperpage' => 20,
-            'cat' => $this->secondcategory->id . ',' . $this->context->id,
-            'category' => $this->secondcategory->id . ',' . $this->context->id,
-            'recurse' => false,
-            'showhidden' => false,
-            'qbshowtext' => false
-        ];
-        $view->display($pagevars, 'editq');
-        $html = ob_get_clean();
-        $this->assertStringContainsString('Example question', $html);
-        $this->assertStringContainsString('Example question second', $html);
+        $this->assertEquals(2, $DB->count_records_sql($sql, [$this->secondcategory->id]));
     }
 
     /**

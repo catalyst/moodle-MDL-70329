@@ -1,4 +1,4 @@
-@core @core_question
+@core @core_question @javascript
 Feature: A teacher can put questions with idnumbers in categories in the question bank
   In order to organize my questions
   As a teacher
@@ -17,6 +17,7 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
 
+  @javascript
   Scenario: A question can only have a unique idnumber within a category
     When the following "question categories" exist:
       | contextlevel | reference | questioncategory | name           | idnumber |
@@ -33,6 +34,7 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
     # This is the standard form warning reminding the user that the idnumber needs to be unique for a category.
     Then I should see "This ID number is already in use"
 
+  @javascript
   Scenario: A question can be edited and saved without changing the idnumber
     When the following "question categories" exist:
       | contextlevel | reference | questioncategory | name           | idnumber |
@@ -62,7 +64,6 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
     And I press "Save changes"
     Then I should see "This ID number is already in use"
 
-  @javascript
   Scenario: Moving a question between categories can force a change to the idnumber
     And the following "question categories" exist:
       | contextlevel | reference | questioncategory | name           | idnumber |

@@ -298,9 +298,6 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     $cat = $cleanparams['cat'] ?: 0;
     $category = $cleanparams['category'] ?: 0;
     $qperpage = $cleanparams['qperpage'];
-    $recurse = $cleanparams['recurse'];
-    $showhidden = $cleanparams['showhidden'];
-    $qbshowtext = $cleanparams['qbshowtext'];
     $cpage = $cleanparams['cpage'] ?: 1;
     $recurse = $cleanparams['recurse'];
     $showhidden = $cleanparams['showhidden'];
@@ -405,9 +402,13 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     }
 
     $pagevars['qtagids'] = $qtagids;
+    if (empty($qtagids)) {
+        $pagevars['qtagids'] = [];
+    }
     foreach ($pagevars['qtagids'] as $index => $qtagid) {
         $thispageurl->param("qtagids[{$index}]", $qtagid);
     }
+    $pagevars['tabname'] = $edittab;
 
     return array($thispageurl, $contexts, $cmid, $cm, $module, $pagevars);
 }

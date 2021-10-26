@@ -1,4 +1,4 @@
-@qbank @qbank_editquestion
+@qbank @qbank_editquestion @javascript
 Feature: Use the qbank base view to test the status change using
   the pop up
 
@@ -17,12 +17,10 @@ Feature: Use the qbank base view to test the status change using
       | Test questions   | truefalse | First question  | Answer the first question |
       | Test questions   | truefalse | Second question | Answer the first question |
 
-  @javascript
   Scenario: Question status dropdown should change the status of the question
     Given I log in as "admin"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I should see "Test questions"
     And I should see "Ready" in the "First question" "table_row"
     And I should see "Ready" in the "Second question" "table_row"

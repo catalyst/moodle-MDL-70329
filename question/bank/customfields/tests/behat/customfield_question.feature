@@ -28,15 +28,14 @@ Feature: A teacher can edit question with custom fields
       | intro    | Test quiz description |
       | section  | 1                     |
       | grade    | 10                    |
+    And the following "question categories" exist:
+      | contextlevel | reference | name           |
+      | Course       | C1        | Test questions |
+    And the following "questions" exist:
+      | questioncategory | qtype     | name           | questiontext              |
+      | Test questions   | truefalse | First question | Answer the first question |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "True/False" question to the "Test quiz name" quiz with:
-      | Question name                      | First question                          |
-      | Question text                      | Answer the first question               |
-      | General feedback                   | Thank you, this is the general feedback |
-      | Correct answer                     | False                                   |
-      | Feedback for the response 'True'.  | So you think it is true                 |
-      | Feedback for the response 'False'. | So you think it is false                |
     And I am on the "Test quiz name" "quiz activity" page
     And I navigate to "Question bank" in current page administration
 

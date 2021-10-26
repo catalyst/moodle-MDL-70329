@@ -14,30 +14,58 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
-/**
- * Defines an abstract class for filtering/searching the question bank.
- *
- * @package   core_question
- * @copyright 2013 Ray Morris
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace core_question\bank\search;
+namespace core_question\local\bank;
 
 /**
  * An abstract class for filtering/searching questions.
  *
- * See also {@see question_bank_view::init_search_conditions()}.
- * @copyright 2013 Ray Morris
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    core_question
+ * @copyright  2013 Ray Morris
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class condition {
+
+    /** @var int The default filter type (ALL) */
+    const JOINTYPE_DEFAULT = 2;
+
+    /** @var int None of the following match */
+    const JOINTYPE_NONE = 0;
+
+    /** @var int Any of the following match */
+    const JOINTYPE_ANY = 1;
+
+    /** @var int All of the following match */
+    const JOINTYPE_ALL = 2;
+
+    /** @var int The default filter type (BETWEEN) */
+    const RANGETYPE_DEFAULT = 2;
+
+    /** @var int After specified date */
+    const RANGETYPE_AFTER = 0;
+
+    /** @var int Before specified date */
+    const RANGETYPE_BEFORE = 1;
+
+    /** @var int Between specified dates */
+    const RANGETYPE_BETWEEN = 2;
+
     /**
      * Return an SQL fragment to be ANDed into the WHERE clause to filter which questions are shown.
      * @return string SQL fragment. Must use named parameters.
      */
     abstract public function where();
+
+    /**
+     * Each condition will need a unique key to be identified and sequenced by the api.
+     * Use a unique string for the condition identifier, use string directly, dont need to use language pack.
+     * Using language pack might break the filter object for multilingual support.
+     *
+     * @return string
+     */
+    public function get_condition_key() {
+        return '';
+    }
 
     /**
      * Return parameters to be bound to the above WHERE clause fragment.
@@ -65,5 +93,27 @@ abstract class condition {
      */
     public function display_options() {
         return false;
+    }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        return [];
+    }
+
+    /**
+     * Get the list of available joins for the filter.
+     *
+     * @return array
+     */
+    public function get_join_list(): array {
+        return [
+            self::JOINTYPE_NONE => get_string('none'),
+            self::JOINTYPE_ANY => get_string('any'),
+            self::JOINTYPE_ALL => get_string('all'),
+        ];
     }
 }

@@ -2371,9 +2371,20 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
     require_once($CFG->dirroot . '/mod/quiz/locallib.php');
     require_once($CFG->dirroot . '/question/editlib.php');
 
-    $querystring = preg_replace('/^\?/', '', $args['querystring']);
-    $params = [];
-    parse_str($querystring, $params);
+    if (is_array($args)) {
+        $querystring = preg_replace('/^\?/', '', $args['querystring']);
+        $params = [];
+        parse_str($querystring, $params);
+    } else {
+        $param = json_decode($args);
+        $filtercondition = json_decode($param->filtercondition);
+        $extraparams = json_decode($param->extraparams);
+        $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+        $extraparamsclean = [];
+        if (!empty($extraparams)) {
+            $extraparamsclean = \core_question\local\bank\helper::convert_object_array($extraparams);
+        }
+    }
 
     // Build the required resources. The $params are all cleaned as
     // part of this process.
@@ -2385,7 +2396,9 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
     require_capability('mod/quiz:manage', $contexts->lowest());
 
     // Create quiz question bank view.
-    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $quiz);
+    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $pagevars, [$quiz]);
+    //$questionbank->component = 'mod_quiz';
+    //$questionbank->callback = 'quiz_question_bank';
     $questionbank->set_quiz_has_attempts(quiz_has_attempts($quiz->id));
 
     // Output.

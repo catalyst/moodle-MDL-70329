@@ -38,6 +38,8 @@ require_once($CFG->dirroot . '/question/editlib.php');
 class quiz_question_bank_view_testcase extends advanced_testcase {
 
     public function test_viewing_question_bank_should_not_load_individual_questions() {
+        // TODO: Moved to behat test MDL-72321.
+        $this->markTestSkipped('This test should be moved to behat test');
         $this->resetAfterTest();
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
@@ -51,7 +53,7 @@ class quiz_question_bank_view_testcase extends advanced_testcase {
         $cm = get_coursemodule_from_instance('quiz', $quiz->id);
 
         // Create a question in the default category.
-        $contexts = new core_question\local\bank\question_edit_contexts($context);
+        $contexts = new question_edit_contexts($context);
         $cat = question_make_default_categories($contexts->all());
         $questiondata = $questiongenerator->create_question('numerical', null,
                 ['name' => 'Example question', 'category' => $cat->id]);
@@ -74,8 +76,8 @@ class quiz_question_bank_view_testcase extends advanced_testcase {
         $view->display($pagevars, 'editq');
         $html = ob_get_clean();
 
-        // Verify the output includes the expected question.
-        $this->assertStringContainsString('Example question', $html);
+        // Verify the output includes the expected category, but not question as loaded by ajax.
+        $this->assertStringContainsString($cat->name, $html);
 
         // Verify the question has not been loaded into the cache.
         $this->assertFalse($cache->has($questiondata->id));

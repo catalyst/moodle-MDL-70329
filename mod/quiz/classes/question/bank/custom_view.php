@@ -54,9 +54,9 @@ class custom_view extends \core_question\local\bank\view {
      * @param \stdClass $cm activity settings.
      * @param \stdClass $quiz quiz settings.
      */
-    public function __construct($contexts, $pageurl, $course, $cm, $quiz) {
-        parent::__construct($contexts, $pageurl, $course, $cm);
-        $this->quiz = $quiz;
+    public function __construct($contexts, $pageurl, $course, $cm, $params, $extraparams) {
+        parent::__construct($contexts, $pageurl, $course, $cm, $params, $extraparams);
+        $this->quiz = $extraparams[0];
     }
 
     protected function get_question_bank_plugins(): array {
@@ -183,7 +183,7 @@ class custom_view extends \core_question\local\bank\view {
      */
     public function render($pagevars, $tabname): string {
         ob_start();
-        $this->display($pagevars, $tabname);
+        $this->display();
         $out = ob_get_contents();
         ob_end_clean();
         return $out;
@@ -302,33 +302,5 @@ class custom_view extends \core_question\local\bank\view {
         $sql .= ' WHERE ' . implode(' AND ', $tests);
         $this->countsql = 'SELECT count(1)' . $sql;
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
-    }
-
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
-        list(, $contextid) = explode(',', $cat);
-        $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
-        // Category selection form.
-        $this->display_question_bank_header();
-
-        // Display tag filter if usetags setting is enabled/enablefilters is true.
-        if ($this->enablefilters) {
-            if (is_array($this->customfilterobjects)) {
-                foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
-                }
-            } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                        new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new custom_category_condition(
-                    $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
-            }
-        }
-        $this->display_options_form($showquestiontext);
     }
 }

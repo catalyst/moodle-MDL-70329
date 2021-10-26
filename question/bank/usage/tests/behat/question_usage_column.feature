@@ -1,4 +1,4 @@
-@qbank @qbank_usage
+@qbank @qbank_usage @javascript
 Feature: Use the qbank plugin manager page for question usage
   In order to check the plugin behaviour with enable and disable
 
@@ -30,12 +30,10 @@ Feature: Use the qbank plugin manager page for question usage
     And I navigate to "Question bank" in current page administration
     And I should see "Usage"
 
-  @javascript
   Scenario: Question usage modal should work without any usage data
     Given I log in as "admin"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I should see "Test questions"
     And I should see "0" on the usage column
     When I click "0" on the usage column

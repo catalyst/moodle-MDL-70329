@@ -16,9 +16,11 @@
 
 namespace qbank_statistics;
 
+use core_question\local\bank\view;
 use qbank_statistics\columns\facility_index;
 use qbank_statistics\columns\discrimination_index;
 use qbank_statistics\columns\discriminative_efficiency;
+
 /**
  * Class plugin_features is the entrypoint for the columns.
  *
@@ -40,6 +42,12 @@ class plugin_feature extends \core_question\local\bank\plugin_features_base {
             new discrimination_index($qbank),
             new facility_index($qbank),
             new discriminative_efficiency($qbank)
+        ];
+    }
+
+    public function get_question_filters(view $qbank): array {
+        return [
+            new discrimination_condition($qbank),
         ];
     }
 }
