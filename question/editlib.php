@@ -278,9 +278,6 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     $cat = $cleanparams['cat'] ?: 0;
     $category = $cleanparams['category'] ?: 0;
     $qperpage = $cleanparams['qperpage'];
-    $recurse = $cleanparams['recurse'];
-    $showhidden = $cleanparams['showhidden'];
-    $qbshowtext = $cleanparams['qbshowtext'];
     $cpage = $cleanparams['cpage'] ?: 1;
     $recurse = $cleanparams['recurse'];
     $showhidden = $cleanparams['showhidden'];

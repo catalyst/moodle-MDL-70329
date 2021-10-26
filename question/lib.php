@@ -17,16 +17,14 @@
 /**
  * Question related functions.
  *
- * This file was created just because Fragment API expects callbacks to be defined on lib.php.
- *
- * Please, do not add new functions to this file.
- *
  * @package   core_question
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/editlib.php');
 
 /**
  * Question tags fragment callback.
