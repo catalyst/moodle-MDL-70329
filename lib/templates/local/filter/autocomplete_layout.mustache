@@ -15,34 +15,24 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template core_user/participantsfilter
+    @template core/local/filter/autocomplete_layout
 
-    Template for the form containing one or more filter rows.
+    Moodle template for the layout of autocomplete elements.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * data-region="form_autocomplete-input"
+    * data-region="form_autocomplete-suggestions"
+    * data-region="form_autocomplete-selection"
+
+    Context variables required for this template:
+    * none
 
     Example context (json):
-    {
-        "filtertypes": [
-            {
-                "name": "status",
-                "title": "Status",
-                "values": [
-                    {
-                        "value": 1,
-                        "title": "Active"
-                    },
-                    {
-                        "value": 0,
-                        "title": "Suspended"
-                    }
-                ]
-            }
-        ]
-    }
+    {}
 }}
-{{> core/filter }}
-
-{{#js}}
-    require(['core_user/participants_filter'], function(ParticipantsFilter) {
-        ParticipantsFilter.init('core-filter-{{uniqid}}');
-    });
-{{/js}}
+<div data-region="form_autocomplete-input"></div>
+<div data-region="form_autocomplete-suggestions"></div>
+<div data-region="form_autocomplete-selection"></div>
