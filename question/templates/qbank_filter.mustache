@@ -15,24 +15,28 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template core_question/category_condition
+    @template core_question/filter
+
+    Template for the form containing one or more filter rows.
 
     Example context (json):
     {
-        "displaydata": [
-          {
-                "categoryselect": "html string",
-                "categorydesc": "html string"
-          }
+        "filtertypes": [
+            {
+                "name": "status",
+                "title": "Status",
+                "values": [
+                    {
+                        "value": 1,
+                        "title": "Active"
+                    },
+                    {
+                        "value": 0,
+                        "title": "Suspended"
+                    }
+                ]
+            }
         ]
     }
 }}
-<div class="choosecategory">
-    <label class="mr-1" for="id_selectacategory">
-        {{#str}} selectacategory, question{{/str}}
-    </label>
-    {{{categoryselect}}}
-</div>
-<div class="boxaligncenter categoryinfo pl-0">
-    {{{categorydesc}}}
-</div>
+{{> core/filter }}

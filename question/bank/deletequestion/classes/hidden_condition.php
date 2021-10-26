@@ -23,7 +23,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank\search;
+namespace qbank_deletequestion;
+
+use core_question\local\bank\condition;
 
 /**
  * This class controls whether hidden / deleted questions are hidden in the list.
@@ -40,14 +42,17 @@ class hidden_condition extends condition {
     protected $where;
 
     /**
-     * Constructor.
-     * @param bool $hide whether to include old "deleted" questions.
+     * Constructor to initialize the hidden condition for qbank.
      */
-    public function __construct($hide = true) {
-        $this->hide = $hide;
-        if ($hide) {
+    public function __construct($qbank) {
+        $this->hide = !$qbank->get_pagevars('showhidden');
+        if ($this->hide) {
             $this->where = 'q.hidden = 0';
         }
+    }
+
+    public function get_condition_key() {
+        return 'hidden';
     }
 
     /**

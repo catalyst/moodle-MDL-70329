@@ -2881,6 +2881,14 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => true,
     ],
+    'core_qbank_get_questions' => [
+        'classname'   => 'core_question\external\bank',
+        'methodname'  => 'get_questions',
+        'description' => 'Get question table content raw html',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
 );
 
 $services = array(
