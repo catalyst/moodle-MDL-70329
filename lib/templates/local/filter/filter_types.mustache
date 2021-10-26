@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template core_user/local/participantsfilter/filtertypes
+    @template core/local/filter/filter_types
 
     Placeholder to fetch all filter types.
 
@@ -51,12 +51,12 @@
 }}
 <div class="hidden" data-filterregion="filtertypedata">
     {{#filtertypes}}
-        {{> core_user/local/participantsfilter/filtertype}}
+        {{> core/local/filter/filter_type}}
     {{/filtertypes}}
 </div>
 <div class="hidden">
     <select disabled="disabled" data-filterfield="type" data-filterregion="filtertypelist">
-        <option value="">{{#str}}selectfiltertype, core_user{{/str}}</option>
+        <option value="">{{#str}}selectfiltertype{{/str}}</option>
         {{#filtertypes}}
         <option value="{{name}}">{{title}}</option>
         {{/filtertypes}}
