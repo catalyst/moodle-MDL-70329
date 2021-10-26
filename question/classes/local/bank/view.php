@@ -821,7 +821,6 @@ class view {
             if ($searchcondition->display_options_adv()) {
                 $advancedsearch[] = $searchcondition;
             }
-            echo $searchcondition->display_options();
         }
         $this->display_showtext_checkbox($showquestiontext);
         if (!empty($advancedsearch)) {
@@ -1035,6 +1034,18 @@ class view {
     }
 
     /**
+     * Display the questions.
+     *
+     * @param array $questions
+     */
+    protected function display_questions($questions): void {
+        echo \html_writer::start_tag('div',
+            ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+        $this->print_table($questions);
+        echo \html_writer::end_tag('div');
+    }
+
+    /**
      * Display the questions container.
      *
      */
@@ -1050,8 +1061,19 @@ class view {
      */
     public function display_for_api(): void {
         $pagevars = $this->get_pagevars();
-        $this->display_question_list($this->baseurl, $pagevars['cat'], $pagevars['recurse'],
-            $pagevars['qpage'], $pagevars['qperpage'], $this->contexts->having_cap('moodle/question:add'));
+        $this->build_query();
+        $questionsrs = $this->load_page_questions($pagevars['qpage'], $pagevars['qperpage']);
+        $questions = [];
+        foreach ($questionsrs as $question) {
+            if (!empty($question->id)) {
+                $questions[$question->id] = $question;
+            }
+        }
+        $questionsrs->close();
+        foreach ($this->requiredcolumns as $name => $column) {
+            $column->load_additional_data($questions);
+        }
+        $this->print_table($questions);
     }
 
     /**

@@ -163,7 +163,7 @@ class bank extends external_api {
         }
 
         // Set default category if it's empty.
-        if (empty($filters['category'])) {
+        if (empty($params['filters']['category'])) {
             $params['filters']['category'] = [
                 'values' => [$defaultcategoryid],
             ];

@@ -83,14 +83,14 @@ class category_condition extends condition {
      */
     private function init() {
         global $DB;
-            if (!$this->category = $this->get_current_category($this->cat)) {
-                return;
-            }
-            if ($this->recurse) {
-                $categoryids = question_categorylist($this->category->id);
-            } else {
-                $categoryids = [$this->category->id];
-            }
+        if (!$this->category = $this->get_current_category($this->cat)) {
+            return;
+        }
+        if ($this->recurse) {
+            $categoryids = question_categorylist($this->category->id);
+        } else {
+            $categoryids = [$this->category->id];
+        }
         list($catidtest, $this->params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
         $this->where = 'q.category ' . $catidtest;
     }
@@ -236,7 +236,7 @@ class category_condition extends condition {
                     $values[] = (object) [
                         // Remove contextid from value.
                         'value' => strpos($key, ',') === false ? $key : substr($key, 0, strpos($key, ',')),
-                        'title' => trim(html_entity_decode($value)),
+                        'title' => html_entity_decode($value),
                         'selected' => ($key === $this->cat),
                     ];
                 }
