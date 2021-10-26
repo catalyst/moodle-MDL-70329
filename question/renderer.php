@@ -214,4 +214,35 @@ class core_question_bank_renderer extends plugin_renderer_base {
         return '';
     }
 
+    /**
+     * Render the data required for the questionbank filter on the questionbank edit page.
+     *
+     * @param \context $context The context of the course being displayed
+     * @param array $searchconditions The context of the course being displayed
+     * @param array $additionalparams Additional filter parameters
+     * @return string
+     */
+    public function render_questionbank_filter(\context $context, array $searchconditions, $additionalparams): string {
+        global $PAGE;
+        $filter = new \core_question\bank\qbank_filter($context, 'qbank-table');
+        $filter->set_searchconditions($searchconditions, $additionalparams);
+        $templatecontext = $filter->export_for_template($this->output);
+        $renderedtemplate = $this->render_from_template('core_question/qbank_filter', $templatecontext);
+
+        // Building params for filter js.
+        $mustache = $this->get_mustache();
+        $uniqidhelper = $mustache->getHelper('uniqid');
+        $params = [
+            'filterRegionId' => "core-filter-$uniqidhelper",
+            'defaultcourseid' => $templatecontext->courseid,
+            'defaultcategoryid' => $templatecontext->defaultcategoryid,
+            'perpage' => $templatecontext->perpage,
+            'recurse' => $templatecontext->recurse,
+            'showhidden' => $templatecontext->showhidden,
+            'showquestiontext' => $templatecontext->showquestiontext,
+            'contextId' => $context->id,
+        ];
+        $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
+        return $renderedtemplate;
+    }
 }

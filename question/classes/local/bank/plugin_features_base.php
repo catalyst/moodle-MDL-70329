@@ -27,6 +27,8 @@
 
 namespace core_question\local\bank;
 
+use core_question\bank\search\condition;
+
 /**
  * Class plugin_features_base is the base class for qbank plugins.
  *
@@ -36,6 +38,10 @@ namespace core_question\local\bank;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class plugin_features_base {
+
+    public static function get_qbank_plugin_list(): array {
+        return \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
+    }
 
     /**
      * This method will return the array of objects to be rendered as a prt of question bank columns/actions.
@@ -54,6 +60,20 @@ class plugin_features_base {
      */
     public function get_navigation_node(): ?object {
         return null;
+    }
+
+    /**
+     * Return search conditions for the plugin.
+     *
+     * @param view $qbank
+     * @return condition[]
+     */
+    public function get_question_bank_search_conditions(view $qbank): array {
+        return [];
+    }
+
+    public function get_external_function_parameters(): array {
+        return [];
     }
 
 }

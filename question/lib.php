@@ -28,6 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/question/editlib.php');
+use core_question\bank\search\question_condition;
+
 /**
  * Question tags fragment callback.
  *
@@ -92,4 +95,55 @@ function core_question_output_fragment_tags_form($args) {
 
         return $mform->render();
     }
+}
+
+/**
+ * View list fragment callback.
+ *
+ * @param array $args Arguments to the form.
+ * @return null|string The rendered form.
+ */
+function core_question_output_fragment_question_list($args) {
+
+    if (empty($args['questions']) || empty($args['sortdata'])) {
+        return '';
+    }
+    $questions = json_decode($args['questions']);
+    if (empty($questions)) {
+        return '';
+    }
+    $questionids = [];
+    foreach ($questions as $question) {
+        $questionids[] = $question->id;
+    }
+    $params = [];
+    $sortdata = json_decode($args['sortdata']);
+    // Add sort to param.
+    $sortnum = 1;
+    foreach ($sortdata as $data) {
+        $sortby = $data->sortby;
+        if ($data->sortorder == SORT_DESC) {
+            $sortby = '-' . $sortby;
+        }
+        $params['qbs' . $sortnum] = $sortby;
+        $sortnum++;
+    }
+
+    $context = $args['context'];
+    $courseid = $context->instanceid;
+
+    $thispageurl = new \moodle_url('/question/edit.php');
+    $thispageurl->param('courseid', $courseid);
+    $contexts = new \question_edit_contexts($context);
+    $course = get_course($courseid);
+    $cm = null;
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
+
+    $questionbank->add_searchcondition(new question_condition($questionids));
+    $questionbank->set_pagevars($params);
+    $questions = $questionbank->load_questions();
+    ob_start();
+    $questionbank->display_for_api($questions);
+    $tablehtml = ob_get_clean();
+    return $tablehtml;
 }

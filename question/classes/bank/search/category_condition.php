@@ -96,6 +96,19 @@ class category_condition extends condition {
     }
 
     /**
+     * Return default category
+     *
+     * @return \stdClass default category
+     */
+    public function get_default_category(): \stdClass {
+        if (empty($this->category)) {
+            return question_get_default_category(\context_course::instance($this->course->id)->id);
+        } else {
+            return $this->category;
+        }
+    }
+
+    /**
      * SQL fragment to add to the where clause.
      *
      * @return string
@@ -162,15 +175,24 @@ class category_condition extends condition {
     }
 
     /**
-     * Look up the category record based on cateogry ID and context
+     * Print the text if category id not available.
+     */
+    public static function print_choose_category_message(): void {
+        echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
+        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
+        echo \html_writer::end_tag('p');
+    }
+
+    /**
+     * Look up the category record based on category ID and context
      * @param string $categoryandcontext categoryID,contextID as used with question_bank_view->display()
      * @return \stdClass The category record
      */
-    protected function get_current_category($categoryandcontext) {
+    public static function get_current_category($categoryandcontext) {
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         if (!$categoryid) {
-            $this->print_choose_category_message($categoryandcontext);
+            self::print_choose_category_message();
             return false;
         }
 
@@ -198,5 +220,42 @@ class category_condition extends condition {
         } else {
             return format_text($category->info, $category->infoformat, $formatoptions, $this->course->id);
         }
+    }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        $displaydata = [];
+        $catmenu = helper::question_category_options($this->contexts, true, 0, true, -1, false);
+        $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
+            array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
+        $category = $this->get_default_category();
+        $displaydata['categorydesc'] = $this->print_category_info($category);
+        $values = [];
+        foreach ($catmenu as $menu) {
+            foreach ($menu as $catlist) {
+                foreach ($catlist as $key => $value) {
+                    $values[] = (object) [
+                        // Remove contextid from value.
+                        'value' => strpos($key, ',') === false ? $key : substr($key, 0, strpos($key, ',')),
+                        'title' => html_entity_decode($value),
+                        'selected' => ($key === $this->cat),
+                    ];
+                }
+            }
+        }
+        $filteroptions = [
+            'name' => 'category',
+            'title' => get_string('category', 'core_question'),
+            'custom' => false,
+            'multiple' => false,
+            'filterclass' => null,
+            'values' => $values,
+            'allowempty' => false,
+        ];
+        return $filteroptions;
     }
 }

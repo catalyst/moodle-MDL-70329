@@ -22,7 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace core_question\bank\search;
+namespace qbank_tagquestion;
+
+use core_question\bank\search\condition;
 
 /**
  * Question bank search class to allow searching/filtering by tags on a question.
@@ -49,7 +51,7 @@ class tag_condition extends condition {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function __construct(array $contexts, array $selectedtagids = []) {
+    public function __construct(array $contexts, array $selectedtagids = [], $filterverb = self::JOINTYPE_DEFAULT) {
         global $DB;
 
         $this->contexts = $contexts;
@@ -64,7 +66,8 @@ class tag_condition extends condition {
             // we reduce the question list to questions that are tagged with both
             // "foo" AND "bar". Any question that does not have ALL of the specified
             // tags will be omitted.
-            list($tagsql, $tagparams) = $DB->get_in_or_equal($selectedtagids, SQL_PARAMS_NAMED);
+            $equal = !($filterverb === self::JOINTYPE_NONE);
+            list($tagsql, $tagparams) = $DB->get_in_or_equal($selectedtagids, SQL_PARAMS_NAMED, 'param', $equal);
             $tagparams['tagcount'] = count($selectedtagids);
             $tagparams['questionitemtype'] = 'question';
             $tagparams['questioncomponent'] = 'core_question';
@@ -75,8 +78,11 @@ class tag_condition extends condition {
                                       WHERE ti.itemtype = :questionitemtype
                                             AND ti.component = :questioncomponent
                                             AND ti.tagid {$tagsql}
-                                   GROUP BY ti.itemid
-                                     HAVING COUNT(itemid) = :tagcount)";
+                                   GROUP BY ti.itemid ";
+            if ($filterverb === self::JOINTYPE_ALL) {
+                $this->where .= "HAVING COUNT(itemid) = :tagcount ";
+            }
+            $this->where .= ") ";
 
         } else {
             $this->selectedtagids = [];
@@ -124,5 +130,32 @@ class tag_condition extends condition {
         ];
 
         return $OUTPUT->render_from_template('core_question/tag_condition', $context);
+    }
+
+    /**
+     * Get options for filter.
+     *
+     * @return array
+     */
+    public function get_filter_options(): array {
+        $tags = \core_tag_tag::get_tags_by_area_in_contexts('core_question', 'question', $this->contexts);
+        $values = [];
+        foreach ($tags as $tag) {
+            $values[] = [
+                'value' => $tag->id,
+                'title' => html_entity_decode($tag->name),
+                'selected' => in_array($tag->id, $this->selectedtagids)
+            ];
+        }
+        $filteroptions = [
+            'name' => 'qtagids',
+            'title' => get_string('tag', 'tag'),
+            'custom' => false,
+            'multiple' => true,
+            'filterclass' => null,
+            'values' => $values,
+            'allowempty' => true,
+        ];
+        return $filteroptions;
     }
 }
