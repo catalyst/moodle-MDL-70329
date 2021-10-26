@@ -17,6 +17,7 @@
 namespace qbank_tagquestion;
 
 use core_question\local\bank\plugin_features_base;
+use core_question\local\bank\view;
 
 /**
  * Class columns is the entrypoint for the columns.
@@ -32,5 +33,42 @@ class plugin_feature extends plugin_features_base{
         return [
             new tags_action_column($qbank),
         ];
+    }
+
+    public function get_question_bank_search_conditions(view $qbank): array {
+        global $CFG, $DB;
+        $searchconditions = [];
+        if ($CFG->usetags) {
+            $cat = $qbank->get_pagevars('cat');
+            $contexts = [];
+            if (is_array($cat)) {
+                foreach ($cat as $value) {
+                    list(, $contextid) = explode(',', $value);
+                    $catcontext = \context::instance_by_id($contextid);
+                    $contexts[] = $catcontext;
+                }
+            } else {
+                list(, $contextid) = explode(',', $qbank->get_pagevars('cat'));
+                $catcontext = \context::instance_by_id($contextid);
+                $contexts[] = $catcontext;
+            }
+            $thiscontext = $qbank->get_most_specific_context();
+            $contexts[] = $thiscontext;
+            $filters = $qbank->get_pagevars('filters');
+            $tagids = $filters['qtagids']['values'] ?? [];
+            $filterverb = $filter['filterverb'] ?? tag_condition::JOINTYPE_DEFAULT;
+            $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
+        }
+        return $searchconditions;
+    }
+
+    public function get_external_function_parameters(): array {
+        return [
+            'qtagids' => new \external_value(
+            PARAM_SEQUENCE,
+            'Tag ID',
+            VALUE_DEFAULT,
+            '',
+        )];
     }
 }
