@@ -1,0 +1,216 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Question external API.
+ *
+ * @package    core_question
+ * @category   external
+ * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+namespace core_question\external;
+
+require_once($CFG->dirroot . '/question/editlib.php');
+
+use core_question\bank\search\condition;
+use core_question\local\bank\plugin_features_base;
+use external_api;
+use external_function_parameters;
+use external_single_structure;
+use external_multiple_structure;
+use external_value;
+use external_warnings;
+
+
+/**
+ * Core question external functions.
+ *
+ * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class bank extends external_api {
+
+    /**
+     * Describes the parameters for fetching the table html.
+     *
+     * @return external_function_parameters
+     */
+    public static function get_questions_parameters(): external_function_parameters {
+
+        $params = [
+            'filterverb' => new external_value(
+                PARAM_INT,
+                'Main join types',
+                VALUE_DEFAULT,
+                condition::JOINTYPE_DEFAULT,
+            ),
+            'filters' => new external_multiple_structure (
+                new external_single_structure(
+                    [
+                        'filtertype' => new external_value(PARAM_ALPHANUM,'Filter type'),
+                        'jointype' => new external_value(PARAM_INT, 'Join type'),
+                        'values' => new external_value(PARAM_RAW, 'list of ids'),
+                    ]
+                ),
+                'Filter params',
+                VALUE_DEFAULT,
+                [],
+            ),
+            'defaultcourseid' => new external_value(
+                PARAM_INT,
+                'Default course ID',
+                VALUE_REQUIRED,
+            ),
+            'defaultcategoryid' => new external_value(
+                PARAM_INT,
+                'Default question category ID',
+                VALUE_REQUIRED,
+            ),
+            'qperpage' => new external_value(
+                PARAM_INT,
+                'The number of records per page',
+                VALUE_DEFAULT,
+                20,
+            ),
+            'qpage' => new external_value(
+                PARAM_INT,
+                'The page number',
+                VALUE_DEFAULT,
+                0
+            ),
+            'qbshowtext' => new external_value(
+                PARAM_BOOL,
+                'Flag to show question text',
+                VALUE_DEFAULT,
+                false,
+            ),
+            'recurse' => new external_value(
+                PARAM_BOOL,
+                'Type of join to join all filters together',
+                VALUE_DEFAULT,
+                false,
+            ),
+            'showhidden' => new external_value(
+                PARAM_BOOL,
+                'Flag to show question text',
+                VALUE_DEFAULT,
+                false,
+            ),
+        ];
+
+        return new external_function_parameters($params);
+    }
+
+    /**
+     * External function to get the table view content.
+     *
+     * @param int $filterverb
+     * @param array $filters
+     * @param int $defaultcourseid
+     * @param int $defaultcategoryid
+     * @param int $qperpage
+     * @param int $qpage
+     * @param bool $qbshowtext
+     * @param bool $recurse
+     * @param bool $showhidden
+     * @return array
+     */
+    public static function get_questions(
+        int $filterverb,
+        array $filters = [],
+        int $defaultcourseid,
+        int $defaultcategoryid,
+        int $qperpage = 20,
+        int $qpage = 0,
+        bool $qbshowtext = false,
+        bool $recurse = false,
+        bool $showhidden = false
+    ): array {
+        global $DB;
+
+        $courseid = $defaultcourseid;
+
+        $params = [
+            'courseid' => $courseid,
+            'filterverb' => $filterverb,
+            'qperpage' => $qperpage,
+            'qpage' => $qpage,
+            'qbshowtext' => $qbshowtext,
+            'recurse' => $recurse,
+            'showhidden' => $showhidden,
+            'tabname' => 'questions'
+        ];
+
+        foreach ($filters as $filter) {
+            $params['filters'][$filter['filtertype']] = [
+                'jointype' => $filter['jointype'],
+                'values' => empty($filter['values'])? [] : explode(',', $filter['values']),
+            ];
+        }
+
+        // Set default category if it's empty.
+        if (empty($params['filters']['category'])) {
+            $params['filters']['category'] = [
+                'values' => [$defaultcategoryid],
+            ];
+        }
+        // Add contextID for the category filter.
+        $categoryids = $params['filters']['category']['values'];
+        // Currently, we support only one category for the list because of new/edit/delete buttons.
+        $categoryid = array_pop($categoryids);
+        $categories = $DB->get_records('question_categories', ['id' => $categoryid]);
+        $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+        $category = array_pop($categories);
+        $category = $category->id;
+        $params['cat'] = $category;
+
+        require_login($courseid, false);
+        $thispageurl = new \moodle_url('/question/edit.php');
+        $thiscontext = \context_course::instance($courseid);
+        $contexts = new \question_edit_contexts($thiscontext);
+        $course = get_course($courseid);
+        $cm = null;
+        $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
+        $questionbank->set_pagevars($params);
+        $questionbank->add_standard_searchcondition();
+        ob_start();
+        $questionbank->display_for_api();
+        $tablehtml = ob_get_clean();
+
+        $totalquestions = $questionbank->get_question_count();
+
+        return [
+            'html' => $tablehtml,
+            'totalquestions' => $totalquestions,
+            'warnings' => []
+        ];
+    }
+
+    /**
+     * Describes the data returned from the external function.
+     *
+     * @return external_single_structure
+     */
+    public static function get_questions_returns(): external_single_structure {
+        return new external_single_structure([
+            'html' => new external_value(PARAM_RAW, 'The raw html of the requested table.'),
+            'totalquestions' => new external_value(PARAM_INT, 'Total number of questions'),
+            'warnings' => new external_warnings()
+        ]);
+    }
+
+}

@@ -24,6 +24,7 @@
 
 namespace core_question\local\bank;
 
+use core_question\bank\search\category_condition;
 use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
@@ -150,6 +151,16 @@ class view {
     public $customfilterobjects = null;
 
     /**
+     * @var int|null Number of questions.
+     */
+    protected $totalcount = null;
+
+    /**
+     * @var array Number of questions.
+     */
+    protected $pagevars = [];
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -189,7 +200,7 @@ class view {
         $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
         foreach ($searchplugins as $component => $function) {
             foreach ($function($this) as $searchobject) {
-                $this->add_searchcondition($searchobject);
+                $this->add_searchcondition($searchobject, $component);
             }
         }
     }
@@ -199,7 +210,7 @@ class view {
      *
      * @return array
      */
-    protected function get_question_bank_plugins(): array {
+    protected function get_question_bank_plugins_columns(): array {
         $questionbankclasscolumns = [];
         $newpluginclasscolumns = [];
         $corequestionbankcolumns = [
@@ -283,7 +294,7 @@ class view {
      */
     protected function wanted_columns(): array {
         $this->requiredcolumns = [];
-        $questionbankcolumns = $this->get_question_bank_plugins();
+        $questionbankcolumns = $this->get_question_bank_plugins_columns();
         foreach ($questionbankcolumns as $classobject) {
             if (empty($classobject)) {
                 continue;
@@ -573,9 +584,12 @@ class view {
      * Get the number of questions.
      * @return int
      */
-    protected function get_question_count(): int {
+    public function get_question_count(): int {
         global $DB;
-        return $DB->count_records_sql($this->countsql, $this->sqlparams);
+        if (is_null($this->totalcount)) {
+            $this->totalcount = $DB->count_records_sql($this->countsql, $this->sqlparams);
+        }
+        return $this->totalcount;
     }
 
     /**
@@ -666,6 +680,32 @@ class view {
     }
 
     /**
+     * @param string|null $field
+     * @return array|null
+     */
+    public function get_pagevars(string $field = null) {
+        if (is_null($field)) {
+            return $this->pagevars;
+        } else {
+            return $this->pagevars[$field] ?? null;
+        }
+    }
+
+    /**
+     * @param $pagevars
+     * @param string|null $field
+     * @return $this
+     */
+    public function set_pagevars($pagevars, string $field = null) {
+        if (is_null($field)) {
+            $this->pagevars = $pagevars;
+        } else {
+            $this->pagevars[$field] = $pagevars;
+        }
+        return $this;
+    }
+
+    /**
      * Shows the question bank interface.
      *
      * The function also processes a number of actions:
@@ -689,10 +729,11 @@ class view {
         $recurse = $pagevars['recurse'];
         $showhidden = $pagevars['showhidden'];
         $showquestiontext = $pagevars['qbshowtext'];
-        $tagids = [];
-        if (!empty($pagevars['qtagids'])) {
-            $tagids = $pagevars['qtagids'];
+        if (empty($pagevars['qtagids'])) {
+            $pagevars['qtagids'] = [];
         }
+        $pagevars['tabname'] = $tabname;
+        $this->set_pagevars($pagevars);
 
         echo \html_writer::start_div('questionbankwindow boxwidthwide boxaligncenter');
 
@@ -701,10 +742,8 @@ class view {
             return;
         }
 
-        $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
-
         // Show the filters and search options.
-        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
+        $this->wanted_filters($cat, $showhidden, $recurse, $showquestiontext, $perpage);
 
         // Continues with list of questions.
         $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
@@ -717,17 +756,15 @@ class view {
      * The filters for the question bank.
      *
      * @param string $cat 'categoryid,contextid'
-     * @param array $tagids current list of selected tags
      * @param bool $showhidden whether deleted questions should be displayed
      * @param int $recurse Whether to include subcategories
-     * @param array $editcontexts parent contexts
      * @param bool $showquestiontext whether the text of each question should be shown in the list
+     * @param bool $perpage pergage number of records per page
      */
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
+    public function wanted_filters($cat, $showhidden, $recurse, $showquestiontext, $perpage = 0): void {
+        global $PAGE;
         list(, $contextid) = explode(',', $cat);
         $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
         // Category selection form.
         $this->display_question_bank_header();
 
@@ -735,53 +772,21 @@ class view {
         if ($this->enablefilters) {
             if (is_array($this->customfilterobjects)) {
                 foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
+                    $this->add_searchcondition($filterobjects);
                 }
             } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
+                $this->add_standard_searchcondition();
             }
+            // Render the question bank filters.
+            $additionalparams = [
+                'perpage' => $perpage,
+                'recurse' => $recurse,
+                'showhidden' => $showhidden,
+                'showquestiontext' => $showquestiontext
+            ];
+            echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
         }
         $this->display_options_form($showquestiontext);
-    }
-
-    /**
-     * Print the text if category id not available.
-     */
-    protected function print_choose_category_message(): void {
-        echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
-        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
-        echo \html_writer::end_tag('p');
-    }
-
-    /**
-     * Gets current selected category.
-     * @param string $categoryandcontext
-     * @return false|mixed|\stdClass
-     */
-    protected function get_current_category($categoryandcontext) {
-        global $DB, $OUTPUT;
-        list($categoryid, $contextid) = explode(',', $categoryandcontext);
-        if (!$categoryid) {
-            $this->print_choose_category_message();
-            return false;
-        }
-
-        if (!$category = $DB->get_record('question_categories',
-                ['id' => $categoryid, 'contextid' => $contextid])) {
-            echo $OUTPUT->box_start('generalbox questionbank');
-            echo $OUTPUT->notification('Category not found!');
-            echo $OUTPUT->box_end();
-            return false;
-        }
-
-        return $category;
     }
 
     /**
@@ -816,7 +821,6 @@ class view {
             if ($searchcondition->display_options_adv()) {
                 $advancedsearch[] = $searchcondition;
             }
-            echo $searchcondition->display_options();
         }
         $this->display_showtext_checkbox($showquestiontext);
         if (!empty($advancedsearch)) {
@@ -900,7 +904,7 @@ class view {
         // Note: We do not call this in the loop because quiz ob_ captures this function (see raise() PHP doc).
         \core_php_time_limit::raise(300);
 
-        $category = $this->get_current_category($categoryandcontext);
+        $category = category_condition::get_current_category($categoryandcontext);
 
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         $catcontext = \context::instance_by_id($contextid);
@@ -914,23 +918,6 @@ class view {
         if ($totalnumber == 0) {
             return;
         }
-        $questionsrs = $this->load_page_questions($page, $perpage);
-        $questions = [];
-        foreach ($questionsrs as $question) {
-            if (!empty($question->id)) {
-                $questions[$question->id] = $question;
-            }
-        }
-        $questionsrs->close();
-        foreach ($this->requiredcolumns as $name => $column) {
-            $column->load_additional_data($questions);
-        }
-
-        $pageingurl = new \moodle_url($pageurl, $pageurl->params());
-        $pagingbar = new \paging_bar($totalnumber, $page, $perpage, $pageingurl);
-        $pagingbar->pagevar = 'qpage';
-
-        $this->display_top_pagnation($OUTPUT->render($pagingbar));
 
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post']);
@@ -938,9 +925,7 @@ class view {
         echo \html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo \html_writer::input_hidden_params($this->baseurl);
 
-        $this->display_questions($questions);
-
-        $this->display_bottom_pagination($OUTPUT->render($pagingbar), $totalnumber, $perpage, $pageurl);
+        $this->display_questions_container();
 
         $this->display_bottom_controls($totalnumber, $recurse, $category, $catcontext, $addcontexts);
 
@@ -1055,9 +1040,40 @@ class view {
      */
     protected function display_questions($questions): void {
         echo \html_writer::start_tag('div',
-                ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+            ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
         echo \html_writer::end_tag('div');
+    }
+
+    /**
+     * Display the questions container.
+     *
+     */
+    protected function display_questions_container(): void {
+        echo \html_writer::start_tag('div',
+                ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+        $this->print_table([]);
+        echo \html_writer::end_tag('div');
+    }
+
+    /**
+     * Show a list of questions by HTML for API.
+     */
+    public function display_for_api(): void {
+        $pagevars = $this->get_pagevars();
+        $this->build_query();
+        $questionsrs = $this->load_page_questions($pagevars['qpage'], $pagevars['qperpage']);
+        $questions = [];
+        foreach ($questionsrs as $question) {
+            if (!empty($question->id)) {
+                $questions[$question->id] = $question;
+            }
+        }
+        $questionsrs->close();
+        foreach ($this->requiredcolumns as $name => $column) {
+            $column->load_additional_data($questions);
+        }
+        $this->print_table($questions);
     }
 
     /**
@@ -1296,9 +1312,75 @@ class view {
     /**
      * Add another search control to this view.
      * @param condition $searchcondition the condition to add.
+     * @param string|null $fieldname
      */
-    public function add_searchcondition($searchcondition): void {
-        $this->searchconditions[] = $searchcondition;
+    public function add_searchcondition(condition $searchcondition, ?string $fieldname = null): void {
+        if (is_null($fieldname)) {
+            $this->searchconditions[] = $searchcondition;
+        } else {
+            $this->searchconditions[$fieldname] = $searchcondition;
+        }
+    }
+
+    /**
+     * Add standard search conditions.
+     * Params must be set into this object before calling this function.
+     */
+    public function add_standard_searchcondition(): void {
+        $cat = $this->get_pagevars('cat');
+        $showhidden = $this->get_pagevars('showhidden');
+        $recurse = $this->get_pagevars('recurse');
+        $editcontexts = $this->contexts->having_one_edit_tab_cap($this->get_pagevars('tabname'));
+
+        $this->add_searchcondition(new \core_question\bank\search\category_condition(
+            $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
+        $this->add_searchcondition(new \core_question\bank\search\hidden_condition(!$showhidden), 'hidden');
+
+        $plugins = plugin_features_base::get_qbank_plugin_list();
+        foreach ($plugins as $plugin) {
+            $pluginentrypointobject = new $plugin();
+            $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
+            foreach ($pluginobjects as $fieldname => $pluginobject) {
+                $this->add_searchcondition($pluginobject, $fieldname);
+            }
+        }
+    }
+
+    public function apply_filter($params): void {
+        $plugins = plugin_features_base::get_qbank_plugin_list();
+        foreach ($plugins as $plugin) {
+            $pluginentrypointobject = new $plugin();
+            $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
+            foreach ($pluginobjects as $fieldname => $pluginobject) {
+                $this->add_searchcondition($pluginobject, $fieldname);
+            }
+        }
+
+        foreach ($filters as $filter) {
+            switch ($filter['filtertype']) {
+                case 'category':
+                    // TODO: Capability check.
+                    // TODO: Multiple categories.
+                    $categories = intval($filter['values']);
+                    $categories = $DB->get_records('question_categories', ['id' => $categories]);
+                    $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
+                    $category = array_pop($categories);
+                    $category = $category->id;
+                    $params['category'] = $category;
+                    // TODO: Join type.
+                    $jointype = $filter['jointype'];
+                    break;
+                case 'tag':
+                    // TODO: Filter should be from plugin.
+                    // TODO: Join type.
+                    $tags = explode(',', $filter['values']);
+                    $params['qtagids'] = $tags;
+                    $jointype = $filter['jointype'];
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 }
