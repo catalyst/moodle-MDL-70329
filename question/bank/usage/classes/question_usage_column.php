@@ -28,6 +28,12 @@ use core_question\local\bank\column_base;
  */
 class question_usage_column extends column_base {
 
+    public function init(): void {
+        parent::init();
+        global $PAGE;
+        $PAGE->requires->js_call_amd('qbank_usage/usage', 'init');
+    }
+
     public function get_name(): string {
         return 'questionusage';
     }
@@ -41,18 +47,16 @@ class question_usage_column extends column_base {
     }
 
     protected function display_content($question, $rowclasses): void {
-        global $PAGE;
         $usagecount = helper::get_question_entry_usage_count($question);
         $attributes = [];
         if (question_has_capability_on($question, 'view')) {
             $target = 'questionusagepreview_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_usage/usage', 'init', [$datatarget, $question->contextid]);
             $attributes = [
                 'href' => '#',
                 'data-target' => $target,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id,
+                'data-contextid' => $question->contextid,
             ];
         }
         echo \html_writer::tag('a', $usagecount, $attributes);

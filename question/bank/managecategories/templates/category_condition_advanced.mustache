@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template core_question/hidden_condition_advanced
+    @template qbank_managecategories/category_condition_advanced
 
     Example context (json):
     {
@@ -26,8 +26,8 @@
         ]
     }
 }}
-<div class="hidden_condition_advanced">
-    <input type="hidden" name="showhidden" value="0" id="showhidden_off">
-    <input id="showhidden_on" class="searchoptions mr-1" type="checkbox" value="1" name="showhidden" {{{checked}}}>
-    <label for="showhidden_on">{{#str}} showhidden, question{{/str}}</label>
+<div class="category_condition_advanced">
+    <input type="hidden" name="recurse" value="0" id="recurse_off">
+    <input id="recurse_on" class="searchoptions mr-1" type="checkbox" value="1" name="recurse" {{{checked}}}>
+    <label for="recurse_on">{{#str}} includesubcategories, question{{/str}}</label>
 </div>

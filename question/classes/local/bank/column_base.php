@@ -189,8 +189,10 @@ abstract class column_base {
         }
 
         $sortdata['sorturl'] = $this->qbank->new_sort_url($sort, $newsortreverse);
+        $sortdata['sortname'] = $sort;
         $sortdata['sortcontent'] = $link;
         $sortdata['sorttip'] = $tip;
+        $sortdata['sortorder'] = $newsortreverse ? SORT_DESC : SORT_ASC;
         $renderer = $PAGE->get_renderer('core_question', 'bank');
         return $renderer->render_column_sort($sortdata);
 

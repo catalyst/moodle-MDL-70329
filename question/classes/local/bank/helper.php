@@ -51,4 +51,24 @@ class helper {
             throw new \moodle_exception('The following plugin is either disabled or missing from disk: ' . $pluginname);
         }
     }
+
+    /**
+     * Convert multidimentional object to array.
+     *
+     * @param $obj
+     * @return array|mixed
+     */
+    public static function convert_object_array($obj) {
+        // Not an object or array.
+        if (!is_object($obj) && !is_array($obj)) {
+            return $obj;
+        }
+        // Parse array.
+        foreach ($obj as $key => $value) {
+            $arr[$key] = self::convert_object_array($value);
+        }
+        // Return parsed array.
+        return $arr;
+    }
+
 }

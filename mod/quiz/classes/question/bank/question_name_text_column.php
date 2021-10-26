@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace mod_quiz\question\bank;
-
+require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 /**
  * A column type for the name followed by the start of the question text.
  *

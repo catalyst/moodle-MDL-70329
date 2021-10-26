@@ -33,4 +33,10 @@ class plugin_feature extends plugin_features_base {
             new question_text_row($qbank)
         ];
     }
+
+    public function get_question_filters($qbank): array {
+        return [
+            new questiontext_condition($qbank),
+        ];
+    }
 }

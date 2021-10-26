@@ -37,6 +37,15 @@ $string['discriminative_efficiency_link'] = 'mod/quiz/statistics';
 $string['discrimination_index'] = 'Needs checking?';
 $string['discrimination_index_help'] = 'A question is indicated as likely to need checking based on question statistics. For example, if students obtain a low score on the question but a high score on the whole quiz, or a high score on the question but a low score on the whole quiz, then there may be a problem with the question such as the wrong answer being set as correct. Statistics are not infallible though; this is just a hint that the question should be checked.';
 
+// Input & dropdown placeholders.
+
+$string['firstplaceholder'] = 'First discrimination value';
+$string['index'] = 'Index';
+$string['interpretation'] = 'Interpretation';
+$string['secondplaceholder'] = 'Second discrimination value';
+$string['interpretationplaceholder'] = 'Discrimination interpretation';
+$string['title'] = 'Discrimination index';
+
 // Text format.
 $string['verylikely'] = 'Very likely';
 $string['likely'] = 'Likely';

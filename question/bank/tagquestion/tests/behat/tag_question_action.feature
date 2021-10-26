@@ -1,4 +1,4 @@
-@qbank @qbank_tagquestion
+@qbank @qbank_tagquestion @javascript
 Feature: Use the qbank plugin manager page for tagquestion
   In order to check the plugin behaviour with enable and disable
 

@@ -1,4 +1,4 @@
-@qbank @qbank_statistics
+@qbank @qbank_statistics @javascript
 Feature: Show statistics in question bank
 
   Background:

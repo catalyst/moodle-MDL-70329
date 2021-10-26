@@ -34,10 +34,11 @@ $returnurl = required_param('returnurl', PARAM_RAW);
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('questions', '/question/bank/history/history.php');
-
+$pagevars['entryid'] = $entryid;
+$pagevars['returnurl'] = $returnurl;
 $url = new moodle_url($thispageurl, ['entryid' => $entryid, 'returnurl' => $returnurl]);
 $PAGE->set_url($url);
-$questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, $entryid, $returnurl, $cm);
+$questionbank = new \qbank_history\question_history_view($contexts, $url, $COURSE, null, $pagevars);
 
 $streditingquestions = get_string('history_header', 'qbank_history');
 $PAGE->set_title($streditingquestions);
@@ -49,5 +50,5 @@ $PAGE->navbar->add($streditingquestions, $url);
 
 echo $OUTPUT->header();
 // Print the question area.
-$questionbank->display($pagevars, 'questions');
+$questionbank->display();
 echo $OUTPUT->footer();

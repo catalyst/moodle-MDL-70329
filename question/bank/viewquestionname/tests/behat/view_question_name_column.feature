@@ -1,4 +1,4 @@
-@qbank @qbank_viewquestionname
+@qbank @qbank_viewquestionname @javascript
 Feature: Use the qbank plugin manager page for viewquestionname
   In order to check the plugin behaviour with enable and disable
 

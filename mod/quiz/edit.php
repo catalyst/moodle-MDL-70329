@@ -168,10 +168,6 @@ $event = \mod_quiz\event\edit_page_viewed::create([
 ]);
 $event->trigger();
 
-// Get the question bank view.
-$questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $quiz);
-$questionbank->set_quiz_has_attempts($quizhasattempts);
-
 // End of process commands =====================================================.
 
 $PAGE->set_pagelayout('incourse');

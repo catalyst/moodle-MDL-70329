@@ -42,7 +42,6 @@ Feature: A Teacher can comment in a question
     Given I log in as "teacher1"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I should see "0" on the comments column
     When I click "0" on the row on the comments column
     And I add "Super test comment 01 to be deleted" comment to question
@@ -61,7 +60,6 @@ Feature: A Teacher can comment in a question
     Given I log in as "teacher1"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I choose "Preview" action for "First question" in the question bank
     And I click on "Comments" "link"
     Then I should see "Save comment"
@@ -89,7 +87,6 @@ Feature: A Teacher can comment in a question
     Then I log in as "teacher1"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I choose "Preview" action for "First question" in the question bank
     Then I should not see "Save comment"
     And I click on "Close preview" "button"
@@ -108,7 +105,6 @@ Feature: A Teacher can comment in a question
     Then I log in as "teacher2"
     And I am on the "Test quiz" "quiz activity" page
     And I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Test questions"
     And I choose "Preview" action for "First question" in the question bank
     Then I should not see "Save comment"
     And I click on "Close preview" "button"

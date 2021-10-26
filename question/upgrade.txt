@@ -1,5 +1,20 @@
 This files describes API changes for code that uses the question API.
 
+=== 4.1 ==
+
+1) Showhidden, recurse and qbshowtext checkboxes have been removed and replaced with filter
+   objects. Parameters have been completely removed from question/editlib.php methods.
+   New location for showhidden filterable object management is qbank_deletequestion/hidden_condition.
+   New location for recurse filterable object management is qbank_managecategories/subcategories_condition.
+   New location for qbshowtext filterable object management is qbank_viewquestiontext/questiontext_condition.
+
+2) Methods core_question\local\bank::display_options_adv and core_question\local\bank::display_option have been
+   deprecated as those parameters are now managed by filterable objects. Hence all child classes using those
+   methods have also been deprecated.
+
+3) Web service qbank_filter parameters recurse, showhidden and showtext have been removed.
+
+
 === 4.0 ===
 
 Moodle 4.0 included the results of a major project to re-work the question bank.
@@ -138,8 +153,7 @@ Moodle 4.0 included the results of a major project to re-work the question bank.
     referring to the behat_question class name (nothing in the standard Moodle code was)
     then you will have to update your reference.
 
-
-=== 3.9 ===
+=== 3.9 ==
 
 1) For years, the ..._questions_in_use callback has been the right way for plugins to
    tell the core question system if questions are required. Previously this callback

@@ -2375,9 +2375,20 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
     require_once($CFG->dirroot . '/mod/quiz/locallib.php');
     require_once($CFG->dirroot . '/question/editlib.php');
 
-    $querystring = preg_replace('/^\?/', '', $args['querystring']);
-    $params = [];
-    parse_str($querystring, $params);
+    $extraparamsclean = [];
+    if (is_array($args)) {
+        $querystring = preg_replace('/^\?/', '', $args['querystring']);
+        $params = [];
+        parse_str($querystring, $params);
+    } else {
+        $param = json_decode($args);
+        $filtercondition = json_decode($param->filtercondition);
+        $extraparams = json_decode($param->extraparams);
+        $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+        if (!empty($extraparams)) {
+            $extraparamsclean = \core_question\local\bank\helper::convert_object_array($extraparams);
+        }
+    }
 
     // Build the required resources. The $params are all cleaned as
     // part of this process.
@@ -2389,7 +2400,9 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
     require_capability('mod/quiz:manage', $contexts->lowest());
 
     // Create quiz question bank view.
-    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $quiz);
+    array_unshift($extraparamsclean, $quiz);
+    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $pagevars, $extraparamsclean);
+    $questionbank->component = 'mod_quiz';
     $questionbank->set_quiz_has_attempts(quiz_has_attempts($quiz->id));
 
     // Output.
@@ -2482,4 +2495,49 @@ function quiz_delete_references($quizid): void {
         // Delete any references.
         $DB->delete_records('question_references', $params);
     }
+}
+
+/**
+ * Question data fragment to get the question html via ajax call.
+ *
+ * @param $args
+ * @return array|string
+ */
+function mod_quiz_output_fragment_question_data($args) {
+    // Return if there is no args.
+    if (empty($args)) {
+        return '';
+    }
+
+    // Retrieve params.
+    $args = json_decode($args);
+    $filtercondition = json_decode($args->filtercondition);
+    if (!$filtercondition) {
+        return ['', ''];
+    }
+    $extraparams = json_decode($args->extraparams);
+    $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+
+    // Course context.
+    $thiscontext = \context_course::instance($params['courseid']);
+    $contexts = new \question_edit_contexts($thiscontext);
+    $contexts->require_one_edit_tab_cap($params['tabname']);
+    $course = get_course($params['courseid']);
+
+    // Retrieve quiz module.
+    $cm = null;
+    $extraparamsclean = [];
+    if (!empty($extraparams && isset($extraparams[0]->cmid))) {
+        $params['cmid'] = $extraparams[0]->cmid;
+        list($quiz, $cm) = get_module_from_cmid($params['cmid']);
+        array_unshift($extraparamsclean, $quiz);
+    }
+
+    // Page url.
+    $thispageurl = new moodle_url('/mod/quiz/edit.php', ['courseid' => $course->id, 'cmid' => $params['cmid']]);
+
+    // Retrieve questions.
+    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $params, $extraparamsclean);
+    list($questionhtml, $jsfooter) = $questionbank->display_questions_table();
+    return [$questionhtml, $jsfooter];
 }

@@ -1,4 +1,4 @@
-@core @core_question
+@core @core_question @javascript
 Feature: A teacher can move questions between categories in the question bank
   In order to organize my questions
   As a teacher
@@ -26,16 +26,17 @@ Feature: A teacher can move questions between categories in the question bank
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
 
-  @javascript
   Scenario: Move a question between categories via the question page
     When I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Used category"
+    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Used category"
+    And I click on "Apply filters" "button"
+    And I should not see "Subcategory (1)" in the ".form-autocomplete-selection" "css_element"
+    And I should see "Used category (1)" in the ".form-autocomplete-selection" "css_element"
     And I click on "Test question to be moved" "checkbox" in the "Test question to be moved" "table_row"
-    And I click on "With selected" "button"
-    And I click on question bulk action "move"
-    And I set the field "Question category" to "Subcategory"
+    And I click on "bulkactionsui-selector" "button"
+    And I press "Move to..."
+    And I set the field "id_movetocategory" to "Subcategory"
     And I press "Move to"
     Then I should see "Test question to be moved"
-    And the field "Select a category" matches value "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subcategory (1)"
-    And the "Select a category" select box should contain "Used category"
-    And the "Select a category" select box should not contain "Used category (1)"
+    And I should see "Subcategory (1)" in the ".form-autocomplete-selection" "css_element"
+    And I should not see "Used category (1)" in the ".form-autocomplete-selection" "css_element"
