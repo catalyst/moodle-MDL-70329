@@ -27,23 +27,30 @@ Feature: An plugin column can be reordered and displayed in the question bank vi
 
   @javascript
   Scenario: Teacher can see proper view
-    When I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
-    And I navigate to "Question bank > Questions" in current page administration
+    Given I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
+    When I navigate to "Question bank > Questions" in current page administration
     And I click on "category" "select"
     And I click on "Question category 1" "option"
-    Then I should see "Test question to be seen" in the ".questionname" "css_element"
-    And I should see "Teacher 1"
+    And I should see "Test question to be seen"
+    Then I should see "Teacher 1"
 
   @javascript
   Scenario: Reordering question bank columns
-    When I log in as "admin"
-    And I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
-    And I drag "View creator (creator_name_column)" "text" and I drop it in "View question type (question_type_column)" "text"
-    And I drag "View creator (modifier_name_column)" "text" and I drop it in "Editmenu (edit_menu_column)" "text"
-    And I log out
+    Given I log in as "admin"
+    When I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
+    And I drag "Creatorname (creator_name_column)" "text" and I drop it in "Qtype (question_type_column)" "text"
     And I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
     And I navigate to "Question bank > Questions" in current page administration
     And I click on "category" "select"
     And I click on "Question category 1" "option"
     Then ".creatorname" "css_element" should appear before ".qtype" "css_element"
-    And ".modifiername" "css_element" should appear before ".editmenu" "css_element"
+
+  @javascript
+  Scenario: Disabling a column removes column from sortcolumn page
+    Given I log in as "admin"
+    When I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
+    And I should see "Creatorname (creator_name_column)"
+    And I click on "Manage question bank plugins" "link"
+    And I click on "Disable" "link" in the "View creator" "table_row"
+    And I click on "Column sort order" "link"
+    Then I should not see "Creatorname (creator_name_column)"

@@ -14,13 +14,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Javascript for report card display and processing.
+ * Javascript for sorting columns in question bank view.
  *
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
-*/
+ */
 
 import Ajax from 'core/ajax';
 import Notification from 'core/notification';
@@ -78,7 +78,7 @@ const findDuplicates = (columnsDuplicate) => {
  * @returns {Array}
  */
 const getColumnOrder = () => {
-    let updated = [...document.querySelectorAll('.retrievable')];
+    let updated = [...document.querySelectorAll('.column')];
     let columns = new Array(updated.length);
     for (let i = 0; i < updated.length; i++) {
         columns[i] = updated[i].innerText.trim();

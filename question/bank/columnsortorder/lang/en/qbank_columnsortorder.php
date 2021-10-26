@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component qbank_columnsortorder, language 'en'
+ * Strings for component qbank_columnsortorder, language 'en'.
  *
  * @package    qbank_columnsortorder
  * @copyright  2021 Catalyst IT Australia Pty Ltd
@@ -24,8 +24,11 @@
  */
 
 $string['pluginname'] = 'Column sort order';
-$string['privacy:metadata'] = 'The Column sort order only displays existing column data.';
+$string['privacy:metadata'] = 'Column sort order does not store any personal data.';
+// Used in admin settings page.
 $string['qbankcolumnsortorder'] = 'Column sort order';
+// When plugin is enabled, caption is present in manage qbank page.
 $string['qbankgotocolumnsort'] = 'You can reorder column order in the question bank view on the {$a} page';
-$string['qbankgotomanageqbanks'] = 'Enable and disable column plugins via {$a}';
+// Caption present in column sort order external page.
+$string['qbankgotomanageqbanks'] = 'Enable and disable column plugins via';
 $string['qbanksortdescription'] = 'Column order modification in this page will reorder column display in question bank view';

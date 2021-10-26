@@ -432,20 +432,6 @@ if ($hassiteconfig || has_capability('moodle/question:config', $systemcontext)) 
     $ADMIN->add('qbanksettings', $temp);
     $plugins = core_plugin_manager::instance()->get_plugins_of_type('qbank');
 
-    if (!qbank_columnsortorder\column_sort_order_manager::is_disabled()) {
-        // Column sort order link in manageqbanks page.
-        $url = new moodle_url('/question/bank/columnsortorder/sortcolumns.php', ['section' => 'columnsortorder']);
-        $temp->add(new admin_setting_description(
-            'manageqbanksgotocolumnsort',
-            '',
-            new lang_string('qbankgotocolumnsort', 'qbank_columnsortorder',
-                html_writer::link($url, get_string('qbankcolumnsortorder', 'qbank_columnsortorder')))
-        ));
-        // Column sort order link in admin page.
-        $temp = new admin_externalpage('settingqbank', get_string('qbankcolumnsortorder', 'qbank_columnsortorder'), $url);
-        $ADMIN->add('qbanksettings', $temp);
-    }
-
     foreach ($plugins as $plugin) {
         /** @var \core\plugininfo\qbank $plugin */
         $plugin->load_settings($ADMIN, 'qbanksettings', $hassiteconfig);

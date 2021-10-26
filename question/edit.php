@@ -23,8 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use qbank_columnsortorder\column_sort_order;
-
 require_once(__DIR__ . '/../config.php');
 require_once($CFG->dirroot . '/question/editlib.php');
 
@@ -37,8 +35,7 @@ if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
 }
 $PAGE->set_url($url);
 
-$columnorder = new column_sort_order();
-$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm, $columnorder);
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
 
 // TODO MDL-72076 - this one will become redundant after implementing bulk actions UI.
 $questionbank->process_actions();

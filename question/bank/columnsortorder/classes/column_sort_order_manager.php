@@ -16,10 +16,15 @@
 
 namespace qbank_columnsortorder;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/questionlib.php');
+
 use core_question\local\bank\view;
 use moodle_url;
 use stdClass;
 use context_system;
+use question_edit_contexts;
 
 /**
  * Class column_sort_order_manager responsible for loading and saving order to the config setting.
@@ -31,7 +36,7 @@ use context_system;
  */
 class column_sort_order_manager {
     /**
-     * @var array Column order as set in config_plugins.
+     * @var array Column order as set in config_plugins 'class' => 'position', ie: question_type_column => 3.
      */
     protected $columnorder;
 
@@ -47,8 +52,17 @@ class column_sort_order_manager {
      * Loads the current column order from config_plugin table.
      *
      */
-    protected function load_order() {
-        $this->columnorder = (array)get_config('column_sortorder');
+    protected function load_order(): void {
+        $this->columnorder = (array)get_config('qbank_columnsortorder');
+
+        // Cleans rows that are not columns.
+        if (array_key_exists('version', $this->columnorder)) {
+            unset($this->columnorder['version']);
+        }
+
+        if (array_key_exists('disabled', $this->columnorder)) {
+            unset($this->columnorder['disabled']);
+        }
     }
 
     /**
@@ -58,11 +72,14 @@ class column_sort_order_manager {
      */
     public function get_question_list_columns(): array {
         $result = [];
+
         $course = new stdClass();
         $course->id = 0;
-        $contexts = context_system::instance();
+        $context = context_system::instance();
+        $contexts = new question_edit_contexts($context);
         // Dummy call to get the objects without error.
-        $questionbank = new view($contexts, new moodle_url('/question/dummyurl.php'), $course, null, $this);
+        $questionbank = new view($contexts, new moodle_url('/question/dummyurl.php'), $course, null);
+
         foreach ($questionbank->get_visiblecolumns() as $key => $column) {
             if ($column->get_name() === 'checkbox') {
                 continue;
@@ -78,59 +95,66 @@ class column_sort_order_manager {
                 $element->name = ucfirst($column->get_name());
                 $element->colname = end($classelements);
             }
+            $element->classcol = explode('\\', get_class($column))[0] . '\\' . $element->colname;
             $result[] = $element;
         }
         return $result;
     }
 
     /**
-     * Sets the current column order in config_plugin table.
-     *
-     * @param string $columns Plugin class ie: qbank_viewcreator\\modifier_name_column.
-     * @return bool
-     */
-    public static function set_order($columns) {
-        global $DB;
-        $columns = explode(',', $columns);
-        foreach ($columns as $key => $column) {
-            $status = set_config($column, $key, 'column_sortorder');
-            if ($status !== true) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Removes any uninstalled or disabled plugin column in the config_plugins 'column_sortorder' in core_question.
+     * Removes any uninstalled or disabled plugin column in the config_plugins for 'qbank_columnsortorder' plugin.
      *
      * @param string $plugintoremove Plugin type and name ie: qbank_viewcreator.
      */
-    public static function remove_unused_column_from_db(string $plugintoremove) : void {
-        $config = get_config('column_sortorder');
-        if (!self::is_disabled() && $plugintoremove !== 'qbank_columnsortorder') {
-            foreach ($config as $class => $position) {
-                if (strpos($class, $plugintoremove) !== false) {
-                    unset_config($class, 'column_sortorder');
+    public function remove_unused_column_from_db(string $plugintoremove) : void {
+        $qbankplugins = $this->get_question_list_columns();
+        foreach ($qbankplugins as $plugin) {
+            if (strpos($plugin->classcol, $plugintoremove) !== false) {
+                if ($plugintoremove === 'qbank_customfields') {
+                    unset_config($plugin->class, 'qbank_columnsortorder');
+                } else {
+                    unset_config($plugin->colname, 'qbank_columnsortorder');
                 }
-            }
-        } else {
-            foreach ($config as $class => $position) {
-                unset_config($class, 'column_sortorder');
             }
         }
     }
 
     /**
-     *  Loads the current configuration from config_plugin table, disabled or not.
+     * Orders columns in the question bank view according to config_plugins table 'qbank_columnsortorder' config.
      *
-     * @return bool true when qbank_columnsortorder is disabled.
+     * @param array $ordertosort Unordered array of columns
+     * @return array $properorder|$ordertosort Returns array ordered if 'qbank_columnsortorder' config exists.
      */
-    public static function is_disabled() {
-        if (get_config('qbank_columnsortorder', 'disabled')) {
-            return true;
-        } else {
-            return false;
+    public function sort_columns($ordertosort): array {
+        // Check if db has order set.
+        if (!empty($this->columnorder)) {
+            // Merge new order with old one.
+            $columnsortorder = $this->columnorder;
+            asort($columnsortorder);
+            $columnorder = [];
+            foreach ($columnsortorder as $classname => $colposition) {
+                $colname = explode('\\', $classname);
+                if (count($colname) > 1) {
+                    $classname = str_replace('\\\\', '\\', $classname);
+                    $columnorder[$classname] = $colposition;
+                } else {
+                    $columnorder[end($colname)] = $colposition;
+                }
+            }
+            $properorder = array_merge($columnorder, $ordertosort);
+            // If plugin/column disabled unset the proper key.
+            $diffkey = array_diff_key($properorder, $ordertosort);
+            foreach ($diffkey as $keytounset => $class) {
+                unset($properorder[$keytounset]);
+            }
+            // Always have the checkbox at first column position.
+            if (isset($properorder['checkbox_column'])) {
+                $checkboxfirstelement = $properorder['checkbox_column'];
+                unset($properorder['checkbox_column']);
+                $properorder = array_merge(['checkbox_column' => $checkboxfirstelement], $properorder);
+            }
+            return $properorder;
         }
+        return $ordertosort;
     }
 }

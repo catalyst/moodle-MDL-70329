@@ -16,14 +16,13 @@
 
 namespace qbank_columnsortorder\external;
 
-defined('MOODLE_INTERNAL') || die();
-
 use context_system;
+use Exception;
 use external_api;
 use external_function_parameters;
 use external_single_structure;
 use external_value;
-use qbank_columnsortorder\column_sort_order_manager;
+use stdClass;
 
 /**
  * External qbank_columnsortorder_set_columnbank_order API
@@ -52,7 +51,7 @@ class set_columnbank_order extends external_api {
      * @return external_value_structure
      */
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL, 'result: true if success');
+        return new external_value(PARAM_BOOL, 'Boolean true returned when config is properly set');
     }
 
     /**
@@ -62,10 +61,24 @@ class set_columnbank_order extends external_api {
      * @return bool
      */
     public static function execute(string $columns) {
+        global $DB;
         $params = self::validate_parameters(self::execute_parameters(), ['columns' => $columns]);
-        self::validate_context(context_system::instance());
+        $context = context_system::instance();
+        self::validate_context($context);
+        require_capability('moodle/category:manage', $context);
+
         $columns = str_replace('"', "", $params['columns']);
-        $result = column_sort_order_manager::set_order($columns);
-        return $result;
+        $columns = stripslashes($columns);
+        $columns = explode(',', $columns);
+        try {
+            $transaction = $DB->start_delegated_transaction();
+            foreach ($columns as $key => $column) {
+                set_config($column, $key, 'qbank_columnsortorder');
+            }
+            $transaction->allow_commit();
+        } catch (Exception $e) {
+            $transaction->rollback($e);
+        }
+        return true;
     }
 }

@@ -23,38 +23,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use qbank_columnsortorder\column_sort_order;
-
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
-require_login();
+admin_externalpage_setup('qbank_columnsortorder', '', ['section' => 'columnsortorder'],
+    '/question/bank/columnsortorder/sortcolumns.php');
 
-$PAGE->set_context(context_system::instance());
-$PAGE->set_url('/question/bank/columnsortorder/sortcolumns.php', ['section' => 'columnsortorder']);
-$PAGE->set_title(get_string('qbankcolumnsortorder', 'qbank_columnsortorder'));
-$PAGE->set_heading(get_string('qbankcolumnsortorder', 'qbank_columnsortorder'));
-$PAGE->set_pagelayout('admin');
 $PAGE->requires->js_call_amd('qbank_columnsortorder/sort_columns', 'init');
-$PAGE->navigation->clear_cache();
+$renderer = $PAGE->get_renderer('qbank_columnsortorder');
 
-$context = [];
-
-$columnsortorder = new column_sort_order();
-$corequestionbankcolumns = $columnsortorder->get_question_list_columns();
-foreach ($corequestionbankcolumns as $columnname) {
-    $name = $columnname->name . ' (' . $columnname->colname . ')';
-    $names['names'][] = ['name' => $name, 'hiddenname' => $columnname->class];
-}
-
-$context = $names;
-$urltoredirect = new moodle_url('/admin/settings.php', ['section' => 'manageqbanks'],
-    get_string('manageqbanks', 'admin'));
-$urltoredirect = html_writer::link($urltoredirect, get_string('manageqbanks', 'admin'));
-$context['captionredirect'] = get_string('qbankgotomanageqbanks', 'qbank_columnsortorder', $urltoredirect);
-
-echo $OUTPUT->header();
-
-echo $OUTPUT->render_from_template('qbank_columnsortorder/columnsortorder', $context);
-
-echo $OUTPUT->footer();
+echo $OUTPUT->header(),
+     $OUTPUT->heading(new lang_string('qbankcolumnsortorder', 'qbank_columnsortorder')),
+     $renderer->render_columns(),
+     $OUTPUT->footer();

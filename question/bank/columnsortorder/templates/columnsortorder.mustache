@@ -21,28 +21,36 @@
 
     Context variables required for this template:
     * name - plugin name
+    * hiddenname - class/columname
 
     Example context (json):
     {
-        "name": "createcourse"
+        "name": "Creatorname (creator_name_column)",
+        "hiddenname": "creator_name_column"
     }
 }}
 
-{{#str}}qbanksortdescription, qbank_columnsortorder{{/str}}
+<div>
+    {{#str}}qbanksortdescription, qbank_columnsortorder{{/str}}
+</div>
 <br>
-<br>
-<div class="list list-group" id="sortable">
+<div class="list list-group" id="sortablecolumncontainer">
     {{#names}}
         <div class="item list-group-item list-group-item-action">
             {{>core/drag_handle}}
-                {{name}}
-                <div class="d-none">
-                    <span class="retrievable">
-                        {{hiddenname}}
-                    </span>
-                </div>
+            {{name}}
+            <div class="d-none">
+                <span class="column">
+                    {{hiddenname}}
+                </span>
+            </div>
         </div>
     {{/names}}
 </div>
 <br>
-{{{captionredirect}}}
+<div>
+    {{#str}} qbankgotomanageqbanks, qbank_columnsortorder {{/str}}
+    <a href={{{urltomanageqbanks}}}>
+        {{#str}} manageqbanks, admin {{/str}}
+    </a>
+</div>

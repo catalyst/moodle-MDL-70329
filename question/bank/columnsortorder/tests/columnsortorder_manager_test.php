@@ -19,9 +19,8 @@ namespace qbank_columnsortorder;
 defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
-use qbank_columnsortorder\external\set_columnbank_order;
-use qbank_columnsortorder\column_sort_order;
 use qbank_columnsortorder\column_sort_order_manager;
+use qbank_columnsortorder\external\set_columnbank_order;
 use core_question\local\bank\view;
 use context_course;
 use moodle_url;
@@ -40,34 +39,39 @@ require_once($CFG->dirroot . '/question/classes/external.php');
  * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class columnsortorder_test extends advanced_testcase {
-
+class columnsortorder_manager_test extends advanced_testcase {
+    /**
+     * Setup testcase.
+     */
+    public function setUp(): void {
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+    }
     /**
      * Test function get_question_list_columns in helper class, that proper data is returned.
      *
      */
-    public function test_getcolumn_function() {
-        $columnsortorder = new column_sort_order();
+    public function test_getcolumn_function(): void {
+        $columnsortorder = new column_sort_order_manager();
         $questionlistcolumns = $columnsortorder->get_question_list_columns();
         $this->assertIsArray($questionlistcolumns);
         foreach ($questionlistcolumns as $columnnobject) {
             $this->assertObjectHasAttribute('class', $columnnobject);
             $this->assertObjectHasAttribute('name', $columnnobject);
             $this->assertObjectHasAttribute('colname', $columnnobject);
+            $this->assertObjectHasAttribute('classcol', $columnnobject);
         }
     }
 
     /**
-     * Test that external call core_question_external::set_columnbank_order($oldorder) sets proper
-     * data in config_plugins table.
+     * Test function that cleans disabled/uninstalled columns.
      *
      */
-    public function test_columnorder_external() {
-        $this->resetAfterTest(true);
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-
-        $columnsortorder = new column_sort_order();
+    public function test_remove_unused_column_from_db(): void {
+        $columnindb = (array)get_config('qbank_columnsortorder');
+        unset($columnindb['version']);
+        $this->assertEmpty($columnindb);
+        $columnsortorder = new column_sort_order_manager();
         $questionlistcolumns = $columnsortorder->get_question_list_columns();
         $columnclasses = [];
         foreach ($questionlistcolumns as $columnnobject) {
@@ -75,26 +79,23 @@ class columnsortorder_test extends advanced_testcase {
         }
         shuffle($columnclasses);
         $columnclasses = implode(',', $columnclasses);
-        $currentconfig = (array)get_config('column_sortorder');
-        $this->assertEmpty($currentconfig);
         set_columnbank_order::execute($columnclasses);
-
-        $currentconfig = (array)get_config('column_sortorder');
-        asort($currentconfig);
-        $currentconfig = array_flip($currentconfig);
-        $columnclasses = explode(',', $columnclasses);
-        $this->assertSame($columnclasses, $currentconfig);
+        $columnindb = (array)get_config('qbank_columnsortorder');
+        $this->assertNotEmpty($columnindb);
+        $pluginclassname = reset($questionlistcolumns)->class;
+        $plugintoremove = explode('\\', reset($questionlistcolumns)->class)[0];
+        $this->assertArrayHasKey($pluginclassname, $columnindb);
+        $columnsortorder->remove_unused_column_from_db($plugintoremove);
+        $columnupdated = (array)get_config('qbank_columnsortorder');
+        array_flip($columnupdated);
+        $this->assertArrayNotHasKey($pluginclassname, $columnupdated);
     }
 
     /**
-     * Test function proper order is set in the question bank view.
+     * Test function sort columns method.
      *
      */
-    public function test_view_ordering() {
-        $this->resetAfterTest(true);
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-
+    public function test_sort_columns(): void {
         $course = $this->getDataGenerator()->create_course();
         // Creates question bank view.
         $questionbank = new view(
@@ -109,44 +110,15 @@ class columnsortorder_test extends advanced_testcase {
             $classname = new ReflectionClass(get_class($columnn));
             $name[] = $classname->getShortName();
         }
-        $columnorder = new column_sort_order();
+        $columnorder = new column_sort_order_manager();
         $neworder = implode(',', $columnorder->sort_columns($name));
         set_columnbank_order::execute($neworder);
-        $currentconfig = get_config('column_sortorder');
+        $currentconfig = get_config('qbank_columnsortorder');
         $currentconfig = (array)$currentconfig;
+        unset($currentconfig['version']);
         asort($currentconfig);
         $currentconfig = array_flip($currentconfig);
         $neworder = explode(',', $neworder);
         $this->assertSame($neworder, $currentconfig);
-    }
-
-    /**
-     * Test function that clean disabled/uninstalled columns.
-     *
-     */
-    public function test_remove_unused_column_from_db() {
-        $this->resetAfterTest(true);
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $columnindb = (array)get_config('column_sortorder');
-        $this->assertEmpty($columnindb);
-        $columnsortorder = new column_sort_order();
-        $questionlistcolumns = $columnsortorder->get_question_list_columns();
-        $columnclasses = [];
-        foreach ($questionlistcolumns as $columnnobject) {
-            $columnclasses[] = $columnnobject->class;
-        }
-        shuffle($columnclasses);
-        $columnclasses = implode(',', $columnclasses);
-        set_columnbank_order::execute($columnclasses);
-        $columnindb = (array)get_config('column_sortorder');
-        $this->assertNotEmpty($columnindb);
-        $pluginclassname = reset($questionlistcolumns)->class;
-        $plugintoremove = explode('\\', reset($questionlistcolumns)->class)[0];
-        $this->assertArrayHasKey($pluginclassname, $columnindb);
-        column_sort_order_manager::remove_unused_column_from_db($plugintoremove);
-        $columnupdated = (array)get_config('column_sortorder');
-        array_flip($columnupdated);
-        $this->assertArrayNotHasKey($pluginclassname, $columnupdated);
     }
 }

@@ -51,11 +51,12 @@ if (!isset($plugins[$name])) {
 switch ($action) {
     case 'disable':
         if ($plugins[$name]->is_enabled()) {
+            $plugintodisable = $plugins[$name]->type . '_' . $plugins[$name]->name;
+            $columnsortordermanager = new column_sort_order_manager();
+            $columnsortordermanager->remove_unused_column_from_db($plugintodisable);
             $class = \core_plugin_manager::resolve_plugininfo_class('qbank');
             $class::enable_plugin($name, false);
             set_config('disabled', 1, 'qbank_'. $name);
-            $plugintodisable = $plugins[$name]->type . '_' . $plugins[$name]->name;
-            column_sort_order_manager::remove_unused_column_from_db($plugintodisable);
         }
         break;
     case 'enable':
