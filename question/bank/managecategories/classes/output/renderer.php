@@ -14,31 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace qbank_managecategories;
+namespace qbank_managecategories\output;
 
-use core_question\local\bank\navigation_node_base;
-use core_question\local\bank\view;
+use plugin_renderer_base;
 
 /**
- * Class plugin_feature.
- *
- * Entry point for qbank plugin.
- * Every qbank plugin must extent this class.
+ * Class renderer for managecategories.
  *
  * @package    qbank_managecategories
  * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends \core_question\local\bank\plugin_features_base {
-
-    public function get_navigation_node(): ?navigation_node_base {
-        return new navigation();
+class renderer extends plugin_renderer_base {
+    /**
+     * Render category condition advanced.
+     *
+     * @param array $displaydata
+     * @return bool|string
+     */
+    public function render_category_condition_advanced($displaydata) {
+        return $this->render_from_template('qbank_managecategories/category_condition_advanced', $displaydata);
     }
 
-    public function get_question_filters(view $qbank): array {
-        return [
-            new category_condition($qbank),
-        ];
+    /**
+     * Render category condition.
+     *
+     * @param array $displaydata
+     * @return bool|string
+     */
+    public function render_category_condition($displaydata) {
+        return $this->render_from_template('qbank_managecategories/category_condition', $displaydata);
     }
 }

@@ -2881,6 +2881,22 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => true,
     ],
+    'core_question_filter' => [
+        'classname'   => 'core_question\external\qbank_filter',
+        'methodname'  => 'execute',
+        'description' => 'Get question filter conditions',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
+    'core_question_view' => [
+        'classname'   => 'core_question\external\qbank_view',
+        'methodname'  => 'execute',
+        'description' => 'Get question bank view',
+        'type'        => 'read',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
 );
 
 $services = array(

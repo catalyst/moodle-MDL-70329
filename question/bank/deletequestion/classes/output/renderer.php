@@ -14,33 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace qbank_tagquestion;
+namespace qbank_deletequestion\output;
 
-use core_question\local\bank\plugin_features_base;
-use core_question\local\bank\view;
+use plugin_renderer_base;
 
 /**
- * Class columns is the entrypoint for the columns.
+ * Class renderer for qbank_deletequestion.
  *
- * @package    qbank_tagquestion
+ * @package    qbank_deletequestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class plugin_feature extends plugin_features_base{
-
-    public function get_question_columns($qbank): array {
-        return [
-            new tags_action_column($qbank),
-        ];
-    }
-
-    public function get_question_filters(view $qbank): array {
-        global $CFG;
-        if ($CFG->usetags) {
-            return [
-                new tag_condition($qbank),
-            ];
-        }
+class renderer extends plugin_renderer_base {
+    /**
+     * Render hidden condition advanced.
+     *
+     * @param array $displaydata
+     * @return bool|string
+     */
+    public function render_hidden_condition_advanced($displaydata) {
+        return $this->render_from_template('qbank_deletequestion/hidden_condition_advanced', $displaydata);
     }
 }

@@ -111,8 +111,13 @@ class core_question_bank_renderer extends plugin_renderer_base {
      *
      * @param array $displaydata
      * @return bool|string
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
     public function render_category_condition($displaydata) {
+        debugging('Function render_category_condition()
+         has been deprecated and moved to qbank_managecategories plugin,
+         Please use qbank_managecategories\output\renderer::render_category_condition() instead.',
+            DEBUG_DEVELOPER);
         return $this->render_from_template('core_question/category_condition', $displaydata);
     }
 
@@ -121,8 +126,13 @@ class core_question_bank_renderer extends plugin_renderer_base {
      *
      * @param array $displaydata
      * @return bool|string
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
     public function render_category_condition_advanced($displaydata) {
+        debugging('Function render_category_condition_advanced()
+         has been deprecated and moved to qbank_managecategories plugin,
+         Please use qbank_managecategories\output\renderer::render_category_condition_advanced() instead.',
+            DEBUG_DEVELOPER);
         return $this->render_from_template('core_question/category_condition_advanced', $displaydata);
     }
 
@@ -131,8 +141,15 @@ class core_question_bank_renderer extends plugin_renderer_base {
      *
      * @param array $displaydata
      * @return bool|string
+     * @deprecated since Moodle 4.0 MDL-72321
+     * @see qbank_deletequestion\output\renderer
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
     public function render_hidden_condition_advanced($displaydata) {
+        debugging('Function render_hidden_condition_advanced()
+         has been deprecated and moved to qbank_deletequestion plugin,
+         Please use qbank_deletequestion\output\renderer::render_hidden_condition_advanced() instead.',
+            DEBUG_DEVELOPER);
         return $this->render_from_template('core_question/hidden_condition_advanced', $displaydata);
     }
 
@@ -235,4 +252,42 @@ class core_question_bank_renderer extends plugin_renderer_base {
         return '';
     }
 
+    /**
+     * Render the data required for the questionbank filter on the questionbank edit page.
+     *
+     * @param \context $context The context of the course being displayed
+     * @param array $searchconditions The context of the course being displayed
+     * @param array $additionalparams Additional filter parameters
+     * @param string $component the component for the fragment
+     * @param string $callback the callback for the fragment
+     * @param array $exraparams extra pamams for the extended apis
+     * @return string
+     */
+    public function render_questionbank_filter(\context $context, array $searchconditions, array $additionalparams,
+                                                $component, $callback, $exraparams): string {
+        global $PAGE;
+        $filter = new \core_question\local\bank\qbank_filter($context, 'qbank-table');
+        $filter->set_searchconditions($searchconditions, $additionalparams);
+        $templatecontext = $filter->export_for_template($this->output);
+        $renderedtemplate = $this->render_from_template('core_question/qbank_filter', $templatecontext);
+
+        // Building params for filter js.
+        $mustache = $this->get_mustache();
+        $uniqidhelper = $mustache->getHelper('uniqid');
+        $params = [
+            'filterRegionId' => "core-filter-$uniqidhelper",
+            'defaultcourseid' => $templatecontext->courseid,
+            'defaultcategoryid' => $templatecontext->defaultcategoryid,
+            'perpage' => $templatecontext->perpage,
+            'recurse' => $templatecontext->recurse,
+            'showhidden' => $templatecontext->showhidden,
+            'showquestiontext' => $templatecontext->showquestiontext,
+            'contextid' => $context->id,
+            'component' => $component,
+            'callback' => $callback,
+            'extraparams' => json_encode($exraparams),
+        ];
+        $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
+        return $renderedtemplate;
+    }
 }

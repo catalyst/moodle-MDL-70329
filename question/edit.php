@@ -36,7 +36,7 @@ if (($lastchanged = optional_param('lastchanged', 0, PARAM_INT)) !== 0) {
 }
 $PAGE->set_url($url);
 
-$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm);
+$questionbank = new core_question\local\bank\view($contexts, $thispageurl, $COURSE, $cm, $pagevars);
 
 $context = $contexts->lowest();
 $streditingquestions = get_string('editquestions', 'question');
@@ -52,7 +52,7 @@ $qbankaction = new \core_question\output\qbank_actionbar($url);
 echo $renderer->qbank_action_menu($qbankaction);
 
 // Print the question area.
-$questionbank->display($pagevars, 'questions');
+$questionbank->display();
 
 // Log the view of this category.
 list($categoryid, $contextid) = explode(',', $pagevars['cat']);

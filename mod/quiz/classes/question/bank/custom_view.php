@@ -51,9 +51,9 @@ class custom_view extends \core_question\local\bank\view {
      * @param \stdClass $cm activity settings.
      * @param \stdClass $quiz quiz settings.
      */
-    public function __construct($contexts, $pageurl, $course, $cm, $quiz) {
-        parent::__construct($contexts, $pageurl, $course, $cm);
-        $this->quiz = $quiz;
+    public function __construct($contexts, $pageurl, $course, $cm, $params, $extraparams) {
+        parent::__construct($contexts, $pageurl, $course, $cm, $params, $extraparams);
+        $this->quiz = $extraparams[0];
     }
 
     protected function get_question_bank_plugins(): array {
@@ -180,7 +180,7 @@ class custom_view extends \core_question\local\bank\view {
      */
     public function render($pagevars, $tabname): string {
         ob_start();
-        $this->display($pagevars, $tabname);
+        $this->display();
         $out = ob_get_contents();
         ob_end_clean();
         return $out;

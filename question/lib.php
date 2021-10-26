@@ -17,16 +17,14 @@
 /**
  * Question related functions.
  *
- * This file was created just because Fragment API expects callbacks to be defined on lib.php.
- *
- * Please, do not add new functions to this file.
- *
  * @package   core_question
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/question/editlib.php');
 
 /**
  * Question tags fragment callback.
@@ -92,4 +90,38 @@ function core_question_output_fragment_tags_form($args) {
 
         return $mform->render();
     }
+}
+
+/**
+ * Question data fragment to get the question html via ajax call.
+ *
+ * @param $args
+ * @return array|string
+ */
+function core_question_output_fragment_question_data($args) {
+    global $PAGE;
+    if (empty($args)) {
+        return '';
+    }
+    $param = json_decode($args);
+    $filtercondition = json_decode($param->filtercondition);
+    if (!$filtercondition) {
+        return ['', ''];
+    }
+    $extraparams = json_decode($param->extraparams);
+    $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+    $extraparamsclean = [];
+    if (!empty($extraparams)) {
+        $extraparamsclean = $extraparams;
+    }
+    $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
+    $thispageurl = new \moodle_url($nodeparent->action->get_path());
+    $thispageurl->param('courseid', $params['courseid']);
+    $thiscontext = \context_course::instance($params['courseid']);
+    $contexts = new \question_edit_contexts($thiscontext);
+    $contexts->require_one_edit_tab_cap($params['tabname']);
+    $course = get_course($params['courseid']);
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params, $extraparamsclean);
+    list($questionhtml, $jsfooter) = $questionbank->display_questions_table();
+    return [$questionhtml, $jsfooter];
 }

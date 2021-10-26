@@ -24,7 +24,6 @@
 
 namespace core_question\local\bank;
 
-use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
 
@@ -72,7 +71,7 @@ class view {
     /**
      * @var \question_edit_contexts
      */
-    protected $contexts;
+    public $contexts;
 
     /**
      * @var object|\cm_info|null if we are in a module context, the cm.
@@ -85,19 +84,19 @@ class view {
     public $course;
 
     /**
-     * @var \question_bank_column_base[] these are all the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are all the 'columns' that are
      * part of the display. Array keys are the class name.
      */
     protected $requiredcolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are the 'columns' that are
      * actually displayed as a column, in order. Array keys are the class name.
      */
     protected $visiblecolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
@@ -140,19 +139,39 @@ class view {
     public $returnurl;
 
     /**
-     * @var bool enable or disable filters while calling the API.
-     */
-    public $enablefilters = true;
-
-    /**
-     * @var array to pass custom filters instead of the specified ones.
-     */
-    public $customfilterobjects = null;
-
-    /**
      * @var array $bulkactions to identify the bulk actions for the api.
      */
     public $bulkactions = [];
+
+    /**
+     * @var int|null Number of questions.
+     */
+    protected $totalcount = null;
+
+    /**
+     * @var array Number of questions.
+     */
+    protected $pagevars = [];
+
+    /**
+     * @var array $plugins all the qbank plugin objects.
+     */
+    protected $plugins = [];
+
+    /**
+     * @var string $component the component the api is used from.
+     */
+    public $component = 'core_question';
+
+    /**
+     * @var string $callback name of the callback for the api call via filter js.
+     */
+    public $callback = 'question_data';
+
+    /**
+     * @var array $extraparams extra parameters for the extended apis.
+     */
+    public $extraparams = [];
 
     /**
      * Constructor for view.
@@ -160,13 +179,16 @@ class view {
      * @param \question_edit_contexts $contexts
      * @param \moodle_url $pageurl
      * @param object $course course settings
-     * @param object $cm (optional) activity settings.
+     * @param null $cm (optional) activity settings.
+     * @param array $params the parameters required to initialize the api.
+     * @param array $extraparams any extra parameters need to initialized if the api is extended, it will be passed to js.
      */
-    public function __construct($contexts, $pageurl, $course, $cm = null) {
+    public function __construct($contexts, $pageurl, $course, $cm = null, $params = [], $extraparams = []) {
         $this->contexts = $contexts;
         $this->baseurl = $pageurl;
         $this->course = $course;
         $this->cm = $cm;
+        $this->extraparams = $extraparams;
 
         // Create the url of the new question page to forward to.
         $this->returnurl = $pageurl->out_as_local_url(false);
@@ -180,10 +202,23 @@ class view {
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
         // Possibly the heading part can be removed.
+        $this->plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
-        $this->init_search_conditions();
         $this->init_bulk_actions();
+        $this->set_pagevars($params);
+    }
+
+    /**
+     * Set the extra params for the extended apis.
+     *
+     * @param $extraparams
+     * @return void
+     */
+    public function set_extra_params($extraparams): void {
+        if (!empty($extraparams)) {
+            $this->extraparams = $extraparams;
+        }
     }
 
     /**
@@ -215,8 +250,11 @@ class view {
      * Initialize search conditions from plugins
      * local_*_get_question_bank_search_conditions() must return an array of
      * \core_question\bank\search\condition objects.
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
     protected function init_search_conditions(): void {
+        debugging('Function init_search_conditions() has been deprecated,
+         please create a qbank plugin and implement a filter object instead.', DEBUG_DEVELOPER);
         $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
         foreach ($searchplugins as $component => $function) {
             foreach ($function($this) as $searchobject) {
@@ -260,7 +298,7 @@ class view {
                 $questionbankclasscolumns[$shortname] = '';
             }
         }
-        $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
+        $plugins = $this->plugins;
         foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin();
             $plugincolumnobjects = $pluginentrypointobject->get_question_columns($this);
@@ -456,7 +494,9 @@ class view {
         $this->sort = [];
         for ($i = 1; $i <= self::MAX_SORTS; $i++) {
             if (!$sort = optional_param('qbs' . $i, '', PARAM_TEXT)) {
-                break;
+                if (!$sort = $this->get_pagevars('qbs' . $i)) {
+                    break;
+                }
             }
             // Work out the appropriate order.
             $order = 1;
@@ -522,9 +562,9 @@ class view {
         $primarysort = key($this->sort);
         if ($sort == $primarysort) {
             return $order;
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
     /**
@@ -555,7 +595,7 @@ class view {
 
     /**
      * Create the SQL query to retrieve the indicated questions, based on
-     * \core_question\bank\search\condition filters.
+     * \core_question\local\bank\condition filters.
      */
     protected function build_query(): void {
         // Get the required tables and fields.
@@ -593,42 +633,51 @@ class view {
                 $this->sqlparams = array_merge($this->sqlparams, $searchcondition->params());
             }
         }
+        // Get higher level filter condition.
+        $filterverb = $this->pagevars['filterverb'] ?? condition::JOINTYPE_DEFAULT;
+        $equal = !($filterverb === condition::JOINTYPE_NONE);
+        $whereclause = ($equal) ? ' WHERE ' : ' WHERE NOT ';
         // Build the SQL.
         $sql = ' FROM {question} q ' . implode(' ', $joins);
-        $sql .= ' WHERE ' . implode(' AND ', $tests);
+        $sql .= $whereclause . implode(' AND ', $tests);
         $this->countsql = 'SELECT count(1)' . $sql;
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
     }
 
     /**
      * Get the number of questions.
+     *
      * @return int
      */
-    protected function get_question_count(): int {
+    public function get_question_count(): int {
         global $DB;
-        return $DB->count_records_sql($this->countsql, $this->sqlparams);
+        if (is_null($this->totalcount)) {
+            $this->totalcount = $DB->count_records_sql($this->countsql, $this->sqlparams);
+        }
+        return $this->totalcount;
     }
 
     /**
      * Load the questions we need to display.
      *
-     * @param int $page page to display.
-     * @param int $perpage number of questions per page.
      * @return \moodle_recordset questionid => data about each question.
      */
-    protected function load_page_questions($page, $perpage): \moodle_recordset {
+    protected function load_page_questions(): \moodle_recordset {
         global $DB;
-        $questions = $DB->get_recordset_sql($this->loadsql, $this->sqlparams, $page * $perpage, $perpage);
+        $questions = $DB->get_recordset_sql($this->loadsql, $this->sqlparams,
+            (int)$this->pagevars['qpage'] * (int)$this->pagevars['qperpage'], $this->pagevars['qperpage']);
         if (empty($questions)) {
             $questions->close();
             // No questions on this page. Reset to page 0.
-            $questions = $DB->get_recordset_sql($this->loadsql, $this->sqlparams, 0, $perpage);
+            $questions = $DB->get_recordset_sql($this->loadsql, $this->sqlparams, 0, $this->pagevars['qperpage']);
         }
         return $questions;
     }
 
     /**
      * Returns the base url.
+     *
+     * @return \moodle_url
      */
     public function base_url(): \moodle_url {
         return $this->baseurl;
@@ -697,90 +746,76 @@ class view {
     }
 
     /**
-     * Shows the question bank interface.
-     *
-     * The function also processes a number of actions:
-     *
-     * Actions affecting the question pool:
-     * move           Moves a question to a different category
-     * deleteselected Deletes the selected questions from the category
-     * Other actions:
-     * category      Chooses the category
-     * params: $tabname question bank edit tab name, for permission checking
-     * $pagevars current list of page variables
-     *
-     * @param string $tabname
-     * @param array $pagevars
+     * @param string|null $field
+     * @return array|null
      */
-    public function display($pagevars, $tabname): void {
-
-        $page = $pagevars['qpage'];
-        $perpage = $pagevars['qperpage'];
-        $cat = $pagevars['cat'];
-        $recurse = $pagevars['recurse'];
-        $showhidden = $pagevars['showhidden'];
-        $showquestiontext = $pagevars['qbshowtext'];
-        $tagids = [];
-        if (!empty($pagevars['qtagids'])) {
-            $tagids = $pagevars['qtagids'];
+    public function get_pagevars(string $field = null) {
+        if (is_null($field)) {
+            return $this->pagevars;
+        } else {
+            return $this->pagevars[$field] ?? null;
         }
+    }
 
+    /**
+     * @param $pagevars
+     * @param string|null $field
+     * @return $this
+     */
+    public function set_pagevars($pagevars, string $field = null) {
+        if (is_null($field)) {
+            $this->pagevars = $pagevars;
+        } else {
+            $this->pagevars[$field] = $pagevars;
+        }
+        return $this;
+    }
+
+    /**
+     * Shows the question bank interface.
+     */
+    public function display(): void {
         echo \html_writer::start_div('questionbankwindow boxwidthwide boxaligncenter');
-
-        $editcontexts = $this->contexts->having_one_edit_tab_cap($tabname);
-
         // Show the filters and search options.
-        $this->wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext);
-
+        $this->wanted_filters();
         // Continues with list of questions.
-        $this->display_question_list($this->baseurl, $cat, null, $page, $perpage,
-                                        $this->contexts->having_cap('moodle/question:add'));
+        $this->display_question_list();
         echo \html_writer::end_div();
 
     }
 
     /**
      * The filters for the question bank.
-     *
-     * @param string $cat 'categoryid,contextid'
-     * @param array $tagids current list of selected tags
-     * @param bool $showhidden whether deleted questions should be displayed
-     * @param int $recurse Whether to include subcategories
-     * @param array $editcontexts parent contexts
-     * @param bool $showquestiontext whether the text of each question should be shown in the list
      */
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        global $CFG;
-        list(, $contextid) = explode(',', $cat);
+    public function wanted_filters(): void {
+        global $PAGE;
+        list(, $contextid) = explode(',', $this->pagevars['cat']);
         $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
         // Category selection form.
         $this->display_question_bank_header();
-
-        // Display tag filter if usetags setting is enabled/enablefilters is true.
-        if ($this->enablefilters) {
-            if (is_array($this->customfilterobjects)) {
-                foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
-                }
-            } else {
-                if ($CFG->usetags) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-                array_unshift($this->searchconditions, new \core_question\bank\search\category_condition(
-                        $cat, $recurse, $editcontexts, $this->baseurl, $this->course));
-            }
-        }
-        $this->display_options_form($showquestiontext);
+        // Add search conditions.
+        $this->add_standard_searchcondition();
+        // Render the question bank filters.
+        $additionalparams = [
+            'perpage' => $this->pagevars['qperpage'],
+            'recurse' => $this->pagevars['recurse'],
+            'showhidden' => $this->pagevars['showhidden'],
+            'showquestiontext' => $this->pagevars['qbshowtext']
+        ];
+        echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter(
+            $catcontext, $this->searchconditions, $additionalparams, $this->component, $this->callback, $this->extraparams);
+        $this->display_options_form($this->pagevars['qbshowtext']);
     }
 
     /**
      * Print the text if category id not available.
+     *
+     * @todo Final deprecation of this function in moodle 4.5
      */
     protected function print_choose_category_message(): void {
+        debugging('Function print_choose_category_message() is deprecated,
+         all the features for this method is currently handles by the qbank filter api,
+         please have a look at question/bank/managecategories/classes/category_confition.php for more information.', DEBUG_DEVELOPER);
         echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
         echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
         echo \html_writer::end_tag('p');
@@ -790,8 +825,13 @@ class view {
      * Gets current selected category.
      * @param string $categoryandcontext
      * @return false|mixed|\stdClass
+     *
+     * @todo Final deprecation of this function in moodle 4.5
      */
     protected function get_current_category($categoryandcontext) {
+        debugging('Function get_current_category() is deprecated,
+         all the features for this method is currently handles by the qbank filter api,
+         please have a look at question/bank/managecategories/classes/category_confition.php for more information.', DEBUG_DEVELOPER);
         global $DB, $OUTPUT;
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         if (!$categoryid) {
@@ -800,7 +840,7 @@ class view {
         }
 
         if (!$category = $DB->get_record('question_categories',
-                ['id' => $categoryid, 'contextid' => $contextid])) {
+            ['id' => $categoryid, 'contextid' => $contextid])) {
             echo $OUTPUT->box_start('generalbox questionbank');
             echo $OUTPUT->notification('Category not found!');
             echo $OUTPUT->box_end();
@@ -842,7 +882,6 @@ class view {
             if ($searchcondition->display_options_adv()) {
                 $advancedsearch[] = $searchcondition;
             }
-            echo $searchcondition->display_options();
         }
         $this->display_showtext_checkbox($showquestiontext);
         if (!empty($advancedsearch)) {
@@ -910,63 +949,31 @@ class view {
 
     /**
      * Prints the table of questions in a category with interactions
-     *
-     * @param \moodle_url $pageurl     The URL to reload this page.
-     * @param string     $categoryandcontext 'categoryID,contextID'.
-     * @param int        $recurse     Whether to include subcategories.
-     * @param int        $page        The number of the page to be displayed
-     * @param int        $perpage     Number of questions to show per page
-     * @param array      $addcontexts contexts where the user is allowed to add new questions.
      */
-    protected function display_question_list($pageurl, $categoryandcontext, $recurse = 1, $page = 0,
-                                                $perpage = 100, $addcontexts = []): void {
-        global $OUTPUT;
+    protected function display_question_list(): void {
         // This function can be moderately slow with large question counts and may time out.
         // We probably do not want to raise it to unlimited, so randomly picking 5 minutes.
         // Note: We do not call this in the loop because quiz ob_ captures this function (see raise() PHP doc).
         \core_php_time_limit::raise(300);
 
-        $category = $this->get_current_category($categoryandcontext);
+        $category = \qbank_managecategories\category_condition::get_current_category($this->pagevars['cat']);
 
-        list($categoryid, $contextid) = explode(',', $categoryandcontext);
+        list($categoryid, $contextid) = explode(',', $this->pagevars['cat']);
         $catcontext = \context::instance_by_id($contextid);
 
         $canadd = has_capability('moodle/question:add', $catcontext);
 
         $this->create_new_question_form($category, $canadd);
 
-        $this->build_query();
-        $totalnumber = $this->get_question_count();
-        if ($totalnumber == 0) {
-            return;
-        }
-        $questionsrs = $this->load_page_questions($page, $perpage);
-        $questions = [];
-        foreach ($questionsrs as $question) {
-            if (!empty($question->id)) {
-                $questions[$question->id] = $question;
-            }
-        }
-        $questionsrs->close();
-        foreach ($this->requiredcolumns as $name => $column) {
-            $column->load_additional_data($questions);
-        }
-
-        $pageingurl = new \moodle_url($pageurl, $pageurl->params());
-        $pagingbar = new \paging_bar($totalnumber, $page, $perpage, $pageingurl);
-        $pagingbar->pagevar = 'qpage';
-
-        $this->display_top_pagnation($OUTPUT->render($pagingbar));
-
         // This html will be refactored in the bulk actions implementation.
-        echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post', 'id' => 'questionsubmit']);
+        echo \html_writer::start_tag('form', ['action' => $this->baseurl, 'method' => 'post', 'id' => 'questionsubmit']);
         echo \html_writer::start_tag('fieldset', ['class' => 'invisiblefieldset', 'style' => "display: block;"]);
         echo \html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo \html_writer::input_hidden_params($this->baseurl);
 
-        $this->display_questions($questions);
-
-        $this->display_bottom_pagination($OUTPUT->render($pagingbar), $totalnumber, $perpage, $pageurl);
+        echo \html_writer::start_tag('div',
+            ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+        echo \html_writer::end_tag('div');
 
         $this->display_bottom_controls($catcontext);
 
@@ -978,8 +985,11 @@ class view {
      * Display the top pagination bar.
      *
      * @param object $pagination
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
-    protected function display_top_pagnation($pagination): void {
+    public function display_top_pagnation($pagination): void {
+        debugging('Function display_top_pagnation() is deprecated, please use display_questions()
+         for ajax based pagination.', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = [
                 'pagination' => $pagination
@@ -994,8 +1004,11 @@ class view {
      * @param int $totalnumber
      * @param int $perpage
      * @param \moodle_url $pageurl
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
-    protected function display_bottom_pagination($pagination, $totalnumber, $perpage, $pageurl): void {
+    public function display_bottom_pagination($pagination, $totalnumber, $perpage, $pageurl): void {
+        debugging('Function display_bottom_pagination() is deprecated, please use display_questions()
+         for ajax based pagination.', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = array (
                 'extraclasses' => 'pagingbottom',
@@ -1070,11 +1083,39 @@ class view {
      *
      * @param array $questions
      */
-    protected function display_questions($questions): void {
+    public function display_questions($questions, $page = 1, $perpage = 20): void {
+        global $OUTPUT;
+        $pageingurl = new \moodle_url($this->base_url());
+        $pagingbar = new \paging_bar($this->totalcount, $page, $perpage, $pageingurl);
+        $pagingbar->pagevar = 'qpage';
+        echo $OUTPUT->render($pagingbar);
         echo \html_writer::start_tag('div',
-                ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+            ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
         echo \html_writer::end_tag('div');
+        echo $OUTPUT->render($pagingbar);
+    }
+
+    /**
+     * Load the questions according to the search conditions.
+     *
+     * @return array
+     */
+    public function load_questions() {
+        $this->init_sort_from_params();
+        $this->build_query();
+        $questionsrs = $this->load_page_questions();
+        $questions = [];
+        foreach ($questionsrs as $question) {
+            if (!empty($question->id)) {
+                $questions[$question->id] = $question;
+            }
+        }
+        $questionsrs->close();
+        foreach ($this->requiredcolumns as $name => $column) {
+            $column->load_additional_data($questions);
+        }
+        return $questions;
     }
 
     /**
@@ -1138,7 +1179,7 @@ class view {
     /**
      * Print table headers from child classes.
      */
-    protected function print_table_headers(): void {
+    public function print_table_headers(): void {
         foreach ($this->visiblecolumns as $column) {
             $column->display_header();
         }
@@ -1169,7 +1210,7 @@ class view {
      * @param \stdClass $question
      * @param int $rowcount
      */
-    protected function print_table_row($question, $rowcount): void {
+    public function print_table_row($question, $rowcount): void {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));
         $attributes = [];
         if ($rowclasses) {
@@ -1214,9 +1255,50 @@ class view {
     /**
      * Add another search control to this view.
      * @param condition $searchcondition the condition to add.
+     * @param string|null $fieldname
      */
-    public function add_searchcondition($searchcondition): void {
-        $this->searchconditions[] = $searchcondition;
+    public function add_searchcondition(condition $searchcondition, ?string $fieldname = null): void {
+        if (is_null($fieldname)) {
+            $this->searchconditions[] = $searchcondition;
+        } else {
+            $this->searchconditions[$fieldname] = $searchcondition;
+        }
     }
 
+    /**
+     * Add standard search conditions.
+     * Params must be set into this object before calling this function.
+     */
+    public function add_standard_searchcondition(): void {
+        foreach ($this->plugins as $componentname => $plugin) {
+            if (\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
+                $pluginentrypointobject = new $plugin();
+                $pluginobjects = $pluginentrypointobject->get_question_filters($this);
+                foreach ($pluginobjects as $pluginobject) {
+                    $this->add_searchcondition($pluginobject, $pluginobject->get_condition_key());
+                }
+            }
+        }
+    }
+
+    /**
+     * Display the questions table for the fragment/ajax.
+     *
+     * @return array
+     */
+    public function display_questions_table(): array {
+        global $PAGE;
+        $this->add_standard_searchcondition();
+        $questions = $this->load_questions();
+        $totalquestions = $this->get_question_count();
+        $questionhtml = '';
+        $PAGE->start_collecting_javascript_requirements();
+        if ($totalquestions > 0) {
+            ob_start();
+            $this->display_questions($questions, $this->pagevars['qpage']);
+            $questionhtml = ob_get_clean();
+        }
+        $jsfooter = $PAGE->requires->get_end_code();
+        return [$questionhtml, $jsfooter];
+    }
 }
