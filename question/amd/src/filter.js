@@ -1,0 +1,245 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Question bank filter managemnet.
+ *
+ * @module     core_question/filter
+ * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+import ajax from 'core/ajax';
+import CoreFilter from 'core/filter';
+import Fragment from 'core/fragment';
+import Notification from 'core/notification';
+import PagedContentFactory from 'core/paged_content_factory';
+import Selectors from 'core/local/filter/selectors';
+import Templates from 'core/templates';
+
+/**
+ * Initialise the question bank filter on the element with the given id.
+ *
+ * @param {String} filterRegionId id of the filter region
+ * @param {String} defaultcourseid default course id
+ * @param {String} defaultcategoryid default category id
+ * @param {int} perpage number of question per page
+ * @param {boolean} recurse if loading sub categories
+ * @param {boolean} showhidden if loading hidden question
+ * @param {boolean} qbshowtext if loading question text
+ * @param {int} contextId contextId
+ */
+export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
+                     perpage, recurse, showhidden, qbshowtext, contextId) => {
+
+    const filterSet = document.querySelector(`#${filterRegionId}`);
+
+    // Default filter params for WS function.
+    let wsfilter = {
+        // Default value filterset::JOINTYPE_DEFAULT.
+        filters: [],
+        filteroptions: {
+            filterverb: 2,
+            recurse: recurse,
+            showhidden: showhidden,
+        },
+        displayoptions: {
+            perpage: perpage,
+            page: 0,
+            showtext: qbshowtext,
+        },
+        sortdata: [
+            {
+                sortby: 'qbank_viewquestiontype\\question_type_column',
+                sortorder: 4,
+            }
+        ],
+        defaultcourseid: defaultcourseid,
+        defaultcategoryid: defaultcategoryid,
+    };
+
+    // HTML <div> ID of question container.
+    const SELECTORS = {
+        QUESTION_CONTAINER_ID: '#questionscontainer',
+        SORT_LINK: '#questionscontainer div.sorters a',
+    };
+
+    // Default Pagination config.
+    const DEFAULT_PAGED_CONTENT_CONFIG = {
+        ignoreControlWhileLoading: true,
+        controlPlacementBottom: false,
+    };
+
+    // Template to render return value from ws function.
+    const TEMPLATE_NAME = 'core_question/qbank_questions';
+
+    // Init function with apply callback.
+    const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
+        applyFilter(filters, pendingPromise);
+    });
+    coreFilter.init();
+
+    /**
+     * Ajax call to retrieve question via ws functions
+     *
+     * @returns {*}
+     * @param {Object} filter filter object
+     */
+    const requestQuestions = filter => {
+        const request = {methodname: 'core_qbank_get_questions', args: filter};
+        return ajax.call([request])[0];
+    };
+
+    /**
+     * Retrieve table data.
+     *
+     * @param {Object} filterdata data
+     * @param {Promise} pendingPromise pending promise
+     */
+    const applyFilter = (filterdata, pendingPromise) => {
+        // Getting filter data.
+        // Otherwise, the ws function should retrieves question based on default courseid and cateogryid.
+        if (filterdata) {
+            // Main join types.
+            wsfilter['filteroptions']['filterverb'] = parseInt(filterSet.dataset.filterverb, 10);
+
+            // Clean old filter
+            wsfilter['filters'] = [];
+
+            // Retrieve fitter info.
+            for (const [key, value] of Object.entries(filterdata)) {
+                let filter = {'filtertype': key, 'jointype': value.jointype, 'values': value.values.toString()};
+                wsfilter['filters'].push(filter);
+            }
+        }
+
+        // Load questions for first page.
+        requestQuestions(wsfilter)
+            .then(response => {
+                // Cleans any notifications if not needed.
+                let element = document.getElementById('user-notifications');
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+                if (response.warnings[0] !== undefined) {
+                    if (response.warnings[0].warningcode === 'nocategoryconditionspecified') {
+                        Notification.addNotification({
+                            message: response.warnings[0].message,
+                            type: 'info'
+                          });
+                    }
+                }
+                const totalquestions = response.totalquestions;
+                if (response.questions.length === 0) {
+                    return Promise.resolve();
+                }
+                const firstpagequestions = {
+                    questions: JSON.stringify(response.questions),
+                    sortdata: JSON.stringify(wsfilter['sortdata'])
+                };
+                return renderPagination(wsfilter, totalquestions, firstpagequestions);
+            })
+            // Render questions for first page and pagination.
+            .then((html, js) => {
+                const questionscontainer = document.querySelector(SELECTORS.QUESTION_CONTAINER_ID);
+                if (html === undefined) {
+                    html = '';
+                }
+                if (js === undefined) {
+                    js = '';
+                }
+                Templates.replaceNodeContents(questionscontainer, html, js);
+                // Resolve filter promise.
+                if (pendingPromise) {
+                    pendingPromise.resolve();
+                }
+            })
+            .fail(Notification.exception);
+    };
+
+    /**
+     * Render table and pagination.
+     *
+     * @param {Object} filter params
+     * @param {int} totalquestions
+     * @param {string} firstpagequestions
+     */
+    const renderPagination = (filter, totalquestions, firstpagequestions) => {
+        return PagedContentFactory.createFromAjax(
+            totalquestions,
+            perpage,
+            pagesData => {
+                return pagesData.map(pageData => {
+                    let pageNumber = pageData.pageNumber;
+                    // Page number start at 1.
+                    let qpage = pageNumber - 1;
+
+                    // Render first page
+                    if (qpage == 0) {
+                        firstpagequestions.defaultcourseid = wsfilter.defaultcourseid;
+                        return Fragment.loadFragment('core_question', 'question_list', contextId, firstpagequestions)
+                            .then(questionshtml => {
+                                return Templates.render(TEMPLATE_NAME, {html: questionshtml});
+                            });
+                    } else {
+                        // Load data for selected page.
+                        filter['displayoptions']['page'] = qpage;
+                        return requestQuestions(filter)
+                            .then(response => {
+                                const pagequestions = {
+                                    questions: JSON.stringify(response.questions),
+                                    sortdata: JSON.stringify(wsfilter['sortdata']),
+                                    defaultcourseid: wsfilter.defaultcourseid
+                                };
+                                return Fragment.loadFragment('core_question', 'question_list', contextId, pagequestions)
+                                    .then(questionshtml => {
+                                        return Templates.render(TEMPLATE_NAME, {html: questionshtml});
+                                    });
+                            })
+                        .fail(Notification.exception);
+                    }
+                });
+            },
+            DEFAULT_PAGED_CONTENT_CONFIG
+        );
+    };
+
+    // Add listeners for the sorting actions.
+    document.addEventListener('click', e => {
+        const sortableLink = e.target.closest(SELECTORS.SORT_LINK);
+        if (sortableLink) {
+            e.preventDefault();
+            let oldsort = wsfilter['sortdata'];
+            wsfilter['sortdata'] = [];
+            let sortdata = {
+                sortby: sortableLink.dataset.sortby,
+                sortorder: sortableLink.dataset.sortorder
+            };
+            wsfilter['sortdata'].push(sortdata);
+            oldsort.forEach(value => {
+                if (value['sortby'] != sortableLink.dataset.sortby) {
+                    wsfilter['sortdata'].push(value);
+                }
+            });
+            wsfilter['displayoptions']['page'] = 0;
+            coreFilter.updateTableFromFilter();
+        }
+    });
+
+    // Run apply filter at page load.
+    const filter = filterSet.querySelector(Selectors.filter.region);
+    coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
+    applyFilter();
+};

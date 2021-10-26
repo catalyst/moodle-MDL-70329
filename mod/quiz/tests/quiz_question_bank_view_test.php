@@ -74,8 +74,8 @@ class quiz_question_bank_view_testcase extends advanced_testcase {
         $view->display($pagevars, 'editq');
         $html = ob_get_clean();
 
-        // Verify the output includes the expected question.
-        $this->assertStringContainsString('Example question', $html);
+        // Verify the output includes the expected category, but not question as loaded by ajax.
+        $this->assertStringContainsString($cat->name, $html);
 
         // Verify the question has not been loaded into the cache.
         $this->assertFalse($cache->has($questiondata->id));

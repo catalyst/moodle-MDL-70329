@@ -16,7 +16,7 @@
 /**
  * Column selector js.
  *
- * @module    qbank_comment/comment
+ * @module     qbank_comment/comment
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -96,15 +96,16 @@ const commentEvent = (questionId, courseID, contextId) => {
  * Entrypoint of the js.
  *
  * @method init
- * @param {string} questionSelector the question comment identifier.
  */
-export const init = (questionSelector) => {
-    let target = document.querySelector(questionSelector);
-    let contextId = 1;
-    let questionId = target.getAttribute('data-questionid'),
-        courseID = target.getAttribute('data-courseid');
-    target.addEventListener('click', () => {
-        // Call for the event listener to listed for clicks in any comment count row.
-        commentEvent(questionId, courseID, contextId);
+export const init = () => {
+    let target = document.querySelector('#questionscontainer');
+    target.addEventListener('click', (e) => {
+        if (e.target.dataset.target && e.target.dataset.target.includes('questioncommentpreview')) {
+            let contextId = e.target.dataset.contextid;
+            let courseId = e.target.dataset.courseid;
+            let questionId = e.target.dataset.questionid;
+            // Call for the event listener to listed for clicks in any comment count row.
+            commentEvent(questionId, courseId, contextId);
+        }
     });
 };

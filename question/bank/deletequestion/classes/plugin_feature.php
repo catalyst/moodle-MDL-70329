@@ -46,4 +46,10 @@ class plugin_feature extends plugin_features_base {
     public function get_bulk_actions(): ?bulk_action_base {
         return new bulk_delete_action();
     }
+
+    public function get_question_filters($qbank): array {
+        return [
+            new hidden_condition($qbank),
+        ];
+    }
 }
