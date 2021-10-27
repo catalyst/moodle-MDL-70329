@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Participants filter managemnet.
+ * Participants filter management.
  *
  * @module     core_user/participants_filter
  * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
@@ -22,13 +22,33 @@
  */
 
 import * as CoreFilter from 'core/filter';
+import * as DynamicTable from 'core_table/dynamic';
+import Selectors from 'core/local/filter/selectors';
+import Notification from 'core/notification';
 
 /**
  * Initialise the participants filter on the element with the given id.
  *
- * @param {String} filterRegionId
+ * @param {String} filterRegionId The id for the filter element.
  */
 export const init = filterRegionId => {
-    CoreFilter.init(filterRegionId, 'DynamicTable');
+    CoreFilter.init(filterRegionId,  function(filters, filterSet, pendingPromise) {
+        console.log(filters);
+        console.log(filterSet);
+        console.log(pendingPromise);
+        DynamicTable.setFilters(
+            DynamicTable.getTableFromId(filterSet.dataset.tableRegion),
+            {
+                jointype: parseInt(filterSet.querySelector(Selectors.filterset.fields.join).value, 10),
+                filters,
+            }
+        )
+            .then(result => {
+                pendingPromise.resolve();
+
+                return result;
+            })
+            .catch(Notification.exception);
+    });
 };
 
