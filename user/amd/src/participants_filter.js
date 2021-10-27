@@ -25,6 +25,7 @@ import * as CoreFilter from 'core/filter';
 import * as DynamicTable from 'core_table/dynamic';
 import Selectors from 'core/local/filter/selectors';
 import Notification from 'core/notification';
+import Pending from 'core/pending';
 
 /**
  * Initialise the participants filter on the element with the given id.
@@ -32,10 +33,8 @@ import Notification from 'core/notification';
  * @param {String} filterRegionId The id for the filter element.
  */
 export const init = filterRegionId => {
-    CoreFilter.init(filterRegionId,  function(filters, filterSet, pendingPromise) {
-        console.log(filters);
-        console.log(filterSet);
-        console.log(pendingPromise);
+    const filterSet = document.querySelector(`#${filterRegionId}`);
+    CoreFilter.init(filterRegionId,  function(filters, pendingPromise) {
         DynamicTable.setFilters(
             DynamicTable.getTableFromId(filterSet.dataset.tableRegion),
             {
@@ -50,5 +49,14 @@ export const init = filterRegionId => {
             })
             .catch(Notification.exception);
     });
+    const tableRoot = DynamicTable.getTableFromId(filterSet.dataset.tableRegion);
+    const initialFilters = DynamicTable.getFilters(tableRoot);
+    if (initialFilters) {
+        const initialFilterPromise = new Pending('core/filter:setFilterFromConfig');
+        // Apply the initial filter configuration.
+        setFilterFromConfig(initialFilters)
+            .then(() => initialFilterPromise.resolve())
+            .catch();
+    }
 };
 
