@@ -33,8 +33,11 @@ import Pending from 'core/pending';
  * @param {String} filterRegionId The id for the filter element.
  */
 export const init = filterRegionId => {
+
     const filterSet = document.querySelector(`#${filterRegionId}`);
-    CoreFilter.init(filterRegionId,  function(filters, pendingPromise) {
+
+    // Initialize filter.
+    const coreFilter = CoreFilter.init(filterSet,  function(filters, pendingPromise) {
         DynamicTable.setFilters(
             DynamicTable.getTableFromId(filterSet.dataset.tableRegion),
             {
@@ -49,6 +52,59 @@ export const init = filterRegionId => {
             })
             .catch(Notification.exception);
     });
+
+    /**
+     * Set the current filter options based on a provided configuration.
+     *
+     * @param {Object} config
+     * @param {Number} config.jointype
+     * @param {Object} config.filters
+     * @returns {Promise}
+     */
+    const setFilterFromConfig = config => {
+        console.log('setFilterFromConfig');
+        const filterConfig = Object.entries(config.filters);
+
+        if (!filterConfig.length) {
+            // There are no filters to set from.
+            return Promise.resolve();
+        }
+
+        // Set the main join type.
+        filterSet.querySelector(Selectors.filterset.fields.join).value = config.jointype;
+
+        const filterPromises = filterConfig.map(([filterType, filterData]) => {
+            if (filterType === 'courseid') {
+                // The courseid is a special case.
+                return false;
+            }
+
+            const filterValues = filterData.values;
+
+            if (!filterValues.length) {
+                // There are no values for this filter.
+                // Skip it.
+                return false;
+            }
+            return coreFilter.addFilterRow().then(([filterRow]) => addFilter(filterRow, filterType, filterValues));
+        }).filter(promise => promise);
+
+        if (!filterPromises.length) {
+            return Promise.resolve();
+        }
+
+        return Promise.all(filterPromises).then(() => {
+            return coreFilter.removeEmptyFilters();
+        })
+            .then(() => {
+                coreFilter.updateFiltersOptions();
+            })
+            .then(() => {
+                coreFilter.updateTableFromFilter();
+            });
+    };
+
+    // Initialize DynamicTable for showing result.
     const tableRoot = DynamicTable.getTableFromId(filterSet.dataset.tableRegion);
     const initialFilters = DynamicTable.getFilters(tableRoot);
     if (initialFilters) {
