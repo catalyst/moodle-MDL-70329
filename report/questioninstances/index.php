@@ -88,13 +88,14 @@ if ($requestedqtype) {
     // context. That is, rows of these results can be used as $context objects.
     $ctxpreload = context_helper::get_preload_record_columns_sql('con');
     $ctxgroupby = implode(',', array_keys(context_helper::get_preload_record_columns('con')));
+    $hiddenstatus = \core_question\local\bank\question_version_status::QUESTION_STATUS_HIDDEN;
     $counts = $DB->get_records_sql("
             SELECT result.contextid, SUM(numquestions) AS numquestions, SUM(numhidden) AS numhidden, $ctxpreload
               FROM (SELECT data.contextid, COUNT(data.numquestions) AS numquestions,
                            (SELECT COUNT(qv.id)
                               FROM {question_versions} qv
                              WHERE qv.id = data.versionid
-                                   AND qv.status = 1) AS numhidden
+                                   AND qv.status = '$hiddenstatus') AS numhidden
                       FROM (SELECT qv.id as versionid, qc.contextid, 1 AS numquestions
                               FROM {question} q
                               JOIN {question_versions} qv ON qv.questionid = q.id

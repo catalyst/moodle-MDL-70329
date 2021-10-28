@@ -87,7 +87,7 @@ class submit_status extends \external_api {
                 question_bank::notify_question_edited($question->id);
                 $result = [
                     'status' => true,
-                    'statusname' => editquestion_helper::get_question_status_string((int)$versionrecord->status)
+                    'statusname' => editquestion_helper::get_question_status_string($versionrecord->status)
                 ];
                 $event = \core\event\question_updated::create_from_question_instance($question, $editingcontext);
                 $event->trigger();
