@@ -25,6 +25,8 @@
 
 namespace qtype_random\task;
 
+use core_question\local\bank\question_version_status;
+
 defined('MOODLE_INTERNAL') || die();
 
 
@@ -56,7 +58,7 @@ class remove_unused_questions extends \core\task\scheduled_task {
                   JOIN {question_versions} qv ON qv.questionid = q.id
              LEFT JOIN {quiz_slots} qslots ON q.id = qslots.questionid
                  WHERE qslots.questionid IS NULL
-                   AND q.qtype = ? AND qv.status = ?", ['random', 0], 0, 10000);
+                   AND q.qtype = ? AND qv.status = ?", ['random', question_version_status::QUESTION_STATUS_READY], 0, 10000);
 
         $count = 0;
         foreach ($unusedrandomids as $unusedrandomid => $notused) {
