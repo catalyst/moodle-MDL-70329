@@ -908,7 +908,6 @@ class edit_renderer extends \plugin_renderer_base {
      * @return string HTML to output.
      */
     public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null, $random = null) {
-        // TODO make changes to the preview for ramdom question using set_reference and re add the preview.
         if ($qtype === 'random') {
             $random = true;
         }

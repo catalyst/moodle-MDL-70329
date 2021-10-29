@@ -663,12 +663,8 @@ function idnumber_exist_in_question_category($questionidnumber, $categoryid, $li
     $response  = false;
     $record = [];
     // Check if the idnumber exist in the category.
-    $sql = 'SELECT q.id, qbe.idnumber
-              FROM {question} q
-              JOIN {question_versions} qv
-                ON qv.questionid = q.id
-              JOIN {question_bank_entries} qbe
-                ON qbe.id = qv.questionbankentryid
+    $sql = 'SELECT qbe.idnumber
+              FROM {question_bank_entries} qbe
              WHERE qbe.idnumber LIKE ?
                AND qbe.questioncategoryid = ?
           ORDER BY qbe.idnumber DESC';
@@ -2075,6 +2071,27 @@ function get_next_version(int $questionbankentryid): int {
     }
 
     return 1;
+}
+
+/**
+ * Checks if question is the latest version.
+ *
+ * @param string $version Question version to check.
+ * @param string $questionbankentryid Entry to check against.
+ * @return bool
+ */
+function is_latest(string $version, string $questionbankentryid) : bool {
+    global $DB;
+
+    $sql = 'SELECT MAX(version) AS max
+                  FROM {question_versions}
+                 WHERE questionbankentryid = ?';
+    $latestversion = $DB->get_record_sql($sql, [$questionbankentryid]);
+
+    if (isset($latestversion->max)) {
+        return ($version === $latestversion->max) ? true : false;
+    }
+    return false;
 }
 
 // Deprecated functions from Moodle 4.0.

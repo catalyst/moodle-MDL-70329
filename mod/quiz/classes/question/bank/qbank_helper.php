@@ -16,6 +16,9 @@
 
 namespace mod_quiz\question\bank;
 
+require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
+require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
+
 /**
  * Helper class for question bank and its associated data.
  *

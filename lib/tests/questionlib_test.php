@@ -2108,4 +2108,21 @@ class core_questionlib_testcase extends advanced_testcase {
         $this->assertEquals($idnumber, '1_1');
         $this->assertEquals(true, $response);
     }
+
+    /**
+     * Test method is_latest().
+     *
+     */
+    public function test_is_latest() {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $qcat1 = $generator->create_question_category(['name' => 'My category', 'sortorder' => 1, 'idnumber' => 'myqcat']);
+        $question = $generator->create_question('shortanswer', null, ['name' => 'q1', 'category' => $qcat1->id]);
+        $record = $DB->get_record('question_versions', ['questionid' => $question->id]);
+        $firstversion = $record->version;
+        $questionbankentryid = $record->questionbankentryid;
+        $islatest = is_latest($firstversion, $questionbankentryid);
+        $this->assertTrue($islatest);
+    }
 }

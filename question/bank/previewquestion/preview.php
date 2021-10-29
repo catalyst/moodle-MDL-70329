@@ -277,7 +277,7 @@ $previewdata = [];
 $previewdata['questionicon'] = print_question_icon($question);
 $previewdata['questionidumber'] = $question->idnumber;
 $previewdata['questiontitle'] = $question->name;
-$islatestversion = helper::is_latest($question->version, $question->questionbankentryid);
+$islatestversion = is_latest($question->version, $question->questionbankentryid);
 if ($islatestversion) {
     $previewdata['versiontitle'] = get_string('versiontitlelatest', 'qbank_previewquestion', $question->version);
 } else {

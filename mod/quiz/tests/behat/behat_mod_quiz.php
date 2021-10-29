@@ -996,14 +996,14 @@ class behat_mod_quiz extends behat_question_base {
 
     /**
      * Generic click action. Click on the element of the specified type in X number of list item.
-     * This function should be used when list item or repeating elements contains multiple time same value. 
+     * This function should be used when list item or repeating elements contains multiple time same value.
      *
-     * @When /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" in the "(?P<listitem_number>\d+)" list item$/
+     * @When /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" on quiz page "(?P<listitem_number>\d+)"$/
      * @param string $element Element we look for
      * @param string $selectortype The type of what we look for
      * @param int $number th of list_item
      */
-    public function i_click_on_list_item($element, $selectortype, $number) {
+    public function i_click_on_quiz_page($element, $selectortype, $number) {
         // Gets the node based on the requested selector type and locator.
         $nodes = $this->find_all($selectortype, $element);
         // We want key to start at 1 for human readable purposes.

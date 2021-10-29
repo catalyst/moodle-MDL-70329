@@ -50,8 +50,8 @@ Feature: A teacher can delete questions in the question bank
       | name             | Test used question to be deleted |
       | questiontext     | Write about whatever you want    |
     And quiz "Test quiz" contains the following questions:
-      | question                         | page |
-      | Test used question to be deleted | 1    |
+      | question                         | page | requireprevious |
+      | Test used question to be deleted | 1    | 0               |
     When I am on "Course 1" course homepage
     And I navigate to "Question bank > Questions" in current page administration
     And I choose "Delete" action for "Test used question to be deleted" in the question bank
