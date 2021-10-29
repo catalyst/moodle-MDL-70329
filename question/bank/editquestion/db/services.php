@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = [
     'qbank_editquestion_set_status' => [
-        'classname' => 'qbank_editquestion\external\submit_status',
+        'classname' => 'qbank_editquestion\external\update_question_version_status',
         'description' => 'Update the question status.',
         'type' => 'write',
         'ajax' => true,

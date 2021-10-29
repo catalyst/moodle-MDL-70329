@@ -64,13 +64,4 @@ class renderer extends \plugin_renderer_base {
     public function render_preview_page($previewdata) {
         return $this->render_from_template('qbank_previewquestion/preview_question', $previewdata);
     }
-
-    /**
-     * Render the tag error page.
-     *
-     * @param array $errordata
-     */
-    public function render_tagerror_page($errordata) {
-        return $this->render_from_template('qbank_previewquestion/tag_error', $errordata);
-    }
 }

@@ -1336,13 +1336,15 @@ function quiz_attempt_state_name($state) {
  * @param object $question the question.
  * @param string $returnurl url to return to after action is done.
  * @param int $variant which question variant to preview (optional).
- * @param bool $random if question is random, true.
  * @return string html for a number of icons linked to action pages for a
  * question - preview and edit / view icons depending on user capabilities.
  */
-function quiz_question_action_icons($quiz, $cmid, $question, $returnurl, $variant = null, $random = null) {
-    $html = quiz_question_preview_button($quiz, $question, false, $variant, $random) . ' ' .
-            quiz_question_edit_button($cmid, $question, $returnurl);
+function quiz_question_action_icons($quiz, $cmid, $question, $returnurl, $variant = null) {
+    $html = '';
+    if ($question->qtype !== 'random') {
+        $html = quiz_question_preview_button($quiz, $question, false, $variant);
+    }
+    $html .= quiz_question_edit_button($cmid, $question, $returnurl);
     return $html;
 }
 
@@ -1399,10 +1401,9 @@ function quiz_question_edit_button($cmid, $question, $returnurl, $contentafteric
  * @param object $quiz the quiz settings
  * @param object $question the question
  * @param int $variant which question variant to preview (optional).
- * @param bool $random Specifies if a question is random.
  * @return moodle_url to preview this question with the options from this quiz.
  */
-function quiz_question_preview_url($quiz, $question, $variant = null, $random = null) {
+function quiz_question_preview_url($quiz, $question, $variant = null) {
     // Get the appropriate display options.
     $displayoptions = mod_quiz_display_options::make_from_quiz($quiz,
             mod_quiz_display_options::DURING);
@@ -1414,7 +1415,7 @@ function quiz_question_preview_url($quiz, $question, $variant = null, $random = 
 
     // Work out the correcte preview URL.
     return \qbank_previewquestion\helper::question_preview_url($question->id, $quiz->preferredbehaviour,
-            $maxmark, $displayoptions, $variant, null, null, null, $random, $quiz->id);
+            $maxmark, $displayoptions, $variant, null, null, null);
 }
 
 /**
@@ -1427,7 +1428,10 @@ function quiz_question_preview_url($quiz, $question, $variant = null, $random = 
  */
 function quiz_question_preview_button($quiz, $question, $label = false, $variant = null, $random = null) {
     global $PAGE;
-    return $PAGE->get_renderer('mod_quiz', 'edit')->question_preview_icon($quiz, $question, $label, $variant, null, $random);
+    if (!question_has_capability_on($question, 'use')) {
+        return '';
+    }
+    return $PAGE->get_renderer('mod_quiz', 'edit')->question_preview_icon($quiz, $question, $label, $variant, null);
 }
 
 /**
@@ -2815,15 +2819,4 @@ function quiz_create_attempt_handling_errors($attemptid, $cmid = null) {
     } else {
         return $attempobj;
     }
-}
-
-/**
- * Get the set reference data for the slot.
- *
- * @param $slotid
- * @return false|mixed|stdClass
- */
-function quiz_get_set_reference($slotid) {
-    global $DB;
-    return $DB->get_record('question_set_references', ['itemid' => $slotid]);
 }

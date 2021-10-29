@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/lib.php');
 require_once($CFG->libdir . '/filelib.php');
+require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
 
 /**
  * Takes an array of objects and constructs a multidimensional array keyed by
@@ -87,27 +88,32 @@ function quiz_has_questions($quizid) {
 }
 
 /**
- * Is there any attempts for the quiz.
- *
- * @param $quizid
- * @return bool
- */
-function quiz_attempts_exist($quizid) {
-    $attempts = count(\mod_quiz\question\bank\qbank_helper::get_questionids_for_attempts_in_quiz($quizid));
-    if ($attempts > 0) {
-        return true;
-    }
-    return false;
-}
-
-/**
  * Get the slots of real questions (not descriptions) in this quiz, in order.
  * @param object $quiz the quiz.
  * @return array of slot => $question object with fields
  *      ->slot, ->id, ->maxmark, ->number, ->length.
  */
 function quiz_report_get_significant_questions($quiz) {
-    $qsbyslot = \mod_quiz\question\bank\qbank_helper::get_questions_report_structure($quiz->id);
+    global $DB;
+    $qsbyslot = [];
+    $quizobj = \quiz::create($quiz->id);
+    $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+    $slots = $structure->get_slots();
+    foreach ($slots as $slot) {
+        $slotreport = new \stdClass();
+        $slotreport->slot = $slot->slot;
+        $slotreport->id = $slot->questionid;
+        $slotreport->qtype = $slot->qtype;
+        $slotreport->length = $slot->length;
+        $slotreport->maxmark = $slot->maxmark;
+        $slotreport->type = $slot->qtype;
+        if ($slot->qtype === 'random') {
+            $categoryobject = $DB->get_record('question_categories', ['id' => $slot->category]);
+            $slotreport->categoryobject = $categoryobject;
+            $slotreport->category = $slot->category;
+        }
+        $qsbyslot[$slotreport->slot] = $slotreport;
+    }
     $qsbyslot = \mod_quiz\question\bank\qbank_helper::question_array_sort($qsbyslot, 'slot');
     $number = 1;
     foreach ($qsbyslot as $question) {
@@ -407,17 +413,6 @@ function quiz_no_questions_message($quiz, $cm, $context) {
         $output .= $OUTPUT->single_button(new moodle_url('/mod/quiz/edit.php',
         array('cmid' => $cm->id)), get_string('editquiz', 'quiz'), 'get');
     }
-
-    return $output;
-}
-
-function quiz_no_question_attempts_message($cm) {
-    global $OUTPUT;
-
-    $output = '';
-    $output .= $OUTPUT->notification(get_string('noquestionattempts', 'quiz'));
-    $output .= $OUTPUT->single_button(new moodle_url('/mod/quiz/view.php',
-        array('id' => $cm->id)), get_string('gobacktoquiz', 'quiz'), 'get');
 
     return $output;
 }

@@ -72,7 +72,7 @@ class qtype_multianswer_edit_form extends question_edit_form {
             $questiondata = question_bank::load_question($question->id);
             $this->nbofquiz = \qbank_usage\helper::get_question_entry_usage_count($questiondata);
             $this->usedinquiz = $this->nbofquiz > 0;
-            $this->nbofattempts = \qbank_usage\helper::get_question_attempts_count_in_quiz($question->id);
+            $this->nbofattempts = \qbank_usage\helper::get_question_attempts_count_in_quiz((int)$question->id);
         }
 
         parent::__construct($submiturl, $question, $category, $contexts, $formeditable);

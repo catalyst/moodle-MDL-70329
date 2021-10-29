@@ -161,6 +161,7 @@ class quiz_question_version_test extends \advanced_testcase {
             $selectversions [$version->version] = $version;
         }
         // Change to version 1.
+        $this->expectException('moodle_exception');
         submit_question_version::execute($slot->id, (int)$selectversions[1]->version);
         list($quizobj, $quba, $attemptobj) = $this->attempt_quiz($quiz, $this->student, 2);
         $this->assertEquals('This is the first version', $attemptobj->get_question_attempt(1)->get_question()->name);

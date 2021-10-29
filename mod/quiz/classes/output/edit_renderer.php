@@ -736,18 +736,9 @@ class edit_renderer extends \plugin_renderer_base {
      * @return string HTML to output.
      */
     public function question(structure $structure, int $slot, \moodle_url $pageurl) {
-
+        global $DB;
         // Get the data required by the question_slot template.
-        $canedit = $structure->can_be_edited();
-        $checkbox = $this->get_checkbox_render($structure, $slot);
         $slotid = $structure->get_slot_id_for_slot($slot);
-        $questionnumber = $this->question_number($structure->get_displayed_number_for_slot($slot));
-        $questionname = $this->get_question_name_render($structure, $slot, $pageurl);
-        $questionicons = $this->get_action_icons_render($structure, $slot, $pageurl);
-        $questiondependencyicon = '';
-        if ($canedit) {
-            $questiondependencyicon = $this->question_dependency_icon($structure, $slot);
-        }
 
         $output = '';
         $output .= html_writer::start_tag('div');
@@ -758,48 +749,19 @@ class edit_renderer extends \plugin_renderer_base {
 
         $data = [
             'slotid' => $slotid,
-            'canbeedited' => $canedit,
-            'checkbox' => $checkbox,
-            'questionnumber' => $questionnumber,
-            'questionname' => $questionname,
-            'questionicons' => $questionicons,
-            'questiondependencyicon' => $questiondependencyicon,
+            'canbeedited' => $structure->can_be_edited(),
+            'checkbox' => $this->get_checkbox_render($structure, $slot),
+            'questionnumber' => $this->question_number($structure->get_displayed_number_for_slot($slot)),
+            'questionname' => $this->get_question_name_for_slot($structure, $slot, $pageurl),
+            'questionicons' => $this->get_action_icon($structure, $slot, $pageurl),
+            'questiondependencyicon' => ($structure->can_be_edited() ? $this->question_dependency_icon($structure, $slot) : ''),
             'versionselection' => false
         ];
 
         $data['versionoptions'] = [];
-        if (!qbank_helper::is_random($slotid)) {
+        if ($structure->get_slot_by_number($slot)->qtype !== 'random') {
             $data['versionselection'] = true;
-            $versionsoptions = qbank_helper::get_version_options($structure->get_question_in_slot($slot)->id);
-            $latestversion = reset($versionsoptions);
-            // Object for using the latest version.
-            $alwaysuselatest = new \stdClass();
-            $alwaysuselatest->versionid = 0;
-            $alwaysuselatest->version = 0;
-            $alwaysuselatest->versionvalue = get_string('alwayslatest', 'quiz');
-            array_unshift($versionsoptions, $alwaysuselatest);
-            $referencedata = $structure->get_slot_by_id($slotid);
-            if (!isset($referencedata->version) || ($referencedata->version === null)) {
-                $currentversion = 0;
-            } else {
-                $currentversion = $referencedata->version;
-            }
-
-            foreach ($versionsoptions as $versionsoption) {
-                $versionsoption->selected = false;
-                if ($versionsoption->version === $currentversion) {
-                    $versionsoption->selected = true;
-                }
-                if (!isset($versionsoption->versionvalue)) {
-                    if ($versionsoption->version === $latestversion->version) {
-                        $versionsoption->versionvalue = get_string('questionversionlatest', 'quiz', $versionsoption->version);
-                    } else {
-                        $versionsoption->versionvalue = get_string('questionversion', 'quiz', $versionsoption->version);
-                    }
-                }
-
-                $data['versionoption'][] = $versionsoption;
-            }
+            $data['versionoption'] = qbank_helper::get_question_version_info($structure->get_question_in_slot($slot)->id, $slotid);
             $this->page->requires->js_call_amd('mod_quiz/question_slot', 'init', [$slotid]);
         }
 
@@ -831,14 +793,14 @@ class edit_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Get the question name render.
+     * Get the question name for the slot.
      *
      * @param structure $structure object containing the structure of the quiz.
      * @param int $slot the slot on the page we are outputting.
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
-    public function get_question_name_render(structure $structure, int $slot, \moodle_url $pageurl) : string {
+    public function get_question_name_for_slot(structure $structure, int $slot, \moodle_url $pageurl) : string {
         // Display the link to the question (or do nothing if question has no url).
         if ($structure->get_question_type_for_slot($slot) === 'random') {
             $questionname = $this->random_question($structure, $slot, $pageurl);
@@ -857,11 +819,14 @@ class edit_renderer extends \plugin_renderer_base {
      * @param \moodle_url $pageurl the canonical URL of this page.
      * @return string HTML to output.
      */
-    public function get_action_icons_render(structure $structure, int $slot, \moodle_url $pageurl) : string {
+    public function get_action_icon(structure $structure, int $slot, \moodle_url $pageurl) : string {
         // Action icons.
+        $qtype = $structure->get_question_type_for_slot($slot);
         $questionicons = '';
-        $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot), null, null,
-                $structure->get_question_type_for_slot($slot));
+        if ($qtype !== 'random') {
+            $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot), null, null,
+                    $qtype);
+        }
         if ($structure->can_be_edited()) {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
@@ -904,15 +869,11 @@ class edit_renderer extends \plugin_renderer_base {
      * @param bool $label if true, show the preview question label after the icon
      * @param int $variant which question variant to preview (optional).
      * @param string $qtype the type of question
-     * @param bool $random if question is random, true.
      * @return string HTML to output.
      */
-    public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null, $random = null) {
-        // TODO make changes to the preview for ramdom question using set_reference and re add the preview.
-        if ($qtype === 'random') {
-            $random = true;
-        }
-        $url = quiz_question_preview_url($quiz, $question, $variant, $random);
+    public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null) {
+
+        $url = quiz_question_preview_url($quiz, $question, $variant);
 
         // Do we want a label?
         $strpreviewlabel = '';
@@ -1070,7 +1031,7 @@ class edit_renderer extends \plugin_renderer_base {
      * @return string HTML to output.
      */
     public function random_question(structure $structure, $slotnumber, $pageurl) {
-
+        global $DB;
         $question = $structure->get_question_in_slot($slotnumber);
         $slot = $structure->get_slot_by_number($slotnumber);
         $editurl = new \moodle_url('/mod/quiz/editrandom.php',
@@ -1080,7 +1041,7 @@ class edit_renderer extends \plugin_renderer_base {
         $temp->questiontext = '';
         $instancename = quiz_question_tostring($temp);
 
-        $setreference = quiz_get_set_reference($slot->id);
+        $setreference = $DB->get_record('question_set_references', ['itemid' => $slot->id]);
         $filtercondition = json_decode($setreference->filtercondition);
 
 

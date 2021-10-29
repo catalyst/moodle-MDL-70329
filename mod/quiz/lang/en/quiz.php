@@ -1041,7 +1041,6 @@ $string['yourfinalgradeis'] = 'Your final grade for this quiz is {$a}.';
 $string['questionversion'] = 'v{$a}';
 $string['questionversionlatest'] = 'v{$a} (latest)';
 $string['alwayslatest'] = 'Always latest';
-$string['noquestionattempts'] = 'No questions have been attempted yet ';
 $string['gobacktoquiz'] = 'Go back';
 
 // Deprecated since Moodle 3.8.

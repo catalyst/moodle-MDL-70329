@@ -1939,8 +1939,6 @@ class mod_quiz_external_testcase extends externallib_advanced_testcase {
         $question = $questiongenerator->create_question('essay', null, array('category' => $cat->id));
         quiz_add_quiz_question($question->id, $quiz);
 
-        //quiz_add_random_questions($quiz, 0, $cat->id, 1, false);
-
         $this->setUser($this->student);
 
         $result = mod_quiz_external::get_quiz_required_qtypes($quiz->id);

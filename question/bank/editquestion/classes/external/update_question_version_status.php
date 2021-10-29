@@ -29,14 +29,14 @@ use qbank_editquestion\editquestion_helper;
 use question_bank;
 
 /**
- * Submit status external api.
+ * Update question status external api.
  *
  * @package    qbank_editquestion
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class submit_status extends \external_api {
+class update_question_version_status extends \external_api {
 
     /**
      * Returns description of method parameters.

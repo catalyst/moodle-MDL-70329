@@ -17,6 +17,7 @@
 namespace qbank_editquestion;
 
 use core_question\local\bank\column_base;
+use core_question\local\bank\question_version_status;
 
 /**
  * A column to show the status of the question.
@@ -39,7 +40,8 @@ class question_status_column extends column_base {
     protected function display_content($question, $rowclasses): void {
         global $PAGE;
         $attributes = [];
-        if (question_has_capability_on($question, 'edit')) {
+        if (question_has_capability_on($question, 'edit')
+            && $question->status !== question_version_status::QUESTION_STATUS_HIDDEN) {
             $target = 'questionstatus_' . $question->id;
             $datatarget = '[data-target="' . $target . '"]';
             $PAGE->requires->js_call_amd('qbank_editquestion/question_status', 'init', [$datatarget]);
@@ -47,7 +49,8 @@ class question_status_column extends column_base {
                 'data-target' => $target,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id,
-                'class' => 'link-primary comment-pointer'
+                'class' => 'link-primary comment-pointer',
+                'href' => '#'
             ];
         }
         echo \html_writer::tag('a', editquestion_helper::get_question_status_string($question->status), $attributes);

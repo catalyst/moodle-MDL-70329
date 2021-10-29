@@ -31,7 +31,6 @@ $string['questionstatus'] = 'Status';
 $string['questionstatusready'] = 'Ready';
 $string['questionstatushidden'] = 'Hidden';
 $string['questionstatusdraft'] = 'Draft';
-$string['questionstatusunknown'] = 'Unknown';
 $string['questionstatusheader'] = 'Change question status';
 
 // Edit form.

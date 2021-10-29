@@ -93,16 +93,7 @@ class editquestion_helper {
      * @return string
      */
     public static function get_question_status_string($status): string {
-        if ($status === question_version_status::QUESTION_STATUS_READY) {
-            $statusstring = get_string('questionstatusready', 'qbank_editquestion');
-        } else if ($status === question_version_status::QUESTION_STATUS_HIDDEN) {
-            $statusstring = get_string('questionstatushidden', 'qbank_editquestion');
-        } else if ($status == question_version_status::QUESTION_STATUS_DRAFT) {
-            $statusstring = get_string('questionstatusdraft', 'qbank_editquestion');
-        } else {
-            $statusstring = get_string('questionstatusunknown', 'qbank_editquestion');
-        }
-        return $statusstring;
+        return get_string('questionstatus' . $status, 'qbank_editquestion');
     }
 
     /**

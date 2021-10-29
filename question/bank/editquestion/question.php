@@ -177,7 +177,7 @@ if ($id) {
     if ($makecopy) {
         // If we are duplicating a question, add some indication to the question name.
         $question->name = get_string('questionnamecopy', 'question', $question->name);
-        //$question->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $category->id);
+        $question->idnumber = core_question_find_next_unused_idnumber($question->idnumber, $category->id);
         $question->beingcopied = true;
     }
 
