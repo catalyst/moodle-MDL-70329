@@ -129,6 +129,15 @@ class structure {
     }
 
     /**
+     * Get the information about the question name in a given slot.
+     * @param int $slotnumber the index of the slot in question.
+     * @return \stdClass the data from the questions table, augmented with
+     */
+    public function get_question_name_in_slot($slotnumber) {
+        return $this->questions[$this->slotsinorder[$slotnumber]->name];
+    }
+
+    /**
      * Get the displayed question number (or 'i') for a given slot.
      * @param int $slotnumber the index of the slot in question.
      * @return string the question number ot display for this slot.
@@ -619,6 +628,7 @@ class structure {
 
             $slot = new \stdClass();
             $slot->id = $slotdata->slotid;
+            $slot->name = $slotdata->name;
             $slot->slot = $slotdata->slot;
             $slot->quizid = $quiz->id;
             $slot->page = $slotdata->page;

@@ -76,7 +76,7 @@ class helper {
      * @param int $quizid
      * @return int
      */
-    public static function get_question_attempts_count_in_quiz($questionid, $quizid = null): int {
+    public static function get_question_attempts_count_in_quiz(int $questionid, $quizid = null): int {
         global $DB;
         if ($quizid) {
             $sql = 'SELECT COUNT(qatt.id)

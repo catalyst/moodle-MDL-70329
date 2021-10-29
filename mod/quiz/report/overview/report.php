@@ -103,20 +103,19 @@ class quiz_overview_report extends quiz_attempts_report {
         $this->process_actions($quiz, $cm, $currentgroup, $groupstudentsjoins, $allowedjoins, $options->get_url());
 
         $hasquestions = quiz_has_questions($quiz->id);
-        $hasattempts = quiz_attempts_exist($quiz->id);
 
         // Start output.
         if (!$table->is_downloading()) {
             // Only print headers if not asked to download data.
             $this->print_standard_header_and_messages($cm, $course, $quiz,
-                    $options, $currentgroup, $hasquestions, $hasstudents, $hasattempts);
+                    $options, $currentgroup, $hasquestions, $hasstudents);
 
             // Print the display options.
             $this->form->display();
         }
 
         $hasstudents = $hasstudents && (!$currentgroup || $this->hasgroupstudents);
-        if ($hasquestions && $hasattempts && ($hasstudents || $options->attempts == self::ALL_WITH)) {
+        if ($hasquestions && ($hasstudents || $options->attempts == self::ALL_WITH)) {
             // Construct the SQL.
             $table->setup_sql_queries($allowedjoins);
 

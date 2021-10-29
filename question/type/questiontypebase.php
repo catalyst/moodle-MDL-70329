@@ -1004,7 +1004,7 @@ class question_type {
         $question->createdby = $questiondata->createdby;
         $question->modifiedby = $questiondata->modifiedby;
 
-        $this->initialise_question_extra_record($question, $questiondata);
+        $this->initialise_core_question_metadata($question, $questiondata);
 
         // Fill extra question fields values.
         $extraquestionfields = $this->extra_question_fields();
@@ -1023,12 +1023,12 @@ class question_type {
     }
 
     /**
-     * Initialise the extra question fields.
+     * Initialise the question metadata.
      *
      * @param question_definition $question the question_definition we are creating.
      * @param object $questiondata the question data loaded from the database.
      */
-    protected function initialise_question_extra_record(question_definition $question, $questiondata) {
+    protected function initialise_core_question_metadata(question_definition $question, $questiondata) {
         $fields =
             [
                 'status',
