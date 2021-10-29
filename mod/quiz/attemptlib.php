@@ -145,16 +145,12 @@ class quiz {
      * Load just basic information about all the questions in this quiz.
      */
     public function preload_questions() {
-        $questiondata = question_preload_questions(null,
-                'slot.id AS slotid, slot.maxmark, slot.slot, slot.page',
-                '(SELECT s.*, null AS questioncategoryid, qr.questionbankentryid AS bankentry, qr.version AS version
-                     FROM {question_references} qr
-                     JOIN {quiz_slots} s ON s.id = qr.itemid) slot ON slot.quizid = :quizid AND slot.bankentry = qbe.id and slot.version = qv.version',
-                ['quizid' => $this->quiz->id], 'slot.slot');
+        $specificquestionids = \mod_quiz\question\bank\qbank_helper::get_specific_version_question_ids($this->quiz->id);
         $latestquestionids = \mod_quiz\question\bank\qbank_helper::get_always_latest_version_question_ids($this->quiz->id);
-        if (!empty($latestquestionids)) {
-            $latestquestiondata = \mod_quiz\question\bank\qbank_helper::get_question_structure_data($this->quiz->id, $latestquestionids, true);
-            $questiondata = array_merge($questiondata, $latestquestiondata);
+        $questionids = array_merge($specificquestionids, $latestquestionids);
+        $questiondata = [];
+        if (!empty($questionids)) {
+            $questiondata = \mod_quiz\question\bank\qbank_helper::get_question_structure_data($this->quiz->id, $questionids, true);
         }
         $allquestiondata = \mod_quiz\question\bank\qbank_helper::question_array_sort(
             \mod_quiz\question\bank\qbank_helper::question_load_random_questions($this->quiz->id, $questiondata), 'slot');
@@ -705,7 +701,7 @@ class quiz_attempt {
 
         $this->quba = question_engine::load_questions_usage_by_activity($this->attempt->uniqueid);
         $this->slots = $DB->get_records('quiz_slots',
-                array('quizid' => $this->get_quizid()), 'slot', 'slot, id, quizid, page, requireprevious, maxmark');
+                array('quizid' => $this->get_quizid()), 'slot', 'slot, id, requireprevious');
         $this->sections = array_values($DB->get_records('quiz_sections',
                 array('quizid' => $this->get_quizid()), 'firstslot'));
 
@@ -1308,13 +1304,12 @@ class quiz_attempt {
      *      this one can be seen.
      */
     public function is_blocked_by_previous_question($slot) {
-        return $slot > 1 && isset($this->slots[$slot]) && isset($this->slots[$slot]->requireprevious) &&
-                $this->slots[$slot]->requireprevious &&
-                !$this->slots[$slot]->section->shufflequestions &&
-                !$this->slots[$slot - 1]->section->shufflequestions &&
-                $this->get_navigation_method() != QUIZ_NAVMETHOD_SEQ &&
-                !$this->get_question_state($slot - 1)->is_finished() &&
-                $this->quba->can_question_finish_during_attempt($slot - 1);
+        return $slot > 1 && isset($this->slots[$slot]) && $this->slots[$slot]->requireprevious &&
+            !$this->slots[$slot]->section->shufflequestions &&
+            !$this->slots[$slot - 1]->section->shufflequestions &&
+            $this->get_navigation_method() != QUIZ_NAVMETHOD_SEQ &&
+            !$this->get_question_state($slot - 1)->is_finished() &&
+            $this->quba->can_question_finish_during_attempt($slot - 1);
     }
 
     /**
@@ -2103,31 +2098,9 @@ class quiz_attempt {
 
         $transaction = $DB->start_delegated_transaction();
 
-        // Choose the replacement question.
-        if (!\mod_quiz\question\bank\qbank_helper::is_random($this->slots[$slot]->id)) {
-            $newqusetionid = \mod_quiz\question\bank\qbank_helper::get_question_for_redo($this->slots[$slot]->id);
-        } else {
-            $tagids = [];
-            $randomquestiondata = \mod_quiz\question\bank\qbank_helper::get_random_question_data_from_slot($this->slots[$slot]->id);
-            $filtercondition = json_decode($randomquestiondata->filtercondition);
-            if (isset($filtercondition->tags)) {
-                foreach ($filtercondition->tags as $tag) {
-                    $tagstring = explode(',', $tag);
-                    $tagids [] = $tagstring[0];
-                }
-            }
-
-            $randomloader = new \core_question\local\bank\random_question_loader($qubaids, array());
-            $newqusetionid = $randomloader->get_next_question_id($filtercondition->questioncategoryid,
-                    (bool) $filtercondition->includingsubcategories, $tagids);
-            if ($newqusetionid === null) {
-                throw new moodle_exception('notenoughrandomquestions', 'quiz',
-                        $this->quizobj->view_url());
-            }
-        }
-
         // Add the question to the usage. It is important we do this before we choose a variant.
-        $newquestion = question_bank::load_question($newqusetionid);
+        $newquestion = question_bank::load_question(
+            \mod_quiz\question\bank\qbank_helper::choose_question_for_redo($this->slots[$slot]->id, $qubaids));
         $newslot = $this->quba->add_question_in_place_of_other($slot, $newquestion);
 
         // Choose the variant.

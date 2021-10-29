@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Comment lib unit tests.
+ * Question version unit tests.
  *
  * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd

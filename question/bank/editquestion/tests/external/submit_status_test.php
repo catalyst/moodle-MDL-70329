@@ -2,7 +2,7 @@
 
 namespace qbank_editquestion;
 
-use qbank_editquestion\external\submit_status;
+use qbank_editquestion\external\update_question_version_status;
 
 /**
  * Submit status external api test.
@@ -12,7 +12,7 @@ use qbank_editquestion\external\submit_status;
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class submit_status_test extends \advanced_testcase {
+class update_question_version_status_test extends \advanced_testcase {
 
     /**
      * Called before every test.
@@ -38,7 +38,7 @@ class submit_status_test extends \advanced_testcase {
         $data = ['status' => 2];
         $mform = \qbank_editquestion\form\question_status_form::mock_generate_submit_keys($data);
         $this->expectException('moodle_exception');
-        list($result, $statusname) = submit_status::execute($numq->id, http_build_query($mform, '', '&'));
+        list($result, $statusname) = update_question_version_status::execute($numq->id, http_build_query($mform, '', '&'));
         // Test if the version actually changed.
         $currentstatus = $DB->get_record('question_versions', ['questionid' => $numq->id]);
         $this->assertEquals($data['status'], $currentstatus->status);
@@ -59,7 +59,7 @@ class submit_status_test extends \advanced_testcase {
         $data = ['status' => 2];
         $mform = \qbank_editquestion\form\question_status_form::mock_generate_submit_keys($data);
         $this->expectException('moodle_exception');
-        list($result, $statusname) = submit_status::execute($numq->id, http_build_query($mform, '', '&'));
+        list($result, $statusname) = update_question_version_status::execute($numq->id, http_build_query($mform, '', '&'));
         $countafterupdate = $DB->count_records('question_versions');
         $this->assertEquals($countcurrentrecords, $countafterupdate);
     }

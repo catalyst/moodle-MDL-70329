@@ -5959,6 +5959,98 @@ trait restore_questions_attempt_data_trait {
     }
 }
 
+/**
+ * Helper trait to restore question reference data.
+ */
+trait restore_question_reference_data_trait {
+
+    /**
+     * Attach the question reference data to the restore.
+     *
+     * @param $element
+     * @param $paths
+     */
+    protected function add_question_references($element, &$paths) {
+        // Check $element is restore_path_element
+        if (! $element instanceof restore_path_element) {
+            throw new restore_step_exception('element_must_be_restore_path_element', $element);
+        }
+
+        // Check $paths is one array
+        if (!is_array($paths)) {
+            throw new restore_step_exception('paths_must_be_array', $paths);
+        }
+
+        $paths[] = new restore_path_element('question_reference',
+            $element->get_path() . '/question_reference');
+    }
+
+    /**
+     * Process question references which replaces the direct connection to quiz slots to question.
+     *
+     * @param $data
+     */
+    public function process_question_reference($data) {
+        global $DB;
+        $data = (object) $data;
+        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
+        $data->itemid = $this->get_new_parentid('quiz_question_instance');
+        if ($entry = $this->get_mappingid('question_bank_entry', $data->questionbankentryid)) {
+            $data->questionbankentryid = $entry;
+        }
+        $DB->insert_record('question_references', $data);
+    }
+}
+
+/**
+ * Helper trait to restore question set reference data.
+ */
+trait restore_question_set_reference_data_trait {
+
+    /**
+     * Attach the question reference data to the restore.
+     *
+     * @param $element
+     * @param $paths
+     */
+    protected function add_question_set_references($element, &$paths) {
+        // Check $element is restore_path_element
+        if (! $element instanceof restore_path_element) {
+            throw new restore_step_exception('element_must_be_restore_path_element', $element);
+        }
+
+        // Check $paths is one array
+        if (!is_array($paths)) {
+            throw new restore_step_exception('paths_must_be_array', $paths);
+        }
+
+        $paths[] = new restore_path_element('question_set_reference',
+            $element->get_path() . '/question_set_reference');
+    }
+
+    /**
+     * Process question set references data which replaces the random qtype.
+     *
+     * @param $data
+     */
+    public function process_question_set_reference($data) {
+        global $DB;
+        $data = (object) $data;
+        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
+        $data->itemid = $this->get_new_parentid('quiz_question_instance');
+        $filtercondition = json_decode($data->filtercondition);
+        if ($category = $this->get_mappingid('question_category', $filtercondition->questioncategoryid)) {
+            $filtercondition->questioncategoryid = $category;
+        }
+        $data->filtercondition = json_encode($filtercondition);
+        if ($context = $this->get_mappingid('context', $data->questionscontextid)) {
+            $data->questionscontextid = $context;
+        }
+
+        $DB->insert_record('question_set_references', $data);
+    }
+}
+
 
 /**
  * Abstract structure step to help activities that store question attempt data.
@@ -5968,6 +6060,8 @@ trait restore_questions_attempt_data_trait {
  */
 abstract class restore_questions_activity_structure_step extends restore_activity_structure_step {
     use restore_questions_attempt_data_trait;
+    use restore_question_reference_data_trait;
+    use restore_question_set_reference_data_trait;
 
     /**
      * Attach below $element (usually attempts) the needed restore_path_elements

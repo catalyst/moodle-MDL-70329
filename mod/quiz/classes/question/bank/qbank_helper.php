@@ -16,6 +16,9 @@
 
 namespace mod_quiz\question\bank;
 
+require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
+require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
+
 /**
  * Helper class for question bank and its associated data.
  *
@@ -35,7 +38,12 @@ class qbank_helper {
      */
     public static function is_random($slotid): bool {
         global $DB;
-        return $DB->record_exists('question_set_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+            ];
+        return $DB->record_exists('question_set_references', $params);
     }
 
     /**
@@ -83,7 +91,12 @@ class qbank_helper {
      */
     public static function get_question_for_redo($slotid) {
         global $DB;
-        $referencerecord = $DB->get_record('question_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+        ];
+        $referencerecord = $DB->get_record('question_references', $params);
         if ($referencerecord->version === null) {
             $questionsql = 'SELECT q.id
                               FROM {question} q
@@ -111,7 +124,37 @@ class qbank_helper {
      */
     public static function get_random_question_data_from_slot($slotid) {
         global $DB;
-        return $DB->get_record('question_set_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+        ];
+        return $DB->get_record('question_set_references', $params);
+    }
+
+    /**
+     * Get the question ids for specific question version.
+     *
+     * @param int $quizid
+     * @return array
+     */
+    public static function get_specific_version_question_ids($quizid) {
+        global $DB;
+        $questionids = [];
+        $sql = 'SELECT qv.questionid
+                  FROM {quiz_slots} qs
+                  JOIN {question_references} qr ON qr.itemid = qs.id
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qr.questionbankentryid
+                   AND qv.version = qr.version
+                 WHERE qr.version IS NOT NULL
+                   AND qs.quizid = ?
+                   AND qr.component = ?
+                   AND qr.questionarea = ?';
+        $questions = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
+        foreach ($questions as $question) {
+            $questionids [] = $question->questionid;
+        }
+        return $questionids;
     }
 
     /**
@@ -127,8 +170,10 @@ class qbank_helper {
                   FROM {quiz_slots} qs
                   JOIN {question_references} qr ON qr.itemid = qs.id
                  WHERE qr.version IS NULL
-                   AND qs.quizid = ?';
-        $entryids = $DB->get_records_sql($sql, [$quizid]);
+                   AND qs.quizid = ?
+                   AND qr.component = ?
+                   AND qr.questionarea = ?';
+        $entryids = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
         $questionentries = [];
         foreach ($entryids as $entryid) {
             $questionentries [] = $entryid->entry;
@@ -179,6 +224,7 @@ class qbank_helper {
         }
         $sql = "SELECT $selectstart
                        q.id AS questionid,
+                       q.name,
                        q.qtype,
                        q.length,
                        slot.page,
@@ -190,7 +236,7 @@ class qbank_helper {
                        qv.version,
                        qv.questionbankentryid
                   FROM {quiz_slots} slot
-             LEFT JOIN {question_references} qr ON qr.itemid = slot.id                  
+             LEFT JOIN {question_references} qr ON qr.itemid = slot.id AND qr.component = 'mod_quiz' AND qr.questionarea = 'slot'
              LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
              LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id $joinon
              LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid   
@@ -229,60 +275,6 @@ class qbank_helper {
     }
 
     /**
-     * Get the question ids for the quiz attempts.
-     *
-     * @param $quizid
-     * @return array
-     */
-    public static function get_questionids_for_attempts_in_quiz($quizid) {
-        global $DB;
-        $questionids = [];
-        $sql = 'SELECT DISTINCT q.id
-                  FROM {quiz} as qz
-                  JOIN {quiz_attempts} qa ON qa.quiz = qz.id
-                  JOIN {question_usages} qu ON qu.id = qa.uniqueid
-                  JOIN {question_attempts} qatt ON qatt.questionusageid = qu.id
-                  JOIN {question} q ON q.id = qatt.questionid
-                 WHERE qz.id = ?';
-        $questions = $DB->get_records_sql($sql, [$quizid]);
-        foreach ($questions as $question) {
-            $questionids [] = $question->id;
-        }
-        return $questionids;
-    }
-
-    /**
-     * Get question structure report.
-     *
-     * @param int $quizid
-     * @return array
-     */
-    public static function get_questions_report_structure($quizid) {
-        global $DB;
-        $quizobj = \quiz::create($quizid);
-        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
-        $slots = $structure->get_slots();
-        $slotreports = [];
-        foreach ($slots as $slot) {
-            $slotreport = new \stdClass();
-            $slotreport->slot = $slot->slot;
-            $slotreport->id = $slot->questionid;
-            $slotreport->qtype = $slot->qtype;
-            $slotreport->length = $slot->length;
-            $slotreport->maxmark = $slot->maxmark;
-            $slotreport->type = $slot->qtype;
-            if ($slot->qtype === 'random') {
-                $categoryobject = $DB->get_record('question_categories', ['id' => $slot->category]);
-                $slotreport->categoryobject = $categoryobject;
-                $slotreport->category = $slot->category;
-            }
-            $slotreports [$slotreport->slot] = $slotreport;
-        }
-
-        return $slotreports;
-    }
-
-    /**
      * Load random questions.
      *
      * @param int $quizid
@@ -298,8 +290,10 @@ class qbank_helper {
                        qsr.filtercondition
                  FROM {question_set_references} qsr
                  JOIN {quiz_slots} slot ON slot.id = qsr.itemid
-                WHERE slot.quizid = ?';
-        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
+                WHERE slot.quizid = ?
+                  AND qsr.component = ?
+                  AND qsr.questionarea = ?';
+        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
 
         $randomquestions = [];
         // Questions already added.
@@ -350,5 +344,81 @@ class qbank_helper {
         }
 
         return $questiondata;
+    }
+
+    /**
+     * Choose question for redo.
+     *
+     * @param int $slotid
+     * @param \qubaid_condition $qubaids
+     * @return int
+     */
+    public static function choose_question_for_redo($slotid, $qubaids): int {
+        // Choose the replacement question.
+        if (!self::is_random($slotid)) {
+            $newqusetionid = self::get_question_for_redo($slotid);
+        } else {
+            $tagids = [];
+            $randomquestiondata = self::get_random_question_data_from_slot($slotid);
+            $filtercondition = json_decode($randomquestiondata->filtercondition);
+            if (isset($filtercondition->tags)) {
+                foreach ($filtercondition->tags as $tag) {
+                    $tagstring = explode(',', $tag);
+                    $tagids [] = $tagstring[0];
+                }
+            }
+
+            $randomloader = new \core_question\local\bank\random_question_loader($qubaids, []);
+            $newqusetionid = $randomloader->get_next_question_id($filtercondition->questioncategoryid,
+                (bool) $filtercondition->includingsubcategories, $tagids);
+            if ($newqusetionid === null) {
+                throw new \moodle_exception('notenoughrandomquestions', 'quiz');
+            }
+
+        }
+        return $newqusetionid;
+    }
+
+    /**
+     * Get the version information for a question to show in the version selection dropdown.
+     *
+     * @param int $questionid
+     * @param int $slotid
+     * @return array
+     */
+    public static function get_question_version_info($questionid, $slotid): array {
+        global $DB;
+        $versiondata = [];
+        $versionsoptions = self::get_version_options($questionid);
+        $latestversion = reset($versionsoptions);
+        // Object for using the latest version.
+        $alwaysuselatest = new \stdClass();
+        $alwaysuselatest->versionid = 0;
+        $alwaysuselatest->version = 0;
+        $alwaysuselatest->versionvalue = get_string('alwayslatest', 'quiz');
+        array_unshift($versionsoptions, $alwaysuselatest);
+        $referencedata = $DB->get_record('question_references', ['itemid' => $slotid]);
+        if (!isset($referencedata->version) || ($referencedata->version === null)) {
+            $currentversion = 0;
+        } else {
+            $currentversion = $referencedata->version;
+        }
+
+        foreach ($versionsoptions as $versionsoption) {
+            $versionsoption->selected = false;
+            if ($versionsoption->version === $currentversion) {
+                $versionsoption->selected = true;
+            }
+            if (!isset($versionsoption->versionvalue)) {
+                if ($versionsoption->version === $latestversion->version) {
+                    $versionsoption->versionvalue = get_string('questionversionlatest', 'quiz', $versionsoption->version);
+                } else {
+                    $versionsoption->versionvalue = get_string('questionversion', 'quiz', $versionsoption->version);
+                }
+            }
+
+            $versiondata[] = $versionsoption;
+        }
+        return $versiondata;
     }
 }

@@ -16,6 +16,8 @@
 
 /**
  * Helper trait for quiz question unit tests.
+ * This trait helps to execute different tests for quiz, for example if it needs to create a quiz, add question
+ * to the question, add random quetion to the quiz, do a backup or restore.
  *
  * @package    mod_quiz
  * @category   test

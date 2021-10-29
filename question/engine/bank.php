@@ -456,7 +456,7 @@ class question_finder implements cache_data_source {
     }
 
     /**
-     * @return cache_application|cache_session|cache_store the question definition cache we are using.
+     * @return cache_application the question definition cache we are using.
      */
     protected function get_data_cache() {
         // Do not double cache here because it may break cache resetting.
@@ -498,8 +498,7 @@ class question_finder implements cache_data_source {
         if ($extraconditions) {
             $extraconditions = ' AND (' . $extraconditions . ')';
         }
-        $readystatus = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
-        $qcparams['readystatus'] = $readystatus;
+        $qcparams['readystatus'] = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
         $sql = "SELECT q.id, q.id AS id2
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id

@@ -944,73 +944,14 @@ class behat_mod_quiz extends behat_question_base {
     }
 
     /**
-     * Checks, that page contains specified text or another. It also checks if the text is visible when running Javascript tests.
+     * Return a list of the exact named selectors for the component.
      *
-     * @Then /^I should see "(?P<text_string>(?:[^"]|\\")*)" or "(?P<text_string2>(?:[^"]|\\")*)"$/
-     * @throws ExpectationException
-     * @param string $text
-     * @param string $secondtext
+     * @return behat_component_named_selector[]
      */
-    public function i_should_see_or($text, $secondtext) {
-        // Looking for all the matching nodes without any other descendant matching the
-       // same xpath (we are using contains(., ....).
-       $xpathliteral = behat_context_helper::escape($text);
-       $secondxpathliteral = behat_context_helper::escape($secondtext);
-
-       $xpath = "/descendant-or-self::*[contains(., $xpathliteral) or contains(., $secondxpathliteral)]" .
-           "[count(descendant::*[contains(., $xpathliteral) or contains(., $secondxpathliteral)]) = 0]";
-
-       try {
-           $nodes = $this->find_all('xpath', $xpath);
-       } catch (ElementNotFoundException $e) {
-           throw new ExpectationException('"' . $text . '" text was not found in the page', $this->getSession());
-       }
-
-       // If we are not running javascript we have enough with the
-       // element existing as we can't check if it is visible.
-       if (!$this->running_javascript()) {
-           return;
-       }
-
-       // We spin as we don't have enough checking that the element is there, we
-       // should also ensure that the element is visible. Using microsleep as this
-       // is a repeated step and global performance is important.
-       $this->spin(
-           function($context, $args) {
-
-               foreach ($args['nodes'] as $node) {
-                   if ($node->isVisible()) {
-                       return true;
-                   }
-               }
-
-               // If non of the nodes is visible we loop again.
-               throw new ExpectationException('"' . $args['text'] . '" text was found but was not visible', $context->getSession());
-           },
-           array('nodes' => $nodes, 'text' => $text),
-           false,
-           false,
-           true
-       );
-   }
-
-    /**
-     * Generic click action. Click on the element of the specified type in X number of list item.
-     * This function should be used when list item or repeating elements contains multiple time same value. 
-     *
-     * @When /^I click on "(?P<element_string>(?:[^"]|\\")*)" "(?P<selector_string>[^"]*)" in the "(?P<listitem_number>\d+)" list item$/
-     * @param string $element Element we look for
-     * @param string $selectortype The type of what we look for
-     * @param int $number th of list_item
-     */
-    public function i_click_on_list_item($element, $selectortype, $number) {
-        // Gets the node based on the requested selector type and locator.
-        $nodes = $this->find_all($selectortype, $element);
-        // We want key to start at 1 for human readable purposes.
-        array_unshift($nodes,'');
-        unset($nodes[0]);
-        $node = $nodes[$number];
-        $this->ensure_node_is_visible($node);
-        $node->click();
+    public static function get_exact_named_selectors(): array {
+        return [
+            new behat_component_named_selector('Edit slot',
+            ["//li[contains(@class,'qtype')]//span[@class='slotnumber' and contains(., %locator%)]/.."])
+        ];
     }
 }

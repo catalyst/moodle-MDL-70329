@@ -40,7 +40,7 @@ class backup_quiz_activity_structure_step extends backup_questions_activity_stru
             'questionsperpage', 'navmethod', 'shuffleanswers',
             'sumgrades', 'grade', 'timecreated',
             'timemodified', 'password', 'subnet', 'browsersecurity',
-            'delay1', 'delay2', 'showuserpicture', 'showblocks', 'completionattemptsexhausted', 'completionpass',
+            'delay1', 'delay2', 'showuserpicture', 'showblocks', 'completionattemptsexhausted',
             'completionminattempts', 'allowofflineattempts']);
 
         // Define elements for access rule subplugin settings.
@@ -51,15 +51,9 @@ class backup_quiz_activity_structure_step extends backup_questions_activity_stru
         $qinstance = new backup_nested_element('question_instance', ['id'],
             ['slot', 'page', 'requireprevious', 'questionid', 'questioncategoryid', 'includingsubcategories', 'maxmark']);
 
-        $setreferences = new backup_nested_element('question_set_references');
+        $this->add_question_references($qinstance);
 
-        $setreference = new backup_nested_element('question_set_reference', ['id'],
-            ['usingcontextid', 'component', 'questionarea', 'questionscontextid', 'filtercondition']);
-
-        $references = new backup_nested_element('question_references');
-
-        $reference = new backup_nested_element('question_reference', ['id'],
-        ['usingcontextid', 'component', 'questionarea', 'questionbankentryid', 'version']);
+        $this->add_question_set_references($qinstance);
 
         $sections = new backup_nested_element('sections');
 
@@ -97,12 +91,6 @@ class backup_quiz_activity_structure_step extends backup_questions_activity_stru
         $quiz->add_child($qinstances);
         $qinstances->add_child($qinstance);
 
-        $qinstance->add_child($setreferences);
-        $setreferences->add_child($setreference);
-
-        $qinstance->add_child($references);
-        $references->add_child($reference);
-
         $quiz->add_child($sections);
         $sections->add_child($section);
 
@@ -122,10 +110,6 @@ class backup_quiz_activity_structure_step extends backup_questions_activity_stru
         $quiz->set_source_table('quiz', ['id' => backup::VAR_ACTIVITYID]);
 
         $qinstance->set_source_table('quiz_slots', ['quizid' => backup::VAR_PARENTID]);
-
-        $setreference->set_source_table('question_set_references', ['itemid' => backup::VAR_PARENTID]);
-
-        $reference->set_source_table('question_references', ['itemid' => backup::VAR_PARENTID]);
 
         $section->set_source_table('quiz_sections', ['quizid' => backup::VAR_PARENTID]);
 

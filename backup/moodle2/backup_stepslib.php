@@ -195,15 +195,67 @@ trait backup_questions_attempt_data_trait {
     }
 }
 
+/**
+ * Helper to backup question reference data for an instance.
+ */
+trait backup_question_reference_data_trait {
+
+    /**
+     * Backup the related data from reference table for the instance.
+     *
+     * @param $element
+     */
+    protected function add_question_references($element) {
+        // Check $element is one nested_backup_element
+        if (! $element instanceof backup_nested_element) {
+            throw new backup_step_exception('question_states_bad_parent_element', $element);
+        }
+
+        $reference = new backup_nested_element('question_reference', ['id'],
+            ['usingcontextid', 'component', 'questionarea', 'questionbankentryid', 'version']);
+
+        $element->add_child($reference);
+
+        $reference->set_source_table('question_references', ['itemid' => backup::VAR_PARENTID]);
+    }
+}
 
 /**
- * Abstract structure step to help activities that store question attempt data.
+ * Helper to backup question set reference data for an instance.
+ */
+trait backup_question_set_reference_trait {
+
+    /**
+     * Backup the related data from set_reference table for the instance.
+     *
+     * @param $element
+     */
+    protected function add_question_set_references($element) {
+        // Check $element is one nested_backup_element
+        if (! $element instanceof backup_nested_element) {
+            throw new backup_step_exception('question_states_bad_parent_element', $element);
+        }
+
+        $setreference = new backup_nested_element('question_set_reference', ['id'],
+            ['usingcontextid', 'component', 'questionarea', 'questionscontextid', 'filtercondition']);
+
+        $element->add_child($setreference);
+
+        $setreference->set_source_table('question_set_references', ['itemid' => backup::VAR_PARENTID]);
+    }
+}
+
+
+/**
+ * Abstract structure step to help activities that store question attempt data, reference data and set reference data.
  *
  * @copyright 2011 The Open University
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class backup_questions_activity_structure_step extends backup_activity_structure_step {
     use backup_questions_attempt_data_trait;
+    use backup_question_reference_data_trait;
+    use backup_question_set_reference_trait;
 }
 
 

@@ -185,17 +185,12 @@ class helper {
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
             $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null,
-            $version = null, $random = null, $quizid = null): moodle_url {
+            $version = null): moodle_url {
 
         $params = ['id' => $questionid];
 
-        if (!is_null($random)) {
-            $params['random'] = $random;
-            $params['quizid'] = $quizid;
-        }
-
         if (!is_null($version)) {
-            $params['version'] = $version;
+            $params['id'] = $version;
         }
         if (is_null($context)) {
             global $PAGE;
@@ -345,91 +340,5 @@ class helper {
             $questionids[$version->questionid] = $key;
         }
         return $questionids;
-    }
-
-    /**
-     * Returns a random question.
-     *
-     * @param  int $quizid Question informations.
-     * @return object $question|$tagerror Question or error with tags not found.
-     */
-    public static function get_random_question($quizid): object {
-        global $DB, $USER;
-        $extrafields = 'slot.id AS slotid, slot.maxmark, slot.slot, slot.page';
-        $join = '(SELECT s.*, null AS questioncategoryid, qr.questionbankentryid AS bankentry, qr.version AS version
-                  FROM {question_references} qr
-                  JOIN {quiz_slots} s ON s.id = qr.itemid) slot ON slot.quizid = :quizid
-                  AND slot.bankentry = qbe.id and slot.version = qv.version';
-        $questiondata = question_preload_questions(null, $extrafields, $join, ['quizid' => $quizid], 'slot.slot');
-
-        $sql = 'SELECT slot.id AS slotid,
-                       slot.maxmark,
-                       slot.slot,
-                       slot.page,
-                       qsr.filtercondition
-                 FROM {question_set_references} qsr
-                 JOIN {quiz_slots} slot ON slot.id = qsr.itemid
-                WHERE slot.quizid = ?';
-        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
-
-        $randomquestions = [];
-        // Questions already added.
-        $usedquestionids = [];
-        foreach ($questiondata as $question) {
-            if (isset($usedquestions[$question->id])) {
-                $usedquestionids[$question->id] += 1;
-            } else {
-                $usedquestionids[$question->id] = 1;
-            }
-        }
-        // Usages for this user's previous quiz attempts.
-        $qubaids = new \mod_quiz\question\qubaids_for_users_attempts($quizid, $USER->id);
-        $randomloader = new \core_question\local\bank\random_question_loader($qubaids, $usedquestionids);
-
-        foreach ($randomquestiondatas as $randomquestiondata) {
-            $filtercondition = json_decode($randomquestiondata->filtercondition);
-            $tagids = [];
-            $tagstrings = [];
-            if (isset($filtercondition->tags)) {
-                foreach ($filtercondition->tags as $tag) {
-                    $tagstring = explode(',', $tag);
-                    $tagids [] = $tagstring[0];
-                    $tagstrings[] = $tagstring[1];
-                }
-            }
-            $randomquestiondata->randomfromcategory = $filtercondition->questioncategoryid;
-            $randomquestiondata->randomincludingsubcategories = $filtercondition->includingsubcategories;
-            $randomquestiondata->questionid = $randomloader->get_next_question_id($randomquestiondata->randomfromcategory,
-                $randomquestiondata->randomincludingsubcategories, $tagids);
-            $randomquestions [] = $randomquestiondata;
-        }
-
-        foreach ($randomquestions as $randomquestion) {
-            // Should not add if there is no question found from the ramdom question loader, maybe empty category.
-            if ($randomquestion->questionid === null) {
-                continue;
-            }
-            $question = new stdClass();
-            $question->slotid = $randomquestion->slotid;
-            $question->maxmark = $randomquestion->maxmark;
-            $question->slot = $randomquestion->slot;
-            $question->page = $randomquestion->page;
-            $qdatas = question_preload_questions($randomquestion->questionid);
-            $qdatas = reset($qdatas);
-            foreach ($qdatas as $key => $qdata) {
-                $question->$key = $qdata;
-            }
-            $questiondata[$question->id] = $question;
-        }
-
-        if (!empty($tagids) && empty($questiondata)) {
-            $tagsnotfound = implode(', ', $tagstrings);
-            $tagerror = new stdClass();
-            $tagerror->error = $tagsnotfound;
-            return $tagerror;
-        }
-        $randomid = reset($questiondata)->id;
-        $question = question_bank::load_question($randomid);
-        return $question;
     }
 }
