@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import * as CoreFilter from 'core/filter';
+import CoreFilter from 'core/filter';
 import * as DynamicTable from 'core_table/dynamic';
 import Selectors from 'core/local/filter/selectors';
 import Notification from 'core/notification';
@@ -37,7 +37,7 @@ export const init = filterRegionId => {
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
     // Initialize filter.
-    const coreFilter = CoreFilter.init(filterSet,  function(filters, pendingPromise) {
+    const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
         DynamicTable.setFilters(
             DynamicTable.getTableFromId(filterSet.dataset.tableRegion),
             {
@@ -52,6 +52,7 @@ export const init = filterRegionId => {
             })
             .catch(Notification.exception);
     });
+    coreFilter.init();
 
     /**
      * Set the current filter options based on a provided configuration.
@@ -62,7 +63,6 @@ export const init = filterRegionId => {
      * @returns {Promise}
      */
     const setFilterFromConfig = config => {
-        console.log('setFilterFromConfig');
         const filterConfig = Object.entries(config.filters);
 
         if (!filterConfig.length) {
@@ -86,7 +86,9 @@ export const init = filterRegionId => {
                 // Skip it.
                 return false;
             }
-            return coreFilter.addFilterRow().then(([filterRow]) => addFilter(filterRow, filterType, filterValues));
+            return coreFilter.addFilterRow().then(([filterRow]) => {
+                coreFilter.addFilter(filterRow, filterType, filterValues);
+            });
         }).filter(promise => promise);
 
         if (!filterPromises.length) {
