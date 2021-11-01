@@ -39,6 +39,7 @@ Feature: Quiz question versioning
     And I click on "Preview question" "link"
     And I switch to "questionpreview" window
     And I should see "Answer the first question"
+    And I press "Display options"
     And I set the field "id_feedback" to "Not shown"
     And I set the field "id_generalfeedback" to "Not shown"
     And I set the field "id_rightanswer" to "Shown"
@@ -57,6 +58,7 @@ Feature: Quiz question versioning
     And I click on "Preview question" "link"
     And I switch to "questionpreview" window
     And I should see "This is the second question text"
+    And I press "Display options"
     And I set the field "id_feedback" to "Not shown"
     And I set the field "id_generalfeedback" to "Not shown"
     And I set the field "id_rightanswer" to "Shown"
