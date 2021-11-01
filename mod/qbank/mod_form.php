@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * The main mod_qbank configuration form.
- *
- * @package     mod_qbank
- * @copyright   2021 Catalyst IT Australia Pty Ltd
- * @author      Nicholas Hoobin <nicholashoobin@catalyst-au.net>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');

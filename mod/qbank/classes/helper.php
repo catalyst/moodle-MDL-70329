@@ -14,27 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Library functions used by db/install.php.
- *
- * @package    mod_qbank
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace mod_qbank;
-
-use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/modlib.php');
 
+use stdClass;
+
 /**
  * Class helper contains all library functions.
  *
- * @package mod_qbank
+ * @package    mod_qbank
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class helper {
 
@@ -48,8 +42,8 @@ class helper {
         global $DB;
 
         $sql = "SELECT DISTINCT qc.contextid, ctx.contextlevel, ctx.instanceid
-                  FROM {question} q
-                  JOIN {question_categories} qc ON qc.id = q.category
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                   JOIN {context} ctx ON ctx.id = qc.contextid
               ORDER BY ctx.contextlevel";
 

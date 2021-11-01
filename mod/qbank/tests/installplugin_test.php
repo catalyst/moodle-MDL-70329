@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace mod_qbank;
+
+use context_coursecat;
+
 /**
  * Testing method get_categories_populated, create_category_course and get_course in helper class.
  *
@@ -23,13 +27,6 @@
  * @author     Guillermo Gomez Arias <guillermogomez@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-namespace mod_qbank;
-
-use context_coursecat;
-
-defined('MOODLE_INTERNAL') || die();
-
 class installplugin_test extends \advanced_testcase {
 
     /**

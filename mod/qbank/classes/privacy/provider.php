@@ -14,18 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Privacy Subsystem implementation for mod_qbank.
- *
- * @package     mod_qbank
- * @copyright   2021 Catalyst IT Australia Pty Ltd
- * @author      Nicholas Hoobin <nicholashoobin@catalyst-au.net>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace mod_qbank\privacy;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Privacy Subsystem for mod_qbank implementing null_provider.
