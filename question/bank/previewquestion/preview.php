@@ -49,24 +49,10 @@ define('QUESTION_PREVIEW_MAX_VARIANTS', 100);
 // Get and validate question id.
 $id = required_param('id', PARAM_INT);
 $version = optional_param('version', null, PARAM_INT);
-$random = optional_param('random', null, PARAM_INT);
 $returnurl = optional_param('returnurl', null, PARAM_RAW);
 
 if ($version) {
     $question = question_bank::load_question($version);
-} else if ($random) {
-    $quizid = required_param('quizid', PARAM_INT);
-    $question = helper::get_random_question($quizid);
-    if (isset($question->error)) {
-        $error = get_string('tagerror', 'qbank_previewquestion', $question->error);
-        $title = get_string('tagsnotfound', 'qbank_previewquestion');
-        $PAGE->set_title($title);
-        $PAGE->set_heading($title);
-        $data['error'] = notification::error($error);
-        echo $OUTPUT->header();
-        echo $PAGE->get_renderer('qbank_previewquestion')->render_tagerror_page($data);
-        echo $OUTPUT->footer();
-    }
 } else {
     $question = question_bank::load_question($id);
 }
@@ -107,7 +93,7 @@ $PAGE->set_url(helper::question_preview_url($id, $options->behaviour, $options->
 // Get and validate existing preview, or start a new one.
 $previewid = optional_param('previewid', 0, PARAM_INT);
 
-if ($previewid && !$version && !$random) {
+if ($previewid && !$version) {
     try {
         $quba = question_engine::load_questions_usage_by_activity($previewid);
 

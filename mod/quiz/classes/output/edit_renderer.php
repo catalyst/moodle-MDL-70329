@@ -859,9 +859,12 @@ class edit_renderer extends \plugin_renderer_base {
      */
     public function get_action_icons_render(structure $structure, int $slot, \moodle_url $pageurl) : string {
         // Action icons.
+        $qtype = $structure->get_question_type_for_slot($slot);
         $questionicons = '';
-        $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot), null, null,
-                $structure->get_question_type_for_slot($slot));
+        if ($qtype !== 'random') {
+            $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot), null, null,
+                    $qtype);
+        }
         if ($structure->can_be_edited()) {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
         }
@@ -904,14 +907,11 @@ class edit_renderer extends \plugin_renderer_base {
      * @param bool $label if true, show the preview question label after the icon
      * @param int $variant which question variant to preview (optional).
      * @param string $qtype the type of question
-     * @param bool $random if question is random, true.
      * @return string HTML to output.
      */
-    public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null, $random = null) {
-        if ($qtype === 'random') {
-            $random = true;
-        }
-        $url = quiz_question_preview_url($quiz, $question, $variant, $random);
+    public function question_preview_icon($quiz, $question, $label = null, $variant = null, $qtype = null) {
+
+        $url = quiz_question_preview_url($quiz, $question, $variant);
 
         // Do we want a label?
         $strpreviewlabel = '';
