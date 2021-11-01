@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import * as CoreFilter from 'core/filter';
+import CoreFilter from 'core/filter';
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
 import Notification from 'core/notification';
@@ -40,6 +40,8 @@ import PagedContentFactory from 'core/paged_content_factory';
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                      perpage, recurse, showhidden, qbshowtext) => {
+
+    const filterSet = document.querySelector(`#${filterRegionId}`);
 
     // Default filter params for WS function.
     let wsfilter = {
@@ -70,9 +72,11 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     var TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
-    CoreFilter.init(filterRegionId, 'QbankTable', function(filterdata, pendingPromise) {
-        applyFilter(filterdata, pendingPromise);
+    const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
+        console.log('callback:filters', filters);
+        applyFilter(filters, pendingPromise);
     });
+    coreFilter.init();
 
     /**
      * Ajax call to retrieve question via ws functions
@@ -88,16 +92,15 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     /**
      * Retrieve table data.
      *
-     * @param {Object} filter data
-     * @param {int} filterverb outermost join types
-     * @param {Promise} filter pending promise
+     * @param {Object} filterdata data
+     * @param {Promise} pendingPromise pending promise
      */
-    const applyFilter = (filterdata, filterverb, pendingPromise) => {
+    const applyFilter = (filterdata, pendingPromise) => {
         // Getting filter data.
         // Otherwise, the ws function should retrieves question based on default courseid and cateogryid.
         if (filterdata) {
             // Main join types.
-            wsfilter['filterverb'] = filterverb;
+            wsfilter['filterverb'] = parseInt(filterSet.dataset.filterverb, 10);
 
             // Clean old filter
             wsfilter['filters'] = [];
