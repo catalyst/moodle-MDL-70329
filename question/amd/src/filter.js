@@ -73,7 +73,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
-        console.log('callback:filters', filters);
         applyFilter(filters, pendingPromise);
     });
     coreFilter.init();

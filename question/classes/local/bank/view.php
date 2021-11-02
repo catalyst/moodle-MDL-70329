@@ -86,19 +86,19 @@ class view {
     public $course;
 
     /**
-     * @var \question_bank_column_base[] these are all the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are all the 'columns' that are
      * part of the display. Array keys are the class name.
      */
     protected $requiredcolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are the 'columns' that are
      * actually displayed as a column, in order. Array keys are the class name.
      */
     protected $visiblecolumns;
 
     /**
-     * @var \question_bank_column_base[] these are the 'columns' that are
+     * @var \core_question\local\bank\column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
@@ -1059,7 +1059,11 @@ class view {
     /**
      * Show a list of questions by HTML for API.
      */
-    public function display_for_api(): void {
+    public function display_for_api($questions): void {
+        $this->print_table($questions);
+    }
+
+    public function get_questions() {
         $pagevars = $this->get_pagevars();
         $this->build_query();
         $questionsrs = $this->load_page_questions($pagevars['qpage'], $pagevars['qperpage']);
@@ -1073,7 +1077,7 @@ class view {
         foreach ($this->requiredcolumns as $name => $column) {
             $column->load_additional_data($questions);
         }
-        $this->print_table($questions);
+        return $questions;
     }
 
     /**
