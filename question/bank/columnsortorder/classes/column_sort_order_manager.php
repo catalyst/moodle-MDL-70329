@@ -18,13 +18,11 @@ namespace qbank_columnsortorder;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/questionlib.php');
-
 use core_question\local\bank\view;
 use moodle_url;
 use stdClass;
 use context_system;
-use question_edit_contexts;
+use core_question\lib\question_edit_contexts;
 
 /**
  * Class column_sort_order_manager responsible for loading and saving order to the config setting.

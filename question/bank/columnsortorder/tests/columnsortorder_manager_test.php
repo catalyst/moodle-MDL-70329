@@ -24,7 +24,7 @@ use qbank_columnsortorder\external\set_columnbank_order;
 use core_question\local\bank\view;
 use context_course;
 use moodle_url;
-use question_edit_contexts;
+use core_question\lib\question_edit_contexts;
 use ReflectionClass;
 
 global $CFG;
