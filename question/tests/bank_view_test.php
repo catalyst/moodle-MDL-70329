@@ -73,8 +73,8 @@ class core_question_bank_view_testcase extends advanced_testcase {
         $view->display($pagevars, 'editq');
         $html = ob_get_clean();
 
-        // Verify the output includes the expected question.
-        $this->assertStringContainsString('Example question', $html);
+        // Verify the output does not include the expected question as it's loaded from ajax call.
+        $this->assertStringNotContainsString('Example question', $html);
 
         // Verify the question has not been loaded into the cache.
         $this->assertFalse($cache->has($questiondata->id));
@@ -116,7 +116,7 @@ class core_question_bank_view_testcase extends advanced_testcase {
 
         // Mainly we are verifying that there was no fatal error.
 
-        // Verify the output includes the expected question.
-        $this->assertStringContainsString('Example question', $html);
+        // Verify the output includes the expected question as as it's loaded from ajax call.
+        $this->assertStringNotContainsString('Example question', $html);
     }
 }
