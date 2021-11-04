@@ -52,7 +52,6 @@ export const init = filterRegionId => {
             })
             .catch(Notification.exception);
     });
-    coreFilter.init();
 
     /**
      * Set the current filter options based on a provided configuration.
