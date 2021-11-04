@@ -188,14 +188,10 @@ class bank extends external_api {
         $questionbank->set_pagevars($params);
         $questionbank->add_standard_searchcondition();
         $questions = $questionbank->get_questions();
-        ob_start();
-        $questionbank->display_for_api($questions);
-        $tablehtml = ob_get_clean();
 
         $totalquestions = $questionbank->get_question_count();
 
         return [
-            'html' => $tablehtml,
             'questions' => $questions,
             'totalquestions' => $totalquestions,
             'warnings' => []
@@ -209,7 +205,6 @@ class bank extends external_api {
      */
     public static function get_questions_returns(): external_single_structure {
         return new external_single_structure([
-            'html' => new external_value(PARAM_RAW, 'The raw html of the requested table.'),
             'questions' => new external_multiple_structure(
                 new external_single_structure([
                     'id' => new external_value(PARAM_INT, 'question id'),

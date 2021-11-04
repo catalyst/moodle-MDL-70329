@@ -21,11 +21,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import CoreFilter from 'core/filter';
 import ajax from 'core/ajax';
-import Templates from 'core/templates';
+import CoreFilter from 'core/filter';
+import Fragment from 'core/fragment';
 import Notification from 'core/notification';
 import PagedContentFactory from 'core/paged_content_factory';
+import Templates from 'core/templates';
 
 /**
  * Initialise the question bank filter on the element with the given id.
@@ -37,9 +38,10 @@ import PagedContentFactory from 'core/paged_content_factory';
  * @param {boolean} recurse if loading sub categories
  * @param {boolean} showhidden if loading hidden question
  * @param {boolean} qbshowtext if loading question text
+ * @param {int} contextId contextId
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
-                     perpage, recurse, showhidden, qbshowtext) => {
+                     perpage, recurse, showhidden, qbshowtext, contextId) => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
@@ -58,18 +60,18 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     };
 
     // HTML <div> ID of question container.
-    var SELECTORS = {
+    const SELECTORS = {
         QUESTION_CONTAINER_ID: 'questionscontainer',
     };
 
     // Default Pagination config.
-    var DEFAULT_PAGED_CONTENT_CONFIG = {
+    const DEFAULT_PAGED_CONTENT_CONFIG = {
         ignoreControlWhileLoading: true,
         controlPlacementBottom: false,
     };
 
-    // Template to renden return value from ws function.
-    var TEMPLATE_NAME = 'core_question/qbank_questions';
+    // Template to render return value from ws function.
+    const TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
@@ -83,8 +85,8 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @returns {*}
      * @param {Object} filter filter object
      */
-    var requestQuestions = function(filter) {
-        let request = {methodname: 'core_qbank_get_questions', args: filter};
+    const requestQuestions = filter => {
+        const request = {methodname: 'core_qbank_get_questions', args: filter};
         return ajax.call([request])[0];
     };
 
@@ -113,14 +115,14 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
         // Load questions for first page.
         requestQuestions(wsfilter)
-            .then(function(response) {
-                let totalquestions = response.totalquestions;
-                let firstpagehtml = response.html;
-                return renderPagination(wsfilter, totalquestions, firstpagehtml);
+            .then(response => {
+                const totalquestions = response.totalquestions;
+                const firstpagequestions = {questions: JSON.stringify(response.questions)};
+                return renderPagination(wsfilter, totalquestions, firstpagequestions);
             })
             // Render questions for first page and pagination.
-            .then(function(html, js) {
-                let questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
+            .then((html, js) => {
+                const questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
                 Templates.replaceNodeContents(questionscontainer, html, js);
                 // Resolve filter promise.
                 if (pendingPromise) {
@@ -136,28 +138,35 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      *
      * @param {Object} filter params
      * @param {int} totalquestions
-     * @param {string} firstpagehtml
+     * @param {string} firstpagequestions
      */
-    const renderPagination = (filter, totalquestions, firstpagehtml) => {
+    const renderPagination = (filter, totalquestions, firstpagequestions) => {
         return PagedContentFactory.createFromAjax(
             totalquestions,
             perpage,
-            function(pagesData) {
-                return pagesData.map(function(pageData) {
+            pagesData => {
+                return pagesData.map(pageData => {
                     let pageNumber = pageData.pageNumber;
                     // Page number start at 1.
                     let qpage = pageNumber - 1;
 
                     // Render first page
                     if (qpage == 0) {
-                        return Templates.render(TEMPLATE_NAME, {html: firstpagehtml});
+                        return Fragment.loadFragment('qbank_viewlist', 'question_list', contextId, firstpagequestions)
+                            .then(questionshtml => {
+                                return Templates.render(TEMPLATE_NAME, {html: questionshtml});
+                            });
                     } else {
                         // Load data for selected page.
                         filter['qpage'] = qpage;
                         return requestQuestions(filter)
-                        .then(function(response) {
-                            return Templates.render(TEMPLATE_NAME, {html: response.html});
-                        })
+                            .then(response => {
+                                const pagequestions = {questions: JSON.stringify(response.questions)};
+                                return Fragment.loadFragment('qbank_viewlist', 'question_list', contextId, pagequestions)
+                                    .then(questionshtml => {
+                                        return Templates.render(TEMPLATE_NAME, {html: questionshtml});
+                                    });
+                            })
                         .fail(Notification.exception);
                     }
                 });

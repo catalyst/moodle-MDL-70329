@@ -1960,6 +1960,7 @@ class core_plugin_manager {
                 'previewquestion',
                 'tagquestion',
                 'viewcreator',
+                'viewlist',
                 'viewquestionname',
                 'viewquestiontext',
                 'viewquestiontype',

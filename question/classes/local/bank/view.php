@@ -1080,6 +1080,22 @@ class view {
         return $questions;
     }
 
+    public function load_questions() {
+        $this->build_query();
+        $questionsrs = $this->load_page_questions(0, 100000);
+        $questions = [];
+        foreach ($questionsrs as $question) {
+            if (!empty($question->id)) {
+                $questions[$question->id] = $question;
+            }
+        }
+        $questionsrs->close();
+        foreach ($this->requiredcolumns as $name => $column) {
+            $column->load_additional_data($questions);
+        }
+        return $questions;
+    }
+
     /**
      * Prints the actual table with question.
      *
