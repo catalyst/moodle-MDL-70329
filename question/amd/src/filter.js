@@ -74,7 +74,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     const TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
-    const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
+    const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
         applyFilter(filters, pendingPromise);
     });
     coreFilter.init();

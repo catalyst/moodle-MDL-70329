@@ -30,58 +30,49 @@ class question_list_test extends \advanced_testcase {
      * Test question usage data.
      */
     public function test_question_list() {
-        global $PAGE;
+
         $this->resetAfterTest();
 
-        $questionusagetable = qbank_viewlist_output_fragment_question_list(['questionid' => 1]);
+        $generator = $this->getDataGenerator();
+        $questiongenerator = $generator->get_plugin_generator('core_question');
 
-        return;
+        // Make a course and a quiz.
+        $course = $generator->create_course();
+        $coursecontext = \context_course::instance($course->id);
+        $cat = $questiongenerator->create_question_category(['contextid' => $coursecontext->id]);
+        $mod = $generator->create_module('quiz', ['course' => $course->id, 'name' => 'quiz']);
 
-        $layout = '1,2,0';
-        // Make a user to do the quiz.
-        $user = $this->getDataGenerator()->create_user();
-        $course = $this->getDataGenerator()->create_course();
-        // Make a quiz.
-        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
-        $quiz = $quizgenerator->create_instance(['course' => $course->id,
-            'grade' => 100.0, 'sumgrades' => 2, 'layout' => $layout]);
+        // Make questions.
+        $questionname1 = 'Question:1';
+        $question = ['category' => $cat->id, 'name' => $questionname1];
+        $q = $questiongenerator->create_question('shortanswer', null, $question);
+        quiz_add_quiz_question($q->id, $mod);
+        $questionid1 = $q->id;
 
-        $quizobj = \quiz::create($quiz->id, $user->id);
+        $questionname2 = 'Question:2';
+        $question = ['category' => $cat->id, 'name' => $questionname2];
+        $q = $questiongenerator->create_question('shortanswer', null, $question);
+        quiz_add_quiz_question($q->id, $mod);
+        $questionid2 = $q->id;
 
-        $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
-        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+        $questionname3 = 'Question:3';
+        $question = ['category' => $cat->id, 'name' => $questionname3];
+        $q = $questiongenerator->create_question('shortanswer', null, $question);
+        quiz_add_quiz_question($q->id, $mod);
+        $questionid3 = $q->id;
 
-        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        $cat = $questiongenerator->create_question_category();
+        // Search by question id.
+        $questions = [
+            (object)['id' => $questionid1],
+            (object)['id' => $questionid3],
+        ];
+        $questionlisthtml = qbank_viewlist_output_fragment_question_list([
+            'questions' => json_encode($questions),
+            'context' => $coursecontext,
+        ]);
 
-        $questions = [];
-        $page = 1;
-        foreach (explode(',', $layout) as $slot) {
-            if ($slot == 0) {
-                $page += 1;
-                continue;
-            }
-
-            $question = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
-            quiz_add_quiz_question($question->id, $quiz, $page);
-            $questions [] = $question;
-        }
-
-        $timenow = time();
-        $attempt = quiz_create_attempt($quizobj, 1, false, $timenow, false, $user->id);
-        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
-        quiz_attempt_save_started($quizobj, $quba, $attempt);
-        $attemptdata = \quiz_attempt::create($attempt->id);
-
-        $this->setAdminUser();
-        $PAGE->set_url(new \moodle_url('/'));
-        foreach ($questions as $question) {
-            $questionusagetable = qbank_usage_output_fragment_question_usage(['questionid' => $question->id]);
-            // Test usage table contains the quiz data which was attempted.
-            $this->assertStringContainsString($quiz->name, $questionusagetable);
-
-            // Test usage table contains the course data where the quiz was attempted.
-            $this->assertStringContainsString($course->fullname, $questionusagetable);
-        }
+        $this->assertStringContainsString($questionname1, $questionlisthtml);
+        $this->assertStringNotContainsString($questionname2, $questionlisthtml);
+        $this->assertStringContainsString($questionname3, $questionlisthtml);
     }
 }
