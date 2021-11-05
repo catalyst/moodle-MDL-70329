@@ -36,7 +36,7 @@ export const init = filterRegionId => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
-    // Initialize filter.
+    // Create and initialize filter.
     const coreFilter = new CoreFilter(filterSet,  function(filters, pendingPromise) {
         DynamicTable.setFilters(
             DynamicTable.getTableFromId(filterSet.dataset.tableRegion),
@@ -52,6 +52,7 @@ export const init = filterRegionId => {
             })
             .catch(Notification.exception);
     });
+    coreFilter.init();
 
     /**
      * Set the current filter options based on a provided configuration.
