@@ -258,30 +258,6 @@ abstract class question_edit_form extends question_wizard_form {
         $customfieldhandler->set_parent_context($this->categorycontext); // For question handler only.
         $customfieldhandler->instance_form_definition($mform, empty($this->question->id) ? 0 : $this->question->id);
 
-        if (!empty($this->question->id)) {
-            $mform->addElement('header', 'createdmodifiedheader',
-                    get_string('createdmodifiedheader', 'question'));
-            $a = new stdClass();
-            if (!empty($this->question->createdby)) {
-                $a->time = userdate($this->question->timecreated);
-                $a->user = fullname($DB->get_record(
-                        'user', array('id' => $this->question->createdby)));
-            } else {
-                $a->time = get_string('unknown', 'question');
-                $a->user = get_string('unknown', 'question');
-            }
-            $mform->addElement('static', 'created', get_string('created', 'question'),
-                    get_string('byandon', 'question', $a));
-            if (!empty($this->question->modifiedby)) {
-                $a = new stdClass();
-                $a->time = userdate($this->question->timemodified);
-                $a->user = fullname($DB->get_record(
-                        'user', array('id' => $this->question->modifiedby)));
-                $mform->addElement('static', 'modified', get_string('modified', 'question'),
-                        get_string('byandon', 'question', $a));
-            }
-        }
-
         $this->add_hidden_fields();
 
         $mform->addElement('hidden', 'qtype');
