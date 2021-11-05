@@ -33,9 +33,23 @@ Feature: A teacher can preview questions in the question bank
     And I should see "(latest)"
     And I should see "Marked out of 1.00"
     And I should see "Technical information"
-    And I should see "Preview options"
     And I should see "Display options"
+    And I should see "Preview options"
     And I should see "Comments"
+    And I click on "Comments" "link"
+    And I should see "Save comment"
+    And I should see "ID number"
+    And "Numerical" "icon" should exist
+    And I should see "Version"
+    And I click on "Preview options" "link"
+    And I should see "Question version"
+    And "action-menu-toggle-0" "link" should exist
+    And I click on "action-menu-toggle-0" "link"
+    And I should see "Edit question"
+    And I should see "Duplicate"
+    And I should see "Manage tags"
+    And I should see "Delete"
+    And I should see "Export as Moodle XML"
 
   Scenario: Preview lets the teacher see what happens when an answer is saved
     When I set the field "Answer:" to "1"
@@ -98,7 +112,7 @@ Feature: A teacher can preview questions in the question bank
     And I should see "Delete"
     And I should see "Export as Moodle XML"
 
-  Scenario: Question version is updated when edited
+  Scenario: Question version is updated when edited and teacher can change question version
     When I open the action menu in "action-menu-0-menubar" "region"
     And I choose "Edit question" in the open action menu
     And I set the field "Question name" to "New version"
@@ -111,6 +125,8 @@ Feature: A teacher can preview questions in the question bank
     And I should see "(latest)"
     And I should see "New version"
     And I should see "New text version"
+    And I should not see "Test question to be previewed"
+    And I should not see "Version 1"
 
   Scenario: Question preview can be closed
     When I open the action menu in "action-menu-0-menubar" "region"
