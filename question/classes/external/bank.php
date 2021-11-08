@@ -52,12 +52,6 @@ class bank extends external_api {
     public static function get_questions_parameters(): external_function_parameters {
 
         $params = [
-            'filterverb' => new external_value(
-                PARAM_INT,
-                'Main join types',
-                VALUE_DEFAULT,
-                condition::JOINTYPE_DEFAULT,
-            ),
             'filters' => new external_multiple_structure (
                 new external_single_structure(
                     [
@@ -69,6 +63,28 @@ class bank extends external_api {
                 'Filter params',
                 VALUE_DEFAULT,
                 [],
+            ),
+            'filteroptions' => new external_single_structure(
+                [
+                    'filterverb' => new external_value(
+                        PARAM_INT,
+                        'Main join types',
+                        VALUE_DEFAULT,
+                        condition::JOINTYPE_DEFAULT,
+                    ),
+                    'recurse' => new external_value(
+                        PARAM_BOOL,
+                        'Type of join to join all filters together',
+                        VALUE_DEFAULT,
+                        false,
+                    ),
+                    'showhidden' => new external_value(
+                        PARAM_BOOL,
+                        'Flag to show question text',
+                        VALUE_DEFAULT,
+                        false,
+                    ),
+                ]
             ),
             'displayoptions' => new external_single_structure(
                 [
@@ -102,18 +118,6 @@ class bank extends external_api {
                 'Default question category ID',
                 VALUE_REQUIRED,
             ),
-            'recurse' => new external_value(
-                PARAM_BOOL,
-                'Type of join to join all filters together',
-                VALUE_DEFAULT,
-                false,
-            ),
-            'showhidden' => new external_value(
-                PARAM_BOOL,
-                'Flag to show question text',
-                VALUE_DEFAULT,
-                false,
-            ),
         ];
 
         return new external_function_parameters($params);
@@ -122,26 +126,19 @@ class bank extends external_api {
     /**
      * External function to get the table view content.
      *
-     * @param int $filterverb
      * @param array $filters
+     * @param array $filteroptions
      * @param array $displayoptions
      * @param int $defaultcourseid
      * @param int $defaultcategoryid
-     * @param int $qperpage
-     * @param int $qpage
-     * @param bool $qbshowtext
-     * @param bool $recurse
-     * @param bool $showhidden
      * @return array
      */
     public static function get_questions(
-        int $filterverb,
         array $filters = [],
+        array $filteroptions = [],
         array $displayoptions = [],
         int $defaultcourseid,
-        int $defaultcategoryid,
-        bool $recurse = false,
-        bool $showhidden = false
+        int $defaultcategoryid
     ): array {
         global $DB;
 
@@ -149,12 +146,12 @@ class bank extends external_api {
 
         $params = [
             'courseid' => $courseid,
-            'filterverb' => $filterverb,
+            'filterverb' => $filteroptions['filterverb'],
             'qperpage' => $displayoptions['perpage'],
             'qpage' => $displayoptions['page'],
             'qbshowtext' => $displayoptions['showtext'],
-            'recurse' => $recurse,
-            'showhidden' => $showhidden,
+            'recurse' => $filteroptions['recurse'],
+            'showhidden' => $filteroptions['showhidden'],
             'tabname' => 'questions'
         ];
 
@@ -185,6 +182,7 @@ class bank extends external_api {
         $thispageurl = new \moodle_url('/question/edit.php');
         $thiscontext = \context_course::instance($courseid);
         $contexts = new \question_edit_contexts($thiscontext);
+        $contexts->require_one_edit_tab_cap($params['tabname']);
         $course = get_course($courseid);
         $cm = null;
         $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);

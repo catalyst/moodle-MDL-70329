@@ -48,8 +48,12 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     // Default filter params for WS function.
     let wsfilter = {
         // Default value filterset::JOINTYPE_DEFAULT.
-        filterverb: 2,
         filters: [],
+        filteroptions: {
+            filterverb: 2,
+            recurse: recurse,
+            showhidden: showhidden,
+        },
         displayoptions: {
             perpage: perpage,
             page: 0,
@@ -57,8 +61,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         },
         defaultcourseid: defaultcourseid,
         defaultcategoryid: defaultcategoryid,
-        recurse: recurse,
-        showhidden: showhidden,
     };
 
     // HTML <div> ID of question container.
