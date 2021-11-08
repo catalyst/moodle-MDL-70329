@@ -70,6 +70,28 @@ class bank extends external_api {
                 VALUE_DEFAULT,
                 [],
             ),
+            'displayoptions' => new external_single_structure(
+                [
+                    'perpage' => new external_value(
+                        PARAM_INT,
+                        'The number of records per page',
+                        VALUE_DEFAULT,
+                        20,
+                    ),
+                    'page' => new external_value(
+                        PARAM_INT,
+                        'The page number',
+                        VALUE_DEFAULT,
+                        0
+                    ),
+                    'showtext' => new external_value(
+                        PARAM_BOOL,
+                        'Flag to show question text',
+                        VALUE_DEFAULT,
+                        false,
+                    ),
+                ]
+            ),
             'defaultcourseid' => new external_value(
                 PARAM_INT,
                 'Default course ID',
@@ -79,24 +101,6 @@ class bank extends external_api {
                 PARAM_INT,
                 'Default question category ID',
                 VALUE_REQUIRED,
-            ),
-            'qperpage' => new external_value(
-                PARAM_INT,
-                'The number of records per page',
-                VALUE_DEFAULT,
-                20,
-            ),
-            'qpage' => new external_value(
-                PARAM_INT,
-                'The page number',
-                VALUE_DEFAULT,
-                0
-            ),
-            'qbshowtext' => new external_value(
-                PARAM_BOOL,
-                'Flag to show question text',
-                VALUE_DEFAULT,
-                false,
             ),
             'recurse' => new external_value(
                 PARAM_BOOL,
@@ -120,6 +124,7 @@ class bank extends external_api {
      *
      * @param int $filterverb
      * @param array $filters
+     * @param array $displayoptions
      * @param int $defaultcourseid
      * @param int $defaultcategoryid
      * @param int $qperpage
@@ -132,11 +137,9 @@ class bank extends external_api {
     public static function get_questions(
         int $filterverb,
         array $filters = [],
+        array $displayoptions = [],
         int $defaultcourseid,
         int $defaultcategoryid,
-        int $qperpage = 20,
-        int $qpage = 0,
-        bool $qbshowtext = false,
         bool $recurse = false,
         bool $showhidden = false
     ): array {
@@ -147,9 +150,9 @@ class bank extends external_api {
         $params = [
             'courseid' => $courseid,
             'filterverb' => $filterverb,
-            'qperpage' => $qperpage,
-            'qpage' => $qpage,
-            'qbshowtext' => $qbshowtext,
+            'qperpage' => $displayoptions['perpage'],
+            'qpage' => $displayoptions['page'],
+            'qbshowtext' => $displayoptions['showtext'],
             'recurse' => $recurse,
             'showhidden' => $showhidden,
             'tabname' => 'questions'

@@ -50,11 +50,13 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         // Default value filterset::JOINTYPE_DEFAULT.
         filterverb: 2,
         filters: [],
+        displayoptions: {
+            perpage: perpage,
+            page: 0,
+            showtext: qbshowtext,
+        },
         defaultcourseid: defaultcourseid,
         defaultcategoryid: defaultcategoryid,
-        qperpage: perpage,
-        qpage: 0,
-        qbshowtext: qbshowtext,
         recurse: recurse,
         showhidden: showhidden,
     };
@@ -158,7 +160,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                             });
                     } else {
                         // Load data for selected page.
-                        filter['qpage'] = qpage;
+                        filter['displayoptions']['page'] = qpage;
                         return requestQuestions(filter)
                             .then(response => {
                                 const pagequestions = {questions: JSON.stringify(response.questions)};
