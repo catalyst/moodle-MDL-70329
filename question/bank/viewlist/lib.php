@@ -43,6 +43,9 @@ function qbank_viewlist_output_fragment_question_list($args) {
         return '';
     }
     $questions = json_decode($args['questions']);
+    if (empty($questions)) {
+        return '';
+    }
     $questionids = [];
     foreach ($questions as $question) {
         $questionids[] = $question->id;
@@ -51,6 +54,7 @@ function qbank_viewlist_output_fragment_question_list($args) {
     $courseid = $context->instanceid;
 
     $thispageurl = new \moodle_url('/question/edit.php');
+    $thispageurl->param('courseid', $courseid);
     $contexts = new \question_edit_contexts($context);
     $course = get_course($courseid);
     $cm = null;

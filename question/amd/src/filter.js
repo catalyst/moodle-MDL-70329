@@ -105,7 +105,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         // Otherwise, the ws function should retrieves question based on default courseid and cateogryid.
         if (filterdata) {
             // Main join types.
-            wsfilter['filterverb'] = parseInt(filterSet.dataset.filterverb, 10);
+            wsfilter['filteroptions']['filterverb'] = parseInt(filterSet.dataset.filterverb, 10);
 
             // Clean old filter
             wsfilter['filters'] = [];
@@ -121,6 +121,9 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         requestQuestions(wsfilter)
             .then(response => {
                 const totalquestions = response.totalquestions;
+                if (response.questions.length === 0) {
+                    return;
+                }
                 const firstpagequestions = {questions: JSON.stringify(response.questions)};
                 return renderPagination(wsfilter, totalquestions, firstpagequestions);
             })
