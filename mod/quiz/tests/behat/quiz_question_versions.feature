@@ -30,38 +30,49 @@ Feature: Quiz question versioning
     And I am on "Course 1" course homepage
 
   @javascript
-  Scenario: Selecting approriate question versions
-    When I am on the "Quiz 1" "mod_quiz > View" page logged in as "teacher1"
-    And I navigate to "Edit quiz" in current page administration
+  Scenario: Approriate question version should be displayed when not edited
+    When I am on the "Quiz 1" "mod_quiz > Edit" page logged in as "teacher1"
     And I should see "First question"
     And I should see "Answer the first question"
     And I should see "v1 (latest)"
+    # We check that the corresponding version is the appropriate one in preview
     And I click on "Preview question" "link"
     And I switch to "questionpreview" window
+    And I should see "Version 1 (latest)"
     And I should see "Answer the first question"
     And I press "Display options"
-    And I set the field "id_feedback" to "Not shown"
-    And I set the field "id_generalfeedback" to "Not shown"
-    And I set the field "id_rightanswer" to "Shown"
+    And I set the following fields to these values:
+      | id_feedback        | Not shown |
+      | id_generalfeedback | Not shown |
+      | id_rightanswer     | Shown     |
     And I press "id_saveupdate"
     And I click on "finish" "button"
     And I should see "The correct answer is 'True'."
-    And I switch to the main window
+
+  @javascript
+  Scenario: Approriate question version should be displayed when edited
+    When I am on the "Quiz 1" "mod_quiz > Edit" page logged in as "teacher1"
     And I click on "Edit question First question" "link"
-    And I set the field "id_name" to "Second question"
-    And I set the field "id_questiontext" to "This is the second question text"
-    And I set the field "id_correctanswer" to "False"
+    # We edit the question with new informations to generate a second version
+    And I set the following fields to these values:
+      | id_name          | Second question                  |
+      | id_questiontext  | This is the second question text |
+      | id_correctanswer | False                            |
     And I press "id_submitbutton"
     And I set the field "version" to "v2"
     And I should see "Second question"
     And I should see "This is the second question text"
     And I click on "Preview question" "link"
     And I switch to "questionpreview" window
+    # We check that the corresponding version is the appropriate one in preview
+    # We also check that the new informations are properly displayed
+    And I should see "Version 2 (latest)"
     And I should see "This is the second question text"
     And I press "Display options"
-    And I set the field "id_feedback" to "Not shown"
-    And I set the field "id_generalfeedback" to "Not shown"
-    And I set the field "id_rightanswer" to "Shown"
+    And I set the following fields to these values:
+      | id_feedback        | Not shown |
+      | id_generalfeedback | Not shown |
+      | id_rightanswer     | Shown     |
     And I press "id_saveupdate"
     And I click on "finish" "button"
     Then I should see "The correct answer is 'False'."
