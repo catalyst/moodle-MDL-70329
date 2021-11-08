@@ -48,14 +48,9 @@ define('QUESTION_PREVIEW_MAX_VARIANTS', 100);
 
 // Get and validate question id.
 $id = required_param('id', PARAM_INT);
-$version = optional_param('version', null, PARAM_INT);
 $returnurl = optional_param('returnurl', null, PARAM_RAW);
 
-if ($version) {
-    $question = question_bank::load_question($version);
-} else {
-    $question = question_bank::load_question($id);
-}
+$question = question_bank::load_question($id);
 
 if ($returnurl) {
     $returnurl = new moodle_url($returnurl);
@@ -93,7 +88,7 @@ $PAGE->set_url(helper::question_preview_url($id, $options->behaviour, $options->
 // Get and validate existing preview, or start a new one.
 $previewid = optional_param('previewid', 0, PARAM_INT);
 
-if ($previewid && !$version) {
+if ($previewid) {
     try {
         $quba = question_engine::load_questions_usage_by_activity($previewid);
 
@@ -140,10 +135,9 @@ $options->maxmark = $quba->get_question_max_mark($slot);
 
 // Create the settings form, and initialise the fields.
 $versionids = helper::load_versions($question->questionbankentryid);
-$version = is_null($version) ? $question->id : $version;
 $optionsform = new preview_options_form(helper::
 question_preview_form_url($question->id, $context, $previewid, $returnurl),
-        ['quba' => $quba, 'maxvariant' => $maxvariant, 'versions' => $versionids, 'questionversion' => $version]);
+        ['quba' => $quba, 'maxvariant' => $maxvariant, 'versions' => $versionids, 'questionversion' => $id]);
 $optionsform->set_data($options);
 
 // Process change of settings, if that was requested.
