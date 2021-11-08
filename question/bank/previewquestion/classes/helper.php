@@ -190,7 +190,7 @@ class helper {
         $params = ['id' => $questionid];
 
         if (!is_null($version)) {
-            $params['version'] = $version;
+            $params['id'] = $version;
         }
         if (is_null($context)) {
             global $PAGE;
