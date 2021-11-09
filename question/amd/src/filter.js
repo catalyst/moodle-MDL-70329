@@ -26,6 +26,7 @@ import CoreFilter from 'core/filter';
 import Fragment from 'core/fragment';
 import Notification from 'core/notification';
 import PagedContentFactory from 'core/paged_content_factory';
+import Selectors from 'core/local/filter/selectors';
 import Templates from 'core/templates';
 
 /**
@@ -183,5 +184,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     };
 
     // Run apply filter at page load.
+    const filter = filterSet.querySelector(Selectors.filter.region);
+    coreFilter.addFilter(filter, 'category');
     applyFilter();
 };
