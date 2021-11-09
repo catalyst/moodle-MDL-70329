@@ -160,7 +160,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
                     // Render first page
                     if (qpage == 0) {
-                        return Fragment.loadFragment('qbank_viewlist', 'question_list', contextId, firstpagequestions)
+                        return Fragment.loadFragment('core_question', 'question_list', contextId, firstpagequestions)
                             .then(questionshtml => {
                                 return Templates.render(TEMPLATE_NAME, {html: questionshtml});
                             });
@@ -170,7 +170,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                         return requestQuestions(filter)
                             .then(response => {
                                 const pagequestions = {questions: JSON.stringify(response.questions)};
-                                return Fragment.loadFragment('qbank_viewlist', 'question_list', contextId, pagequestions)
+                                return Fragment.loadFragment('core_question', 'question_list', contextId, pagequestions)
                                     .then(questionshtml => {
                                         return Templates.render(TEMPLATE_NAME, {html: questionshtml});
                                     });
