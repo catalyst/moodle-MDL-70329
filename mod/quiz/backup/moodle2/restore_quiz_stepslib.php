@@ -51,15 +51,14 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         // A chance for access subplugings to set up their quiz data.
         $this->add_subplugin_structure('quizaccess', $quiz);
 
-        $paths[] = new restore_path_element('quiz_question_instance', '/activity/quiz/question_instances/question_instance');
+        $quizquestioninstance = new restore_path_element('quiz_question_instance', '/activity/quiz/question_instances/question_instance');
+        $paths[] = $quizquestioninstance;
         if ($this->task->get_old_moduleversion() < 2021091700) {
             $paths[] = new restore_path_element('quiz_slot_tags',
                 '/activity/quiz/question_instances/question_instance/tags/tag');
         } else {
-            $paths[] = new restore_path_element('quiz_question_set_reference',
-                '/activity/quiz/question_instances/question_instance/question_set_references/question_set_reference');
-            $paths[] = new restore_path_element('quiz_question_reference',
-                '/activity/quiz/question_instances/question_instance/question_references/question_reference');
+            $this->add_question_references($quizquestioninstance, $paths);
+            $this->add_question_set_references($quizquestioninstance, $paths);
         }
         $paths[] = new restore_path_element('quiz_section', '/activity/quiz/sections/section');
         $paths[] = new restore_path_element('quiz_feedback', '/activity/quiz/feedbacks/feedback');
@@ -447,44 +446,6 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         $setreferencedata->filtercondition = json_encode($filtercondition);
 
         $DB->update_record('question_set_references', $setreferencedata);
-    }
-
-    /**
-     * Process question set references data which replaces the random qtype.
-     *
-     * @param $data
-     */
-    protected function process_quiz_question_set_reference($data) {
-        global $DB;
-        $data = (object) $data;
-        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
-        $data->itemid = $this->get_new_parentid('quiz_question_instance');
-        $filtercondition = json_decode($data->filtercondition);
-        if ($category = $this->get_mappingid('question_category', $filtercondition->questioncategoryid)) {
-            $filtercondition->questioncategoryid = $category;
-        }
-        $data->filtercondition = json_encode($filtercondition);
-        if ($context = $this->get_mappingid('context', $data->questionscontextid)) {
-            $data->questionscontextid = $context;
-        }
-
-        $DB->insert_record('question_set_references', $data);
-    }
-
-    /**
-     * Process question references which replaces the direct connection to quiz slots to question.
-     *
-     * @param $data
-     */
-    protected function process_quiz_question_reference($data) {
-        global $DB;
-        $data = (object) $data;
-        $data->usingcontextid = $this->get_mappingid('context', $data->usingcontextid);
-        $data->itemid = $this->get_new_parentid('quiz_question_instance');
-        if ($entry = $this->get_mappingid('question_bank_entry', $data->questionbankentryid)) {
-            $data->questionbankentryid = $entry;
-        }
-        $DB->insert_record('question_references', $data);
     }
 
     protected function process_quiz_section($data) {
