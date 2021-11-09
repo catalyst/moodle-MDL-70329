@@ -915,9 +915,6 @@ class view {
 
         $this->build_query();
         $totalnumber = $this->get_question_count();
-        if ($totalnumber == 0) {
-            return;
-        }
 
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post']);

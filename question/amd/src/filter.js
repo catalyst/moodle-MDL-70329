@@ -123,7 +123,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
             .then(response => {
                 const totalquestions = response.totalquestions;
                 if (response.questions.length === 0) {
-                    return;
+                    return Promise.resolve();
                 }
                 const firstpagequestions = {questions: JSON.stringify(response.questions)};
                 return renderPagination(wsfilter, totalquestions, firstpagequestions);
@@ -131,6 +131,12 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
             // Render questions for first page and pagination.
             .then((html, js) => {
                 const questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
+                if (html === undefined) {
+                    html = '';
+                }
+                if (js === undefined) {
+                    js = '';
+                }
                 Templates.replaceNodeContents(questionscontainer, html, js);
                 // Resolve filter promise.
                 if (pendingPromise) {

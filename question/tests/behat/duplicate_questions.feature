@@ -1,4 +1,4 @@
-@core @core_question
+@core @core_question @javascript
 Feature: A teacher can duplicate questions in the question bank
   In order to efficiently expand my question bank
   As a teacher

@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace qbank_viewlist;
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Tests for the data of question usage from differnet areas like helper or usage table.
  *
- * @package    qbank_viewlist
+ * @package    core_question
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class question_list_test extends \advanced_testcase {
+class question_list_test extends advanced_testcase {
 
     /**
      * Test question usage data.
