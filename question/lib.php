@@ -116,6 +116,15 @@ function core_question_output_fragment_question_list($args) {
     foreach ($questions as $question) {
         $questionids[] = $question->id;
     }
+    $params = [];
+    $sortdata = json_decode($args['sortdata']);
+    // Add sort to param.
+    $sortnum = 1;
+    foreach ($sortdata as $data) {
+        $params['qbs' . $sortnum] = $data->sortby;
+        $sortnum++;
+    }
+
     $context = $args['context'];
     $courseid = $context->instanceid;
 
@@ -127,6 +136,7 @@ function core_question_output_fragment_question_list($args) {
     $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
 
     $questionbank->add_searchcondition(new question_condition($questionids));
+    $questionbank->set_pagevars($params);
     $questions = $questionbank->load_questions();
     ob_start();
     $questionbank->display_for_api($questions);

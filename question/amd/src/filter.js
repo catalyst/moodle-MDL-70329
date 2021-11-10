@@ -60,13 +60,20 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
             page: 0,
             showtext: qbshowtext,
         },
+        sortdata: [
+            {
+                sortby: 'qbank_viewquestiontype\\question_type_column',
+                sortorder: 4,
+            }
+        ],
         defaultcourseid: defaultcourseid,
         defaultcategoryid: defaultcategoryid,
     };
 
     // HTML <div> ID of question container.
     const SELECTORS = {
-        QUESTION_CONTAINER_ID: 'questionscontainer',
+        QUESTION_CONTAINER_ID: '#questionscontainer',
+        SORT_LINK: '#questionscontainer div.sorters a',
     };
 
     // Default Pagination config.
@@ -125,12 +132,15 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 if (response.questions.length === 0) {
                     return Promise.resolve();
                 }
-                const firstpagequestions = {questions: JSON.stringify(response.questions)};
+                const firstpagequestions = {
+                    questions: JSON.stringify(response.questions),
+                    sortdata: JSON.stringify(wsfilter['sortdata'])
+                };
                 return renderPagination(wsfilter, totalquestions, firstpagequestions);
             })
             // Render questions for first page and pagination.
             .then((html, js) => {
-                const questionscontainer = document.getElementById(SELECTORS.QUESTION_CONTAINER_ID);
+                const questionscontainer = document.querySelector(SELECTORS.QUESTION_CONTAINER_ID);
                 if (html === undefined) {
                     html = '';
                 }
@@ -142,7 +152,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 if (pendingPromise) {
                     pendingPromise.resolve();
                 }
-                return;
             })
             .fail(Notification.exception);
     };
@@ -175,7 +184,10 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                         filter['displayoptions']['page'] = qpage;
                         return requestQuestions(filter)
                             .then(response => {
-                                const pagequestions = {questions: JSON.stringify(response.questions)};
+                                const pagequestions = {
+                                    questions: JSON.stringify(response.questions),
+                                    sortdata: JSON.stringify(wsfilter['sortdata'])
+                                };
                                 return Fragment.loadFragment('core_question', 'question_list', contextId, pagequestions)
                                     .then(questionshtml => {
                                         return Templates.render(TEMPLATE_NAME, {html: questionshtml});
@@ -188,6 +200,21 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
             DEFAULT_PAGED_CONTENT_CONFIG
         );
     };
+
+    // Add listeners for the sorting actions.
+    document.addEventListener('click', e => {
+        const sortableLink = e.target.closest(SELECTORS.SORT_LINK);
+        if (sortableLink) {
+            e.preventDefault();
+            wsfilter['sortdata'] = [];
+            let sortdata = {
+                sortby: sortableLink.dataset.sortby,
+                sortorder: sortableLink.dataset.sortorder
+            };
+            wsfilter['sortdata'].push(sortdata);
+            coreFilter.updateTableFromFilter();
+        }
+    });
 
     // Run apply filter at page load.
     const filter = filterSet.querySelector(Selectors.filter.region);

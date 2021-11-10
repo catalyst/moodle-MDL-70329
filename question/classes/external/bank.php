@@ -108,6 +108,23 @@ class bank extends external_api {
                     ),
                 ]
             ),
+            'sortdata' => new external_multiple_structure(
+                new external_single_structure([
+                    'sortby' => new external_value(
+                        PARAM_TEXT,
+                        'The name of a sortable column',
+                        VALUE_REQUIRED
+                    ),
+                    'sortorder' => new external_value(
+                        PARAM_ALPHANUMEXT,
+                        'The direction that this column should be sorted by',
+                        VALUE_REQUIRED
+                    ),
+                ]),
+                'The combined sort order of the table. Multiple fields can be specified.',
+                VALUE_OPTIONAL,
+                []
+            ),
             'defaultcourseid' => new external_value(
                 PARAM_INT,
                 'Default course ID',
@@ -129,6 +146,7 @@ class bank extends external_api {
      * @param array $filters
      * @param array $filteroptions
      * @param array $displayoptions
+     * @param array $sortdata
      * @param int $defaultcourseid
      * @param int $defaultcategoryid
      * @return array
@@ -137,6 +155,7 @@ class bank extends external_api {
         array $filters = [],
         array $filteroptions = [],
         array $displayoptions = [],
+        array $sortdata= [],
         int $defaultcourseid,
         int $defaultcategoryid
     ): array {
@@ -177,6 +196,13 @@ class bank extends external_api {
         $category = array_pop($categories);
         $category = $category->id;
         $params['cat'] = $category;
+
+        // Add sort to param.
+        $sortnum = 1;
+        foreach ($sortdata as $data) {
+            $params['qbs' . $sortnum] = $data['sortby'];
+            $sortnum++;
+        }
 
         require_login($courseid, false);
         $thispageurl = new \moodle_url('/question/edit.php');

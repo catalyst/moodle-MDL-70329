@@ -436,7 +436,9 @@ class view {
         $this->sort = [];
         for ($i = 1; $i <= self::MAX_SORTS; $i++) {
             if (!$sort = optional_param('qbs' . $i, '', PARAM_TEXT)) {
-                break;
+                if (!$sort = $this->get_pagevars('qbs' . $i)) {
+                    break;
+                }
             }
             // Work out the appropriate order.
             $order = 1;
@@ -1062,6 +1064,7 @@ class view {
 
     public function get_questions() {
         $pagevars = $this->get_pagevars();
+        $this->init_sort_from_params();
         $this->build_query();
         $questionsrs = $this->load_page_questions($pagevars['qpage'], $pagevars['qperpage']);
         $questions = [];
@@ -1078,6 +1081,7 @@ class view {
     }
 
     public function load_questions() {
+        $this->init_sort_from_params();
         $this->build_query();
         $questionsrs = $this->load_page_questions(0, 100000);
         $questions = [];
