@@ -48,6 +48,8 @@ const setSelectors = (slotId) => {
     SELECTORS = {
         VERSION_LIST: '#version' + slotIdClass,
         SLOT_ID: '#mod-indent-outer-slot' + slotIdClass,
+        QUESTION_NAME: '#questionname' + slotIdClass,
+        QUESTION_TEXT: '#questiontext' + slotIdClass,
     };
 };
 
@@ -58,8 +60,31 @@ const setSelectors = (slotId) => {
  * @returns {Promise}
  */
 const ajax = (request) => {
-    return Ajax.call(request)[0].done(function() {
-        location.reload();
+    return Ajax.call(request)[0].done((response) => {
+        if (response.result === true) {
+            document.querySelector(SELECTORS.QUESTION_NAME).innerHTML = response.name;
+            document.querySelector(SELECTORS.QUESTION_TEXT).innerHTML = response.questiontext;
+            let previewtag = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview');
+            let tempo = document.createElement('div');
+            tempo.innerHTML = response.previewtag;
+            previewtag.replaceWith(tempo.firstChild);
+            let editurl = document.querySelector(SELECTORS.SLOT_ID + ' > .activityinstance > a').href;
+            editurl = new URL(editurl);
+            let searchparams = editurl.searchParams;
+            searchparams.set('id', response.questionid);
+            editurl.search = searchparams.toString();
+            editurl = editurl.toString();
+            document.querySelector(SELECTORS.SLOT_ID + ' > .activityinstance > a').href = editurl;
+            // let previewurl = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview');
+            // console.log(previewurl);
+            // let previewurl = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview').href;
+            // previewurl = new URL(previewurl);
+            // let searchPreviewParam = previewurl.searchParams;
+            // searchPreviewParam.set('id', response.questionid);
+            // previewurl.search = searchPreviewParam.toString();
+            // previewurl = previewurl.toString();
+            // document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview').href = previewurl;
+        }
     }).fail(Notification.exception);
 };
 
@@ -72,12 +97,14 @@ const changeVersion = (slotId) => {
     const selectElement = document.querySelector(SELECTORS.VERSION_LIST);
     selectElement.addEventListener('change', () => {
         let versionSelected = parseInt(selectElement.value);
+        let previewurl = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview').href;
         setSelectors(slotId);
         let request = [{
             methodname: 'mod_quiz_set_question_version',
             args: {
                 slotid: slotId,
                 newversion: versionSelected,
+                previewurl: previewurl,
             }
         }];
         ajax(request);
