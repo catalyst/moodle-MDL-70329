@@ -36,7 +36,7 @@ Feature: Basic use of the Responses report
     Given I am on the "Quiz 1" "quiz activity" page logged in as teacher
     When I navigate to "Results > Responses" in current page administration
     Then I should see "Attempts: 0"
-    And I should see "No questions have been attempted yet"
+    And I should see "Nothing to display"
     And I set the field "Attempts from" to "enrolled users who have not attempted the quiz"
 
   @javascript
