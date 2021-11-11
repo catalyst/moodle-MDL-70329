@@ -206,12 +206,18 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         const sortableLink = e.target.closest(SELECTORS.SORT_LINK);
         if (sortableLink) {
             e.preventDefault();
+            let oldsort = wsfilter['sortdata'];
             wsfilter['sortdata'] = [];
             let sortdata = {
                 sortby: sortableLink.dataset.sortby,
                 sortorder: sortableLink.dataset.sortorder
             };
             wsfilter['sortdata'].push(sortdata);
+            oldsort.forEach(value => {
+                if (value['sortby'] != sortableLink.dataset.sortby) {
+                    wsfilter['sortdata'].push(value);
+                }
+            });
             coreFilter.updateTableFromFilter();
         }
     });

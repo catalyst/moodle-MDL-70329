@@ -200,7 +200,11 @@ class bank extends external_api {
         // Add sort to param.
         $sortnum = 1;
         foreach ($sortdata as $data) {
-            $params['qbs' . $sortnum] = $data['sortby'];
+            $sortby = $data['sortby'];
+            if ($data['sortorder'] == SORT_DESC) {
+                $sortby = '-' . $sortby;
+            }
+            $params['qbs' . $sortnum] = $sortby;
             $sortnum++;
         }
 
@@ -236,7 +240,7 @@ class bank extends external_api {
                 new external_single_structure([
                     'id' => new external_value(PARAM_INT, 'question id'),
                     'contextid' => new external_value(PARAM_INT, 'context id'),
-                    'name' => new external_value(PARAM_TEXT, 'question name'),
+                    'name' => new external_value(PARAM_RAW, 'question name'),
                 ]),
             ),
             'totalquestions' => new external_value(PARAM_INT, 'Total number of questions'),

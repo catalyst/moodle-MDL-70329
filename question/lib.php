@@ -121,7 +121,11 @@ function core_question_output_fragment_question_list($args) {
     // Add sort to param.
     $sortnum = 1;
     foreach ($sortdata as $data) {
-        $params['qbs' . $sortnum] = $data->sortby;
+        $sortby = $data->sortby;
+        if ($data->sortorder == SORT_DESC) {
+            $sortby = '-' . $sortby;
+        }
+        $params['qbs' . $sortnum] = $sortby;
         $sortnum++;
     }
 
