@@ -46,7 +46,7 @@ const getFragment = (args, contextId) => {
  * @param {int} questionId
  * @param {int} contextId
  */
-const usageEvent = (questionId, contextId) => {
+export const usageEvent = (questionId, contextId) => {
     let args = {
         questionid: questionId
     };
@@ -67,20 +67,4 @@ const usageEvent = (questionId, contextId) => {
         });
         return modal;
     }).fail(Notification.exception);
-};
-
-/**
- * Entrypoint of the js.
- *
- * @method init
- * @param {string} questionSelector the question usage identifier.
- * @param {int} contextId the question context id.
- */
-export const init = (questionSelector, contextId) => {
-    let target = document.querySelector(questionSelector);
-    let questionId = target.getAttribute('data-questionid');
-    target.addEventListener('click', () => {
-        // Call for the event listener to listed for clicks in any usage count row.
-        usageEvent(questionId, contextId);
-    });
 };

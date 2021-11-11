@@ -33,10 +33,10 @@ import Notification from 'core/notification';
  *
  * @method clickEvent
  * @param {Number} questionId
- * @param {Number} courseID
  * @param {Number} contextId
+ * @param {Number} courseID
  */
-const commentEvent = (questionId, courseID, contextId) => {
+export const commentEvent = (questionId, contextId, courseID) => {
     let args = {
         questionid: questionId,
         courseid: courseID
@@ -90,21 +90,4 @@ const commentEvent = (questionId, courseID, contextId) => {
         modal.show();
         return modal;
     }).fail(Notification.exception);
-};
-
-/**
- * Entrypoint of the js.
- *
- * @method init
- * @param {string} questionSelector the question comment identifier.
- */
-export const init = (questionSelector) => {
-    let target = document.querySelector(questionSelector);
-    let contextId = 1;
-    let questionId = target.getAttribute('data-questionid'),
-        courseID = target.getAttribute('data-courseid');
-    target.addEventListener('click', () => {
-        // Call for the event listener to listed for clicks in any comment count row.
-        commentEvent(questionId, courseID, contextId);
-    });
 };

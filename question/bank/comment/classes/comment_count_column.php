@@ -65,8 +65,6 @@ class comment_count_column extends column_base {
         $attributes = [];
         if (question_has_capability_on($question, 'comment')) {
             $target = 'questioncommentpreview_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_comment/comment', 'init', [$datatarget]);
             $attributes = [
                 'data-target' => $target,
                 'data-questionid' => $question->id,
