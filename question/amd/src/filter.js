@@ -225,6 +225,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
     // Run apply filter at page load.
     const filter = filterSet.querySelector(Selectors.filter.region);
-    coreFilter.addFilter(filter, 'category');
+    coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
     applyFilter();
 };
