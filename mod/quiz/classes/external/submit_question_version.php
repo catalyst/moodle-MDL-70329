@@ -53,7 +53,6 @@ class submit_question_version extends external_api {
             [
                 'slotid' => new external_value(PARAM_INT, ''),
                 'newversion' => new external_value(PARAM_INT, ''),
-                'previewurl' => new external_value(PARAM_URL, 'Preview url to alter')
             ]
         );
     }
@@ -65,12 +64,11 @@ class submit_question_version extends external_api {
      * @param int $newversion
      * @return array
      */
-    public static function execute(int $slotid, int $newversion, string $previewurl): array {
+    public static function execute(int $slotid, int $newversion): array {
         global $DB, $OUTPUT;
         $params = [
             'slotid' => $slotid,
-            'newversion' => $newversion,
-            'previewurl' => $previewurl
+            'newversion' => $newversion
         ];
         $params = self::validate_parameters(self::execute_parameters(), $params);
         $response = ['result' => false];
@@ -106,20 +104,10 @@ class submit_question_version extends external_api {
                 $questiondata = $DB->get_record_sql($sql,
                     ['questionreference' => $reference->id, 'questionversion' => $reference->version]);
             }
-            $editurl = new moodle_url($params['editurl'], ['id' => $questiondata->id]);
-            $url = new moodle_url($params['previewurl'], ['id' => $questiondata->id]);
-            $strpreviewquestion = get_string('previewquestion', 'quiz');
-            $image = $OUTPUT->pix_icon('t/preview', $strpreviewquestion);
-            $action = new popup_action('click', $url, 'questionpreview',
-                helper::question_preview_popup_params());
-
-            $actionlink = $OUTPUT->action_link($url, $image, $action,
-                ['title' => $strpreviewquestion, 'class' => 'preview']);
 
             $response['name'] = $questiondata->name;
             $response['questiontext'] = clean_param($questiondata->questiontext, PARAM_NOTAGS);
             $response['questionid'] = $questiondata->id;
-            $response['previewtag'] = $actionlink;
         }
         return $response;
     }
@@ -135,7 +123,6 @@ class submit_question_version extends external_api {
                 'result' => new external_value(PARAM_BOOL, ''),
                 'name' => new external_value(PARAM_TEXT, 'Name of the question version'),
                 'questiontext' => new external_value(PARAM_NOTAGS, 'Question text for the desired question version'),
-                'previewtag' => new external_value(PARAM_RAW, 'The new preview url'),
                 'questionid' => new external_value(PARAM_INT, 'The selected question id')
             ]
         );
