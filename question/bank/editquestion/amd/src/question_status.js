@@ -74,7 +74,7 @@ const save = (modal, questionId, target) => {
  * @param {int} contextId
  * @param {object} target
  */
-const statusEvent = (questionId, contextId, target) => {
+export const statusEvent = (questionId, contextId, target) => {
     let args = {
         questionid: questionId
     };
@@ -94,20 +94,4 @@ const statusEvent = (questionId, contextId, target) => {
         });
         return modal;
     }).fail(Notification.exception);
-};
-
-/**
- * Entrypoint of the js.
- *
- * @method init
- * @param {string} questionSelector the question status identifier.
- */
-export const init = (questionSelector) => {
-    let target = document.querySelector(questionSelector);
-    let contextId = 1;
-    let questionId = target.getAttribute('data-questionid');
-    target.addEventListener('click', () => {
-        // Call for the event listener to listed for clicks in any usage count row.
-        statusEvent(questionId, contextId, target);
-    });
 };

@@ -43,8 +43,6 @@ class question_status_column extends column_base {
         if (question_has_capability_on($question, 'edit')
             && $question->status !== question_version_status::QUESTION_STATUS_HIDDEN) {
             $target = 'questionstatus_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_editquestion/question_status', 'init', [$datatarget]);
             $attributes = [
                 'data-target' => $target,
                 'data-questionid' => $question->id,

@@ -1089,6 +1089,7 @@ class view {
      * @param array $questions
      */
     protected function print_table($questions): void {
+        global $PAGE;
         // Start of the table.
         echo \html_writer::start_tag('table', ['id' => 'categoryquestions']);
 
@@ -1106,6 +1107,7 @@ class view {
             $this->print_table_row($question, $rowcount);
             $rowcount += 1;
         }
+        $PAGE->requires->js_call_amd('core_question/column_delegator', 'init');
         echo \html_writer::end_tag('tbody');
 
         // End of the table.
