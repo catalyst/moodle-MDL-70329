@@ -218,6 +218,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                     wsfilter['sortdata'].push(value);
                 }
             });
+            wsfilter['displayoptions']['page'] = 0;
             coreFilter.updateTableFromFilter();
         }
     });
