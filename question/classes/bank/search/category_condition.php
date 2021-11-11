@@ -101,7 +101,11 @@ class category_condition extends condition {
      * @return \stdClass default category
      */
     public function get_default_category(): \stdClass {
-        return $this->category;
+        if (empty($this->category)) {
+            return question_get_default_category(\context_course::instance($this->course->id)->id);
+        } else {
+            return $this->category;
+        }
     }
 
     /**
@@ -228,7 +232,8 @@ class category_condition extends condition {
         $catmenu = helper::question_category_options($this->contexts, true, 0, true, -1, false);
         $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
             array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
-        $displaydata['categorydesc'] = $this->print_category_info($this->category);
+        $category = $this->get_default_category();
+        $displaydata['categorydesc'] = $this->print_category_info($category);
         $values = [];
         foreach ($catmenu as $menu) {
             foreach ($menu as $catlist) {

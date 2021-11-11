@@ -105,7 +105,7 @@ function core_question_output_fragment_tags_form($args) {
  */
 function core_question_output_fragment_question_list($args) {
 
-    if (empty($args['questions'])) {
+    if (empty($args['questions']) || empty($args['sortdata'])) {
         return '';
     }
     $questions = json_decode($args['questions']);

@@ -16,6 +16,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot.'/question/lib.php');
+
 /**
  * Tests for the data of question usage from differnet areas like helper or usage table.
  *
@@ -66,13 +69,23 @@ class question_list_test extends advanced_testcase {
             (object)['id' => $questionid1],
             (object)['id' => $questionid3],
         ];
-        $questionlisthtml = qbank_viewlist_output_fragment_question_list([
+        $sortdata = [
+            (object)[
+                'sortby' => 'qbank_viewquestionname\\question_name_idnumber_tags_column-name',
+                'sortorder' => SORT_DESC,
+            ],
+        ];
+        $questionlisthtml = core_question_output_fragment_question_list([
             'questions' => json_encode($questions),
+            'sortdata' => json_encode($sortdata),
             'context' => $coursecontext,
         ]);
 
+        // Check if question filter is working.
         $this->assertStringContainsString($questionname1, $questionlisthtml);
         $this->assertStringNotContainsString($questionname2, $questionlisthtml);
         $this->assertStringContainsString($questionname3, $questionlisthtml);
+        // Check if sort is working.
+        $this->assertTrue(strpos($questionlisthtml, $questionname3) < strpos($questionlisthtml, $questionname1));
     }
 }
