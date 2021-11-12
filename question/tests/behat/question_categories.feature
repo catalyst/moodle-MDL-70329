@@ -40,7 +40,6 @@ Feature: A teacher can move questions between categories in the question bank
     And I should see "Subcategory (1)" in the ".form-autocomplete-selection" "css_element"
     And I should not see "Used category (1)" in the ".form-autocomplete-selection" "css_element"
 
-
   @javascript
   Scenario: Move a question between categories via the question settings page
     When I navigate to "Question bank > Questions" in current page administration
