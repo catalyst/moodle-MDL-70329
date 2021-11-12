@@ -63,26 +63,21 @@ const ajax = (request) => {
     return Ajax.call(request)[0].done((response) => {
         if (response.result === true) {
             // Question name and text update.
-            document.querySelector(SELECTORS.QUESTION_NAME).innerHTML = response.name;
+            document.querySelector(SELECTORS.QUESTION_NAME).innerHTML = response.questionname;
             document.querySelector(SELECTORS.QUESTION_TEXT).innerHTML = response.questiontext;
             // Preview url update.
             let queryPreviewUrl = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview');
-            let previewurl = queryPreviewUrl.href;
-            previewurl = new URL(previewurl);
-            let searchPreviewParams = previewurl.searchParams;
-            searchPreviewParams.set('id', response.questionid);
-            previewurl.search = searchPreviewParams.toString();
-            previewurl = previewurl.toString();
-            queryPreviewUrl.setAttribute('href', previewurl);
+            queryPreviewUrl.setAttribute('href', '#');
+            // Cloning the element to remove any event listenners.
+            let oldElement = queryPreviewUrl;
+            let newElement = oldElement.cloneNode(true);
+            oldElement.parentNode.replaceChild(newElement, oldElement);
+            newElement.addEventListener('click', () => {
+                window.open(response.previewurl, 'questionpreview', 'width=800,height=600');
+            });
             // Edit Url update.
             let queryEditUrl = document.querySelector(SELECTORS.SLOT_ID + ' > .activityinstance > a');
-            let editurl = queryEditUrl.href;
-            editurl = new URL(editurl);
-            let searchparams = editurl.searchParams;
-            searchparams.set('id', response.questionid);
-            editurl.search = searchparams.toString();
-            editurl = editurl.toString();
-            queryEditUrl.href = editurl;
+            queryEditUrl.href = response.editurl;
         }
     }).fail(Notification.exception);
 };

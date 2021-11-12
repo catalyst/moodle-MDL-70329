@@ -23,6 +23,7 @@ require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/engine/datalib.php');
 require_once($CFG->libdir . '/questionlib.php');
 
+use context_module;
 use external_api;
 use external_description;
 use external_function_parameters;
@@ -65,7 +66,7 @@ class submit_question_version extends external_api {
      * @return array
      */
     public static function execute(int $slotid, int $newversion): array {
-        global $DB, $OUTPUT;
+        global $DB;
         $params = [
             'slotid' => $slotid,
             'newversion' => $newversion
@@ -78,7 +79,7 @@ class submit_question_version extends external_api {
 
         // Capability check.
         list($course, $cm) = get_course_and_cm_from_instance($slotdata->quizid, 'quiz');
-        $context = \context_module::instance($cm->id);
+        $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/quiz:manage', $context);
 
@@ -104,10 +105,15 @@ class submit_question_version extends external_api {
                 $questiondata = $DB->get_record_sql($sql,
                     ['questionreference' => $reference->id, 'questionversion' => $reference->version]);
             }
-
-            $response['name'] = $questiondata->name;
+            $returnurl = '/mod/quiz/edit.php?cmid=' . $cm->id;
+            $previewurl = new moodle_url('/question/bank/previewquestion/preview.php',
+                ['id' => $questiondata->id, 'cmid' => $cm->id]);
+            $editurl = new moodle_url('/question/bank/editquestion/question.php',
+                ['id' => $questiondata->id, 'cmid' => $cm->id, 'returnurl' => $returnurl]);
+            $response['questionname'] = $questiondata->name;
             $response['questiontext'] = clean_param($questiondata->questiontext, PARAM_NOTAGS);
-            $response['questionid'] = $questiondata->id;
+            $response['editurl'] = $editurl->out(false);
+            $response['previewurl'] = $previewurl->out(false);
         }
         return $response;
     }
@@ -121,9 +127,10 @@ class submit_question_version extends external_api {
         return new external_single_structure(
             [
                 'result' => new external_value(PARAM_BOOL, ''),
-                'name' => new external_value(PARAM_TEXT, 'Name of the question version'),
+                'questionname' => new external_value(PARAM_TEXT, 'Name of the question version'),
                 'questiontext' => new external_value(PARAM_NOTAGS, 'Question text for the desired question version'),
-                'questionid' => new external_value(PARAM_INT, 'The selected question id')
+                'editurl' => new external_value(PARAM_URL, 'Edit url for selected version'),
+                'previewurl' => new external_value(PARAM_URL, 'Preview url for selected version'),
             ]
         );
     }
