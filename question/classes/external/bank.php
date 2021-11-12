@@ -52,6 +52,16 @@ class bank extends external_api {
     public static function get_questions_parameters(): external_function_parameters {
 
         $params = [
+            'defaultcourseid' => new external_value(
+                PARAM_INT,
+                'Default course ID',
+                VALUE_REQUIRED,
+            ),
+            'defaultcategoryid' => new external_value(
+                PARAM_INT,
+                'Default question category ID',
+                VALUE_REQUIRED,
+            ),
             'filters' => new external_multiple_structure (
                 new external_single_structure(
                     [
@@ -125,16 +135,6 @@ class bank extends external_api {
                 VALUE_OPTIONAL,
                 []
             ),
-            'defaultcourseid' => new external_value(
-                PARAM_INT,
-                'Default course ID',
-                VALUE_REQUIRED,
-            ),
-            'defaultcategoryid' => new external_value(
-                PARAM_INT,
-                'Default question category ID',
-                VALUE_REQUIRED,
-            ),
         ];
 
         return new external_function_parameters($params);
@@ -152,12 +152,12 @@ class bank extends external_api {
      * @return array
      */
     public static function get_questions(
+        int $defaultcourseid,
+        int $defaultcategoryid,
         array $filters = [],
         array $filteroptions = [],
         array $displayoptions = [],
-        array $sortdata= [],
-        int $defaultcourseid,
-        int $defaultcategoryid
+        array $sortdata= []
     ): array {
         global $DB;
 
