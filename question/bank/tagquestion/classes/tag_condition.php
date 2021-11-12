@@ -150,7 +150,7 @@ class tag_condition extends condition {
         $filteroptions = [
             'name' => 'qtagids',
             'title' => get_string('tag', 'tag'),
-            'custom' => true,
+            'custom' => false,
             'multiple' => true,
             'filterclass' => null,
             'values' => $values,

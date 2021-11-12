@@ -250,11 +250,11 @@ class category_condition extends condition {
         $filteroptions = [
             'name' => 'category',
             'title' => get_string('category', 'core_question'),
-            'custom' => true,
+            'custom' => false,
             'multiple' => false,
             'filterclass' => null,
             'values' => $values,
-            'allowempty' => true,
+            'allowempty' => false,
         ];
         return $filteroptions;
     }
