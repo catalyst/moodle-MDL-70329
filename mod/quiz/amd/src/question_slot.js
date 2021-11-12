@@ -48,6 +48,8 @@ const setSelectors = (slotId) => {
     SELECTORS = {
         VERSION_LIST: '#version' + slotIdClass,
         SLOT_ID: '#mod-indent-outer-slot' + slotIdClass,
+        QUESTION_NAME: '#questionname' + slotIdClass,
+        QUESTION_TEXT: '#questiontext' + slotIdClass,
     };
 };
 
@@ -58,8 +60,25 @@ const setSelectors = (slotId) => {
  * @returns {Promise}
  */
 const ajax = (request) => {
-    return Ajax.call(request)[0].done(function() {
-        location.reload();
+    return Ajax.call(request)[0].done((response) => {
+        if (response.result === true) {
+            // Question name and text update.
+            document.querySelector(SELECTORS.QUESTION_NAME).innerHTML = response.questionname;
+            document.querySelector(SELECTORS.QUESTION_TEXT).innerHTML = response.questiontext;
+            // Preview url update.
+            let queryPreviewUrl = document.querySelector(SELECTORS.SLOT_ID + ' > .actions > .preview');
+            queryPreviewUrl.setAttribute('href', '#');
+            // Cloning the element to remove any event listenners.
+            let oldElement = queryPreviewUrl;
+            let newElement = oldElement.cloneNode(true);
+            oldElement.parentNode.replaceChild(newElement, oldElement);
+            newElement.addEventListener('click', () => {
+                window.open(response.previewurl, 'questionpreview', 'width=800,height=600');
+            });
+            // Edit Url update.
+            let queryEditUrl = document.querySelector(SELECTORS.SLOT_ID + ' > .activityinstance > a');
+            queryEditUrl.href = response.editurl;
+        }
     }).fail(Notification.exception);
 };
 
@@ -77,7 +96,7 @@ const changeVersion = (slotId) => {
             methodname: 'mod_quiz_set_question_version',
             args: {
                 slotid: slotId,
-                newversion: versionSelected,
+                newversion: versionSelected
             }
         }];
         ajax(request);

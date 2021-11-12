@@ -2176,7 +2176,12 @@ function quiz_question_tostring($question, $showicon = false, $showquestiontext 
     if ($showicon) {
         $name .= print_question_icon($question) . ' ' . $name;
     }
-    $result .= html_writer::span($name, 'questionname');
+
+    if (isset($question->slotid)) {
+        $result .= html_writer::span($name, 'questionname', ['id' => "questionname-{$question->slotid}"]);
+    } else {
+        $result .= html_writer::span($name, 'questionname');
+    }
 
     // Question idnumber.
     if ($showidnumber && $question->idnumber !== null && $question->idnumber !== '') {
@@ -2203,7 +2208,11 @@ function quiz_question_tostring($question, $showicon = false, $showquestiontext 
                 $question->questiontextformat, array('noclean' => true, 'para' => false));
         $questiontext = shorten_text($questiontext, 50);
         if ($questiontext) {
-            $result .= ' ' . html_writer::span(s($questiontext), 'questiontext');
+            if (isset($question->slotid)) {
+                $result .= ' ' . html_writer::span(s($questiontext), 'questiontext', ['id' => "questiontext-{$question->slotid}"]);
+            } else {
+                $result .= ' ' . html_writer::span(s($questiontext), 'questiontext');
+            }
         }
     }
 
