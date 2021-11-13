@@ -195,6 +195,21 @@ class view {
         $this->plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
+        $this->init_search_conditions();
+    }
+
+    /**
+     * Initialize search conditions from plugins
+     * local_*_get_question_bank_search_conditions() must return an array of
+     * \core_question\bank\search\condition objects.
+     */
+    protected function init_search_conditions(): void {
+        $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
+        foreach ($searchplugins as $component => $function) {
+            foreach ($function($this) as $searchobject) {
+                $this->add_searchcondition($searchobject);
+            }
+        }
     }
 
     /**
@@ -781,6 +796,49 @@ class view {
             echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
         }
         $this->display_options_form($showquestiontext);
+    }
+
+    /**
+     * Print the text if category id not available.
+     *
+     * @todo Final deprecation of this function in moodle 4.5
+     */
+    protected function print_choose_category_message(): void {
+        debugging('Function print_choose_category_message() is deprecated,
+         all the features for this method is currently handles by the qbank filter api,
+         please have a look at question/bank/managecategories/classes/category_confition.php for more information.', DEBUG_DEVELOPER);
+        echo \html_writer::start_tag('p', ['style' => "\"text-align:center;\""]);
+        echo \html_writer::tag('b', get_string('selectcategoryabove', 'question'));
+        echo \html_writer::end_tag('p');
+    }
+
+    /**
+     * Gets current selected category.
+     * @param string $categoryandcontext
+     * @return false|mixed|\stdClass
+     *
+     * @todo Final deprecation of this function in moodle 4.5
+     */
+    protected function get_current_category($categoryandcontext) {
+        debugging('Function get_current_category() is deprecated,
+         all the features for this method is currently handles by the qbank filter api,
+         please have a look at question/bank/managecategories/classes/category_confition.php for more information.', DEBUG_DEVELOPER);
+        global $DB, $OUTPUT;
+        list($categoryid, $contextid) = explode(',', $categoryandcontext);
+        if (!$categoryid) {
+            $this->print_choose_category_message();
+            return false;
+        }
+
+        if (!$category = $DB->get_record('question_categories',
+            ['id' => $categoryid, 'contextid' => $contextid])) {
+            echo $OUTPUT->box_start('generalbox questionbank');
+            echo $OUTPUT->notification('Category not found!');
+            echo $OUTPUT->box_end();
+            return false;
+        }
+
+        return $category;
     }
 
     /**
