@@ -195,21 +195,6 @@ class view {
         $this->plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
-        $this->init_search_conditions();
-    }
-
-    /**
-     * Initialize search conditions from plugins
-     * local_*_get_question_bank_search_conditions() must return an array of
-     * \core_question\bank\search\condition objects.
-     */
-    protected function init_search_conditions(): void {
-        $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
-        foreach ($searchplugins as $component => $function) {
-            foreach ($function($this) as $searchobject) {
-                $this->add_searchcondition($searchobject, $component);
-            }
-        }
     }
 
     /**
@@ -1362,13 +1347,13 @@ class view {
 
         $this->add_searchcondition(new \core_question\bank\search\category_condition(
             $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
-        $this->add_searchcondition(new \core_question\bank\search\hidden_condition(!$showhidden), 'hidden');
+        $this->add_searchcondition(new \core_question\bank\search\hidden_condition($this), 'hidden');
 
         foreach ($this->plugins as $plugin) {
             $pluginentrypointobject = new $plugin();
-            $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
-            foreach ($pluginobjects as $fieldname => $pluginobject) {
-                $this->add_searchcondition($pluginobject, $fieldname);
+            $pluginobjects = $pluginentrypointobject->get_question_filters($this);
+            foreach ($pluginobjects as $pluginobject) {
+                $this->add_searchcondition($pluginobject, $pluginobject->get_condition_key());
             }
         }
     }

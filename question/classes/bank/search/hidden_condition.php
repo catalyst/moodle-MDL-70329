@@ -43,11 +43,15 @@ class hidden_condition extends condition {
      * Constructor.
      * @param bool $hide whether to include old "deleted" questions.
      */
-    public function __construct($hide = true) {
-        $this->hide = $hide;
-        if ($hide) {
+    public function __construct($qbank) {
+        $this->hide = !$qbank->get_pagevars('showhidden');
+        if ($this->hide) {
             $this->where = 'q.hidden = 0';
         }
+    }
+
+    public function get_condition_key() {
+        return 'hidden';
     }
 
     /**

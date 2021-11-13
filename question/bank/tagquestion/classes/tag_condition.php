@@ -98,13 +98,10 @@ class tag_condition extends condition {
         }
     }
 
-    /**
-     * Get the SQL WHERE snippet to be used in the SQL to retrieve the
-     * list of questions. This SQL snippet will add the logic for the
-     * tag condition.
-     *
-     * @return string
-     */
+    public function get_condition_key() {
+        return 'tag';
+    }
+
     public function where() {
         return $this->where;
     }

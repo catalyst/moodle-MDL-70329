@@ -53,6 +53,17 @@ abstract class condition {
     abstract public function where();
 
     /**
+     * Each condition will need a unique key to be identified and sequenced by the api.
+     * Use a unique string for the condition identifier, use string directly, dont need to use language pack.
+     * Using language pack might break the filter object for multilingual support.
+     *
+     * @return string
+     */
+    public function get_condition_key() {
+        return '';
+    }
+
+    /**
      * Return parameters to be bound to the above WHERE clause fragment.
      * @return array parameter name => value.
      */

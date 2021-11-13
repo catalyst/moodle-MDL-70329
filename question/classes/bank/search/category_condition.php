@@ -108,6 +108,10 @@ class category_condition extends condition {
         }
     }
 
+    public function get_condition_key() {
+        return 'category';
+    }
+
     /**
      * SQL fragment to add to the where clause.
      *

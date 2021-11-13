@@ -64,7 +64,7 @@ class plugin_features_base {
      * @param view $qbank
      * @return condition[]
      */
-    public function get_question_bank_search_conditions(view $qbank): array {
+    public function get_question_filters(view $qbank): array {
         return [];
     }
 }
