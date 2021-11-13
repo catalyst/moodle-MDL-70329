@@ -39,10 +39,6 @@ use core_question\bank\search\condition;
  */
 class plugin_features_base {
 
-    public static function get_qbank_plugin_list(): array {
-        return \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
-    }
-
     /**
      * This method will return the array of objects to be rendered as a prt of question bank columns/actions.
      *

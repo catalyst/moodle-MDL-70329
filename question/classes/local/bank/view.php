@@ -161,6 +161,11 @@ class view {
     protected $pagevars = [];
 
     /**
+     * @var array $plugins all the qbank plugin objects.
+     */
+    protected $plugins = [];
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -186,6 +191,7 @@ class view {
         $this->lastchangedid = optional_param('lastchanged', 0, PARAM_INT);
 
         // Possibly the heading part can be removed.
+        $this->plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
         $this->init_columns($this->wanted_columns(), $this->heading_column());
         $this->init_sort();
         $this->init_search_conditions();
@@ -210,7 +216,7 @@ class view {
      *
      * @return array
      */
-    protected function get_question_bank_plugins_columns(): array {
+    protected function get_question_bank_plugins(): array {
         $questionbankclasscolumns = [];
         $newpluginclasscolumns = [];
         $corequestionbankcolumns = [
@@ -240,7 +246,7 @@ class view {
                 $questionbankclasscolumns[$shortname] = '';
             }
         }
-        $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
+        $plugins = $this->plugins;
         foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin();
             $pluginobjects = $pluginentrypointobject->get_question_columns($this);
@@ -294,7 +300,7 @@ class view {
      */
     protected function wanted_columns(): array {
         $this->requiredcolumns = [];
-        $questionbankcolumns = $this->get_question_bank_plugins_columns();
+        $questionbankcolumns = $this->get_question_bank_plugins();
         foreach ($questionbankcolumns as $classobject) {
             if (empty($classobject)) {
                 continue;
@@ -1357,8 +1363,7 @@ class view {
             $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
         $this->add_searchcondition(new \core_question\bank\search\hidden_condition(!$showhidden), 'hidden');
 
-        $plugins = plugin_features_base::get_qbank_plugin_list();
-        foreach ($plugins as $plugin) {
+        foreach ($this->plugins as $plugin) {
             $pluginentrypointobject = new $plugin();
             $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
             foreach ($pluginobjects as $fieldname => $pluginobject) {
@@ -1366,42 +1371,4 @@ class view {
             }
         }
     }
-
-    public function apply_filter($params): void {
-        $plugins = plugin_features_base::get_qbank_plugin_list();
-        foreach ($plugins as $plugin) {
-            $pluginentrypointobject = new $plugin();
-            $pluginobjects = $pluginentrypointobject->get_question_bank_search_conditions($this);
-            foreach ($pluginobjects as $fieldname => $pluginobject) {
-                $this->add_searchcondition($pluginobject, $fieldname);
-            }
-        }
-
-        foreach ($filters as $filter) {
-            switch ($filter['filtertype']) {
-                case 'category':
-                    // TODO: Capability check.
-                    // TODO: Multiple categories.
-                    $categories = intval($filter['values']);
-                    $categories = $DB->get_records('question_categories', ['id' => $categories]);
-                    $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
-                    $category = array_pop($categories);
-                    $category = $category->id;
-                    $params['category'] = $category;
-                    // TODO: Join type.
-                    $jointype = $filter['jointype'];
-                    break;
-                case 'tag':
-                    // TODO: Filter should be from plugin.
-                    // TODO: Join type.
-                    $tags = explode(',', $filter['values']);
-                    $params['qtagids'] = $tags;
-                    $jointype = $filter['jointype'];
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
 }
