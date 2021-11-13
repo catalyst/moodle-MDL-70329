@@ -81,5 +81,6 @@ $renamedclasses = [
     'export_form' => 'qbank_exportquestions\\form\\export_form',
     'preview_options_form' => 'qbank_previewquestion\\form\\preview_options_form',
     'question_preview_options' => 'qbank_previewquestion\\output\\question_preview_options',
-    'core_question\\form\\tags' => '\qbank_tagquestion\\form\\tags_form'
+    'core_question\\form\\tags' => '\qbank_tagquestion\\form\\tags_form',
+    'core_question\\bank\\search\\hidden_condition' => 'qbank_deletequestion\\hidden_condition'
 ];

@@ -41,4 +41,10 @@ class plugin_feature extends plugin_features_base {
             new delete_action_column($qbank),
         ];
     }
+
+    public function get_question_filters($qbank): array {
+        return [
+            new hidden_condition($qbank),
+        ];
+    }
 }

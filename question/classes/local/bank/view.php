@@ -1341,19 +1341,19 @@ class view {
      */
     public function add_standard_searchcondition(): void {
         $cat = $this->get_pagevars('cat');
-        $showhidden = $this->get_pagevars('showhidden');
         $recurse = $this->get_pagevars('recurse');
         $editcontexts = $this->contexts->having_one_edit_tab_cap($this->get_pagevars('tabname'));
 
         $this->add_searchcondition(new \core_question\bank\search\category_condition(
             $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
-        $this->add_searchcondition(new \core_question\bank\search\hidden_condition($this), 'hidden');
 
-        foreach ($this->plugins as $plugin) {
-            $pluginentrypointobject = new $plugin();
-            $pluginobjects = $pluginentrypointobject->get_question_filters($this);
-            foreach ($pluginobjects as $pluginobject) {
-                $this->add_searchcondition($pluginobject, $pluginobject->get_condition_key());
+        foreach ($this->plugins as $componentname => $plugin) {
+            if (\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
+                $pluginentrypointobject = new $plugin();
+                $pluginobjects = $pluginentrypointobject->get_question_filters($this);
+                foreach ($pluginobjects as $pluginobject) {
+                    $this->add_searchcondition($pluginobject, $pluginobject->get_condition_key());
+                }
             }
         }
     }
