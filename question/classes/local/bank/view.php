@@ -73,7 +73,7 @@ class view {
     /**
      * @var \question_edit_contexts
      */
-    protected $contexts;
+    public $contexts;
 
     /**
      * @var object|\cm_info|null if we are in a module context, the cm.
@@ -1398,13 +1398,6 @@ class view {
      * Params must be set into this object before calling this function.
      */
     public function add_standard_searchcondition(): void {
-        $cat = $this->get_pagevars('cat');
-        $recurse = $this->get_pagevars('recurse');
-        $editcontexts = $this->contexts->having_one_edit_tab_cap($this->get_pagevars('tabname'));
-
-        $this->add_searchcondition(new \core_question\bank\search\category_condition(
-            $cat, $recurse, $editcontexts, $this->baseurl, $this->course), 'category');
-
         foreach ($this->plugins as $componentname => $plugin) {
             if (\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
                 $pluginentrypointobject = new $plugin();

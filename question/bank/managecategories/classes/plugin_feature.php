@@ -16,6 +16,8 @@
 
 namespace qbank_managecategories;
 
+use core_question\local\bank\view;
+
 /**
  * Class plugin_feature.
  *
@@ -31,5 +33,11 @@ class plugin_feature extends \core_question\local\bank\plugin_features_base {
 
     public function get_navigation_node(): ?object {
         return new navigation();
+    }
+
+    public function get_question_filters(view $qbank): array {
+        return [
+            new category_condition($qbank),
+        ];
     }
 }
