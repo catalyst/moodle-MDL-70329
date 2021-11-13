@@ -14,22 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * For rendering qbank filters on the edit qbank page.
- *
- * @package    core_question\bank
- * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-namespace core_question\bank;
+namespace core_question\local\bank;
 
 use renderer_base;
 use stdClass;
 
 /**
- * Class for rendering qbank filters on the qbank filter page.
+ * Class for rendering filters on the base view.
  *
- * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
+ * @package    core_question
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qbank_filter extends \core\output\filter {

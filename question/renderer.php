@@ -224,7 +224,7 @@ class core_question_bank_renderer extends plugin_renderer_base {
      */
     public function render_questionbank_filter(\context $context, array $searchconditions, $additionalparams): string {
         global $PAGE;
-        $filter = new \core_question\bank\qbank_filter($context, 'qbank-table');
+        $filter = new \core_question\local\bank\qbank_filter($context, 'qbank-table');
         $filter->set_searchconditions($searchconditions, $additionalparams);
         $templatecontext = $filter->export_for_template($this->output);
         $renderedtemplate = $this->render_from_template('core_question/qbank_filter', $templatecontext);
