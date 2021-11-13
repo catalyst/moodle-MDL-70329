@@ -36,39 +36,11 @@ class plugin_feature extends plugin_features_base{
     }
 
     public function get_question_bank_search_conditions(view $qbank): array {
-        global $CFG, $DB;
-        $searchconditions = [];
+        global $CFG;
         if ($CFG->usetags) {
-            $cat = $qbank->get_pagevars('cat');
-            $contexts = [];
-            if (is_array($cat)) {
-                foreach ($cat as $value) {
-                    list(, $contextid) = explode(',', $value);
-                    $catcontext = \context::instance_by_id($contextid);
-                    $contexts[] = $catcontext;
-                }
-            } else {
-                list(, $contextid) = explode(',', $qbank->get_pagevars('cat'));
-                $catcontext = \context::instance_by_id($contextid);
-                $contexts[] = $catcontext;
-            }
-            $thiscontext = $qbank->get_most_specific_context();
-            $contexts[] = $thiscontext;
-            $filters = $qbank->get_pagevars('filters');
-            $tagids = $filters['qtagids']['values'] ?? [];
-            $filterverb = $filter['filterverb'] ?? tag_condition::JOINTYPE_DEFAULT;
-            $searchconditions['tag'] = new tag_condition($contexts, $tagids, $filterverb);
+            return [
+                new tag_condition($qbank),
+            ];
         }
-        return $searchconditions;
-    }
-
-    public function get_external_function_parameters(): array {
-        return [
-            'qtagids' => new \external_value(
-            PARAM_SEQUENCE,
-            'Tag ID',
-            VALUE_DEFAULT,
-            '',
-        )];
     }
 }

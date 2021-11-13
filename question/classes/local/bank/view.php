@@ -173,11 +173,12 @@ class view {
      * @param object $course course settings
      * @param object $cm (optional) activity settings.
      */
-    public function __construct($contexts, $pageurl, $course, $cm = null) {
+    public function __construct($contexts, $pageurl, $course, $cm = null, $enablefilters = true) {
         $this->contexts = $contexts;
         $this->baseurl = $pageurl;
         $this->course = $course;
         $this->cm = $cm;
+        $this->enablefilters = $enablefilters;
 
         // Create the url of the new question page to forward to.
         $this->returnurl = $pageurl->out_as_local_url(false);
@@ -776,7 +777,7 @@ class view {
         // Category selection form.
         $this->display_question_bank_header();
 
-        // Display tag filter if usetags setting is enabled/enablefilters is true.
+        // Display the filters if filter is enabled from the api call.
         if ($this->enablefilters) {
             if (is_array($this->customfilterobjects)) {
                 foreach ($this->customfilterobjects as $filterobjects) {

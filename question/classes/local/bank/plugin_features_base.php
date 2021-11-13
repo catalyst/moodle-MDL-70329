@@ -67,9 +67,4 @@ class plugin_features_base {
     public function get_question_bank_search_conditions(view $qbank): array {
         return [];
     }
-
-    public function get_external_function_parameters(): array {
-        return [];
-    }
-
 }

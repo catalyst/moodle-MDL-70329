@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * A condition for adding filtering by tag to the question bank.
- *
- * @package   core_question
- * @copyright 2018 Ryan Wyllie <ryan@moodle.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_tagquestion;
 
 use core_question\bank\search\condition;
@@ -30,6 +22,7 @@ use core_question\bank\search\condition;
  * Question bank search class to allow searching/filtering by tags on a question.
  *
  * @copyright 2018 Ryan Wyllie <ryan@moodle.com>
+ * @author    2021 Safat Shahin <safatshahin@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tag_condition extends condition {
@@ -37,25 +30,39 @@ class tag_condition extends condition {
     /** @var string SQL fragment to add to the where clause. */
     protected $where;
 
-    /** @var string SQL fragment to add to the where clause. */
-    protected $contexts;
+    /** @var array Contexts to be used. */
+    protected $contexts = [];
 
     /** @var array List of IDs for tags that have been selected in the form. */
     protected $selectedtagids;
 
+    /** @var array named params for the where clause. */
+    protected $params;
+
     /**
-     * Constructor.
+     * Tag condition constructor. It uses the qbank object and initialises all the its required information
+     * to be passed as a part of condition to get the questions.
      *
-     * @param array $contexts List of contexts to show tags from
-     * @param int[] $selectedtagids List of IDs for tags to filter by.
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
-    public function __construct(array $contexts, array $selectedtagids = [], $filterverb = self::JOINTYPE_DEFAULT) {
+    public function __construct($qbank) {
         global $DB;
-
-        $this->contexts = $contexts;
-
+        $cat = $qbank->get_pagevars('cat');
+        if (is_array($cat)) {
+            foreach ($cat as $value) {
+                list($category, $contextid) = explode(',', $value);
+                $catcontext = \context::instance_by_id($contextid);
+                $this->contexts[] = $catcontext;
+            }
+        } else {
+            list($category, $contextid) = explode(',', $qbank->get_pagevars('cat'));
+            $catcontext = \context::instance_by_id($contextid);
+            $this->contexts[] = $catcontext;
+        }
+        $thiscontext = $qbank->get_most_specific_context();
+        $this->contexts[] = $thiscontext;
+        $filters = $qbank->get_pagevars('filters');
+        $selectedtagids = $filters['qtagids']['values'] ?? [];
+        $filterverb = $filters['filterverb'] ?? self::JOINTYPE_DEFAULT;
         // If some tags have been selected then we need to filter
         // the question list by the selected tags.
         if ($selectedtagids) {
