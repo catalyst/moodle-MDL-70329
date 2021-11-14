@@ -24,7 +24,6 @@
 
 namespace core_question\local\bank;
 
-use core_question\bank\search\category_condition;
 use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
@@ -956,7 +955,7 @@ class view {
         // Note: We do not call this in the loop because quiz ob_ captures this function (see raise() PHP doc).
         \core_php_time_limit::raise(300);
 
-        $category = category_condition::get_current_category($categoryandcontext);
+        $category = \qbank_managecategories\category_condition::get_current_category($categoryandcontext);
 
         list($categoryid, $contextid) = explode(',', $categoryandcontext);
         $catcontext = \context::instance_by_id($contextid);

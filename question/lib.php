@@ -17,10 +17,6 @@
 /**
  * Question related functions.
  *
- * This file was created just because Fragment API expects callbacks to be defined on lib.php.
- *
- * Please, do not add new functions to this file.
- *
  * @package   core_question
  * @copyright 2018 Simey Lameze <simey@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -98,7 +94,7 @@ function core_question_output_fragment_tags_form($args) {
 }
 
 /**
- * View list fragment callback.
+ * View question list fragment callback.
  *
  * @param array $args Arguments to the form.
  * @return null|string The rendered form.
@@ -144,6 +140,5 @@ function core_question_output_fragment_question_list($args) {
     $questions = $questionbank->load_questions();
     ob_start();
     $questionbank->display_for_api($questions);
-    $tablehtml = ob_get_clean();
-    return $tablehtml;
+    return ob_get_clean();
 }
