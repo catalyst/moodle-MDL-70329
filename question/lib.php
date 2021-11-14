@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/question/editlib.php');
-use core_question\bank\search\question_condition;
+use core_question\local\bank\question_condition;
 
 /**
  * Question tags fragment callback.

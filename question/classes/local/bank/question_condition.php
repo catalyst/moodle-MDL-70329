@@ -14,21 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace core_question\local\bank;
+
+use core_question\bank\search\condition;
 
 /**
- * A search class to control whether hidden / deleted questions are hidden in the list.
+ * This class controls by questionid to handle question condition.
  *
  * @package   core_question
- * @copyright 2021 Catalyst IT Australia Pty Ltd
- * @author    Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace core_question\bank\search;
-
-/**
- * This class controls by questionid.
- *
  * @copyright 2021 Catalyst IT Australia Pty Ltd
  * @author    Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
