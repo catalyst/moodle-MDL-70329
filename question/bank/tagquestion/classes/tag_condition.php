@@ -16,7 +16,7 @@
 
 namespace qbank_tagquestion;
 
-use core_question\bank\search\condition;
+use core_question\local\bank\condition;
 
 /**
  * Question bank search class to allow searching/filtering by tags on a question.

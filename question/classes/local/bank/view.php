@@ -24,7 +24,6 @@
 
 namespace core_question\local\bank;
 
-use core_question\bank\search\condition;
 use qbank_editquestion\editquestion_helper;
 use qbank_managecategories\helper;
 
@@ -543,7 +542,7 @@ class view {
 
     /**
      * Create the SQL query to retrieve the indicated questions, based on
-     * \core_question\bank\search\condition filters.
+     * \core_question\local\bank\condition filters.
      */
     protected function build_query(): void {
         // Get the required tables and fields.

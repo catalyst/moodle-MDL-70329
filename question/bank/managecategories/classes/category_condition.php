@@ -16,7 +16,7 @@
 
 namespace qbank_managecategories;
 
-use core_question\bank\search\condition;
+use core_question\local\bank\condition;
 
 /**
  *  This class controls from which category questions are listed.

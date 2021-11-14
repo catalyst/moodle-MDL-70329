@@ -25,7 +25,7 @@
 
 namespace qbank_deletequestion;
 
-use core_question\bank\search\condition;
+use core_question\local\bank\condition;
 
 /**
  * This class controls whether hidden / deleted questions are hidden in the list.

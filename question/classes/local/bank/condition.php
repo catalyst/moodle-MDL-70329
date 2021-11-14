@@ -14,23 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
-/**
- * Defines an abstract class for filtering/searching the question bank.
- *
- * @package   core_question
- * @copyright 2013 Ray Morris
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace core_question\bank\search;
+namespace core_question\local\bank;
 
 /**
  * An abstract class for filtering/searching questions.
  *
- * See also {@see question_bank_view::init_search_conditions()}.
- * @copyright 2013 Ray Morris
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    core_question
+ * @copyright  2013 Ray Morris
+ * @author     Safat Shahin <safatshahin@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class condition {
 
@@ -100,6 +92,11 @@ abstract class condition {
         return [];
     }
 
+    /**
+     * Get the list of available joins for the filter.
+     *
+     * @return array
+     */
     public function get_join_list(): array {
         return [
             self::JOINTYPE_NONE => get_string('none'),

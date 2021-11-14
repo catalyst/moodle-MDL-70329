@@ -26,8 +26,7 @@ namespace core_question\external;
 
 require_once($CFG->dirroot . '/question/editlib.php');
 
-use core_question\bank\search\condition;
-use core_question\local\bank\plugin_features_base;
+use core_question\local\bank\condition;
 use external_api;
 use external_function_parameters;
 use external_single_structure;

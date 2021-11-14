@@ -16,8 +16,6 @@
 
 namespace core_question\local\bank;
 
-use core_question\bank\search\condition;
-
 /**
  * This class controls by questionid to handle question condition.
  *

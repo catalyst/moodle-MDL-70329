@@ -27,8 +27,6 @@
 
 namespace core_question\local\bank;
 
-use core_question\bank\search\condition;
-
 /**
  * Class plugin_features_base is the base class for qbank plugins.
  *
