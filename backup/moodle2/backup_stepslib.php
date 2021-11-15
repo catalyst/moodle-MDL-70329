@@ -203,9 +203,11 @@ trait backup_question_reference_data_trait {
     /**
      * Backup the related data from reference table for the instance.
      *
-     * @param $element
+     * @param backup_nested_element $element
+     * @param string $component
+     * @param string $questionarea
      */
-    protected function add_question_references($element) {
+    protected function add_question_references($element, $component, $questionarea) {
         // Check $element is one nested_backup_element
         if (! $element instanceof backup_nested_element) {
             throw new backup_step_exception('question_states_bad_parent_element', $element);
@@ -216,7 +218,12 @@ trait backup_question_reference_data_trait {
 
         $element->add_child($reference);
 
-        $reference->set_source_table('question_references', ['itemid' => backup::VAR_PARENTID]);
+        $reference->set_source_table('question_references', [
+            'usingcontextid' => backup::VAR_CONTEXTID,
+            'component' => backup_helper::is_sqlparam($component),
+            'questionarea' => backup_helper::is_sqlparam($questionarea),
+            'itemid' => backup::VAR_PARENTID
+        ]);
     }
 }
 
@@ -228,9 +235,11 @@ trait backup_question_set_reference_trait {
     /**
      * Backup the related data from set_reference table for the instance.
      *
-     * @param $element
+     * @param backup_nested_element $element
+     * @param string $component
+     * @param string $questionarea
      */
-    protected function add_question_set_references($element) {
+    protected function add_question_set_references($element, $component, $questionarea) {
         // Check $element is one nested_backup_element
         if (! $element instanceof backup_nested_element) {
             throw new backup_step_exception('question_states_bad_parent_element', $element);
@@ -241,7 +250,12 @@ trait backup_question_set_reference_trait {
 
         $element->add_child($setreference);
 
-        $setreference->set_source_table('question_set_references', ['itemid' => backup::VAR_PARENTID]);
+        $setreference->set_source_table('question_set_references', [
+            'usingcontextid' => backup::VAR_CONTEXTID,
+            'component' => backup_helper::is_sqlparam($component),
+            'questionarea' => backup_helper::is_sqlparam($questionarea),
+            'itemid' => backup::VAR_PARENTID
+        ]);
     }
 }
 
