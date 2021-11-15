@@ -25,7 +25,7 @@
 
 namespace core\plugininfo;
 
-use qbank_columnsortorder\column_sort_order_manager;
+use qbank_columnsortorder\column_manager;
 
 /**
  * Base class for qbank plugins.
@@ -161,12 +161,5 @@ class qbank extends base {
         if ($settings) {
             $ADMIN->add($parentnodename, $settings);
         }
-    }
-
-    public function uninstall_cleanup() {
-        $plugintoremove = $this->type . '_' . $this->name;
-        $columnsortordermanager = new column_sort_order_manager();
-        $columnsortordermanager->remove_unused_column_from_db($plugintoremove);
-        parent::uninstall_cleanup();
     }
 }

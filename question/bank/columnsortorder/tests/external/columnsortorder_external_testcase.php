@@ -17,7 +17,7 @@
 namespace qbank_columnsortorder;
 
 use advanced_testcase;
-use qbank_columnsortorder\column_sort_order_manager;
+use qbank_columnsortorder\column_manager;
 use qbank_columnsortorder\external\set_columnbank_order;
 
 defined('MOODLE_INTERNAL') || die();
@@ -43,8 +43,8 @@ class columnsortorder_external_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $this->setAdminUser();
 
-        $columnsortorder = new column_sort_order_manager();
-        $questionlistcolumns = $columnsortorder->get_question_list_columns();
+        $columnsortorder = new column_manager();
+        $questionlistcolumns = $columnsortorder->get_columns();
         $columnclasses = [];
         foreach ($questionlistcolumns as $columnnobject) {
             $columnclasses[] = $columnnobject->class;

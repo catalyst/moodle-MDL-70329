@@ -22,15 +22,16 @@
  *
  */
 
-import Ajax from 'core/ajax';
-import Notification from 'core/notification';
+import {call as fetchMany} from 'core/ajax';
+import {exception as displayException} from 'core/notification';
 import SortableList from 'core/sortable_list';
 import jQuery from 'jquery';
 
 /**
  * Sets up sortable list in the column sort order page.
+ * @param {Element} listRoot
  */
-const setupSortableLists = () => {
+const setupSortableLists = (listRoot) => {
     new SortableList(
         '.list',
         {
@@ -39,56 +40,43 @@ const setupSortableLists = () => {
     );
 
     jQuery('.item').on(SortableList.EVENTS.DROP, () => {
-        let columnorder = getColumnOrder();
-        setOrder(columnorder.join());
-        jQuery('.item').removeClass('active');
+        const columns = getColumnOrder(listRoot);
+        setOrder(columns).catch(displayException);
+        listRoot.querySelectorAll('.item').forEach(item => item.classList.remove('active'));
     });
 
     jQuery('.item').on(SortableList.EVENTS.DRAGSTART, (event) => {
-        jQuery(event.currentTarget).addClass('active');
+        event.currentTarget.classList.add('active');
     });
 };
 
 /**
  * Call external function set_order - inserts the updated column in the config_plugins table.
  *
- * @param {String} updatedcolumn String that contains column order.
+ * @param {String} columns String that contains column order.
+ * @returns {Promise}
  */
-const setOrder = (updatedcolumn) => {
-    Ajax.call([{
+const setOrder = columns => fetchMany([{
         methodname: 'qbank_columnsortorder_set_columnbank_order',
-        args: {columns: JSON.stringify(updatedcolumn)},
-        fail: Notification.exception
-    }]);
-};
-
-/**
- * Gets an array duplicate.
- *
- * @param {Array} columnsDuplicate Array to search duplicates for.
- * @returns {Object}
- */
-const findDuplicates = (columnsDuplicate) => {
-    return columnsDuplicate.filter((item, index) => columnsDuplicate.indexOf(item) !== index);
-};
+        args: {columns: columns},
+    }])[0];
 
 /**
  * Gets the newly reordered columns to display in the question bank view.
- *
+ * @param {Element} listRoot
  * @returns {Array}
  */
-const getColumnOrder = () => {
-    let updated = [...document.querySelectorAll('.column')];
-    let columns = new Array(updated.length);
-    for (let i = 0; i < updated.length; i++) {
-        columns[i] = updated[i].innerText.trim();
-    }
-    if (findDuplicates(columns).length !== 0) {
-        columns.pop();
-    }
-    return columns;
+const getColumnOrder = (listRoot) => {
+    const columns = Array.from(listRoot.querySelectorAll('[data-pluginname]')).map(column => column.dataset.pluginname);
+
+    return columns.filter((value, index) => columns.indexOf(value) === index);
 };
 
-export const init = () => {
-    setupSortableLists();
+/**
+ * Initialize module
+ * @param {int} id unique id for columns.
+ */
+export const init = (id) => {
+    const listRoot = document.querySelector(`#${id}`);
+    setupSortableLists(listRoot);
 };

@@ -20,8 +20,9 @@ use context_system;
 use Exception;
 use external_api;
 use external_function_parameters;
-use external_single_structure;
+use external_multiple_structure;
 use external_value;
+use qbank_columnsortorder\column_manager;
 use stdClass;
 
 /**
@@ -39,41 +40,32 @@ class set_columnbank_order extends external_api {
      *
      * @return external_function_parameters
      */
-    public static function execute_parameters() {
-        return new external_function_parameters(
-                ['columns' => new external_value(PARAM_RAW, 'JSON String containing column order to set in config_plugins table')]
-        );
+    public static function execute_parameters(): external_function_parameters {
+        return new external_function_parameters([
+            'columns' => new external_multiple_structure(
+                new external_value(PARAM_TEXT, 'Plugin name for the column', VALUE_REQUIRED)
+            )
+        ]);
     }
 
     /**
      * Returns description of method result value.
      *
-     * @return external_value_structure
      */
-    public static function execute_returns() {
-        return null;
+    public static function execute_returns(): void {
     }
 
     /**
      * Returns the columns plugin order.
      *
-     * @param string $columns json string representing new column order.
-     * @return bool
+     * @param array $columns json string representing new column order.
      */
-    public static function execute(string $columns) {
-        global $DB;
-        $params = self::validate_parameters(self::execute_parameters(), ['columns' => $columns]);
+    public static function execute(array $columns): void {
+        ['columns' => $columns] = self::validate_parameters(self::execute_parameters(), ['columns' => $columns]);
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('moodle/category:manage', $context);
 
-        $columns = str_replace('"', "", $params['columns']);
-        $columns = stripslashes($columns);
-        $columns = explode(',', $columns);
-        $transaction = $DB->start_delegated_transaction();
-        foreach ($columns as $key => $column) {
-            set_config($column, $key, 'qbank_columnsortorder');
-        }
-        $transaction->allow_commit();
+        column_manager::set_column_order($columns);
     }
 }

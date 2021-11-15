@@ -38,7 +38,7 @@ Feature: An plugin column can be reordered and displayed in the question bank vi
   Scenario: Reordering question bank columns
     Given I log in as "admin"
     When I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
-    And I drag "Creatorname (creator_name_column)" "text" and I drop it in "Qtype (question_type_column)" "text"
+    And I drag "Created by (creator_name_column)" "text" and I drop it in "T (question_type_column)" "text"
     And I am on the "Test quiz Q001" "quiz activity" page logged in as "teacher1"
     And I navigate to "Question bank > Questions" in current page administration
     And I click on "category" "select"
@@ -46,11 +46,43 @@ Feature: An plugin column can be reordered and displayed in the question bank vi
     Then ".creatorname" "css_element" should appear before ".qtype" "css_element"
 
   @javascript
-  Scenario: Disabling a column removes column from sortcolumn page
+  Scenario: Disabling and enabling column display is proper
     Given I log in as "admin"
     When I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
-    And I should see "Creatorname (creator_name_column)"
+    And I should see "Created by (creator_name_column)"
     And I click on "Manage question bank plugins" "link"
     And I click on "Disable" "link" in the "View creator" "table_row"
     And I click on "Column sort order" "link"
-    Then I should not see "Creatorname (creator_name_column)"
+    Then "Columns below are currently disabled." "text" should appear before "Created by" "text"
+    And I should not see "Created by (creator_name_column)"
+    And I click on "Manage question bank plugins" "link"
+    And I click on "Enable" "link" in the "View creator" "table_row"
+    And I click on "Column sort order" "link"
+    Then I should not see "Columns below are currently disabled."
+    And I should see "Created by (creator_name_column)"
+
+  @javascript
+  Scenario: Custom fields are reorderable
+    Given I log in as "admin"
+    When I navigate to "Plugins > Question bank plugins > Question custom fields" in site administration
+    And I press "Add a new category"
+    And I click on "Add a new custom field" "link"
+    And I follow "Checkbox"
+    And I set the following fields to these values:
+      | Name       | checkboxcustomcolumn |
+      | Short name | chckcust             |
+    And I press "Save changes"
+    Then I should see "checkboxcustomcolumn"
+    And I navigate to "Plugins > Question bank plugins > Column sort order" in site administration
+    And I should see "checkboxcustomcolumn"
+    And I drag "checkboxcustomcolumn" "text" and I drop it in "T (question_type_column)" "text"
+    Then "checkboxcustomcolumn" "text" should appear before "T (question_type_column)" "text"
+    And I click on "Manage question bank plugins" "link"
+    And I click on "Disable" "link" in the "Question custom fields" "table_row"
+    And I click on "Column sort order" "link"
+    Then "Columns below are currently disabled." "text" should appear before "chckcust" "text"
+    And I click on "Manage question bank plugins" "link"
+    And I click on "Enable" "link" in the "Question custom fields" "table_row"
+    And I click on "Column sort order" "link"
+    Then I should not see "Columns below are currently disabled."
+    And I should see "checkboxcustomcolumn"

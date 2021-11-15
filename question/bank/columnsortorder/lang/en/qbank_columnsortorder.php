@@ -30,5 +30,7 @@ $string['qbankcolumnsortorder'] = 'Column sort order';
 // When plugin is enabled, caption is present in manage qbank page.
 $string['qbankgotocolumnsort'] = 'You can reorder column order in the question bank view on the {$a} page';
 // Caption present in column sort order external page.
+$string['qbankcolumnsdisabled'] = 'Columns below are currently disabled.';
 $string['qbankgotomanageqbanks'] = 'Enable and disable column plugins via <a href=\'{$a}\'>Manage question bank plugins</a>';
+$string['qbankcolumnname'] = '({$a})';
 $string['qbanksortdescription'] = 'Column order modification in this page will reorder column display in question bank view';
