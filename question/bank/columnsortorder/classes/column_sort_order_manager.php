@@ -106,7 +106,7 @@ class column_sort_order_manager {
      *
      * @param string $plugintoremove Plugin type and name ie: qbank_viewcreator.
      */
-    public function remove_unused_column_from_db(string $plugintoremove) : void {
+    public function remove_unused_column_from_db(string $plugintoremove): void {
         $qbankplugins = $this->get_question_list_columns();
         foreach ($qbankplugins as $plugin) {
             if (strpos($plugin->classcol, $plugintoremove) !== false) {

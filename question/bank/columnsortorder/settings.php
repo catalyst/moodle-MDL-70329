@@ -24,21 +24,21 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use qbank_columnsortorder\column_sort_order_manager;
-
 defined('MOODLE_INTERNAL') || die();
 
-$columnsortordermanager = new column_sort_order_manager();
 // Column sort order link in manageqbanks page.
 $url = new moodle_url('/question/bank/columnsortorder/sortcolumns.php', ['section' => 'columnsortorder']);
+
 if ($ADMIN->fulltree) {
     $page = $adminroot->locate('manageqbanks');
-    $page->add(new admin_setting_description(
-        'manageqbanksgotocolumnsort',
-        '',
-        new lang_string('qbankgotocolumnsort', 'qbank_columnsortorder',
-            html_writer::link($url, get_string('qbankcolumnsortorder', 'qbank_columnsortorder')))
-    ));
+    if (isset($page)) {
+        $page->add(new admin_setting_description(
+            'manageqbanksgotocolumnsort',
+            '',
+            new lang_string('qbankgotocolumnsort', 'qbank_columnsortorder',
+                html_writer::link($url, get_string('qbankcolumnsortorder', 'qbank_columnsortorder')))
+        ));
+    }
 }
 // Column sort order link in admin page.
 $settings = new admin_externalpage('qbank_columnsortorder', get_string('qbankcolumnsortorder', 'qbank_columnsortorder'), $url);

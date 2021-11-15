@@ -51,7 +51,7 @@ class set_columnbank_order extends external_api {
      * @return external_value_structure
      */
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL, 'Boolean true returned when config is properly set');
+        return null;
     }
 
     /**
@@ -70,15 +70,10 @@ class set_columnbank_order extends external_api {
         $columns = str_replace('"', "", $params['columns']);
         $columns = stripslashes($columns);
         $columns = explode(',', $columns);
-        try {
-            $transaction = $DB->start_delegated_transaction();
-            foreach ($columns as $key => $column) {
-                set_config($column, $key, 'qbank_columnsortorder');
-            }
-            $transaction->allow_commit();
-        } catch (Exception $e) {
-            $transaction->rollback($e);
+        $transaction = $DB->start_delegated_transaction();
+        foreach ($columns as $key => $column) {
+            set_config($column, $key, 'qbank_columnsortorder');
         }
-        return true;
+        $transaction->allow_commit();
     }
 }

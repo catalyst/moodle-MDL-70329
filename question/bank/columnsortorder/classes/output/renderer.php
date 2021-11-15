@@ -34,7 +34,7 @@ class renderer extends plugin_renderer_base {
      *
      * @return string The rendered HTML.
      */
-    public function render_columns() {
+    public function render_column_sort_ui() {
         $columnsortorder = new column_sort_order_manager();
         $corequestionbankcolumns = $columnsortorder->get_question_list_columns();
         foreach ($corequestionbankcolumns as $columnname) {
@@ -42,10 +42,9 @@ class renderer extends plugin_renderer_base {
             $names['names'][] = ['name' => $name, 'hiddenname' => $columnname->class];
         }
 
-        $urltoredirect = new moodle_url('/admin/settings.php', ['section' => 'manageqbanks'],
-            get_string('manageqbanks', 'admin'));
+        $urltoredirect = new moodle_url('/admin/settings.php', ['section' => 'manageqbanks']);
 
-        $names['urltomanageqbanks'] = $urltoredirect;
+        $names['urltomanageqbanks'] = get_string('qbankgotomanageqbanks', 'qbank_columnsortorder', $urltoredirect->__toString());
 
         return $this->render_from_template('qbank_columnsortorder/columnsortorder', $names);
     }

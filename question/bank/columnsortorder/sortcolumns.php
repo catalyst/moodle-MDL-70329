@@ -34,5 +34,5 @@ $renderer = $PAGE->get_renderer('qbank_columnsortorder');
 
 echo $OUTPUT->header(),
      $OUTPUT->heading(new lang_string('qbankcolumnsortorder', 'qbank_columnsortorder')),
-     $renderer->render_columns(),
+     $renderer->render_column_sort_ui(),
      $OUTPUT->footer();
