@@ -38,7 +38,12 @@ class qbank_helper {
      */
     public static function is_random($slotid): bool {
         global $DB;
-        return $DB->record_exists('question_set_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+            ];
+        return $DB->record_exists('question_set_references', $params);
     }
 
     /**
@@ -86,7 +91,12 @@ class qbank_helper {
      */
     public static function get_question_for_redo($slotid) {
         global $DB;
-        $referencerecord = $DB->get_record('question_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+        ];
+        $referencerecord = $DB->get_record('question_references', $params);
         if ($referencerecord->version === null) {
             $questionsql = 'SELECT q.id
                               FROM {question} q
@@ -114,7 +124,12 @@ class qbank_helper {
      */
     public static function get_random_question_data_from_slot($slotid) {
         global $DB;
-        return $DB->get_record('question_set_references', ['itemid' => $slotid]);
+        $params = [
+            'itemid' => $slotid,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot'
+        ];
+        return $DB->get_record('question_set_references', $params);
     }
 
     /**
@@ -132,8 +147,10 @@ class qbank_helper {
                   JOIN {question_versions} qv ON qv.questionbankentryid = qr.questionbankentryid
                    AND qv.version = qr.version
                  WHERE qr.version IS NOT NULL
-                   AND qs.quizid = ?';
-        $questions = $DB->get_records_sql($sql, [$quizid]);
+                   AND qs.quizid = ?
+                   AND qr.component = ?
+                   AND qr.questionarea = ?';
+        $questions = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
         foreach ($questions as $question) {
             $questionids [] = $question->questionid;
         }
@@ -153,8 +170,10 @@ class qbank_helper {
                   FROM {quiz_slots} qs
                   JOIN {question_references} qr ON qr.itemid = qs.id
                  WHERE qr.version IS NULL
-                   AND qs.quizid = ?';
-        $entryids = $DB->get_records_sql($sql, [$quizid]);
+                   AND qs.quizid = ?
+                   AND qr.component = ?
+                   AND qr.questionarea = ?';
+        $entryids = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
         $questionentries = [];
         foreach ($entryids as $entryid) {
             $questionentries [] = $entryid->entry;
@@ -217,7 +236,7 @@ class qbank_helper {
                        qv.version,
                        qv.questionbankentryid
                   FROM {quiz_slots} slot
-             LEFT JOIN {question_references} qr ON qr.itemid = slot.id                  
+             LEFT JOIN {question_references} qr ON qr.itemid = slot.id AND qr.component = 'mod_quiz' AND qr.questionarea = 'slot'
              LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
              LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id $joinon
              LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid   
@@ -271,8 +290,10 @@ class qbank_helper {
                        qsr.filtercondition
                  FROM {question_set_references} qsr
                  JOIN {quiz_slots} slot ON slot.id = qsr.itemid
-                WHERE slot.quizid = ?';
-        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid]);
+                WHERE slot.quizid = ?
+                  AND qsr.component = ?
+                  AND qsr.questionarea = ?';
+        $randomquestiondatas = $DB->get_records_sql($sql, [$quizid, 'mod_quiz', 'slot']);
 
         $randomquestions = [];
         // Questions already added.
@@ -335,7 +356,7 @@ class qbank_helper {
     public static function choose_question_for_redo($slotid, $qubaids): int {
         // Choose the replacement question.
         if (!self::is_random($slotid)) {
-            $newqusetionid = \mod_quiz\question\bank\qbank_helper::get_question_for_redo($slotid);
+            $newqusetionid = self::get_question_for_redo($slotid);
         } else {
             $tagids = [];
             $randomquestiondata = self::get_random_question_data_from_slot($slotid);

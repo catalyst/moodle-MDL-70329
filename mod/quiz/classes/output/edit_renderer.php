@@ -1041,7 +1041,7 @@ class edit_renderer extends \plugin_renderer_base {
         $temp->questiontext = '';
         $instancename = quiz_question_tostring($temp);
 
-        $setreference = $DB->get_record('question_set_references', ['itemid' => $slot->id]);
+        $setreference = qbank_helper::get_random_question_data_from_slot($slot->id);
         $filtercondition = json_decode($setreference->filtercondition);
 
 
