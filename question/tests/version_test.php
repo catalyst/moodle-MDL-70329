@@ -183,7 +183,7 @@ class version_test extends \advanced_testcase {
         quiz_add_quiz_question($question->id, $this->quiz);
 
         // Move the category to system context.
-        $contexts = new \core_question\lib\question_edit_contexts($systemcontext);
+        $contexts = new \core_question\local\bank\question_edit_contexts($systemcontext);
         $qcobject = new qbank_managecategories\question_category_object(null,
             new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
             $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
