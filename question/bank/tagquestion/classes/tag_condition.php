@@ -62,7 +62,7 @@ class tag_condition extends condition {
         $this->contexts[] = $thiscontext;
         $filters = $qbank->get_pagevars('filters');
         $selectedtagids = $filters['qtagids']['values'] ?? [];
-        $filterverb = $filters['filterverb'] ?? self::JOINTYPE_DEFAULT;
+        $filterverb = $filters['qtagids']['jointype'] ?? self::JOINTYPE_DEFAULT;
         // If some tags have been selected then we need to filter
         // the question list by the selected tags.
         if ($selectedtagids) {
