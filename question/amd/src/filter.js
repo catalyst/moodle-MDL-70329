@@ -128,6 +128,19 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         // Load questions for first page.
         requestQuestions(wsfilter)
             .then(response => {
+                // Cleans any notifications if not needed.
+                let element = document.getElementById('user-notifications');
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+                if (response.warnings[0] !== undefined) {
+                    if (response.warnings[0].warningcode === 'nocategoryconditionspecified') {
+                        Notification.addNotification({
+                            message: response.warnings[0].message,
+                            type: 'info'
+                          });
+                    }
+                }
                 const totalquestions = response.totalquestions;
                 if (response.questions.length === 0) {
                     return Promise.resolve();
