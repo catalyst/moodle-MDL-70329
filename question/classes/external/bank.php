@@ -34,7 +34,6 @@ use external_multiple_structure;
 use external_value;
 use external_warnings;
 
-
 /**
  * Core question external functions.
  *
@@ -190,6 +189,17 @@ class bank extends external_api {
         $categoryids = $params['filters']['category']['values'];
         // Currently, we support only one category for the list because of new/edit/delete buttons.
         $categoryid = array_pop($categoryids);
+        if (!is_numeric($categoryid)) {
+            $warnings[] = [
+                'warningcode' => 'nocategoryconditionspecified',
+                'message' => get_string('nocategoryconditionspecified', 'question')
+            ];
+            return [
+                        'questions' => [],
+                        'totalquestions' => 0,
+                        'warnings' => $warnings
+                    ];
+        }
         $categories = $DB->get_records('question_categories', ['id' => $categoryid]);
         $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
         $category = array_pop($categories);
