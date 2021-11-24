@@ -126,7 +126,7 @@ class category_condition extends condition {
         if ($this->category) {
             $displaydata['categorydesc'] = $this->print_category_info($this->category);
         }
-        return $PAGE->get_renderer('core_question', 'bank')->render_category_condition($displaydata);
+        return $PAGE->get_renderer('qbank_managecategories')->render_category_condition($displaydata);
     }
 
     /**
@@ -139,7 +139,7 @@ class category_condition extends condition {
         if ($this->recurse) {
             $displaydata['checked'] = 'checked="true"';
         }
-        return $PAGE->get_renderer('core_question', 'bank')->render_category_condition_advanced($displaydata);
+        return $PAGE->get_renderer('qbank_managecategories')->render_category_condition_advanced($displaydata);
     }
 
     /**

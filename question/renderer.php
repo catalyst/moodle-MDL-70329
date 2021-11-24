@@ -107,26 +107,6 @@ class core_question_bank_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Render category condition.
-     *
-     * @param array $displaydata
-     * @return bool|string
-     */
-    public function render_category_condition($displaydata) {
-        return $this->render_from_template('core_question/category_condition', $displaydata);
-    }
-
-    /**
-     * Render category condition advanced.
-     *
-     * @param array $displaydata
-     * @return bool|string
-     */
-    public function render_category_condition_advanced($displaydata) {
-        return $this->render_from_template('core_question/category_condition_advanced', $displaydata);
-    }
-
-    /**
      * Render hidden condition advanced.
      *
      * @param array $displaydata
