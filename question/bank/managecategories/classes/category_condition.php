@@ -50,6 +50,9 @@ class category_condition extends condition {
     /** @var int The maximum displayed length of the category info. */
     public $maxinfolength;
 
+    /** @var array Filters assosciated with the apply filter request */
+    public $filters;
+
     /**
      * Constructor to initialize the category filter condition.
      */
@@ -58,6 +61,8 @@ class category_condition extends condition {
         $this->recurse = $qbank->get_pagevars('recurse');
         $this->contexts = $qbank->contexts->having_one_edit_tab_cap($qbank->get_pagevars('tabname'));
         $this->course = $qbank->course;
+        $this->filters = $qbank->get_pagevars('filters');
+
         $this->init();
     }
 
@@ -74,7 +79,9 @@ class category_condition extends condition {
         } else {
             $categoryids = [$this->category->id];
         }
-        list($catidtest, $this->params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat');
+        $filterverb = $this->filters['category']['jointype'] ?? self::JOINTYPE_DEFAULT;
+        $equal = !($filterverb === self::JOINTYPE_NONE);
+        list($catidtest, $this->params) = $DB->get_in_or_equal($categoryids, SQL_PARAMS_NAMED, 'cat', $equal);
         $this->where = 'q.category ' . $catidtest;
     }
 
