@@ -86,8 +86,8 @@ class update_category_order extends external_api {
             try {
                 // Retrieves top category parent where neighbor category is located.
                 $sql = 'SELECT id, contextid, parent, sortorder, idnumber
-                        FROM {question_categories}
-                        WHERE (contextid = ?) OR (id = ?)';
+                          FROM {question_categories}
+                         WHERE (contextid = ?) OR (id = ?)';
 
                 $records = $DB->get_records_sql($sql, [$newctxid, $origincategory]);
                 $destinationcontext = reset($records);

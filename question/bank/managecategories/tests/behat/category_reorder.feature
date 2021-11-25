@@ -66,7 +66,7 @@ Feature: A Teacher can reorder question categories
     And I type "A brand new category"
     And I set the field "Category info" to "A brand new description for a brand new category"
     And I set the field "ID number" to "12345"
-    And I click on "//button[contains(text(), 'Add category')]" "xpath_element"
+    And I click on "Add category" button
     And I should see "A brand new category"
     And I should see "12345"
     And I should not see "A brand new description for a brand new category"
@@ -76,7 +76,7 @@ Feature: A Teacher can reorder question categories
   @javascript
   Scenario: Teacher cannot submit form if proper input are not entered
     When I click on "Add category" "button"
-    And I click on "//button[contains(text(), 'Add category')]" "xpath_element"
+    And I click on "Add category" button
     Then I should see "- The category name cannot be blank."
 
   @javascript
@@ -84,12 +84,12 @@ Feature: A Teacher can reorder question categories
     And I click on "System category" edit menu in the question category list
     And I choose "Edit settings" in the open action menu
     And I set the field "ID number" to "c1used"
-    And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
+    And I click on "Save changes" button
     And I should see "c1used"
     And I click on "Course category 2" edit menu in the question category list
     And I choose "Edit settings" in the open action menu
     And I set the field "ID number" to "c1used"
-    And I click on "//button[contains(text(), 'Save changes')]" "xpath_element"
+    And I click on "Save changes" button
     And I drag "Course category 2" and I drop it in "System category" in the question category list
     Then "Course category 2" "text" should appear before "System category" "text"
     And I should see "ID number already in use, please change it to move or update category"

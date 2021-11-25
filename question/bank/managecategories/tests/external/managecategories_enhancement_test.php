@@ -14,18 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Unit tests for managecategories enhancement.
- *
- * @package    qbank_managecategories
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories;
-
-defined('MOODLE_INTERNAL') || die();
 
 use advanced_testcase;
 use moodle_exception;
@@ -37,6 +26,7 @@ use qbank_managecategories\external\update_question_category;
  * Unit tests for qbank_managecategories enhancememt component.
  *
  * @package    qbank_managecategories
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

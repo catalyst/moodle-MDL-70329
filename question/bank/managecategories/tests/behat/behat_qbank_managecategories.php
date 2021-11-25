@@ -42,6 +42,7 @@ class behat_qbank_managecategories extends behat_base {
         $this->ensure_node_is_visible($node);
         $node->click();
     }
+
     /**
      * Drags and drops the specified element in the question category list.
      *
@@ -55,5 +56,20 @@ class behat_qbank_managecategories extends behat_base {
         $targettype = 'text';
         $generalcontext = behat_context_helper::get('behat_general');
         $generalcontext->i_drag_and_i_drop_it_in($source, $sourcetype, $target, $targettype);
+    }
+
+    /**
+     * Click on specific button.
+     *
+     * @Given /^I click on "(?P<element_string>(?:[^"]|\\")*)" button$/
+     * @param string $source
+     * @param string $target
+     */
+    public function i_click_on_button($element) {
+        $selectortype = 'xpath_element';
+        $element = "//button[contains(text(), '$element')]";
+        $node = $this->get_selected_node($selectortype, $element);
+        $this->ensure_node_is_visible($node);
+        $node->click();
     }
 }

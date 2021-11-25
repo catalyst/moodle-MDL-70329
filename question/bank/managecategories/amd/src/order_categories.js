@@ -40,32 +40,35 @@ class OrderCategories {
                 moveHandlerSelector: '.list_item [data-drag-type=move]',
             }
         );
-        $('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
-            evt.stopPropagation();
-            const categoryListElements = $('.list_item').parent();
-            // Get moved list item href URL.
-            const href = evt.currentTarget.getElementsByTagName('a')[0].href;
-            // Get query string for that URL.
-            const queryString = href.substr(href.search('\\?'));
-            const params = new URLSearchParams(queryString);
-            const cat = params.get('cat');
-            // Get old context and category id.
-            const oldContextId = cat.substr(cat.search(',') + 1);
-            const oldCat = cat.substr(0, cat.search(','));
-            // Remove proxy created by sortable list.
-            $('li.list_item[style]').remove();
-            const newOrder = this.getNewOrder(categoryListElements, oldContextId, oldCat);
-            // Call external function.
-            const newCatOrder = JSON.stringify(newOrder[0]);
-            const destination = newOrder[1].split(',');
-            const origin = newOrder[2].split(',');
-            const destinationContext = destination[1];
-            const originContext = origin[1];
-            const originCategory = origin[0];
 
-            this.setCatOrder(newCatOrder, originCategory, destinationContext, originContext)
-            .then(() => location.reload())
-            .catch(() => location.reload());
+        $('.list_item').on(SortableList.EVENTS.DRAG, () => {
+            $('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
+                evt.stopPropagation();
+                const categoryListElements = $('.list_item').parent();
+                // Get moved list item href URL.
+                const href = evt.currentTarget.getElementsByTagName('a')[0].href;
+                // Get query string for that URL.
+                const queryString = href.substr(href.search('\\?'));
+                const params = new URLSearchParams(queryString);
+                const cat = params.get('cat');
+                // Get old context and category id.
+                const oldContextId = cat.substr(cat.search(',') + 1);
+                const oldCat = cat.substr(0, cat.search(','));
+                // Remove proxy created by sortable list.
+                $('li.list_item[style]').remove();
+                const newOrder = this.getNewOrder(categoryListElements, oldContextId, oldCat);
+                // Call external function.
+                const newCatOrder = JSON.stringify(newOrder[0]);
+                const destination = newOrder[1].split(',');
+                const origin = newOrder[2].split(',');
+                const destinationContext = destination[1];
+                const originContext = origin[1];
+                const originCategory = origin[0];
+
+                this.setCatOrder(newCatOrder, originCategory, destinationContext, originContext)
+                .then(() => location.reload())
+                .catch(() => location.reload());
+            });
         });
     };
 
@@ -125,11 +128,9 @@ class OrderCategories {
                 const queryString = href.substr(href.search('\\?'));
                 const params = new URLSearchParams(queryString);
                 // Parameters.
-                const cat = params.get('cat');
-                const contextId = cat.substr(cat.search(',') + 1);
-                cat = cat.substr(0, cat.search(','));
-                listOrder[j] = cat + ',' + contextId;
-                if (listOrder[j] === oldCtxCat) {
+                const categories = params.get('cat');
+                listOrder[j] = categories;
+                if (categories === oldCtxCat) {
                     destinationCtx.push(listOrder);
                 }
             }
