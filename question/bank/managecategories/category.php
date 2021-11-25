@@ -48,7 +48,7 @@ if (!is_null($cmid)) {
 
 $PAGE->requires->js_call_amd('qbank_managecategories/addcategory_dialogue', 'initModal',
     ['[data-action=addcategory]', $thiscontext]);
-$PAGE->requires->js_call_amd('qbank_managecategories/order_categories', 'init');
+$PAGE->requires->js_call_amd('qbank_managecategories/qbshow_description', 'init');
 
 // Get values from form for actions on this page.
 $param = new stdClass();
@@ -64,7 +64,8 @@ $cmidorcourseid = !is_null($cmid) ? $cmid : $courseid;
 $iscmid = !is_null($cmid) ? true : false;
 $qcobject = new question_category_object($pagevars['cpage'], $thispageurl,
         $contexts->having_one_edit_tab_cap('categories'), $param->edit,
-        $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'), $cmidorcourseid, $iscmid);
+        $pagevars['cat'], $param->delete, $contexts->having_cap('moodle/question:add'),
+        $cmidorcourseid, $iscmid, $thiscontext);
 
 if ($param->left || $param->right) {
     require_sesskey();

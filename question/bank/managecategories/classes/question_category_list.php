@@ -115,7 +115,7 @@ class question_category_list extends moodle_list {
      * @param integer $right id of item to move right
      * @return bool
      */
-    public function process_actions($left, $right, $moveup = null, $movedown = null) : bool {
+    public function process_actions($left, $right) : bool {
         // Should this action be processed by this list object?
         if (!(array_key_exists($left, $this->records) || array_key_exists($right, $this->records))) {
             return false;

@@ -71,3 +71,25 @@ function qbank_managecategories_output_fragment_new_category_form($args) {
     return $mform->render();
 }
 
+/**
+ * Fragment for rendering new categories order.
+ *
+ * @param array $args Arguments to the form.
+ * @return null|string The rendered form.
+ */
+function qbank_managecategories_output_fragment_new_category_order($args) {
+    global $OUTPUT;
+    $url = new moodle_url($args['url']);
+    $thiscontext = $args['context'];
+    $contexts = new question_edit_contexts($thiscontext);
+    $defaultcategory = question_make_default_categories($contexts->all());
+    $cat = $defaultcategory->id . ',' . $defaultcategory->contextid;
+    $qcobject = new question_category_object(1, $url,
+        $contexts->having_one_edit_tab_cap('categories'), 0,
+        $cat, 0, $contexts->having_cap('moodle/question:add'));
+    $data = [
+        'categoriesrendered' => $qcobject->output_edit_lists(),
+        'contextid' => $args['context']->id,
+    ];
+    return $OUTPUT->render_from_template('qbank_managecategories/categoryrendering', $data);
+}

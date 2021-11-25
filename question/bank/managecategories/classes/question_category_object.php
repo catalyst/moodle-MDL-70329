@@ -83,12 +83,13 @@ class question_category_object {
      * @param int $currentcat id of the category to be edited. 0 if none.
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
+     * @param context[] $addcontexts contexts where the current user can add questions.
      * @param int|null $cmidorcourseid  course module id or course id for the current page.
      * @param bool|null $iscmid boolean checking if cmidorcourseid is cmid.
-     * @param context[] $addcontexts contexts where the current user can add questions.
+     * @param int $thiscontext integer representing course context.
      */
     public function __construct($page, $pageurl, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
-        $cmidorcourseid = null, $iscmid = null) {
+        $cmidorcourseid = null, $iscmid = null, $thiscontext = null) {
 
         $this->tab = str_repeat('&nbsp;', $this->tabsize);
 
@@ -115,7 +116,7 @@ class question_category_object {
         $this->str->page           = get_string('page');
 
         $this->pageurl = $pageurl;
-
+        $this->contextid = $thiscontext;
         $this->initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts, $cmidorcourseid, $iscmid);
     }
 
@@ -127,9 +128,9 @@ class question_category_object {
      * @param int $currentcat id of the category to be edited. 0 if none.
      * @param int|null $defaultcategory id of the current category. null if none.
      * @param int $todelete id of the category to delete. 0 if none.
+     * @param context[] $addcontexts contexts where the current user can add questions.
      * @param int|null $cmidorcourseid  course module id or course id for the current page.
      * @param bool|null $iscmid boolean checking if cmidorcourseid is cmid.
-     * @param context[] $addcontexts contexts where the current user can add questions.
      */
     public function initialize($page, $contexts, $currentcat, $defaultcategory, $todelete, $addcontexts,
         $cmidorcourseid, $iscmid): void {
@@ -178,7 +179,8 @@ class question_category_object {
             'helpstringhead' => $helpstringhead,
             'checkbox' => $this->checkboxform->render(),
             'categoriesrendered' => $this->output_edit_lists(),
-            'hascapability' => $hascapability
+            'hascapability' => $hascapability,
+            'contextid' => $this->contextid,
         ];
 
         return $OUTPUT->render_from_template(helper::PLUGINNAME . '/basecategory', $dat);

@@ -25,6 +25,7 @@ use core\notification;
 use external_api;
 use external_function_parameters;
 use external_value;
+use external_single_structure;
 use moodle_exception;
 use qbank_managecategories\helper;
 
@@ -83,57 +84,57 @@ class update_category_order extends external_api {
 
         // Question_categories table modifications.
         if (!is_null($newctxid)) {
-            try {
-                // Retrieves top category parent where neighbor category is located.
-                $sql = 'SELECT id, contextid, parent, sortorder, idnumber
-                          FROM {question_categories}
-                         WHERE (contextid = ?) OR (id = ?)';
+            // Retrieves top category parent where neighbor category is located.
+            $sql = 'SELECT id, contextid, parent, sortorder, idnumber
+                        FROM {question_categories}
+                        WHERE (contextid = ?) OR (id = ?)';
 
-                $records = $DB->get_records_sql($sql, [$newctxid, $origincategory]);
-                $destinationcontext = reset($records);
-                $categorytoupdate = $records[$origincategory];
-                if (isset($categorytoupdate->idnumber)) {
-                    // We don't want errors when reordering in same context.
-                    if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
-                        $exists = helper::get_idnumber($categorytoupdate->idnumber, $destinationcontext->contextid);
-                        if ($exists) {
-                            notification::error(get_string('idnumberexists', 'qbank_managecategories'));
-                            return false;
-                        }
+            $records = $DB->get_records_sql($sql, [$newctxid, $origincategory]);
+            $destinationcontext = reset($records);
+            $categorytoupdate = $records[$origincategory];
+            if (isset($categorytoupdate->idnumber)) {
+                // We don't want errors when reordering in same context.
+                if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
+                    $exists = helper::get_idnumber($categorytoupdate->idnumber, $destinationcontext->contextid);
+                    if ($exists) {
+                        return [
+                            'success' => false,
+                            'error' => 'idnumberexists'
+                        ];
                     }
                 }
-                $categorytoupdate->parent = $destinationcontext->id;
-                $updatedcontextcat = $categorytoupdate->id . ',' . $categorytoupdate->contextid;
-                $categorytoupdate->contextid = $newctxid;
-                $DB->update_record('question_categories', $categorytoupdate);
-                // Retrieve sortorder in concerned contexts (only 2 context).
-                $tosort = [];
-                foreach ($neworder as $category) {
-                    foreach ($category as $innerorder => $innervalue) {
-                        if ($innervalue === $updatedcontextcat) {
-                            $innervalue = $categorytoupdate->id . ',' . $categorytoupdate->contextid;
-                        }
-                        $tosort[$innervalue] = $innerorder;
+            }
+            $categorytoupdate->parent = $destinationcontext->id;
+            $updatedcontextcat = $categorytoupdate->id . ',' . $categorytoupdate->contextid;
+            $categorytoupdate->contextid = $newctxid;
+            $DB->update_record('question_categories', $categorytoupdate);
+            // Retrieve sortorder in concerned contexts (only 2 context).
+            $tosort = [];
+            foreach ($neworder as $category) {
+                foreach ($category as $innerorder => $innervalue) {
+                    if ($innervalue === $updatedcontextcat) {
+                        $innervalue = $categorytoupdate->id . ',' . $categorytoupdate->contextid;
                     }
+                    $tosort[$innervalue] = $innerorder;
                 }
+            }
 
-                foreach ($tosort as $ctxcat => $sortorder) {
-                    $currentctx = clean_param(explode(',', $ctxcat)[1], PARAM_INT);
-                    $currentid = clean_param(explode(',', $ctxcat)[0], PARAM_INT);
-                    if (($currentctx === $origincontext) || ($currentctx === $newctxid)) {
-                        if (isset($records[$currentid])) {
-                            $rec = $records[$currentid];
-                            $rec->sortorder = $sortorder;
-                            $DB->update_record('question_categories', $rec);
-                        }
+            foreach ($tosort as $ctxcat => $sortorder) {
+                $currentctx = clean_param(explode(',', $ctxcat)[1], PARAM_INT);
+                $currentid = clean_param(explode(',', $ctxcat)[0], PARAM_INT);
+                if (($currentctx === $origincontext) || ($currentctx === $newctxid)) {
+                    if (isset($records[$currentid])) {
+                        $rec = $records[$currentid];
+                        $rec->sortorder = $sortorder;
+                        $DB->update_record('question_categories', $rec);
                     }
                 }
-            } catch (moodle_exception $e) {
-                notification::error($e->getMessage());
-                return false;
             }
         }
-        return true;
+        return [
+            'success' => true,
+            'error' => '',
+        ];
     }
 
     /**
@@ -142,6 +143,9 @@ class update_category_order extends external_api {
      * @return external_value
      */
     public static function execute_returns() {
-        return new external_value(PARAM_BOOL, 'Returns success or failure');
+        return new external_single_structure([
+                'success' => new external_value(PARAM_BOOL, 'Returns success or failure'),
+                'error'   => new external_value(PARAM_TEXT, 'Error code')
+        ]);
     }
 }

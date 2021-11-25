@@ -62,8 +62,7 @@ class behat_qbank_managecategories extends behat_base {
      * Click on specific button.
      *
      * @Given /^I click on "(?P<element_string>(?:[^"]|\\")*)" button$/
-     * @param string $source
-     * @param string $target
+     * @param string $element
      */
     public function i_click_on_button($element) {
         $selectortype = 'xpath_element';

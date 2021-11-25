@@ -15,39 +15,23 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template qbank_managecategories/basecategory
+    @template qbank_managecategories/categoryrendering
 
     This template renders the base for category view.
 
     Example context (json):
     {
-        "helpstringhead": "<h2> Edit categories <a href='someurl'>...</a></h2>",
-        "checkbox": "<form id='qbshowdescr-form'>...</form>",
         "categoriesrendered": "<div id='categoriesrendered'>...</div>"
     }
 }}
 
-<div class="row">
-    <div class="pl-4">
-        {{{helpstringhead}}}
-    </div>
-</div>
-<br>
-<div class="row">
-    {{#hascapability}}
-        <div class="pl-4">
-            <button type="submit" data-action="addcategory" class="btn btn-primary"> 
-                {{# pix }} t/add, core, {{/ pix}}
-                {{# str}} addcategory, qbank_managecategories {{/ str}}
-            </button>
-        </div>
-    {{/hascapability}}
-    <div class="col-6 mt-2">
-        {{{checkbox}}}
-    </div>
-</div>
-<br>
-    <div id="categoriesrendered">
-        {{> qbank_managecategories/categoryrendering }}
-    </div>
-<br>
+{{#categoriesrendered}}
+    {{{category}}}
+{{/categoriesrendered}}
+{{#contextid}}
+    {{#js}}
+        require(['qbank_managecategories/order_categories'], function(orderCategories) {
+            orderCategories.init({{contextid}});
+        });
+    {{/js}}
+{{/contextid}}
