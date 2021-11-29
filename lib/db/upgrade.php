@@ -3173,7 +3173,7 @@ function xmldb_main_upgrade($oldversion) {
 
     // Introduce question versioning to core.
     // First, create the new tables.
-    if ($oldversion < 2021112300.00) {
+    if ($oldversion < 2021112200.01) {
         // Define table question_bank_entries to be created.
         $table = new xmldb_table('question_bank_entries');
 
@@ -3267,14 +3267,14 @@ function xmldb_main_upgrade($oldversion) {
         }
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2021112300.00);
+        upgrade_main_savepoint(true, 2021112200.01);
     }
 
-    if ($oldversion < 2021112300.00) {
+    if ($oldversion < 2021112200.02) {
         // Next, split question records into the new tables.
         upgrade_migrate_question_table();
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2021112300.00);
+        upgrade_main_savepoint(true, 2021112200.02);
     }
 
     // Finally, drop fields from question table.
