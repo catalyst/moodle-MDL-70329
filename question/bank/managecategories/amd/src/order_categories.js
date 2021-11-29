@@ -61,9 +61,12 @@ const setupSortableLists = (contextid) => {
         const newOrder = getNewOrder(categoryListElements, oldContextId, oldCat);
         // Call external function.
         const newCatOrder = JSON.stringify(newOrder[0]);
-        const destination = newOrder[1].split(',');
+        let destinationContext = oldContextId;
+        if (newOrder[1] !== undefined) {
+            const destination = newOrder[1].split(',');
+            destinationContext = destination[1];
+        }
         const origin = newOrder[2].split(',');
-        const destinationContext = destination[1];
         const originContext = origin[1];
         const originCategory = origin[0];
 
@@ -80,8 +83,6 @@ const setupSortableLists = (contextid) => {
                     type: 'error'
                 });
             });
-            //console.log(error);
-            //location.reload();
         });
     });
 };
@@ -165,7 +166,7 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
         newCatOrder[i] = listOrder;
     }
     destinationCtx = destinationCtx[0];
-    destinationCtx = destinationCtx.filter((ctxId) => ctxId !== oldCtxCat);
+    destinationCtx = destinationCtx.filter((ctxId) => !ctxId.includes(oldContextId));
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 

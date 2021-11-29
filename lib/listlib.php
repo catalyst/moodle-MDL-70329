@@ -405,11 +405,9 @@ abstract class moodle_list {
      *
      * @param integer $left id of item to move left
      * @param integer $right id of item to move right
-     * @param integer $moveup id of item to move up
-     * @param integer $movedown id of item to move down
      * @return unknown
      */
-    public function process_actions($left, $right, $moveup, $movedown) {
+    public function process_actions($left, $right) {
         //should this action be processed by this list object?
         if (!(array_key_exists($left, $this->records) || array_key_exists($right, $this->records) || array_key_exists($moveup, $this->records) || array_key_exists($movedown, $this->records))) {
             return false;
@@ -426,20 +424,6 @@ abstract class moodle_list {
             if ($this->item_is_first_on_page($right)) {
                 // Item has jumped onto the previous page, change page when we redirect.
                 $this->page --;
-                $this->pageurl->params(array($this->pageparamname => $this->page));
-            }
-        } else if (!empty($moveup)) {
-            $this->move_item_up_down('up', $moveup);
-            if ($this->item_is_first_on_page($moveup)) {
-                // Item has jumped onto the previous page, change page when we redirect.
-                $this->page --;
-                $this->pageurl->params(array($this->pageparamname => $this->page));
-            }
-        } else if (!empty($movedown)) {
-            $this->move_item_up_down('down', $movedown);
-            if ($this->item_is_last_on_page($movedown)) {
-                // Item has jumped onto the next page, change page when we redirect.
-                $this->page ++;
                 $this->pageurl->params(array($this->pageparamname => $this->page));
             }
         } else {
