@@ -2502,11 +2502,10 @@ class backup_questions_structure_step extends backup_structure_step {
         $questionverion->set_source_table('question_versions', ['questionbankentryid' => backup::VAR_PARENTID]);
 
         $question->set_source_sql('
-                SELECT q.*
-                 FROM {question} q
-                 JOIN {question_versions} qv ON qv.questionid = q.id
-                 JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                WHERE qv.id = ?', [backup::VAR_PARENTID]);
+            SELECT DISTINCT q.*
+                       FROM {question} q
+                       JOIN {question_versions} qv ON (qv.questionid = q.id OR qv.questionid = q.parent)
+                      WHERE qv.id = ?', [backup::VAR_PARENTID]);
 
         $qhint->set_source_sql('
                 SELECT *
