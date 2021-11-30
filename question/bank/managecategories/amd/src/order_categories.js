@@ -69,7 +69,6 @@ const setupSortableLists = (contextid) => {
         const origin = newOrder[2].split(',');
         const originContext = origin[1];
         const originCategory = origin[0];
-
         setCatOrder(newCatOrder, originCategory, destinationContext, originContext)
         .then(() => {
             return getCategoriesFragment(contextid).done((html, js) => {
@@ -173,7 +172,7 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
         newCatOrder[i] = listOrder;
     }
     destinationCtx = destinationCtx[0];
-    destinationCtx = destinationCtx.filter((ctxId) => !ctxId.includes(oldContextId));
+    destinationCtx = destinationCtx.filter((ctxId) => ctxId.split(',')[1] != oldContextId);
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 

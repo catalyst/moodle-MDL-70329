@@ -123,12 +123,14 @@ class update_category_order extends external_api {
                     $record->contextid = $newctxid;
                     // Checks if the descendant idnumber exists or not.
                     if(isset($record->idnumber)) {
-                        $exists = helper::get_idnumber($record->idnumber, $destinationcontext->contextid);
-                        if ($exists) {
-                            return [
-                                'success' => false,
-                                'error' => 'idnumberexists'
-                            ];
+                        if ((int)$destinationcontext->contextid !== $record->contextid) {
+                            $exists = helper::get_idnumber($record->idnumber, $destinationcontext->contextid);
+                            if ($exists) {
+                                return [
+                                    'success' => false,
+                                    'error' => 'idnumberexists'
+                                ];
+                            }
                         }
                     }
                     $DB->update_record('question_categories', $record);
