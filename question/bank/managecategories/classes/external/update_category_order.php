@@ -121,6 +121,16 @@ class update_category_order extends external_api {
             foreach ($records as $record) {
                 if (array_key_exists($record->parent, $records)) {
                     $record->contextid = $newctxid;
+                    // Checks if the descendant idnumber exists or not.
+                    if(isset($record->idnumber)) {
+                        $exists = helper::get_idnumber($record->idnumber, $destinationcontext->contextid);
+                        if ($exists) {
+                            return [
+                                'success' => false,
+                                'error' => 'idnumberexists'
+                            ];
+                        }
+                    }
                     $DB->update_record('question_categories', $record);
                 }
             }
@@ -140,6 +150,7 @@ class update_category_order extends external_api {
                 }
             }
 
+            // Sets new sortorder.
             foreach ($tosort as $ctxcat => $sortorder) {
                 $currentctx = clean_param(explode(',', $ctxcat)[1], PARAM_INT);
                 $currentid = clean_param(explode(',', $ctxcat)[0], PARAM_INT);

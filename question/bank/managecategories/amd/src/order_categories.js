@@ -77,11 +77,18 @@ const setupSortableLists = (contextid) => {
             });
         })
         .catch((error) => {
-            return getString(error.error, 'qbank_managecategories').then((str) => {
+            getString(error.error, 'qbank_managecategories')
+            .then((str) => {
                 return Notification.addNotification({
                     message: str,
                     type: 'error'
                 });
+            }).catch(() => {
+                return;
+            });
+            return getCategoriesFragment(contextid).done((html, js) => {
+                document.getElementsByClassName('alert-danger')[0].scrollIntoView();
+                Templates.replaceNodeContents('#categoriesrendered', html, js);
             });
         });
     });
