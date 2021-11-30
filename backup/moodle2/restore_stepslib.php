@@ -5194,6 +5194,10 @@ class restore_create_categories_and_questions extends restore_structure_step {
                                  'itemname' => 'question',
                                  'itemid'   => $dbq->parent))) {
                 $DB->set_field('question', 'parent', $newparent, array('id' => $dbq->id));
+                // Questions with parent cannot have a version record.
+                if ($newparent > 0) {
+                    $DB->set_field('question_versions', 'questionid', $newparent, ['questionid' => $dbq->id]);
+                }
             }
         }
 
