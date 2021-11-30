@@ -104,6 +104,7 @@ class update_category_order extends external_api {
             $categorytoupdate = $records[$origincategory];
             unset($records[$topcategoryid]);
             unset($records[$topcategoryidtounset]);
+            $transaction = $DB->start_delegated_transaction();
             if (isset($categorytoupdate->idnumber)) {
                 // We don't want errors when reordering in same context.
                 if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
@@ -123,7 +124,8 @@ class update_category_order extends external_api {
                     $record->contextid = $newctxid;
                     // Checks if the descendant idnumber exists or not.
                     if(isset($record->idnumber)) {
-                        if ((int)$destinationcontext->contextid !== $record->contextid) {
+                        // We don't want errors when reordering in same context.
+                        if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
                             $exists = helper::get_idnumber($record->idnumber, $destinationcontext->contextid);
                             if ($exists) {
                                 return [
@@ -165,6 +167,7 @@ class update_category_order extends external_api {
                 }
             }
         }
+        $transaction->allow_commit();
         return [
             'success' => true,
             'error' => '',
