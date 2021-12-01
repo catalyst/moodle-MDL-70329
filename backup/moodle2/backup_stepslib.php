@@ -208,7 +208,7 @@ trait backup_question_reference_data_trait {
      * @param string $questionarea
      */
     protected function add_question_references($element, $component, $questionarea) {
-        // Check $element is one nested_backup_element
+        // Check $element is one nested_backup_element.
         if (! $element instanceof backup_nested_element) {
             throw new backup_step_exception('question_states_bad_parent_element', $element);
         }
@@ -240,7 +240,7 @@ trait backup_question_set_reference_trait {
      * @param string $questionarea
      */
     protected function add_question_set_references($element, $component, $questionarea) {
-        // Check $element is one nested_backup_element
+        // Check $element is one nested_backup_element.
         if (! $element instanceof backup_nested_element) {
             throw new backup_step_exception('question_states_bad_parent_element', $element);
         }
@@ -2525,10 +2525,8 @@ class backup_questions_structure_step extends backup_structure_step {
                 backup::VAR_PARENTID
             ]);
 
-        // don't need to annotate ids nor files
-        // (already done by {@link backup_annotate_all_question_files}
         // Don't need to annotate ids nor files.
-        // ...(already done by {@link backup_annotate_all_question_files}.
+        // ...(already done by {@see backup_annotate_all_question_files()}.
 
         return $qcategories;
     }

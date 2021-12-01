@@ -4759,13 +4759,13 @@ class restore_create_categories_and_questions extends restore_structure_step {
             // Apply for 'qtype' plugins optional paths at question level.
             $this->add_plugin_structure('qtype', $question);
 
-            // Apply for 'local' plugins optional paths at question level
+            // Apply for 'local' plugins optional paths at question level.
             $this->add_plugin_structure('local', $question);
 
             $paths [] = $question;
             $paths [] = new restore_path_element('question_hint',
                 '/question_categories/question_category/questions/question/question_hints/question_hint');
-            $paths [] = new restore_path_element('tag','/question_categories/question_category/questions/question/tags/tag');
+            $paths [] = new restore_path_element('tag', '/question_categories/question_category/questions/question/tags/tag');
         } else {
             // For all the new backups.
             $paths [] = new restore_path_element('question_bank_entry',
@@ -4781,7 +4781,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
             // Apply for 'qbank' plugins optional paths at question level.
             $this->add_plugin_structure('qbank', $question);
 
-            // Apply for 'local' plugins optional paths at question level
+            // Apply for 'local' plugins optional paths at question level.
             $this->add_plugin_structure('local', $question);
 
             $paths [] = $question;
@@ -4797,7 +4797,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
     /**
      * Process question category restore.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     protected function process_question_category($data) {
         global $DB;
@@ -4875,7 +4875,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
     /**
      * Process pre 4.0 question data where in creates the record for version and entry table.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     protected function process_question_legacy_data($data) {
         global $DB;
@@ -4917,7 +4917,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
     /**
      * Process question bank entry data.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     protected function process_question_bank_entry($data) {
         global $DB;
@@ -4956,7 +4956,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
     /**
      * Process question versions.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     protected function process_question_versions($data) {
         global $DB;
@@ -4974,7 +4974,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
     /**
      * Process the actual question.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     protected function process_question($data) {
         global $DB;
@@ -4991,15 +4991,15 @@ class restore_create_categories_and_questions extends restore_structure_step {
             $before40 = true;
         }
         if ($before40) {
-            // Check we have one mapping for this question
+            // Check we have one mapping for this question.
             if (!$questionmapping = $this->get_mapping('question', $oldid)) {
-                return; // No mapping = this question doesn't need to be created/mapped
+                return; // No mapping = this question doesn't need to be created/mapped.
             }
 
             // Get the mapped category (cannot use get_new_parentid() because not
             // all the categories have been created, so it is not always available
             // Instead we get the mapping for the question->parentitemid because
-            // we have loaded qcatids there for all parsed questions
+            // we have loaded qcatids there for all parsed questions.
             $data->category = $this->get_mappingid('question_category', $questionmapping->parentitemid);
             $this->process_question_legacy_data($data);
         }
@@ -5840,7 +5840,7 @@ trait restore_questions_attempt_data_trait {
         $newitemid = $DB->insert_record('question_attempts', $data);
 
         $this->set_mapping($nameprefix . 'question_attempt', $oldid, $newitemid);
-        if (isset($question->info->qtype)){
+        if (isset($question->info->qtype)) {
             $qtype = $question->info->qtype;
         } else {
             $qtype = $DB->get_record('question', ['id' => $data->questionid])->qtype;
@@ -5967,16 +5967,16 @@ trait restore_question_reference_data_trait {
     /**
      * Attach the question reference data to the restore.
      *
-     * @param $element
-     * @param $paths
+     * @param restore_path_element $element the parent element. (E.g. a quiz attempt.)
+     * @param array $paths the paths array that is being built to describe the structure.
      */
     protected function add_question_references($element, &$paths) {
-        // Check $element is restore_path_element
+        // Check $element is restore_path_element.
         if (! $element instanceof restore_path_element) {
             throw new restore_step_exception('element_must_be_restore_path_element', $element);
         }
 
-        // Check $paths is one array
+        // Check $paths is one array.
         if (!is_array($paths)) {
             throw new restore_step_exception('paths_must_be_array', $paths);
         }
@@ -5988,7 +5988,7 @@ trait restore_question_reference_data_trait {
     /**
      * Process question references which replaces the direct connection to quiz slots to question.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     public function process_question_reference($data) {
         global $DB;
@@ -6010,16 +6010,16 @@ trait restore_question_set_reference_data_trait {
     /**
      * Attach the question reference data to the restore.
      *
-     * @param $element
-     * @param $paths
+     * @param restore_path_element $element the parent element. (E.g. a quiz attempt.)
+     * @param array $paths the paths array that is being built to describe the structure.
      */
     protected function add_question_set_references($element, &$paths) {
-        // Check $element is restore_path_element
+        // Check $element is restore_path_element.
         if (! $element instanceof restore_path_element) {
             throw new restore_step_exception('element_must_be_restore_path_element', $element);
         }
 
-        // Check $paths is one array
+        // Check $paths is one array.
         if (!is_array($paths)) {
             throw new restore_step_exception('paths_must_be_array', $paths);
         }
@@ -6031,7 +6031,7 @@ trait restore_question_set_reference_data_trait {
     /**
      * Process question set references data which replaces the random qtype.
      *
-     * @param $data
+     * @param array $data the data from the XML file.
      */
     public function process_question_set_reference($data) {
         global $DB;

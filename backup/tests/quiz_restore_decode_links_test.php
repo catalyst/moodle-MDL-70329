@@ -83,7 +83,7 @@ class restore_quiz_decode_testcase extends \core_privacy\tests\provider_testcase
         foreach ($quizquestions as $quizquestion) {
             $questionids [] = $quizquestion->id;
         }
-        list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
+        list($condition, $param) = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'questionid');
         $condition = 'WHERE qa.question ' . $condition;
 
         $sql = "SELECT qa.id,
