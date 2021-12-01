@@ -59,9 +59,6 @@ class mod_quiz_local_structure_slot_random_test extends advanced_testcase {
         $form->defaultmark = 1;
         $form->status = \core_question\local\bank\constants::QUESTION_STATUS_HIDDEN;
         $form->stamp = make_unique_id_code();
-        $question = new stdClass();
-        $question->qtype = 'random';
-        $question = question_bank::get_qtype('random')->save_question($question, $form);
 
         // Set the filter conditions.
         $filtercondition = new stdClass();
@@ -376,9 +373,6 @@ class mod_quiz_local_structure_slot_random_test extends advanced_testcase {
         $form->defaultmark = 1;
         $form->status = \core_question\local\bank\constants::QUESTION_STATUS_HIDDEN;
         $form->stamp = make_unique_id_code();
-        $question = new stdClass();
-        $question->qtype = 'random';
-        $question = question_bank::get_qtype('random')->save_question($question, $form);
 
         // Prepare 2 tags.
         $tagrecord = array(

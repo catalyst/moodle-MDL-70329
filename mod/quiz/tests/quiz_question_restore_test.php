@@ -51,7 +51,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Test a quiz backup and restore in a different course without attempts for course question bank.
      */
-    public function test_quiz_restore_in_a_different_course_using_course_question_bank(){
+    public function test_quiz_restore_in_a_different_course_using_course_question_bank() {
         global $DB;
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
@@ -73,7 +73,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Test a quiz backup and restore in a different course without attempts for quiz question bank.
      */
-    public function test_quiz_restore_in_a_different_course_using_quiz_question_bank(){
+    public function test_quiz_restore_in_a_different_course_using_quiz_question_bank() {
         global $DB;
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
@@ -95,7 +95,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Count the questions for the context.
      *
-     * @param $context
+     * @param \context $context
      * @param string $extracondition
      * @return int
      */
@@ -179,7 +179,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Test pre 4.0 quiz restore for regular questions.
      */
-    public function test_pre_4_quiz_restore_for_regular_questions(){
+    public function test_pre_4_quiz_restore_for_regular_questions() {
         global $USER, $DB;
 
         $backupid = 'abc';
@@ -220,7 +220,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Test pre 4.0 quiz restore for random questions.
      */
-    public function test_pre_4_quiz_restore_for_random_questions(){
+    public function test_pre_4_quiz_restore_for_random_questions() {
         global $USER, $DB;
         $backupid = 'abc';
         $backuppath = make_backup_temp_directory($backupid);

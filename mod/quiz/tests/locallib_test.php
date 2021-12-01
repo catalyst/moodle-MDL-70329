@@ -524,9 +524,7 @@ class mod_quiz_locallib_testcase extends advanced_testcase {
                 [
                     "{$tags['foo']->id},{$tags['foo']->name}",
                     "{$tags['bar']->id},{$tags['bar']->name}",
-
-                ],
-            $slottags);
+                ], $slottags);
     }
 
     public function test_quiz_retrieve_slot_tags_with_removed_tag() {

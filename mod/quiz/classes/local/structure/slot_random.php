@@ -132,7 +132,7 @@ class slot_random {
     /**
      * Set filter condition.
      *
-     * @param $filters
+     * @param \stdClass $filters
      */
     public function set_filter_condition($filters) {
         if (!empty($this->tags)) {

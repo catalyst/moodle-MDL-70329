@@ -16,6 +16,7 @@
 
 /**
  * Helper trait for quiz question unit tests.
+ *
  * This trait helps to execute different tests for quiz, for example if it needs to create a quiz, add question
  * to the question, add random quetion to the quiz, do a backup or restore.
  *
@@ -59,6 +60,7 @@ trait quiz_question_helper_test_trait {
     /**
      * Helper method to add regular questions in quiz.
      *
+     * @param component_generator_base $questiongenerator
      * @param \stdClass $quiz
      * @param array $override
      */
@@ -80,6 +82,7 @@ trait quiz_question_helper_test_trait {
     /**
      * Helper method to add random question to quiz.
      *
+     * @param component_generator_base $questiongenerator
      * @param \stdClass $quiz
      * @param array $override
      */
@@ -169,6 +172,8 @@ trait quiz_question_helper_test_trait {
     /**
      * A helper method to emulate duplication of the quiz.
      *
+     * @param stdClass $course
+     * @param stdClass $quiz
      * @return \cm_info|null
      */
     protected function duplicate_quiz($course, $quiz): ?\cm_info {

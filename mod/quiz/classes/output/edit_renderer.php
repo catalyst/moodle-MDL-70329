@@ -823,8 +823,8 @@ class edit_renderer extends \plugin_renderer_base {
         $qtype = $structure->get_question_type_for_slot($slot);
         $questionicons = '';
         if ($qtype !== 'random') {
-            $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot), null, null,
-                    $qtype);
+            $questionicons .= $this->question_preview_icon($structure->get_quiz(), $structure->get_question_in_slot($slot),
+                null, null, $qtype);
         }
         if ($structure->can_be_edited()) {
             $questionicons .= $this->question_remove_icon($structure, $slot, $pageurl);
@@ -1029,7 +1029,6 @@ class edit_renderer extends \plugin_renderer_base {
      * @return string HTML to output.
      */
     public function random_question(structure $structure, $slotnumber, $pageurl) {
-        global $DB;
         $question = $structure->get_question_in_slot($slotnumber);
         $slot = $structure->get_slot_by_number($slotnumber);
         $editurl = new \moodle_url('/mod/quiz/editrandom.php',
@@ -1041,7 +1040,6 @@ class edit_renderer extends \plugin_renderer_base {
 
         $setreference = qbank_helper::get_random_question_data_from_slot($slot->id);
         $filtercondition = json_decode($setreference->filtercondition);
-
 
         $configuretitle = get_string('configurerandomquestion', 'quiz');
         $qtype = \question_bank::get_qtype($question->qtype, false);

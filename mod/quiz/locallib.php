@@ -2277,7 +2277,7 @@ function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) 
 
     $sql = "SELECT qbe.id
               FROM {quiz_slots} slot
-              JOIN {question_references} qr ON qr.itemid = slot.id                  
+              JOIN {question_references} qr ON qr.itemid = slot.id
               JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
              WHERE slot.quizid = ?";
 
@@ -2362,34 +2362,34 @@ function quiz_add_quiz_question($questionid, $quiz, $page = 0, $maxmark = null) 
     $qreferenceitem = $DB->get_record_sql($sql, [$questionid, $slotid]);
 
     if (!$qreferenceitem) {
-        // Create a new reference record for questions created already
-        $question_references = new \StdClass();
-        $question_references->usingcontextid = context_module::instance($quiz->cmid)->id;
-        $question_references->component = 'mod_quiz';
-        $question_references->questionarea = 'slot';
-        $question_references->itemid = $slotid;
-        $question_references->questionbankentryid = get_question_bank_entry($questionid)->id;
+        // Create a new reference record for questions created already.
+        $questionreferences = new \StdClass();
+        $questionreferences->usingcontextid = context_module::instance($quiz->cmid)->id;
+        $questionreferences->component = 'mod_quiz';
+        $questionreferences->questionarea = 'slot';
+        $questionreferences->itemid = $slotid;
+        $questionreferences->questionbankentryid = get_question_bank_entry($questionid)->id;
         $version = get_question_version($questionid);
-        $question_references->version = $version[array_key_first($version)]->version;
+        $questionreferences->version = $version[array_key_first($version)]->version;
 
-        $DB->insert_record('question_references', $question_references);
+        $DB->insert_record('question_references', $questionreferences);
 
-    } elseif ($qreferenceitem->itemid === 0 || $qreferenceitem->itemid === null) {
-        $question_references = new \StdClass();
-        $question_references->id = $qreferenceitem->id;
-        $question_references->itemid = $slotid;
-        $DB->update_record('question_references', $question_references);
+    } else if ($qreferenceitem->itemid === 0 || $qreferenceitem->itemid === null) {
+        $questionreferences = new \StdClass();
+        $questionreferences->id = $qreferenceitem->id;
+        $questionreferences->itemid = $slotid;
+        $DB->update_record('question_references', $questionreferences);
     } else {
         // If the reference record exits for another quiz.
-        $question_references = new \StdClass();
-        $question_references->usingcontextid = context_module::instance($quiz->cmid)->id;
-        $question_references->component = 'mod_quiz';
-        $question_references->questionarea = 'slot';
-        $question_references->itemid = $slotid;
-        $question_references->questionbankentryid = get_question_bank_entry($questionid)->id;
+        $questionreferences = new \StdClass();
+        $questionreferences->usingcontextid = context_module::instance($quiz->cmid)->id;
+        $questionreferences->component = 'mod_quiz';
+        $questionreferences->questionarea = 'slot';
+        $questionreferences->itemid = $slotid;
+        $questionreferences->questionbankentryid = get_question_bank_entry($questionid)->id;
         $version = get_question_version($questionid);
-        $question_references->version = $version[array_key_first($version)]->version;
-        $DB->insert_record('question_references', $question_references);
+        $questionreferences->version = $version[array_key_first($version)]->version;
+        $DB->insert_record('question_references', $questionreferences);
     }
 
     $trans->allow_commit();

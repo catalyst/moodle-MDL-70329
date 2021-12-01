@@ -130,7 +130,7 @@ class quiz_question_version_test extends \advanced_testcase {
     /**
      * Test if changing the version of the slot changes the attempts.
      */
-    public function test_quiz_question_attempts_with_changed_version(){
+    public function test_quiz_question_attempts_with_changed_version() {
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);

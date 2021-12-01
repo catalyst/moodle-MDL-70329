@@ -16,6 +16,8 @@
 
 namespace mod_quiz\question\bank;
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
 require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
 
@@ -204,6 +206,7 @@ class qbank_helper {
      *
      * @param null $quizid
      * @param array $questionids
+     * @param bool $attempt
      * @return array
      */
     public static function get_question_structure_data($quizid, $questionids = [], $attempt = false) {
@@ -212,7 +215,7 @@ class qbank_helper {
         $condition = '';
         $joinon = 'AND qr.version = qv.version';
         if (!empty($questionids)) {
-            list($condition, $param) = $DB->get_in_or_equal($questionids,SQL_PARAMS_NAMED, 'questionid');
+            list($condition, $param) = $DB->get_in_or_equal($questionids, SQL_PARAMS_NAMED, 'questionid');
             $condition = 'AND q.id ' . $condition;
             $joinon = '';
             $params = array_merge($params, $param);
@@ -239,7 +242,7 @@ class qbank_helper {
              LEFT JOIN {question_references} qr ON qr.itemid = slot.id AND qr.component = 'mod_quiz' AND qr.questionarea = 'slot'
              LEFT JOIN {question_bank_entries} qbe ON qbe.id = qr.questionbankentryid
              LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id $joinon
-             LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid   
+             LEFT JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
              LEFT JOIN {question} q ON q.id = qv.questionid
                  WHERE slot.quizid = :quizid
              $condition";

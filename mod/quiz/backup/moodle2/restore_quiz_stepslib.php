@@ -51,7 +51,8 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
         // A chance for access subplugings to set up their quiz data.
         $this->add_subplugin_structure('quizaccess', $quiz);
 
-        $quizquestioninstance = new restore_path_element('quiz_question_instance', '/activity/quiz/question_instances/question_instance');
+        $quizquestioninstance = new restore_path_element('quiz_question_instance',
+            '/activity/quiz/question_instances/question_instance');
         $paths[] = $quizquestioninstance;
         if ($this->task->get_old_moduleversion() < 2021091700) {
             $paths[] = new restore_path_element('quiz_slot_tags',
@@ -98,7 +99,7 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
     /**
      * Process the quiz data.
      *
-     * @param $data
+     * @param stdClass|array $data
      */
     protected function process_quiz($data) {
         global $CFG, $DB, $USER;
@@ -307,7 +308,7 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
     /**
      * Process the data for pre 4.0 quiz data where the question_references and question_set_references table introduced.
      *
-     * @param $data
+     * @param stdClass|array $data
      */
     protected function process_quiz_question_legacy_instance($data) {
         global $DB;
@@ -360,7 +361,7 @@ class restore_quiz_activity_structure_step extends restore_questions_activity_st
     /**
      * Process quiz slots.
      *
-     * @param $data
+     * @param stdClass|array $data
      */
     protected function process_quiz_question_instance($data) {
         global $CFG, $DB;
