@@ -2011,7 +2011,7 @@ function core_question_find_next_unused_idnumber(?string $oldidnumber, int $cate
 /**
  * Get the question_bank_entry object given a question id.
  *
- * @param $questionid int Question id.
+ * @param int $questionid Question id.
  * @return false|mixed
  * @throws dml_exception
  */
@@ -2032,7 +2032,7 @@ function get_question_bank_entry(int $questionid): object {
 /**
  * Get the question versions given a question id in a descending sort .
  *
- * @param $questionid int Question id.
+ * @param int $questionid Question id.
  * @return array
  * @throws dml_exception
  */
@@ -2048,7 +2048,7 @@ function get_question_version($questionid): array {
 /**
  * Get the next version number to create base on a Question bank entry id.
  *
- * @param $questionbankentryid int Question bank entry id.
+ * @param int $questionbankentryid Question bank entry id.
  * @return int next version number.
  * @throws dml_exception
  */
@@ -2117,7 +2117,9 @@ function question_preview_url($questionid, $preferredbehaviour = null,
 }
 
 /**
- * @return array that can be passed as $params to the {@link popup_action} constructor.
+ * Popup params for the question preview.
+ *
+ * @return array that can be passed as $params to the {@see popup_action()} constructor.
  * @deprecated since Moodle 4.0
  * @see qbank_previewquestion\previewquestion_helper::question_preview_popup_params()
  * @todo Final deprecation on Moodle 4.4 MDL-72438
@@ -2154,7 +2156,7 @@ function question_hash($question) {
  * @param string $withcategories
  * @param string $withcontexts
  * @param string $filename
- * @param moodle_url export file url
+ * @return moodle_url export file url
  * @deprecated since Moodle 4.0 MDL-71573
  * @see qbank_exportquestions\exportquestions_helper
  * @todo Final deprecation on Moodle 4.4 MDL-72438
@@ -2226,6 +2228,7 @@ function question_remove_stale_questions_from_category($categoryid) {
  *          performance only. It is not modfied.
  * @param int $id the category to start the indenting process from.
  * @param int $depth the indent depth. Used in recursive calls.
+ * @param int $nochildrenof
  * @return array a new array of categories, in the right order for the tree.
  * @deprecated since Moodle 4.0 MDL-71585
  * @see qbank_managecategories\helper
@@ -2241,6 +2244,7 @@ function flatten_category_tree(&$categories, $id, $depth = 0, $nochildrenof = -1
  * Format categories into an indented list reflecting the tree structure.
  *
  * @param array $categories An array of category objects, for example from the.
+ * @param int $nochildrenof
  * @return array The formatted list of categories.
  * @deprecated since Moodle 4.0 MDL-71585
  * @see qbank_managecategories\helper
@@ -2257,11 +2261,12 @@ function add_indented_names($categories, $nochildrenof = -1) {
  * Categories from this course and (optionally) published categories from other courses
  * are included. Optionally, only categories the current user may edit can be included.
  *
- * @param integer $courseid the id of the course to get the categories for.
- * @param integer $published if true, include publised categories from other courses.
- * @param integer $only_editable if true, exclude categories this user is not allowed to edit.
+ * @param array $contexts
+ * @param bool $top
+ * @param int $currentcat
  * @param integer $selected optionally, the id of a category to be selected by
  *      default in the dropdown.
+ * @param int $nochildrenof
  * @deprecated since Moodle 4.0 MDL-71585
  * @see qbank_managecategories\helper
  * @todo Final deprecation on Moodle 4.4 MDL-72438
@@ -2314,6 +2319,10 @@ function question_category_options($contexts, $top = false, $currentcat = 0,
 }
 
 /**
+ * Add context in categories key.
+ *
+ * @param array $categories The list of categories.
+ * @return array
  * @deprecated since Moodle 4.0 MDL-71585
  * @see qbank_managecategories\helper
  * @todo Final deprecation on Moodle 4.4 MDL-72438
