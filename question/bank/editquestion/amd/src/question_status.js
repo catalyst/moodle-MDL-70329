@@ -33,78 +33,100 @@ import Ajax from 'core/ajax';
  * Get the fragment.
  *
  * @method getFragment
- * @param {{questioned: int}} args
- * @param {int} contextId
- * @return {string}
+ * @param {{questioned: Number}} args
+ * @param {Number} contextId
+ * @return {String}
  */
 const getFragment = (args, contextId) => {
     return Fragment.loadFragment('qbank_editquestion', 'question_status', contextId, args);
 };
 
 /**
+ * Set the question status.
+ *
+ * @param {Number} questionId The question id.
+ * @param {String} formData The question tag form data in a URI encoded param string
+ * @return {Array} The modified question status
+ */
+const setQuestionStatus = (questionId, formData) => Ajax.call([{
+    methodname: 'qbank_editquestion_set_status',
+    args: {
+        questionid: questionId,
+        formdata: formData
+    }
+}])[0];
+
+/**
  * Save the status.
  *
  * @method getFragment
  * @param {object} modal
- * @param {int} questionId
- * @param {object} target
+ * @param {Number} questionId
+ * @param {HTMLElement} target
  */
 const save = (modal, questionId, target) => {
-    let formData = modal.getBody().find('form').serialize();
-    let responseAjax = Ajax.call([{
-        methodname: 'qbank_editquestion_set_status',
-        args: {
-            questionid: questionId,
-            formdata: formData
-        }
-    }]);
-    responseAjax[0].done(function(result) {
-        if (result.status) {
-            target.innerText = result.statusname;
-        }
-    }).fail(Notification.exception);
-    return true;
+    const formData = modal.getBody().find('form').serialize();
+
+    setQuestionStatus(questionId, formData)
+        .then(result => {
+            if (result.status) {
+                target.innerText = result.statusname;
+            }
+            return;
+        })
+        .catch(Notification.exception);
 };
 
 /**
  * Event listeners for the module.
  *
  * @method clickEvent
- * @param {int} questionId
- * @param {int} contextId
- * @param {object} target
+ * @param {Number} questionId
+ * @param {Number} contextId
+ * @param {HTMLElement} target
  */
 const statusEvent = (questionId, contextId, target) => {
     let args = {
         questionid: questionId
     };
-    ModalFactory.create({
-        type: ModalFactory.types.SAVE_CANCEL,
-        title: Str.get_string('questionstatusheader', 'qbank_editquestion'),
-        body: getFragment(args, contextId),
-        large: false,
-    }).done((modal) => {
-        modal.show();
-        let root = modal.getRoot();
-        root.on(ModalEvents.save, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            save(modal, questionId, target);
-            modal.hide();
-        });
-        return modal;
-    }).fail(Notification.exception);
+    getStatusModal(args, contextId)
+        .then((modal) => {
+            modal.show();
+            let root = modal.getRoot();
+            root.on(ModalEvents.save, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                save(modal, questionId, target);
+                modal.hide();
+            });
+            return modal;
+        })
+        .catch(Notification.exception);
 };
+
+/**
+ * Get the status modal to display.
+ *
+ * @param {{questionid: Number}} args
+ * @param {Number} contextId
+ * @return {HTMLElement}
+ */
+const getStatusModal = (args, contextId) => ModalFactory.create({
+    type: ModalFactory.types.SAVE_CANCEL,
+    title: Str.get_string('questionstatusheader', 'qbank_editquestion'),
+    body: getFragment(args, contextId),
+    large: false,
+});
 
 /**
  * Entrypoint of the js.
  *
  * @method init
- * @param {string} questionSelector the question status identifier.
+ * @param {String} questionSelector the question status identifier.
+ * @param {Number} contextId The context id of the question.
  */
-export const init = (questionSelector) => {
+export const init = (questionSelector, contextId) => {
     let target = document.querySelector(questionSelector);
-    let contextId = 1;
     let questionId = target.getAttribute('data-questionid');
     target.addEventListener('click', () => {
         // Call for the event listener to listed for clicks in any usage count row.

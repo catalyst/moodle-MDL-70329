@@ -44,7 +44,7 @@ class question_status_column extends column_base {
             && $question->status !== question_version_status::QUESTION_STATUS_HIDDEN) {
             $target = 'questionstatus_' . $question->id;
             $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_editquestion/question_status', 'init', [$datatarget]);
+            $PAGE->requires->js_call_amd('qbank_editquestion/question_status', 'init', [$datatarget, $question->contextid]);
             $attributes = [
                 'data-target' => $target,
                 'data-questionid' => $question->id,
