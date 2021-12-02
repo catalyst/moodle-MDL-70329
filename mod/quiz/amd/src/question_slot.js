@@ -22,74 +22,55 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import Ajax from 'core/ajax';
+import {call as fetchMany} from 'core/ajax';
 import Notification from 'core/notification';
 
 /**
+ * Set the question version for the slot.
  *
- * Initialize CSS selectors.
- *
- * @type {object}
+ * @param {Number} slotId
+ * @param {Number} newVersion
+ * @return {Array} The modified question version
  */
-let SELECTORS = {};
-
-/**
- * Set CSS selector.
- * Add slot id to class if is not null.
- *
- * @param {int} slotId The slot id.
- */
-const setSelectors = (slotId) => {
-    let slotIdClass = '';
-    if (slotId) {
-        slotIdClass = '-' + slotId;
+const setQuestionVersion = (slotId, newVersion) => fetchMany([{
+    methodname: 'mod_quiz_set_question_version',
+    args: {
+        slotid: slotId,
+        newversion: newVersion,
     }
-
-    SELECTORS = {
-        VERSION_LIST: '#version' + slotIdClass,
-        SLOT_ID: '#mod-indent-outer-slot' + slotIdClass,
-    };
-};
-
-/**
- * Helper ajax function.
- *
- * @param {object} request The request to be made.
- * @returns {Promise}
- */
-const ajax = (request) => {
-    return Ajax.call(request)[0].done(function() {
-        location.reload();
-    }).fail(Notification.exception);
-};
+}])[0];
 
 /**
  * Replace the container with a new version.
- *
- * @param {int} slotId
  */
-const changeVersion = (slotId) => {
-    const selectElement = document.querySelector(SELECTORS.VERSION_LIST);
-    selectElement.addEventListener('change', () => {
-        let versionSelected = parseInt(selectElement.value);
-        setSelectors(slotId);
-        let request = [{
-            methodname: 'mod_quiz_set_question_version',
-            args: {
-                slotid: slotId,
-                newversion: versionSelected,
-            }
-        }];
-        ajax(request);
+const registerEventListeners = () => {
+    document.addEventListener('change', e => {
+        if (!e.target.matches('[data-action="mod_quiz-select_slot"][data-slot-id]')) {
+            return;
+        }
+
+        const slotId = e.target.dataset.slotId;
+        const newVersion = parseInt(e.target.value);
+
+        setQuestionVersion(slotId, newVersion)
+            .then(() => {
+                location.reload();
+                return;
+            })
+            .catch(Notification.exception);
     });
 };
 
+/** @property {Boolean} eventsRegistered If the event has been registered or not */
+let eventsRegistered = false;
+
 /**
  * Entrypoint of the js.
- *
- * @param {int} slotId
  */
-export const init = (slotId) => {
-    setSelectors(slotId);
-    changeVersion(slotId);
+export const init = () => {
+    if (eventsRegistered) {
+        return;
+    }
+
+    registerEventListeners();
 };
