@@ -611,9 +611,13 @@ class view {
                 $this->sqlparams = array_merge($this->sqlparams, $searchcondition->params());
             }
         }
+        // Get higher level filter condition.
+        $filterverb = $this->pagevars['filterverb'] ?? condition::JOINTYPE_DEFAULT;
+        $equal = !($filterverb === condition::JOINTYPE_NONE);
+        $whereclause = ($equal) ? ' WHERE ' : ' WHERE NOT ';
         // Build the SQL.
         $sql = ' FROM {question} q ' . implode(' ', $joins);
-        $sql .= ' WHERE ' . implode(' AND ', $tests);
+        $sql .= $whereclause . implode(' AND ', $tests);
         $this->countsql = 'SELECT count(1)' . $sql;
         $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
     }
