@@ -103,6 +103,15 @@ class category_condition extends condition {
     }
 
     /**
+     * Returns course id.
+     *
+     * @return string Course id.
+     */
+    public function get_course_id() {
+        return $this->course->id;
+    }
+
+    /**
      * SQL fragment to add to the where clause.
      *
      * @return string

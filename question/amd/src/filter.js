@@ -188,6 +188,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
                     // Render first page
                     if (qpage == 0) {
+                        firstpagequestions.defaultcourseid = wsfilter.defaultcourseid;
                         return Fragment.loadFragment('core_question', 'question_list', contextId, firstpagequestions)
                             .then(questionshtml => {
                                 return Templates.render(TEMPLATE_NAME, {html: questionshtml});
@@ -199,7 +200,8 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                             .then(response => {
                                 const pagequestions = {
                                     questions: JSON.stringify(response.questions),
-                                    sortdata: JSON.stringify(wsfilter['sortdata'])
+                                    sortdata: JSON.stringify(wsfilter['sortdata']),
+                                    defaultcourseid: wsfilter.defaultcourseid
                                 };
                                 return Fragment.loadFragment('core_question', 'question_list', contextId, pagequestions)
                                     .then(questionshtml => {

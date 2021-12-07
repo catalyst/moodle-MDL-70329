@@ -83,9 +83,13 @@ class qbank_filter extends \core\output\filter {
      */
     public function export_for_template(renderer_base $output): stdClass {
         $defaultcategory = $this->searchconditions['category']->get_default_category();
+        $courseid = $this->context->instanceid;
+        if ($courseid === 0) {
+            $courseid = $this->searchconditions['category']->get_course_id();
+        }
         return (object) [
             'tableregionid' => $this->tableregionid,
-            'courseid' => $this->context->instanceid,
+            'courseid' => $courseid,
             'filtertypes' => $this->get_filtertypes(),
             'selected' => 'category',
             'rownumber' => 1,

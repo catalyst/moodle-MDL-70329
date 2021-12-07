@@ -126,7 +126,7 @@ function core_question_output_fragment_question_list($args) {
     }
 
     $context = $args['context'];
-    $courseid = $context->instanceid;
+    $courseid = ($context->instanceid === 0) ? $args['defaultcourseid'] : $context->instanceid;
 
     $thispageurl = new \moodle_url('/question/edit.php');
     $thispageurl->param('courseid', $courseid);
