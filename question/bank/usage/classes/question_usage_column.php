@@ -27,6 +27,11 @@ use core_question\local\bank\column_base;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_usage_column extends column_base {
+    public function init(): void {
+        parent::init();
+        global $PAGE;
+        $PAGE->requires->js_call_amd('qbank_usage/usage', 'init');
+    }
 
     public function get_name(): string {
         return 'questionusage';
@@ -42,12 +47,11 @@ class question_usage_column extends column_base {
         $attributes = [];
         if (question_has_capability_on($question, 'view')) {
             $target = 'questionusagepreview_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_usage/usage', 'init', [$datatarget, $question->contextid]);
             $attributes = [
                 'data-target' => $target,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id,
+                'data-contextid' => $question->contextid,
                 'class' => 'link-primary comment-pointer'
             ];
         }
