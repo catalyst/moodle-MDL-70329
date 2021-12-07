@@ -139,6 +139,6 @@ function core_question_output_fragment_question_list($args) {
     $questionbank->set_pagevars($params);
     $questions = $questionbank->load_questions();
     ob_start();
-    $questionbank->display_for_api($questions);
+    $questionbank->display_questions($questions);
     return ob_get_clean();
 }

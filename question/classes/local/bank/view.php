@@ -1102,7 +1102,7 @@ class view {
      *
      * @param array $questions
      */
-    protected function display_questions($questions): void {
+    public function display_questions($questions): void {
         echo \html_writer::start_tag('div',
             ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
@@ -1117,13 +1117,6 @@ class view {
         echo \html_writer::start_tag('div',
                 ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         echo \html_writer::end_tag('div');
-    }
-
-    /**
-     * Show a list of questions by HTML for API.
-     */
-    public function display_for_api($questions): void {
-        $this->print_table($questions);
     }
 
     public function get_questions() {
