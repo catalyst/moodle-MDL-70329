@@ -974,7 +974,6 @@ class view {
      */
     protected function display_question_list($pageurl, $categoryandcontext, $recurse = 1, $page = 0,
                                                 $perpage = 100, $addcontexts = []): void {
-        global $OUTPUT;
         // This function can be moderately slow with large question counts and may time out.
         // We probably do not want to raise it to unlimited, so randomly picking 5 minutes.
         // Note: We do not call this in the loop because quiz ob_ captures this function (see raise() PHP doc).
@@ -990,7 +989,6 @@ class view {
         $this->create_new_question_form($category, $canadd);
 
         $this->build_query();
-        $totalnumber = $this->get_question_count();
 
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post', 'id' => 'questionsubmit']);
@@ -998,7 +996,9 @@ class view {
         echo \html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
         echo \html_writer::input_hidden_params($this->baseurl);
 
-        $this->display_questions_container();
+        echo \html_writer::start_tag('div',
+            ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
+        echo \html_writer::end_tag('div');
 
         $this->display_bottom_controls($catcontext);
 
@@ -1106,16 +1106,6 @@ class view {
         echo \html_writer::start_tag('div',
             ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
-        echo \html_writer::end_tag('div');
-    }
-
-    /**
-     * Display the questions container.
-     *
-     */
-    protected function display_questions_container(): void {
-        echo \html_writer::start_tag('div',
-                ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         echo \html_writer::end_tag('div');
     }
 
