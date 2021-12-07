@@ -96,15 +96,17 @@ const commentEvent = (questionId, courseID, contextId) => {
  * Entrypoint of the js.
  *
  * @method init
- * @param {string} questionSelector the question comment identifier.
  */
-export const init = (questionSelector) => {
-    let target = document.querySelector(questionSelector);
-    let contextId = 1;
-    let questionId = target.getAttribute('data-questionid'),
-        courseID = target.getAttribute('data-courseid');
-    target.addEventListener('click', () => {
-        // Call for the event listener to listed for clicks in any comment count row.
-        commentEvent(questionId, courseID, contextId);
+export const init = () => {
+    let target = document.querySelector('#questionscontainer');
+
+    target.addEventListener('click', (e) => {
+        if (e.target.dataset.target && e.target.dataset.target.includes('questioncommentpreview')) {
+            const contextId = 1;
+            let courseId = e.target.dataset.courseid;
+            let questionId = e.target.dataset.questionid;
+            // Call for the event listener to listed for clicks in any comment count row.
+            commentEvent(questionId, courseId, contextId);
+        }
     });
 };

@@ -28,6 +28,26 @@ use question_bank;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class comment_count_column extends column_base {
+    /**
+     * @var bool Comments enabled or not from config.
+     */
+    protected $commentsenabled = true;
+
+    public function init(): void {
+        parent::init();
+        $this->check_comments_status();
+        if ($this->commentsenabled) {
+            global $PAGE;
+            $PAGE->requires->js_call_amd('qbank_comment/comment', 'init');
+        }
+    }
+
+    protected function check_comments_status(): void {
+        global $CFG;
+        if (!$CFG->usecomments) {
+            $this->commentsenabled = false;
+        }
+    }
 
     /**
      * Get the name of the column, used internally.
@@ -65,8 +85,6 @@ class comment_count_column extends column_base {
         $attributes = [];
         if (question_has_capability_on($question, 'comment')) {
             $target = 'questioncommentpreview_' . $question->id;
-            $datatarget = '[data-target="' . $target . '"]';
-            $PAGE->requires->js_call_amd('qbank_comment/comment', 'init', [$datatarget]);
             $attributes = [
                 'data-target' => $target,
                 'data-questionid' => $question->id,
