@@ -1116,7 +1116,6 @@ class view {
     protected function display_questions_container(): void {
         echo \html_writer::start_tag('div',
                 ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
-        $this->print_table([]);
         echo \html_writer::end_tag('div');
     }
 
