@@ -111,8 +111,14 @@ class core_question_bank_renderer extends plugin_renderer_base {
      *
      * @param array $displaydata
      * @return bool|string
+     * @deprecated since Moodle 4.0 MDL-72321
+     * @see qbank_deletequestion\output\renderer
      */
     public function render_hidden_condition_advanced($displaydata) {
+        debugging('Function render_hidden_condition_advanced()
+        has been deprecated and moved to qbank_deletequestion plugin,
+        Please use qbank_deletequestion\output\renderer::render_hidden_condition_advanced() instead.',
+            DEBUG_DEVELOPER);
         return $this->render_from_template('core_question/hidden_condition_advanced', $displaydata);
     }
 

@@ -119,7 +119,7 @@ class tag_condition extends condition {
      * Print HTML to display the list of tags to filter by.
      */
     public function display_options() {
-        global $OUTPUT;
+        global $PAGE;
 
         $tags = \core_tag_tag::get_tags_by_area_in_contexts('core_question', 'question', $this->contexts);
         $tagoptions = array_map(function($tag) {
@@ -133,7 +133,7 @@ class tag_condition extends condition {
             'tagoptions' => $tagoptions
         ];
 
-        return $OUTPUT->render_from_template('core_question/tag_condition', $context);
+        return $PAGE->get_renderer('qbank_tagquestion')->render_tag_condition($context);
     }
 
     /**

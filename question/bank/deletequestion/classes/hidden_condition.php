@@ -73,6 +73,6 @@ class hidden_condition extends condition {
         if (!$this->hide) {
             $displaydata['checked'] = 'checked="true"';
         }
-        return $PAGE->get_renderer('core_question', 'bank')->render_hidden_condition_advanced($displaydata);
+        return $PAGE->get_renderer('qbank_deletequestion')->render_hidden_condition_advanced($displaydata);
     }
 }
