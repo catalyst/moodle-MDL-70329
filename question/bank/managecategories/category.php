@@ -30,7 +30,6 @@ use qbank_managecategories\form\question_move_form;
 use qbank_managecategories\helper;
 use qbank_managecategories\question_category_object;
 use core\event\questions_exported;
-use context_module;
 
 require_login();
 core_question\local\bank\helper::require_plugin_enabled(helper::PLUGINNAME);
@@ -130,7 +129,7 @@ $renderer = $PAGE->get_renderer('core_question', 'bank');
 
 echo $OUTPUT->header();
 
-$qbankaction = new \core_question\output\qbank_actionbar($url);
+$qbankaction = new \core_question\output\qbank_actionbar(new moodle_url('/question/bank/managecategories/category.php'));
 echo $renderer->qbank_action_menu($qbankaction);
 
 if ($questionstomove) {
