@@ -129,7 +129,7 @@ $renderer = $PAGE->get_renderer('core_question', 'bank');
 
 echo $OUTPUT->header();
 
-$qbankaction = new \core_question\output\qbank_actionbar(new moodle_url('/question/bank/managecategories/category.php'));
+$qbankaction = new \core_question\output\qbank_actionbar($thispageurl);
 echo $renderer->qbank_action_menu($qbankaction);
 
 if ($questionstomove) {
