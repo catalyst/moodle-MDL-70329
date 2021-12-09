@@ -540,9 +540,9 @@ class view {
         $primarysort = key($this->sort);
         if ($sort == $primarysort) {
             return $order;
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
     /**
@@ -992,8 +992,6 @@ class view {
 
         $this->create_new_question_form($category, $canadd);
 
-        $this->build_query();
-
         // This html will be refactored in the bulk actions implementation.
         echo \html_writer::start_tag('form', ['action' => $pageurl, 'method' => 'post', 'id' => 'questionsubmit']);
         echo \html_writer::start_tag('fieldset', ['class' => 'invisiblefieldset', 'style' => "display: block;"]);
@@ -1014,8 +1012,11 @@ class view {
      * Display the top pagination bar.
      *
      * @param object $pagination
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
-    protected function display_top_pagnation($pagination): void {
+    public function display_top_pagnation($pagination): void {
+        debugging('Function display_top_pagnation() is deprecated, please use display_questions()
+         for ajax based pagination.', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = [
                 'pagination' => $pagination
@@ -1030,8 +1031,11 @@ class view {
      * @param int $totalnumber
      * @param int $perpage
      * @param \moodle_url $pageurl
+     * @todo Final deprecation on Moodle 4.4 MDL-72438
      */
-    protected function display_bottom_pagination($pagination, $totalnumber, $perpage, $pageurl): void {
+    public function display_bottom_pagination($pagination, $totalnumber, $perpage, $pageurl): void {
+        debugging('Function display_bottom_pagination() is deprecated, please use display_questions()
+         for ajax based pagination.', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = array (
                 'extraclasses' => 'pagingbottom',
@@ -1106,35 +1110,23 @@ class view {
      *
      * @param array $questions
      */
-    public function display_questions($questions): void {
+    public function display_questions($questions, $page = 1, $perpage = 20): void {
+        global $OUTPUT;
+        $pageingurl = new \moodle_url($this->base_url());
+        $pagingbar = new \paging_bar($this->totalcount, $page, $perpage, $pageingurl);
+        $pagingbar->pagevar = 'qpage';
+        echo $OUTPUT->render($pagingbar);
         echo \html_writer::start_tag('div',
             ['class' => 'categoryquestionscontainer', 'id' => 'questionscontainer']);
         $this->print_table($questions);
         echo \html_writer::end_tag('div');
+        echo $OUTPUT->render($pagingbar);
     }
 
-    public function get_questions() {
-        $pagevars = $this->get_pagevars();
+    public function load_questions($page, $perpage = 20) {
         $this->init_sort_from_params();
         $this->build_query();
-        $questionsrs = $this->load_page_questions($pagevars['qpage'], $pagevars['qperpage']);
-        $questions = [];
-        foreach ($questionsrs as $question) {
-            if (!empty($question->id)) {
-                $questions[$question->id] = $question;
-            }
-        }
-        $questionsrs->close();
-        foreach ($this->requiredcolumns as $name => $column) {
-            $column->load_additional_data($questions);
-        }
-        return $questions;
-    }
-
-    public function load_questions() {
-        $this->init_sort_from_params();
-        $this->build_query();
-        $questionsrs = $this->load_page_questions(0, 100000);
+        $questionsrs = $this->load_page_questions($page, $perpage);
         $questions = [];
         foreach ($questionsrs as $question) {
             if (!empty($question->id)) {
@@ -1209,7 +1201,7 @@ class view {
     /**
      * Print table headers from child classes.
      */
-    protected function print_table_headers(): void {
+    public function print_table_headers(): void {
         foreach ($this->visiblecolumns as $column) {
             $column->display_header();
         }
@@ -1240,7 +1232,7 @@ class view {
      * @param \stdClass $question
      * @param int $rowcount
      */
-    protected function print_table_row($question, $rowcount): void {
+    public function print_table_row($question, $rowcount): void {
         $rowclasses = implode(' ', $this->get_row_classes($question, $rowcount));
         $attributes = [];
         if ($rowclasses) {

@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Question external API.
- *
- * @package    core_question
- * @category   external
- * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 namespace core_question\external;
 
 require_once($CFG->dirroot . '/question/editlib.php');
@@ -37,17 +29,20 @@ use external_warnings;
 /**
  * Core question external functions.
  *
- * @copyright  2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
+ * @package    core_question
+ * @category   external
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     2021 Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class bank extends external_api {
+class qbank_filter extends external_api {
 
     /**
      * Describes the parameters for fetching the table html.
      *
      * @return external_function_parameters
      */
-    public static function get_questions_parameters(): external_function_parameters {
+    public static function execute_parameters(): external_function_parameters {
 
         $params = [
             'defaultcourseid' => new external_value(
@@ -63,7 +58,7 @@ class bank extends external_api {
             'filters' => new external_multiple_structure (
                 new external_single_structure(
                     [
-                        'filtertype' => new external_value(PARAM_ALPHANUM,'Filter type'),
+                        'filtertype' => new external_value(PARAM_ALPHANUM, 'Filter type'),
                         'jointype' => new external_value(PARAM_INT, 'Join type'),
                         'values' => new external_value(PARAM_RAW, 'list of ids'),
                     ]
@@ -149,15 +144,15 @@ class bank extends external_api {
      * @param int $defaultcategoryid
      * @return array
      */
-    public static function get_questions(
+    public static function execute(
         int $defaultcourseid,
         int $defaultcategoryid,
         array $filters = [],
         array $filteroptions = [],
         array $displayoptions = [],
-        array $sortdata= []
+        array $sortdata = []
     ): array {
-        global $DB;
+        global $DB, $PAGE, $OUTPUT;
 
         $courseid = $defaultcourseid;
 
@@ -175,7 +170,7 @@ class bank extends external_api {
         foreach ($filters as $filter) {
             $params['filters'][$filter['filtertype']] = [
                 'jointype' => $filter['jointype'],
-                'values' => empty($filter['values'])? [] : explode(',', $filter['values']),
+                'values' => empty($filter['values']) ? [] : explode(',', $filter['values']),
             ];
         }
 
@@ -195,10 +190,11 @@ class bank extends external_api {
                 'message' => get_string('nocategoryconditionspecified', 'question')
             ];
             return [
-                        'questions' => [],
-                        'totalquestions' => 0,
-                        'warnings' => $warnings
-                    ];
+                'totalquestions' => 0,
+                'questionhtml' => '',
+                'jsfooter' => '',
+                'warnings' => $warnings
+            ];
         }
         $categories = $DB->get_records('question_categories', ['id' => $categoryid]);
         $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
@@ -218,22 +214,31 @@ class bank extends external_api {
         }
 
         require_login($courseid, false);
-        $thispageurl = new \moodle_url('/question/edit.php');
+        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
+        $thispageurl = new \moodle_url($nodeparent->action->get_path());
+        $thispageurl->param('courseid', $courseid);
         $thiscontext = \context_course::instance($courseid);
         $contexts = new \question_edit_contexts($thiscontext);
         $contexts->require_one_edit_tab_cap($params['tabname']);
         $course = get_course($courseid);
-        $cm = null;
-        $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, $cm);
+        $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course);
         $questionbank->set_pagevars($params);
         $questionbank->add_standard_searchcondition();
-        $questions = $questionbank->get_questions();
-
+        $questions = $questionbank->load_questions($params['qpage']);
         $totalquestions = $questionbank->get_question_count();
-
+        $questionhtml = '';
+        if ($totalquestions > 0) {
+            ob_start();
+            $questionbank->display_questions($questions, $params['qpage']);
+            $questionhtml = ob_get_clean();
+        }
+        $OUTPUT->header();
+        $PAGE->start_collecting_javascript_requirements();
+        $jsfooter = $PAGE->requires->get_end_code();
         return [
-            'questions' => $questions,
             'totalquestions' => $totalquestions,
+            'questionhtml' => $questionhtml,
+            'jsfooter' => $jsfooter,
             'warnings' => []
         ];
     }
@@ -243,16 +248,11 @@ class bank extends external_api {
      *
      * @return external_single_structure
      */
-    public static function get_questions_returns(): external_single_structure {
+    public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'questions' => new external_multiple_structure(
-                new external_single_structure([
-                    'id' => new external_value(PARAM_INT, 'question id'),
-                    'contextid' => new external_value(PARAM_INT, 'context id'),
-                    'name' => new external_value(PARAM_RAW, 'question name'),
-                ]),
-            ),
             'totalquestions' => new external_value(PARAM_INT, 'Total number of questions'),
+            'questionhtml' => new external_value(PARAM_RAW, 'Question html to render'),
+            'jsfooter' => new external_value(PARAM_RAW, 'Question js to readd'),
             'warnings' => new external_warnings()
         ]);
     }

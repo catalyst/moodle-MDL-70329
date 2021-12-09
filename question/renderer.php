@@ -241,7 +241,6 @@ class core_question_bank_renderer extends plugin_renderer_base {
             'recurse' => $templatecontext->recurse,
             'showhidden' => $templatecontext->showhidden,
             'showquestiontext' => $templatecontext->showquestiontext,
-            'contextId' => $context->id,
         ];
         $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
         return $renderedtemplate;

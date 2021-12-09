@@ -23,9 +23,7 @@
 
 import ajax from 'core/ajax';
 import CoreFilter from 'core/filter';
-import Fragment from 'core/fragment';
 import Notification from 'core/notification';
-import PagedContentFactory from 'core/paged_content_factory';
 import Selectors from 'core/local/filter/selectors';
 import Templates from 'core/templates';
 
@@ -39,10 +37,9 @@ import Templates from 'core/templates';
  * @param {boolean} recurse if loading sub categories
  * @param {boolean} showhidden if loading hidden question
  * @param {boolean} qbshowtext if loading question text
- * @param {int} contextId contextId
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
-                     perpage, recurse, showhidden, qbshowtext, contextId) => {
+                     perpage, recurse, showhidden, qbshowtext) => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
@@ -57,7 +54,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         },
         displayoptions: {
             perpage: perpage,
-            page: 0,
             showtext: qbshowtext,
         },
         sortdata: [
@@ -74,16 +70,9 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     const SELECTORS = {
         QUESTION_CONTAINER_ID: '#questionscontainer',
         SORT_LINK: '#questionscontainer div.sorters a',
+        PAGINATION_LINK: '#questionscontainer a[href].page-link',
+        PAGINATION_ACTIVE: '#questionscontainer a[href].page-link.active',
     };
-
-    // Default Pagination config.
-    const DEFAULT_PAGED_CONTENT_CONFIG = {
-        ignoreControlWhileLoading: true,
-        controlPlacementBottom: false,
-    };
-
-    // Template to render return value from ws function.
-    const TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
@@ -98,7 +87,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @param {Object} filter filter object
      */
     const requestQuestions = filter => {
-        const request = {methodname: 'core_qbank_get_questions', args: filter};
+        const request = {methodname: 'core_qbank_qbank_filter', args: filter};
         return ajax.call([request])[0];
     };
 
@@ -113,21 +102,21 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         // Otherwise, the ws function should retrieves question based on default courseid and cateogryid.
         if (filterdata) {
             // Main join types.
-            wsfilter['filteroptions']['filterverb'] = parseInt(filterSet.dataset.filterverb, 10);
+            wsfilter.filteroptions.filterverb = parseInt(filterSet.dataset.filterverb, 10);
 
             // Clean old filter
-            wsfilter['filters'] = [];
+            wsfilter.filters = [];
 
             // Retrieve fitter info.
             for (const [key, value] of Object.entries(filterdata)) {
                 let filter = {'filtertype': key, 'jointype': value.jointype, 'values': value.values.toString()};
-                wsfilter['filters'].push(filter);
+                wsfilter.filters.push(filter);
             }
         }
 
         // Load questions for first page.
         requestQuestions(wsfilter)
-            .then(response => {
+            .then((response) => {
                 // Cleans any notifications if not needed.
                 let element = document.getElementById('user-notifications');
                 while (element.firstChild) {
@@ -141,100 +130,46 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                           });
                     }
                 }
-                const totalquestions = response.totalquestions;
-                if (response.questions.length === 0) {
-                    return Promise.resolve();
-                }
-                const firstpagequestions = {
-                    questions: JSON.stringify(response.questions),
-                    sortdata: JSON.stringify(wsfilter['sortdata'])
-                };
-                return renderPagination(wsfilter, totalquestions, firstpagequestions);
-            })
-            // Render questions for first page and pagination.
-            .then((html, js) => {
                 const questionscontainer = document.querySelector(SELECTORS.QUESTION_CONTAINER_ID);
-                if (html === undefined) {
-                    html = '';
-                }
-                if (js === undefined) {
-                    js = '';
-                }
-                Templates.replaceNodeContents(questionscontainer, html, js);
+                Templates.replaceNodeContents(questionscontainer, response.questionhtml, response.jsfooter);
                 // Resolve filter promise.
                 if (pendingPromise) {
                     pendingPromise.resolve();
                 }
+                return;
             })
             .fail(Notification.exception);
-    };
-
-    /**
-     * Render table and pagination.
-     *
-     * @param {Object} filter params
-     * @param {int} totalquestions
-     * @param {string} firstpagequestions
-     */
-    const renderPagination = (filter, totalquestions, firstpagequestions) => {
-        return PagedContentFactory.createFromAjax(
-            totalquestions,
-            perpage,
-            pagesData => {
-                return pagesData.map(pageData => {
-                    let pageNumber = pageData.pageNumber;
-                    // Page number start at 1.
-                    let qpage = pageNumber - 1;
-
-                    // Render first page
-                    if (qpage == 0) {
-                        firstpagequestions.defaultcourseid = wsfilter.defaultcourseid;
-                        return Fragment.loadFragment('core_question', 'question_list', contextId, firstpagequestions)
-                            .then(questionshtml => {
-                                return Templates.render(TEMPLATE_NAME, {html: questionshtml});
-                            });
-                    } else {
-                        // Load data for selected page.
-                        filter['displayoptions']['page'] = qpage;
-                        return requestQuestions(filter)
-                            .then(response => {
-                                const pagequestions = {
-                                    questions: JSON.stringify(response.questions),
-                                    sortdata: JSON.stringify(wsfilter['sortdata']),
-                                    defaultcourseid: wsfilter.defaultcourseid
-                                };
-                                return Fragment.loadFragment('core_question', 'question_list', contextId, pagequestions)
-                                    .then(questionshtml => {
-                                        return Templates.render(TEMPLATE_NAME, {html: questionshtml});
-                                    });
-                            })
-                        .fail(Notification.exception);
-                    }
-                });
-            },
-            DEFAULT_PAGED_CONTENT_CONFIG
-        );
     };
 
     // Add listeners for the sorting actions.
     document.addEventListener('click', e => {
         const sortableLink = e.target.closest(SELECTORS.SORT_LINK);
+        const paginationLink = e.target.closest(SELECTORS.PAGINATION_LINK);
         if (sortableLink) {
             e.preventDefault();
-            let oldsort = wsfilter['sortdata'];
-            wsfilter['sortdata'] = [];
+            let oldsort = wsfilter.sortdata;
+            wsfilter.sortdata = [];
             let sortdata = {
                 sortby: sortableLink.dataset.sortby,
                 sortorder: sortableLink.dataset.sortorder
             };
-            wsfilter['sortdata'].push(sortdata);
+            wsfilter.sortdata.push(sortdata);
             oldsort.forEach(value => {
-                if (value['sortby'] != sortableLink.dataset.sortby) {
-                    wsfilter['sortdata'].push(value);
+                if (value.sortby != sortableLink.dataset.sortby) {
+                    wsfilter.sortdata.push(value);
                 }
             });
-            wsfilter['displayoptions']['page'] = 0;
+            wsfilter.displayoptions.page = 0;
             coreFilter.updateTableFromFilter();
+        }
+        if (paginationLink) {
+            e.preventDefault();
+            let attr = e.target.getAttribute("href");
+            if (attr !== '#') {
+                const urlParams = new URLSearchParams(attr);
+                wsfilter.displayoptions.page = urlParams.get('qpage');
+                coreFilter.updateTableFromFilter();
+            }
         }
     });
 
