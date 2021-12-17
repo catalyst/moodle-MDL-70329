@@ -2881,10 +2881,10 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => true,
     ],
-    'core_qbank_qbank_filter' => [
+    'core_question_filter' => [
         'classname'   => 'core_question\external\qbank_filter',
         'methodname'  => 'execute',
-        'description' => 'Get question table content raw html',
+        'description' => 'Get question filter conditions',
         'type'        => 'read',
         'ajax'        => true,
         'loginrequired' => true,
