@@ -96,14 +96,14 @@ function core_question_output_fragment_tags_form($args) {
  * Question data fragment to get the question html via ajax call.
  *
  * @param $args
- * @return false|string
+ * @return array|string
  */
 function core_question_output_fragment_question_data($args) {
     global $PAGE;
-    if (empty($args['filtercondition'])) {
+    if (empty($args)) {
         return '';
     }
-    $params = json_decode($args['filtercondition']);
+    $params = json_decode($args);
     $params = \core_question\local\bank\helper::convert_object_array($params);
     $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
     $thispageurl = new \moodle_url($nodeparent->action->get_path());
@@ -118,10 +118,12 @@ function core_question_output_fragment_question_data($args) {
     $questions = $questionbank->load_questions($params['qpage']);
     $totalquestions = $questionbank->get_question_count();
     $questionhtml = '';
+    $PAGE->start_collecting_javascript_requirements();
     if ($totalquestions > 0) {
         ob_start();
         $questionbank->display_questions($questions, $params['qpage']);
         $questionhtml = ob_get_clean();
     }
-    return $questionhtml;
+    $jsfooter = $PAGE->requires->get_end_code();
+    return [$questionhtml, $jsfooter];
 }

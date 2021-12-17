@@ -26,7 +26,6 @@ import CoreFilter from 'core/filter';
 import Notification from 'core/notification';
 import Selectors from 'core/local/filter/selectors';
 import Templates from 'core/templates';
-import Fragment from 'core/fragment';
 
 /**
  * Initialise the question bank filter on the element with the given id.
@@ -79,7 +78,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     };
 
     // Template to render return value from ws function.
-    const TEMPLATE_NAME = 'core_question/qbank_questions';
+    // const TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
@@ -140,15 +139,15 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 return renderQuestiondata(response.filtercondition);
             })
             // Render questions for first page and pagination.
-            .then((html, js) => {
+            .then((response) => {
                 const questionscontainer = document.querySelector(SELECTORS.QUESTION_CONTAINER_ID);
-                if (html === undefined) {
-                    html = '';
+                if (response.questionhtml === undefined) {
+                    response.questionhtml = '';
                 }
-                if (js === undefined) {
-                    js = '';
+                if (response.jsfooter === undefined) {
+                    response.jsfooter = '';
                 }
-                Templates.replaceNodeContents(questionscontainer, html, js);
+                Templates.replaceNodeContents(questionscontainer, response.questionhtml, response.jsfooter);
                 // Resolve filter promise.
                 if (pendingPromise) {
                     pendingPromise.resolve();
@@ -163,16 +162,14 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @return {string} questionhtml
      */
     const renderQuestiondata = (filtercondition) => {
-        // eslint-disable-next-line no-console
-        const condition = {
-            filtercondition: filtercondition
+        const viewData = {
+            component: component,
+            callback: callback,
+            filtercondition: filtercondition,
+            contextid: contextId
         };
-        // eslint-disable-next-line no-console
-        console.log(condition);
-        return Fragment.loadFragment(component, callback, contextId, condition)
-            .then(questionshtml => {
-                return Templates.render(TEMPLATE_NAME, {html: questionshtml});
-            });
+        const request = {methodname: 'core_question_view', args: viewData};
+        return ajax.call([request])[0];
     };
 
     // Add listeners for the sorting actions.

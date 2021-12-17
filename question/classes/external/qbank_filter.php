@@ -152,7 +152,7 @@ class qbank_filter extends external_api {
         array $displayoptions = [],
         array $sortdata = []
     ): array {
-        global $DB, $PAGE, $OUTPUT;
+        global $DB;
 
         $courseid = $defaultcourseid;
 
