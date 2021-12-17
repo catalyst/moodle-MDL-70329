@@ -91,3 +91,37 @@ function core_question_output_fragment_tags_form($args) {
         return $mform->render();
     }
 }
+
+/**
+ * Question data fragment to get the question html via ajax call.
+ *
+ * @param $args
+ * @return false|string
+ */
+function core_question_output_fragment_question_data($args) {
+    global $PAGE;
+    if (empty($args['filtercondition'])) {
+        return '';
+    }
+    $params = json_decode($args['filtercondition']);
+    $params = \core_question\local\bank\helper::convert_object_array($params);
+    $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
+    $thispageurl = new \moodle_url($nodeparent->action->get_path());
+    $thispageurl->param('courseid', $params['courseid']);
+    $thiscontext = \context_course::instance($params['courseid']);
+    $contexts = new \question_edit_contexts($thiscontext);
+    $contexts->require_one_edit_tab_cap($params['tabname']);
+    $course = get_course($params['courseid']);
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course);
+    $questionbank->set_pagevars($params);
+    $questionbank->add_standard_searchcondition();
+    $questions = $questionbank->load_questions($params['qpage']);
+    $totalquestions = $questionbank->get_question_count();
+    $questionhtml = '';
+    if ($totalquestions > 0) {
+        ob_start();
+        $questionbank->display_questions($questions, $params['qpage']);
+        $questionhtml = ob_get_clean();
+    }
+    return $questionhtml;
+}

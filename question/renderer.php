@@ -260,7 +260,8 @@ class core_question_bank_renderer extends plugin_renderer_base {
      * @param array $additionalparams Additional filter parameters
      * @return string
      */
-    public function render_questionbank_filter(\context $context, array $searchconditions, $additionalparams): string {
+    public function render_questionbank_filter(\context $context, array $searchconditions, array $additionalparams,
+                                                $component, $callback): string {
         global $PAGE;
         $filter = new \core_question\local\bank\qbank_filter($context, 'qbank-table');
         $filter->set_searchconditions($searchconditions, $additionalparams);
@@ -278,6 +279,9 @@ class core_question_bank_renderer extends plugin_renderer_base {
             'recurse' => $templatecontext->recurse,
             'showhidden' => $templatecontext->showhidden,
             'showquestiontext' => $templatecontext->showquestiontext,
+            'contextid' => $context->id,
+            'component' => $component,
+            'callback' => $callback
         ];
         $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
         return $renderedtemplate;

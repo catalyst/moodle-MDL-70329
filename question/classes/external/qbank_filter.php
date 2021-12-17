@@ -190,9 +190,7 @@ class qbank_filter extends external_api {
                 'message' => get_string('nocategoryconditionspecified', 'question')
             ];
             return [
-                'totalquestions' => 0,
-                'questionhtml' => '',
-                'jsfooter' => '',
+                'filtercondition' => '',
                 'warnings' => $warnings
             ];
         }
@@ -212,33 +210,8 @@ class qbank_filter extends external_api {
             $params['qbs' . $sortnum] = $sortby;
             $sortnum++;
         }
-
-        require_login($courseid, false);
-        $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
-        $thispageurl = new \moodle_url($nodeparent->action->get_path());
-        $thispageurl->param('courseid', $courseid);
-        $thiscontext = \context_course::instance($courseid);
-        $contexts = new \question_edit_contexts($thiscontext);
-        $contexts->require_one_edit_tab_cap($params['tabname']);
-        $course = get_course($courseid);
-        $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course);
-        $questionbank->set_pagevars($params);
-        $questionbank->add_standard_searchcondition();
-        $questions = $questionbank->load_questions($params['qpage']);
-        $totalquestions = $questionbank->get_question_count();
-        $questionhtml = '';
-        $OUTPUT->header();
-        $PAGE->start_collecting_javascript_requirements();
-        if ($totalquestions > 0) {
-            ob_start();
-            $questionbank->display_questions($questions, $params['qpage']);
-            $questionhtml = ob_get_clean();
-        }
-        $jsfooter = $PAGE->requires->get_end_code();
         return [
-            'totalquestions' => $totalquestions,
-            'questionhtml' => $questionhtml,
-            'jsfooter' => $jsfooter,
+            'filtercondition' => json_encode($params),
             'warnings' => []
         ];
     }
@@ -250,9 +223,7 @@ class qbank_filter extends external_api {
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
-            'totalquestions' => new external_value(PARAM_INT, 'Total number of questions'),
-            'questionhtml' => new external_value(PARAM_RAW, 'Question html to render'),
-            'jsfooter' => new external_value(PARAM_RAW, 'Question js to readd'),
+            'filtercondition' => new external_value(PARAM_RAW, 'Question filter conditions'),
             'warnings' => new external_warnings()
         ]);
     }

@@ -169,6 +169,16 @@ class view {
     protected $plugins = [];
 
     /**
+     * @var string $component the component the api is used from.
+     */
+    public $component = 'core_question';
+
+    /**
+     * @var string $callback name of the callback for the api call via filter js.
+     */
+    public $callback = 'question_data';
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -821,7 +831,8 @@ class view {
                 'showhidden' => $showhidden,
                 'showquestiontext' => $showquestiontext
             ];
-            echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter($catcontext, $this->searchconditions, $additionalparams);
+            echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter(
+                $catcontext, $this->searchconditions, $additionalparams, $this->component, $this->callback);
         }
         $this->display_options_form($showquestiontext);
     }

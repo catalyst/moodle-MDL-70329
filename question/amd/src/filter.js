@@ -26,6 +26,7 @@ import CoreFilter from 'core/filter';
 import Notification from 'core/notification';
 import Selectors from 'core/local/filter/selectors';
 import Templates from 'core/templates';
+import Fragment from 'core/fragment';
 
 /**
  * Initialise the question bank filter on the element with the given id.
@@ -37,9 +38,13 @@ import Templates from 'core/templates';
  * @param {boolean} recurse if loading sub categories
  * @param {boolean} showhidden if loading hidden question
  * @param {boolean} qbshowtext if loading question text
+ * @param {int} contextId id of the context
+ * @param {string} component name of the component for fragment
+ * @param {string} callback name of the callback for the fragment
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
-                     perpage, recurse, showhidden, qbshowtext) => {
+                     perpage, recurse, showhidden, qbshowtext,
+                     contextId, component, callback) => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
@@ -72,6 +77,9 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         SORT_LINK: '#questionscontainer div.sorters a',
         PAGINATION_LINK: '#questionscontainer a[href].page-link',
     };
+
+    // Template to render return value from ws function.
+    const TEMPLATE_NAME = 'core_question/qbank_questions';
 
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
@@ -129,15 +137,42 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                           });
                     }
                 }
+                return renderQuestiondata(response.filtercondition);
+            })
+            // Render questions for first page and pagination.
+            .then((html, js) => {
                 const questionscontainer = document.querySelector(SELECTORS.QUESTION_CONTAINER_ID);
-                Templates.replaceNodeContents(questionscontainer, response.questionhtml, response.jsfooter);
+                if (html === undefined) {
+                    html = '';
+                }
+                if (js === undefined) {
+                    js = '';
+                }
+                Templates.replaceNodeContents(questionscontainer, html, js);
                 // Resolve filter promise.
                 if (pendingPromise) {
                     pendingPromise.resolve();
                 }
-                return;
             })
             .fail(Notification.exception);
+    };
+
+    /**
+     * Render question data using the fragment.
+     * @param {object} filtercondition
+     * @return {string} questionhtml
+     */
+    const renderQuestiondata = (filtercondition) => {
+        // eslint-disable-next-line no-console
+        const condition = {
+            filtercondition: filtercondition
+        };
+        // eslint-disable-next-line no-console
+        console.log(condition);
+        return Fragment.loadFragment(component, callback, contextId, condition)
+            .then(questionshtml => {
+                return Templates.render(TEMPLATE_NAME, {html: questionshtml});
+            });
     };
 
     // Add listeners for the sorting actions.
