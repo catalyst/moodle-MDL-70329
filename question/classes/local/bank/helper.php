@@ -65,7 +65,7 @@ class helper {
         }
         // Parse array.
         foreach ($obj as $key => $value) {
-            $arr[$key] = objToArray($value);
+            $arr[$key] = self::convert_object_array($value);
         }
         // Return parsed array.
         return $arr;
