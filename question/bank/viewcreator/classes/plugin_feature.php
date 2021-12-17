@@ -17,6 +17,7 @@
 namespace qbank_viewcreator;
 
 use core_question\local\bank\plugin_features_base;
+use core_question\local\bank\view;
 
 /**
  * Class plugin_feature is the entrypoint for the columns.
@@ -32,6 +33,12 @@ class plugin_feature extends plugin_features_base {
         return [
             new creator_name_column($qbank),
             new modifier_name_column($qbank)
+        ];
+    }
+
+    public function get_question_filters(view $qbank): array {
+        return [
+            new date_condition($qbank),
         ];
     }
 }

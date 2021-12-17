@@ -56,7 +56,6 @@ class qbank_filter extends \core\output\filter {
     protected function get_filtertypes(): array {
 
         $filtertypes = [];
-
         foreach ($this->searchconditions as $searchcondition) {
             $filteroptions = $searchcondition->get_filter_options();
             if (!empty($filteroptions['name'])) {
