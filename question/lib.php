@@ -112,10 +112,9 @@ function core_question_output_fragment_question_data($args) {
     $contexts = new \question_edit_contexts($thiscontext);
     $contexts->require_one_edit_tab_cap($params['tabname']);
     $course = get_course($params['courseid']);
-    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course);
-    $questionbank->set_pagevars($params);
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params);
     $questionbank->add_standard_searchcondition();
-    $questions = $questionbank->load_questions($params['qpage']);
+    $questions = $questionbank->load_questions();
     $totalquestions = $questionbank->get_question_count();
     $questionhtml = '';
     $PAGE->start_collecting_javascript_requirements();
