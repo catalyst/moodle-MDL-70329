@@ -101,6 +101,7 @@ abstract class column_base {
         $data = [];
         $data['sortable'] = true;
         $data['extraclasses'] = $this->get_classes();
+        $data['style'] = $this->get_styles();
         $sortable = $this->is_sortable();
         $name = get_class($this);
         $title = $this->get_title();
@@ -142,6 +143,16 @@ abstract class column_base {
      * @return string a fuller version of the name.
      */
     protected function get_title_tip() {
+        return '';
+    }
+
+    /**
+     * Use this when get_styles() returns
+     * some style property to put into the th and td tags.
+     *
+     * @return string a string to put into a style="" property
+     */
+    protected function get_styles() {
         return '';
     }
 
@@ -216,7 +227,7 @@ abstract class column_base {
      */
     protected function display_start($question, $rowclasses): void {
         $tag = 'td';
-        $attr = ['class' => $this->get_classes()];
+        $attr = ['class' => $this->get_classes(), 'style' => $this->get_styles()];
         if ($this->isheading) {
             $tag = 'th';
             $attr['scope'] = 'row';

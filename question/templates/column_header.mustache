@@ -26,12 +26,13 @@
                 "tiptitle": "Element title",
                 "sorttip": true,
                 "tip": "Select questions for bulk actions",
-                "sortlinks": "sort / sort"
+                "sortlinks": "sort / sort",
+                "style": "width: 5em;"
           }
         ]
     }
 }}
-<th class="header {{extraclasses}}" scope="col">
+<th class="header {{extraclasses}}" scope="col"{{#style}} style="{{style}}"{{/style}}>
     {{#title}}
         <div class="title">{{title}}</div>
     {{/title}}

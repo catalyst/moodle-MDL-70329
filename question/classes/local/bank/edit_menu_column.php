@@ -72,6 +72,10 @@ class edit_menu_column extends column_base {
         return 'editmenu';
     }
 
+    public function get_styles(): string {
+        return "width: " . (mb_strlen(get_string('edit'), 'UTF-8') + 1) . "em;";
+    }
+
     protected function display_content($question, $rowclasses): void {
         global $OUTPUT;
 
