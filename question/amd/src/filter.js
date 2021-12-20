@@ -77,9 +77,6 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         PAGINATION_LINK: '#questionscontainer a[href].page-link',
     };
 
-    // Template to render return value from ws function.
-    // const TEMPLATE_NAME = 'core_question/qbank_questions';
-
     // Init function with apply callback.
     const coreFilter = new CoreFilter(filterSet, function(filters, pendingPromise) {
         applyFilter(filters, pendingPromise);
@@ -89,8 +86,8 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     /**
      * Ajax call to retrieve question via ws functions
      *
-     * @returns {*}
      * @param {Object} filter filter object
+     * @returns {*}
      */
     const requestQuestions = filter => {
         const request = {methodname: 'core_question_filter', args: filter};
@@ -159,7 +156,7 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     /**
      * Render question data using the fragment.
      * @param {object} filtercondition
-     * @return {string} questionhtml
+     * @return {*}
      */
     const renderQuestiondata = (filtercondition) => {
         const viewData = {
