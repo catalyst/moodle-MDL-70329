@@ -40,10 +40,11 @@ import Templates from 'core/templates';
  * @param {int} contextId id of the context
  * @param {string} component name of the component for fragment
  * @param {string} callback name of the callback for the fragment
+ * @param {string} extraparams json encoded extra params for the extended apis
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                      perpage, recurse, showhidden, qbshowtext,
-                     contextId, component, callback) => {
+                     contextId, component, callback, extraparams) => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
@@ -159,11 +160,14 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
      * @return {*}
      */
     const renderQuestiondata = (filtercondition) => {
+        // eslint-disable-next-line no-console
+        console.log(extraparams);
         const viewData = {
             component: component,
             callback: callback,
             filtercondition: filtercondition,
-            contextid: contextId
+            contextid: contextId,
+            extraparams: extraparams,
         };
         const request = {methodname: 'core_question_view', args: viewData};
         return ajax.call([request])[0];

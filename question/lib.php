@@ -103,8 +103,11 @@ function core_question_output_fragment_question_data($args) {
     if (empty($args)) {
         return '';
     }
-    $params = json_decode($args);
-    $params = \core_question\local\bank\helper::convert_object_array($params);
+    $param = json_decode($args);
+    $filtercondition = json_decode($param->filtercondition);
+    $extraparams = json_decode($param->extraparams);
+    $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+    $extraparams = \core_question\local\bank\helper::convert_object_array($extraparams);
     $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
     $thispageurl = new \moodle_url($nodeparent->action->get_path());
     $thispageurl->param('courseid', $params['courseid']);
@@ -112,7 +115,7 @@ function core_question_output_fragment_question_data($args) {
     $contexts = new \question_edit_contexts($thiscontext);
     $contexts->require_one_edit_tab_cap($params['tabname']);
     $course = get_course($params['courseid']);
-    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params);
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params, $extraparams);
     $questionbank->add_standard_searchcondition();
     $questions = $questionbank->load_questions();
     $totalquestions = $questionbank->get_question_count();

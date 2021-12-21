@@ -32,6 +32,7 @@ use external_value;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class qbank_view extends external_api {
+
     /**
      * Describes the parameters for fetching the table html.
      *
@@ -43,24 +44,29 @@ class qbank_view extends external_api {
             'callback' => new external_value(PARAM_TEXT, 'The name of the callback'),
             'filtercondition' => new external_value(PARAM_RAW, 'The filter conditions'),
             'contextid' => new external_value(PARAM_INT, 'The context of the api'),
+            'extraparams' => new external_value(PARAM_RAW, 'The extra parameters for extended apis', VALUE_OPTIONAL),
         ]);
     }
 
-    public static function execute($component, $callback, $filtercondition, $contextid) {
+    public static function execute($component, $callback, $filtercondition, $contextid, $extraparams = '') {
         global $OUTPUT;
         // Parameter validation.
         $params = self::validate_parameters(self::execute_parameters(), [
             'component' => $component,
             'callback' => $callback,
             'filtercondition' => $filtercondition,
-            'contextid' => $contextid
+            'contextid' => $contextid,
+            'extraparams' => $extraparams
         ]);
-        $argument = [];
-        $argument [] = $params['filtercondition'];
+        $argument [] = json_encode([
+            'filtercondition' => $params['filtercondition'],
+            'extraparams' => $params['extraparams']
+        ]);
         $context = \context::instance_by_id($contextid);
         self::validate_context($context);
         $OUTPUT->header();
-        list ($questionhtml, $jsfooter) = component_callback($params['component'], 'output_fragment_' . $params['callback'], $argument);
+        list ($questionhtml, $jsfooter) = component_callback($params['component'],
+            'output_fragment_' . $params['callback'], $argument);
         return [
             'questionhtml' => $questionhtml,
             'jsfooter' => $jsfooter

@@ -169,6 +169,11 @@ class view {
     public $callback = 'question_data';
 
     /**
+     * @var string|null $extraparams extra parameters for the extended apis.
+     */
+    public $extraparams = '';
+
+    /**
      * Constructor for view.
      *
      * @param \question_edit_contexts $contexts
@@ -201,6 +206,19 @@ class view {
         $this->init_sort();
         $this->init_bulk_actions();
         $this->set_pagevars($params);
+        $this->set_extra_params($extraparams);
+    }
+
+    /**
+     * Set the extra params for the extended apis.
+     *
+     * @param $extraparams
+     * @return void
+     */
+    public function set_extra_params($extraparams): void {
+        if (!empty($extraparams)) {
+            $this->extraparams = json_encode($extraparams);
+        }
     }
 
     /**
@@ -785,7 +803,7 @@ class view {
             'showquestiontext' => $this->pagevars['qbshowtext']
         ];
         echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter(
-            $catcontext, $this->searchconditions, $additionalparams, $this->component, $this->callback);
+            $catcontext, $this->searchconditions, $additionalparams, $this->component, $this->callback, $this->extraparams);
         $this->display_options_form($this->pagevars['qbshowtext']);
     }
 
