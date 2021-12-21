@@ -236,7 +236,7 @@ class view {
      */
     protected function init_search_conditions(): void {
         debugging('Function init_search_conditions() has been deprecated,
-         please create a qbank plugin and implement a filter object instead instead.', DEBUG_DEVELOPER);
+         please create a qbank plugin and implement a filter object instead.', DEBUG_DEVELOPER);
         $searchplugins = get_plugin_list_with_function('local', 'get_question_bank_search_conditions');
         foreach ($searchplugins as $component => $function) {
             foreach ($function($this) as $searchobject) {
@@ -628,6 +628,7 @@ class view {
 
     /**
      * Get the number of questions.
+     *
      * @return int
      */
     public function get_question_count(): int {
@@ -657,6 +658,8 @@ class view {
 
     /**
      * Returns the base url.
+     *
+     * @return \moodle_url
      */
     public function base_url(): \moodle_url {
         return $this->baseurl;
@@ -1075,6 +1078,11 @@ class view {
         echo $OUTPUT->render($pagingbar);
     }
 
+    /**
+     * Load the questions according to the search conditions.
+     *
+     * @return array
+     */
     public function load_questions() {
         $this->init_sort_from_params();
         $this->build_query();
