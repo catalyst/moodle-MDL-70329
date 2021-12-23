@@ -107,7 +107,10 @@ function core_question_output_fragment_question_data($args) {
     $filtercondition = json_decode($param->filtercondition);
     $extraparams = json_decode($param->extraparams);
     $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
-    $extraparams = \core_question\local\bank\helper::convert_object_array($extraparams);
+    $extraparamsclean = [];
+    if (!empty($extraparams)) {
+        $extraparamsclean = $extraparams;
+    }
     $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
     $thispageurl = new \moodle_url($nodeparent->action->get_path());
     $thispageurl->param('courseid', $params['courseid']);
@@ -115,17 +118,7 @@ function core_question_output_fragment_question_data($args) {
     $contexts = new \question_edit_contexts($thiscontext);
     $contexts->require_one_edit_tab_cap($params['tabname']);
     $course = get_course($params['courseid']);
-    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params, $extraparams);
-    $questionbank->add_standard_searchcondition();
-    $questions = $questionbank->load_questions();
-    $totalquestions = $questionbank->get_question_count();
-    $questionhtml = '';
-    $PAGE->start_collecting_javascript_requirements();
-    if ($totalquestions > 0) {
-        ob_start();
-        $questionbank->display_questions($questions, $params['qpage']);
-        $questionhtml = ob_get_clean();
-    }
-    $jsfooter = $PAGE->requires->get_end_code();
+    $questionbank = new \core_question\local\bank\view($contexts, $thispageurl, $course, null, $params, $extraparamsclean);
+    list($questionhtml, $jsfooter) = $questionbank->display_questions_table();
     return [$questionhtml, $jsfooter];
 }

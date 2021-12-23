@@ -260,7 +260,7 @@ class core_question_bank_renderer extends plugin_renderer_base {
      * @param array $additionalparams Additional filter parameters
      * @param string $component the component for the fragment
      * @param string $callback the callback for the fragment
-     * @param string $exraparams extra pamams for the extended apis
+     * @param array $exraparams extra pamams for the extended apis
      * @return string
      */
     public function render_questionbank_filter(\context $context, array $searchconditions, array $additionalparams,
@@ -285,7 +285,7 @@ class core_question_bank_renderer extends plugin_renderer_base {
             'contextid' => $context->id,
             'component' => $component,
             'callback' => $callback,
-            'extraparams' => $exraparams,
+            'extraparams' => json_encode($exraparams),
         ];
         $PAGE->requires->js_call_amd('core_question/filter', 'init', $params);
         return $renderedtemplate;

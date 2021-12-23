@@ -169,9 +169,9 @@ class view {
     public $callback = 'question_data';
 
     /**
-     * @var string|null $extraparams extra parameters for the extended apis.
+     * @var array $extraparams extra parameters for the extended apis.
      */
-    public $extraparams = '';
+    public $extraparams = [];
 
     /**
      * Constructor for view.
@@ -188,6 +188,7 @@ class view {
         $this->baseurl = $pageurl;
         $this->course = $course;
         $this->cm = $cm;
+        $this->extraparams = $extraparams;
 
         // Create the url of the new question page to forward to.
         $this->returnurl = $pageurl->out_as_local_url(false);
@@ -206,7 +207,6 @@ class view {
         $this->init_sort();
         $this->init_bulk_actions();
         $this->set_pagevars($params);
-        $this->set_extra_params($extraparams);
     }
 
     /**
@@ -217,7 +217,7 @@ class view {
      */
     public function set_extra_params($extraparams): void {
         if (!empty($extraparams)) {
-            $this->extraparams = json_encode($extraparams);
+            $this->extraparams = $extraparams;
         }
     }
 
@@ -1279,5 +1279,26 @@ class view {
                 }
             }
         }
+    }
+
+    /**
+     * Display the questions table for the fragment/ajax.
+     *
+     * @return array
+     */
+    public function display_questions_table(): array {
+        global $PAGE;
+        $this->add_standard_searchcondition();
+        $questions = $this->load_questions();
+        $totalquestions = $this->get_question_count();
+        $questionhtml = '';
+        $PAGE->start_collecting_javascript_requirements();
+        if ($totalquestions > 0) {
+            ob_start();
+            $this->display_questions($questions, $this->pagevars['qpage']);
+            $questionhtml = ob_get_clean();
+        }
+        $jsfooter = $PAGE->requires->get_end_code();
+        return [$questionhtml, $jsfooter];
     }
 }
