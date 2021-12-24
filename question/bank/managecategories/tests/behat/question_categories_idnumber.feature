@@ -32,12 +32,12 @@ Feature: A teacher can put questions with idnumbers in categories with idnumbers
       | Parent category | Top for Course 1  |
       | Category info   | Created as a test |
       | ID number       | c1used            |
-    And I click on "//div[@class='modal-footer']/button[@data-action='save']" "xpath_element"
+    And I click on "Add category" "button" in the ".modal-footer" "css_element"
     # Standard warning.
     Then I should see "This ID number is already in use"
     # Correction to a unique idnumber for the context.
     And I set the field "ID number" to "c1unused"
-    And I click on "//div[@class='modal-footer']/button[@data-action='save']" "xpath_element"
+    And I click on "Add category" "button" in the ".modal-footer" "css_element"
     Then I should see "New cat"
     And I should see "ID number"
     And I should see "c1unused"

@@ -17,8 +17,10 @@
 namespace qbank_managecategories;
 
 use advanced_testcase;
+use core_privacy\local\request\writer;
 use moodle_exception;
 use qbank_managecategories\external\update_category_order;
+use qbank_managecategories\privacy\provider;
 
 /**
  * Unit tests for qbank_managecategories enhancememt component.
@@ -74,6 +76,7 @@ class managecategories_enhancement_test extends advanced_testcase {
         $this->categoryinfo = 'Dummy category info';
         $this->idnumber = 'Dummy id num';
     }
+
     /**
      * Tests setting a new category order.
      *
@@ -98,7 +101,7 @@ class managecategories_enhancement_test extends advanced_testcase {
             $ordertoset[] = [$category->id . ',' . $category->contextid];
         }
         $ordertoset = json_encode($ordertoset);
-        update_category_order::execute($ordertoset, $category2->id, $category4->contextid, $category2->contextid);
+        update_category_order::execute($ordertoset, $category2->id, $category4->contextid, $category2->contextid, 0);
 
         $newcategories = $DB->get_records('question_categories');
         $neworder = [];
@@ -110,5 +113,20 @@ class managecategories_enhancement_test extends advanced_testcase {
         }
         $ordertoset = json_decode($ordertoset);
         $this->assertNotSame($ordertoset, $neworder);
+    }
+
+    /**
+     * Tests updating a category parent.
+     *
+     */
+    public function test_update_category_parent() {
+        global $DB;
+
+        $category2 = $this->generator->create_question_category();
+        $parentbefore = $DB->get_field('question_categories', 'parent', ['id' => $category2->id]);
+        update_category_order::execute('', $category2->id, 0, 0, $this->category->id);
+        $parentafter = $DB->get_field('question_categories', 'parent', ['id' => $category2->id]);
+        $this->assertEquals($parentafter, $this->category->id);
+        $this->assertNotEquals($parentbefore, $this->category->id);
     }
 }

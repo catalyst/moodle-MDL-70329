@@ -17,32 +17,30 @@
 {{!
     @template qbank_managecategories/categories
 
-    This template renders the base for category view.
+    Template for displaying category view.
 
     Example context (json):
     {
         "helpstringhead": "<h2> Edit categories <a href='someurl'>...</a></h2>",
         "hascapability": true,
         "checkbox": "<form id='qbshowdescr-form'>...</form>",
+        "contextid": "18",
         "categoriesrendered": [{
             "items": [{
-                "questionbankurl": "question/edit.php?cmid=",
+                "questionbankurl": "question/edit.php?cmid=123",
                 "categoryname": "Default for Miscellaneous",
                 "idnumber": "1",
                 "questioncount": " (1)",
                 "categorydesc": "The default category for questions shared in context Miscellaneous",
                 "editactionmenu": "<div class='action-menu moodle-actionmenu'>...</div>",
-                "handle": "true",
-                "iconleft": "<img class="icon spacer" width="1" height="1" alt="" aria-hidden="true" src="http://someurl/theme/image.php/boost/core/1639662110/spacer" />",
-                "iconright" "<img class="icon spacer" width="1" height="1" alt="" aria-hidden="true" src="http://someurl/theme/image.php/boost/core/1639662110/spacer" />",
-                "children": [{
-                    "items": [{ ... }],
-                }],
+                "handle": true,
+                "iconleft": "<img class='icon spacer' width='1' height='1' aria-hidden='true' src='http://someurl/theme/image.php/boost/core/1639662110/spacer' />",
+                "iconright": "<img class='icon spacer' width='1' height='1' aria-hidden='true' src='http://someurl/theme/image.php/boost/core/00000/spacer' />",
+                "children": ""
             }],
             "heading": "Question categories for 'Quiz: qz'",
-            "ctxlvl": "contextlevel70",
-        }],
-        "contextid": "18",
+            "ctxlvl": "contextlevel70"
+        }]
     }
 }}
 {{#helpstringhead}}

@@ -14,24 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace qbank_managecategories;
+
+use advanced_testcase;
+use core_privacy\local\request\writer;
+use qbank_managecategories\privacy\provider;
 
 /**
- * qbank_managecategories external functions and service definitions.
+ * Unit tests for qbank_managecategories privacy provider.
+ *
  * @package    qbank_managecategories
- * @category   webservice
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$functions = [
-    'qbank_managecategories_update_category_order' => [
-        'classname'    => 'qbank_managecategories\external\update_category_order',
-        'description'  => 'Returns question category order',
-        'type'         => 'write',
-        'capabilities' => 'moodle/question:managecategory',
-        'ajax'         => true,
-    ],
-];
+class provider_test extends advanced_testcase {
+    /**
+     * Test to check export_user_preferences.
+     */
+    public function test_export_user_preferences() {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        set_user_preference('qbank_managecategories_showdescr', 1, $user);
+        provider::export_user_preferences($user->id);
+        $writer = writer::with_context(\context_system::instance());
+        $prefs = $writer->get_user_preferences('qbank_managecategories');
+        $this->assertEquals(1, $prefs->showdescr->value);
+        $this->assertEquals(get_string('displaydescription', 'qbank_managecategories'), $prefs->showdescr->description);
+    }
+}

@@ -62,8 +62,7 @@ class core_question_events_testcase extends advanced_testcase {
                 $defaultcategoryobj->id,
                 $defaultcategory,
                 null,
-                $contexts->having_cap('moodle/question:add'),
-                $quiz->cmid);
+                $contexts->having_cap('moodle/question:add'));
 
         // Create the category.
         $categoryid = $qcobject->add_category($defaultcategory, 'newcategory', '', true);

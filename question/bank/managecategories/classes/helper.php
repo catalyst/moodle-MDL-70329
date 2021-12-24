@@ -380,7 +380,7 @@ class helper {
      * @param string $contextid Contextid to check in.
      * @return mixed Returns false or id of existing idnumber.
      */
-    public static function get_idnumber(string $idnumber, string $contextid) {
+    public static function idnumber_exists(string $idnumber, string $contextid) {
         global $DB;
 
         $record = $DB->get_record('question_categories', ['idnumber' => $idnumber, 'contextid' => $contextid]);

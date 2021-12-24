@@ -36,7 +36,7 @@ use qbank_managecategories\question_category_object;
  * @return null|string The rendered form.
  */
 function qbank_managecategories_output_fragment_category_rendering($args) {
-    global $OUTPUT, $PAGE;
+    global $PAGE;
     $url = new moodle_url($args['url']);
     $thiscontext = $args['context'];
     if ($args['cmid']) {

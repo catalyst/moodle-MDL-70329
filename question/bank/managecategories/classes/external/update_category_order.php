@@ -30,7 +30,8 @@ use moodle_exception;
 use qbank_managecategories\helper;
 
 /**
- * External qbank_managecategories API
+ * External qbank_managecategories API handling category reordering using drag and drop,
+ * it also handles the update of category parent when category descendant arrow is being used.
  *
  * @package    qbank_managecategories
  * @category   external
@@ -45,11 +46,12 @@ class update_category_order extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'neworder' => new external_value(PARAM_RAW, 'Category order string, encoded as a json array, ie:
-            [["9,19"],["2,17","8,19"],["6,3","4,3"],["10,1"]]'),
+            'neworder' => new external_value(PARAM_RAW, "Category order string, encoded as a json array, ie:
+                [['9,19'],['2,17','8,19'],['6,3','4,3'],['10,1']]", VALUE_DEFAULT, ''),
             'origincategory' => new external_value(PARAM_INT, 'Category being moved'),
-            'destinationcontext' => new external_value(PARAM_INT, 'Destination where the moved category is being put'),
-            'origincontext' => new external_value(PARAM_INT, 'Context from where the category was moved')
+            'destinationcontext' => new external_value(PARAM_INT, 'Destination context where category is moved', VALUE_DEFAULT, 0),
+            'origincontext' => new external_value(PARAM_INT, 'Context from where the category was moved', VALUE_DEFAULT, 0),
+            'tocategory' => new external_value(PARAM_INT, 'Destination category id when updating parent', VALUE_DEFAULT, 0)
         ]);
     }
 
@@ -60,20 +62,35 @@ class update_category_order extends external_api {
      * @param int $origincategory Category id from dragged category.
      * @param int $destinationcontext Destination context id where category is dropped.
      * @param int $origincontext Context id where the category was dragged from.
+     * @param int $tocategory Destination category id when updating parent.
      * @return string $categories.
      */
-    public static function execute(string $neworder, int $origincategory, int $destinationcontext, int $origincontext) {
+    public static function execute(string $neworder, int $origincategory,
+        int $destinationcontext, int $origincontext, int $tocategory) {
         global $DB;
         $params = self::validate_parameters(self::execute_parameters(), [
             'neworder' => $neworder,
             'origincategory' => $origincategory,
             'destinationcontext' => $destinationcontext,
-            'origincontext' => $origincontext
+            'origincontext' => $origincontext,
+            'tocategory' => $tocategory
         ]);
 
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('moodle/category:manage', $context);
+
+        // If tocategory present only update category parent.
+        // Descendant arrow being used.
+        if ($params['tocategory']) {
+            $categorytomove = $DB->get_record('question_categories', ['id' => $params['origincategory']]);
+            $categorytomove->parent = $params['tocategory'];
+            $DB->update_record('question_categories', $categorytomove);
+            return [
+                'success' => true,
+                'error' => ''
+            ];
+        }
         // New order insertion.
         $neworder = $params['neworder'];
         $neworder = json_decode($neworder, true);
@@ -86,8 +103,8 @@ class update_category_order extends external_api {
         if (!is_null($newctxid)) {
             // Retrieves new and old context categories.
             $sql = 'SELECT id, contextid, parent, sortorder, idnumber
-                        FROM {question_categories}
-                        WHERE (contextid = ?) OR (contextid = ?)';
+                      FROM {question_categories}
+                     WHERE (contextid = ?) OR (contextid = ?)';
 
             $records = $DB->get_records_sql($sql, [$newctxid, $origincontext]);
             foreach ($records as $record) {
@@ -108,11 +125,11 @@ class update_category_order extends external_api {
             if (isset($categorytoupdate->idnumber)) {
                 // We don't want errors when reordering in same context.
                 if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
-                    $exists = helper::get_idnumber($categorytoupdate->idnumber, $destinationcontext->contextid);
+                    $exists = helper::idnumber_exists($categorytoupdate->idnumber, $destinationcontext->contextid);
                     if ($exists) {
                         return [
                             'success' => false,
-                            'error' => 'idnumberexists'
+                            'error' => get_string('idnumberexists', 'qbank_managecategories')
                         ];
                     }
                 }
@@ -131,11 +148,11 @@ class update_category_order extends external_api {
                 if (isset($records[$descendantid]->idnumber)) {
                     // We don't want errors when reordering in same context.
                     if ($destinationcontext->contextid !== $categorytoupdate->contextid) {
-                        $exists = helper::get_idnumber($records[$descendantid]->idnumber, $destinationcontext->contextid);
+                        $exists = helper::idnumber_exists($records[$descendantid]->idnumber, $destinationcontext->contextid);
                         if ($exists) {
                             return [
                                 'success' => false,
-                                'error' => 'idnumberexists'
+                                'error' => get_string('idnumberexists', 'qbank_managecategories')
                             ];
                         }
                     }

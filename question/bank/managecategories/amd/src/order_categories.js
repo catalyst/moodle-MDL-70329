@@ -24,7 +24,6 @@
  */
 
 import $ from 'jquery';
-import {get_string as getString} from 'core/str';
 import Ajax from 'core/ajax';
 import Fragment from 'core/fragment';
 import Notification from 'core/notification';
@@ -41,7 +40,7 @@ new SortableList(
 /**
  * Sets up sortable list in the column sort order page.
  *
- * @param {int} contextid Context id for fragment.
+ * @param {number} contextid Context id for fragment.
  */
 const setupSortableLists = (contextid) => {
     $('.list_item').on(SortableList.EVENTS.DROP, (evt) => {
@@ -76,14 +75,9 @@ const setupSortableLists = (contextid) => {
             });
         })
         .catch((error) => {
-            getString(error.error, 'qbank_managecategories')
-            .then((str) => {
-                return Notification.addNotification({
-                    message: str,
-                    type: 'error'
-                });
-            }).catch(() => {
-                return;
+            Notification.addNotification({
+                message: error.error,
+                type: 'error'
             });
             return getCategoriesFragment(contextid).done((html, js) => {
                 document.getElementsByClassName('alert-danger')[0].scrollIntoView();
@@ -110,9 +104,9 @@ const getCategoriesFragment = (contextid) => {
  * Call external function update_category_order - inserts the updated column in the question_categories table.
  *
  * @param {string} newCatOrder String containing new ordered categories.
- * @param {int} originCategory Category which was dragged.
- * @param {int} destinationContext Context where category was dropped.
- * @param {int} originContext Context from which the category was dragged.
+ * @param {number} originCategory Category which was dragged.
+ * @param {number} destinationContext Context where category was dropped.
+ * @param {number} originContext Context from which the category was dragged.
  * @returns {Promise}
  */
 const setCatOrder = (newCatOrder, originCategory, destinationContext, originContext) => {
@@ -123,7 +117,7 @@ const setCatOrder = (newCatOrder, originCategory, destinationContext, originCont
                 neworder: newCatOrder,
                 origincategory: originCategory,
                 destinationcontext: destinationContext,
-                origincontext: originContext
+                origincontext: originContext,
             },
             fail: Notification.exception
         }]);
@@ -145,8 +139,8 @@ const setCatOrder = (newCatOrder, originCategory, destinationContext, originCont
  * Retrieving the order on EVENT.DROP, also gets new parameter.
  *
  * @param {JQuery<HTMLElement>} categoryListElements List of HTML element to parse.
- * @param {int} oldContextId Old context id to change.
- * @param {int} oldCat Old category.
+ * @param {number} oldContextId Old context id to change.
+ * @param {number} oldCat Old category.
  * @returns {array}
  */
 const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
@@ -176,6 +170,39 @@ const getNewOrder = (categoryListElements, oldContextId, oldCat) => {
     return [newCatOrder, destinationCtx[0], oldCtxCat];
 };
 
+/**
+ * Method to add listenner on category arrow - descendants.
+ *
+ * @param {number} contextid Context id for fragment.
+ */
+const categoryParentListenner = (contextid) => {
+    const categorycontainer = document.getElementById('categoriesrendered');
+    if (categorycontainer) {
+        categorycontainer.addEventListener('click', (e) => {
+            if (e.target.parentNode.classList.contains('action-icon')) {
+                const data = e.target.parentNode.dataset;
+                const response = Ajax.call([{
+                    methodname: 'qbank_managecategories_update_category_order',
+                    args: {
+                        origincategory: data.tomove,
+                        tocategory: data.tocategory,
+                    },
+                    fail: Notification.exception
+                }]);
+                response[0].then(() => {
+                    getCategoriesFragment(contextid).done((html, js) => {
+                        Templates.replaceNodeContents('#categoriesrendered', html, js);
+                    });
+                    return;
+                }).catch(() => {
+                    return;
+                });
+            }
+        });
+    }
+};
+
 export const init = (contextid) => {
+    categoryParentListenner(contextid);
     setupSortableLists(contextid);
 };

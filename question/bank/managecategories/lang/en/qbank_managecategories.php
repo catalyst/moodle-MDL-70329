@@ -24,6 +24,8 @@
  */
 
 $string['addcategory'] = 'Add category';
+$string['descriptionnotdisplayed'] = 'Categories description not displayed';
+$string['displaydescription'] = 'Categories description displayed';
 $string['editcategory'] = 'Edit category';
 $string['idnumberexists'] = 'ID number already in use, please change it to move or update category';
 $string['lastcategoryinthiscontext'] = 'This category is the only present under context,

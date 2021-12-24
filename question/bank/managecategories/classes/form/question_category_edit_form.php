@@ -185,7 +185,7 @@ class question_category_edit_form extends \core_form\dynamic_form {
         if ($values->id !== 0) {
             $cat->id = $values->id;
             if ($idnumber) {
-                $exists = helper::get_idnumber($idnumber, $contextid);
+                $exists = helper::idnumber_exists($idnumber, $contextid);
                 if ($exists && $exists !== $values->id) {
                     throw new moodle_exception('idnumberexists', 'qbank_managecategories');
                 }
@@ -194,7 +194,7 @@ class question_category_edit_form extends \core_form\dynamic_form {
         } else {
             $cat->sortorder = 999;
             if ($idnumber) {
-                $exists = helper::get_idnumber($idnumber, $contextid);
+                $exists = helper::idnumber_exists($idnumber, $contextid);
                 if ($exists) {
                     throw new moodle_exception('idnumberexists', 'qbank_managecategories');
                 }

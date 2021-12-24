@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Form for moving questions between categories.
- *
- * @package    qbank_managecategories
- * @copyright  2021 Catalyst IT Australia Pty Ltd
- * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace qbank_managecategories\form;
 
 use moodleform;
@@ -31,19 +22,15 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
-
 /**
- * Form for displaying category descriptions.
+ * Form for displaying categories description.
  *
+ * @package    qbank_managecategories
+ * @copyright  2021 Catalyst IT Australia Pty Ltd
+ * @author     2021, Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_category_checkbox_form extends moodleform {
-
-    /**
-     * Build the form definition.
-     *
-     * This adds all the form fields that the question move feature needs.
-     * @throws \coding_exception
-     */
     protected function definition() {
         $mform = $this->_form;
 
