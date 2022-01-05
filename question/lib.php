@@ -105,6 +105,9 @@ function core_question_output_fragment_question_data($args) {
     }
     $param = json_decode($args);
     $filtercondition = json_decode($param->filtercondition);
+    if (!$filtercondition) {
+        return ['', ''];
+    }
     $extraparams = json_decode($param->extraparams);
     $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
     $extraparamsclean = [];
