@@ -33,6 +33,15 @@ $string['facility_index'] = 'Facility index';
 $string['discriminative_efficiency'] = 'Discriminative efficiency';
 $string['discrimination_index'] = 'Need for revision';
 
+// Input & dropdown placeholders.
+
+$string['firstplaceholder'] = 'First discrimination value';
+$string['index'] = 'Index';
+$string['interpretation'] = 'Interpretation';
+$string['secondplaceholder'] = 'Second discrimination value';
+$string['interpretationplaceholder'] = 'Discrimination interpretation';
+$string['title'] = 'Discrimination index';
+
 // Text format.
 $string['verylikely'] = 'Very likely';
 $string['likely'] = 'Likely';
