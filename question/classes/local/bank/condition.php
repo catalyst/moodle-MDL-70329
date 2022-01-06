@@ -38,6 +38,18 @@ abstract class condition {
     /** @var int All of the following match */
     const JOINTYPE_ALL = 2;
 
+    /** @var int The default filter type (BETWEEN) */
+    const RANGETYPE_DEFAULT = 2;
+
+    /** @var int After specified date */
+    const RANGETYPE_AFTER = 0;
+
+    /** @var int Before specified date */
+    const RANGETYPE_BEFORE = 1;
+
+    /** @var int Between specified dates */
+    const RANGETYPE_BETWEEN = 2;
+
     /**
      * Return an SQL fragment to be ANDed into the WHERE clause to filter which questions are shown.
      * @return string SQL fragment. Must use named parameters.
