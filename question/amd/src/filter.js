@@ -113,7 +113,12 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
 
             // Retrieve fitter info.
             for (const [key, value] of Object.entries(filterdata)) {
-                let filter = {'filtertype': key, 'jointype': value.jointype, 'values': value.values.toString()};
+                let filter = {
+                    'filtertype': key,
+                    'jointype': value.jointype,
+                    'rangetype': value.rangetype,
+                    'values': value.values.toString()
+                };
                 wsfilter.filters.push(filter);
             }
         }
