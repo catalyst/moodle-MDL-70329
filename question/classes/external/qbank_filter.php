@@ -61,6 +61,7 @@ class qbank_filter extends external_api {
                         'filtertype' => new external_value(PARAM_ALPHANUM, 'Filter type'),
                         'jointype' => new external_value(PARAM_INT, 'Join type'),
                         'values' => new external_value(PARAM_RAW, 'list of ids'),
+                        'rangetype' => new external_value(PARAM_INT, 'Range type', VALUE_OPTIONAL),
                     ]
                 ),
                 'Filter params',
@@ -170,7 +171,8 @@ class qbank_filter extends external_api {
         foreach ($filters as $filter) {
             $params['filters'][$filter['filtertype']] = [
                 'jointype' => $filter['jointype'],
-                'values' => empty($filter['values']) ? [] : explode(',', $filter['values']),
+                'rangetype' => $filter['rangetype'] ?? null,
+                'values' => empty($filter['values'])  && $filter['values'] != 0 ? [] : explode(',', $filter['values']),
             ];
         }
 
@@ -194,6 +196,37 @@ class qbank_filter extends external_api {
                 'warnings' => $warnings
             ];
         }
+
+        // Error management for range conditions.
+        foreach ($params['filters'] as $filter) {
+            if (isset($filter['rangetype'])) {
+                if ($filter['rangetype'] === condition::RANGETYPE_BETWEEN) {
+                    if (count($filter['values']) === 1) {
+                        $warnings[] = [
+                            'warningcode' => 'nocategoryconditionspecified',
+                            'message' => get_string('nocategoryconditionspecified', 'question')
+                        ];
+                        return [
+                            'filtercondition' => '',
+                            'warnings' => $warnings
+                        ];
+                    }
+                }
+                foreach ($filter['values'] as $filtervalue) {
+                    if (!is_numeric($filtervalue)) {
+                        $warnings[] = [
+                            'warningcode' => 'nocategoryconditionspecified',
+                            'message' => get_string('nocategoryconditionspecified', 'question')
+                        ];
+                        return [
+                            'filtercondition' => '',
+                            'warnings' => $warnings
+                        ];
+                    }
+                }
+            }
+        }
+
         $categories = $DB->get_records('question_categories', ['id' => $categoryid]);
         $categories = \qbank_managecategories\helper::question_add_context_in_key($categories);
         $category = array_pop($categories);
