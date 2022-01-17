@@ -2128,4 +2128,122 @@ class core_questionlib_testcase extends advanced_testcase {
         $islatest = is_latest($firstversion, $questionbankentryid);
         $this->assertTrue($islatest);
     }
+
+    /**
+     * Test question bank entry deletion.
+     */
+    public function test_delete_question_bank_entry() {
+        global $DB;
+        $this->resetAfterTest();
+        // Setup.
+        $context = context_system::instance();
+        $qgen = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $qcat = $qgen->create_question_category(array('contextid' => $context->id));
+        $q1 = $qgen->create_question('shortanswer', null, array('category' => $qcat->id));
+        // Make sure there is an entry in the entry table.
+        $sql = 'SELECT qbe.id as id,
+                       qv.id as versionid
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv
+                    ON qbe.id = qv.questionbankentryid
+                  JOIN {question} q
+                    ON qv.questionid = q.id
+                 WHERE q.id = ?';
+        $records = $DB->get_records_sql($sql, [$q1->id]);
+        $this->assertCount(1, $records);
+        // Delete the record.
+        $record = reset($records);
+        delete_question_bank_entry($record->id);
+        $records = $DB->get_records('question_bank_entries', ['id' => $record->id]);
+        // As the version record exists, it wont delete the data to resolve any errors.
+        $this->assertCount(1, $records);
+        $DB->delete_records('question_versions', ['id' => $record->versionid]);
+        delete_question_bank_entry($record->id);
+        $records = $DB->get_records('question_bank_entries', ['id' => $record->id]);
+        $this->assertCount(0, $records);
+    }
+
+    /**
+     * Test question bank entry object.
+     */
+    public function test_get_question_bank_entry() {
+        global $DB;
+        $this->resetAfterTest();
+        // Setup.
+        $context = context_system::instance();
+        $qgen = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $qcat = $qgen->create_question_category(array('contextid' => $context->id));
+        $q1 = $qgen->create_question('shortanswer', null, array('category' => $qcat->id));
+        // Make sure there is an entry in the entry table.
+        $sql = 'SELECT qbe.id as id,
+                       qv.id as versionid
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv
+                    ON qbe.id = qv.questionbankentryid
+                  JOIN {question} q
+                    ON qv.questionid = q.id
+                 WHERE q.id = ?';
+        $records = $DB->get_records_sql($sql, [$q1->id]);
+        $this->assertCount(1, $records);
+        $record = reset($records);
+        $questionbankentry = get_question_bank_entry($q1->id);
+        $this->assertEquals($questionbankentry->id, $record->id);
+    }
+
+    /**
+     * Test the version objects for a question.
+     */
+    public function test_get_question_version() {
+        global $DB;
+        $this->resetAfterTest();
+        // Setup.
+        $context = context_system::instance();
+        $qgen = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $qcat = $qgen->create_question_category(array('contextid' => $context->id));
+        $q1 = $qgen->create_question('shortanswer', null, array('category' => $qcat->id));
+        // Make sure there is an entry in the entry table.
+        $sql = 'SELECT qbe.id as id,
+                       qv.id as versionid
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv
+                    ON qbe.id = qv.questionbankentryid
+                  JOIN {question} q
+                    ON qv.questionid = q.id
+                 WHERE q.id = ?';
+        $records = $DB->get_records_sql($sql, [$q1->id]);
+        $this->assertCount(1, $records);
+        $record = reset($records);
+        $questionversions = get_question_version($q1->id);
+        $questionversion = reset($questionversions);
+        $this->assertEquals($questionversion->id, $record->versionid);
+    }
+
+    /**
+     * Test get next version of a question.
+     */
+    public function test_get_next_version() {
+        global $DB;
+        $this->resetAfterTest();
+        // Setup.
+        $context = context_system::instance();
+        $qgen = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $qcat = $qgen->create_question_category(array('contextid' => $context->id));
+        $q1 = $qgen->create_question('shortanswer', null, array('category' => $qcat->id));
+        // Make sure there is an entry in the entry table.
+        $sql = 'SELECT qbe.id as id,
+                       qv.id as versionid,
+                       qv.version
+                  FROM {question_bank_entries} qbe
+                  JOIN {question_versions} qv
+                    ON qbe.id = qv.questionbankentryid
+                  JOIN {question} q
+                    ON qv.questionid = q.id
+                 WHERE q.id = ?';
+        $records = $DB->get_records_sql($sql, [$q1->id]);
+        $this->assertCount(1, $records);
+        $record = reset($records);
+        $this->assertEquals(1, $record->version);
+        $nextversion = get_next_version($record->id);
+        $this->assertEquals(2, $nextversion);
+    }
 }

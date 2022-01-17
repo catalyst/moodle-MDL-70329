@@ -407,6 +407,8 @@ current value for a pluginname depending on its status (enabled, disabled, other
 * New DML function $DB->delete_records_subquery() to delete records based on a subquery in a way
   that will work across databases.
 * Add support for email DKIM signatures via $CFG->emaildkimselector
+* All the new methods in the questionlib now uses type hinting. Please make a note of this while making changes
+or implementing any question bank related feature in a plugin.
 
 === 3.9 ===
 * Following function has been deprecated, please use \core\task\manager::run_from_cli().

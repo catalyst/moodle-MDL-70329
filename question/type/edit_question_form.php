@@ -211,7 +211,7 @@ abstract class question_edit_form extends question_wizard_form {
             }
         }
 
-        if (!empty($this->question->id)) {
+        if (!empty($this->question->id) && !$this->question->beingcopied) {
             // Add extra information from plugins when editing a question (e.g.: Authors, version control and usage).
             $functionname = 'edit_form_display';
             $questiondata = [];

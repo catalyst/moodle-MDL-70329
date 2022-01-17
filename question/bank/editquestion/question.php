@@ -174,6 +174,7 @@ if ($id) {
     if (!$formeditable) {
         question_require_capability_on($question, 'view');
     }
+    $question->beingcopied = false;
     if ($makecopy) {
         // If we are duplicating a question, add some indication to the question name.
         $question->name = get_string('questionnamecopy', 'question', $question->name);
