@@ -1402,10 +1402,9 @@ function quiz_question_edit_button($cmid, $question, $returnurl, $contentafteric
  * @param object $quiz the quiz settings
  * @param object $question the question
  * @param int $variant which question variant to preview (optional).
- * @param bool $random Specifies if a question is random.
  * @return moodle_url to preview this question with the options from this quiz.
  */
-function quiz_question_preview_url($quiz, $question, $variant = null, $random = null) {
+function quiz_question_preview_url($quiz, $question, $variant = null) {
     // Get the appropriate display options.
     $displayoptions = mod_quiz_display_options::make_from_quiz($quiz,
             mod_quiz_display_options::DURING);
@@ -1417,7 +1416,7 @@ function quiz_question_preview_url($quiz, $question, $variant = null, $random = 
 
     // Work out the correcte preview URL.
     return \qbank_previewquestion\helper::question_preview_url($question->id, $quiz->preferredbehaviour,
-            $maxmark, $displayoptions, $variant, null, null, null, $random, $quiz->id);
+            $maxmark, $displayoptions, $variant);
 }
 
 /**
