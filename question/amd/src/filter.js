@@ -206,7 +206,20 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
     });
 
     // Run apply filter at page load.
+    const urlLoadedFilters = coreFilter.loadUrlParams();
     const filter = filterSet.querySelector(Selectors.filter.region);
-    coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
-    applyFilter();
+    if (Object.entries(urlLoadedFilters).length !== 0) {
+        for (const urlFilter in urlLoadedFilters) {
+            if (urlFilter != 'courseid') {
+                coreFilter.addFilter(filter,
+                                     urlFilter,
+                                     urlLoadedFilters[urlFilter].values,
+                                     urlLoadedFilters[urlFilter].jointype,
+                                     urlLoadedFilters[urlFilter].rangetype);
+            }
+        }
+    } else {
+        coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
+    }
+    applyFilter(urlLoadedFilters);
 };
