@@ -35,7 +35,7 @@ class custom_category_condition extends \core_question\bank\search\category_cond
         $catmenu = custom_category_condition_helper::question_category_options($this->contexts, true, 0,
             true, -1, false);
         $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
-            array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
+            ['class' => 'searchoptions custom-select', 'id' => 'id_selectacategory']);
         $displaydata['categorydesc'] = '';
         if ($this->category) {
             $displaydata['categorydesc'] = $this->print_category_info($this->category);
