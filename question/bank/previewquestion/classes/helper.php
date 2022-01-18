@@ -156,6 +156,7 @@ class helper {
      * @param object $displayoptions
      * @param object $context
      * @param moodle_url $returnurl
+     * @param int|null $version
      */
     public static function restart_preview($previewid, $questionid, $displayoptions, $context,
         $returnurl = null, $version = null): void {
