@@ -2512,18 +2512,14 @@ class backup_questions_structure_step extends backup_structure_step {
                 SELECT *
                  FROM {question_hints}
                 WHERE questionid = :questionid
-                ORDER BY id',
-                array('questionid' => backup::VAR_PARENTID));
+             ORDER BY id', ['questionid' => backup::VAR_PARENTID]);
 
         $tag->set_source_sql("SELECT t.id, ti.contextid, t.name, t.rawname
-                              FROM {tag} t
-                              JOIN {tag_instance} ti ON ti.tagid = t.id
-                              WHERE ti.itemid = ?
-                              AND ti.itemtype = 'question'
-                              AND ti.component = 'core_question'",
-            [
-                backup::VAR_PARENTID
-            ]);
+                                FROM {tag} t
+                                JOIN {tag_instance} ti ON ti.tagid = t.id
+                               WHERE ti.itemid = ?
+                                 AND ti.itemtype = 'question'
+                                 AND ti.component = 'core_question'", [backup::VAR_PARENTID]);
 
         // Don't need to annotate ids nor files.
         // ...(already done by {@see backup_annotate_all_question_files()}.
