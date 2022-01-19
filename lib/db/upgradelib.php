@@ -1307,9 +1307,14 @@ function upgrade_migrate_question_table(): void {
     // The actual update/insert done with multiple DB access, so we do it in a transaction.
     $transaction = $DB->start_delegated_transaction();
 
+    // Count all questions to be migrated (for progress bar).
+    $total = $DB->count_records('question');
+    $pbar = new progress_bar('migratequestions', 1000, true);
+    $i = 0;
     // Get all records in question table, we dont need the subquestions, just regular questions and random questions.
     $questions = $DB->get_recordset('question');
     foreach ($questions as $question) {
+        upgrade_set_timeout(60);
         // Populate table question_bank_entries.
         $questionbankentry = new \stdClass();
         $questionbankentry->questioncategoryid = $question->category;
@@ -1371,6 +1376,9 @@ function upgrade_migrate_question_table(): void {
                 }
             }
         }
+        // Update progress.
+        $i++;
+        $pbar->update($i, $total, "Migrating questions - $i/$total.");
     }
     $questions->close();
 
