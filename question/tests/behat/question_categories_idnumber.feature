@@ -56,7 +56,7 @@ Feature: A teacher can put questions with idnumbers in categories in the questio
       | questioncategory | qtype | name             | questiontext                  | idnumber |
       | Category 1       | essay | Question to edit | Write about whatever you want | q1       |
       | Category 1       | essay | Other question   | Write about whatever you want | q2       |
-    And I navigate to "Question bank > Questions" in current page administration
+    And I navigate to "Question bank" in current page administration
     And I choose "Edit question" action for "Question to edit" in the question bank
     And I set the field "ID number" to "q2"
     And I press "Save changes"
