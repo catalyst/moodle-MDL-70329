@@ -31,7 +31,7 @@ Feature: Questions in the question bank have versions
 
   @javascript
   Scenario: Question version is displayed
-    When I navigate to "Question bank > Questions" in current page administration
+    When I navigate to "Question bank" in current page administration
     And I should see "First question"
     And I click on "Edit" "link" in the "First question" "table_row"
     And I follow "Edit question"
@@ -39,7 +39,7 @@ Feature: Questions in the question bank have versions
 
   @javascript
   Scenario: Question version change when question is altered
-    When I navigate to "Question bank > Questions" in current page administration
+    When I navigate to "Question bank" in current page administration
     And I should see "First question"
     And I click on "Edit" "link" in the "First question" "table_row"
     And I follow "Edit question"
