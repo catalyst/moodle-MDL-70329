@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/mod/quiz/locallib.php');
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass \mod_quiz\question\bank\qbank_helper
  */
 class quiz_question_restore_test extends \advanced_testcase {
     use \quiz_question_helper_test_trait;
@@ -41,7 +42,6 @@ class quiz_question_restore_test extends \advanced_testcase {
     public function setUp(): void {
         global $USER;
         parent::setUp();
-        $this->resetAfterTest();
         $this->setAdminUser();
         $this->course = $this->getDataGenerator()->create_course();
         $this->student = $this->getDataGenerator()->create_user();
@@ -50,9 +50,12 @@ class quiz_question_restore_test extends \advanced_testcase {
 
     /**
      * Test a quiz backup and restore in a different course without attempts for course question bank.
+     *
+     * @covers ::get_question_structure
      */
     public function test_quiz_restore_in_a_different_course_using_course_question_bank() {
         global $DB;
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_course::instance($this->course->id);
@@ -72,9 +75,12 @@ class quiz_question_restore_test extends \advanced_testcase {
 
     /**
      * Test a quiz backup and restore in a different course without attempts for quiz question bank.
+     *
+     * @covers ::get_question_structure
      */
     public function test_quiz_restore_in_a_different_course_using_quiz_question_bank() {
         global $DB;
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -95,7 +101,7 @@ class quiz_question_restore_test extends \advanced_testcase {
     /**
      * Count the questions for the context.
      *
-     * @param \context $context
+     * @param int $context
      * @param string $extracondition
      * @return int
      */
@@ -115,6 +121,7 @@ class quiz_question_restore_test extends \advanced_testcase {
      * Test if a duplicate does not duplicate questions in course question bank.
      */
     public function test_quiz_duplicate_does_not_duplicate_course_question_bank_questions() {
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_course::instance($this->course->id);
@@ -134,6 +141,7 @@ class quiz_question_restore_test extends \advanced_testcase {
      * Test quiz duplicate for quiz question bank.
      */
     public function test_quiz_duplicate_for_quiz_question_bank_questions() {
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -151,9 +159,12 @@ class quiz_question_restore_test extends \advanced_testcase {
 
     /**
      * Test quiz restore with attempts.
+     *
+     * @covers ::get_question_structure
      */
     public function test_quiz_restore_with_attempts() {
         global $DB;
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -181,7 +192,7 @@ class quiz_question_restore_test extends \advanced_testcase {
      */
     public function test_pre_4_quiz_restore_for_regular_questions() {
         global $USER, $DB;
-
+        $this->resetAfterTest();
         $backupid = 'abc';
         $backuppath = make_backup_temp_directory($backupid);
         get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(
@@ -222,6 +233,7 @@ class quiz_question_restore_test extends \advanced_testcase {
      */
     public function test_pre_4_quiz_restore_for_random_questions() {
         global $USER, $DB;
+        $this->resetAfterTest();
         $backupid = 'abc';
         $backuppath = make_backup_temp_directory($backupid);
         get_file_packer('application/vnd.moodle.backup')->extract_to_pathname(

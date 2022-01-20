@@ -31,6 +31,7 @@ require_once(__DIR__ . '/quiz_question_helper_test_trait.php');
  * @copyright  2021 Catalyst IT Australia Pty Ltd
  * @author     Safat Shahin <safatshahin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass \mod_quiz\question\bank\qbank_helper
  */
 class qbank_helper_test extends \advanced_testcase {
     use \quiz_question_helper_test_trait;
@@ -41,7 +42,6 @@ class qbank_helper_test extends \advanced_testcase {
     public function setUp(): void {
         global $USER;
         parent::setUp();
-        $this->resetAfterTest();
         $this->setAdminUser();
         $this->course = $this->getDataGenerator()->create_course();
         $this->student = $this->getDataGenerator()->create_user();
@@ -50,8 +50,12 @@ class qbank_helper_test extends \advanced_testcase {
 
     /**
      * Test is random.
+     *
+     * @covers ::is_random
+     * @covers ::get_random_question_data_from_slot
      */
     public function test_is_random() {
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -71,8 +75,15 @@ class qbank_helper_test extends \advanced_testcase {
 
     /**
      * Test reference records.
+     *
+     * @covers ::get_version_options
+     * @covers ::get_question_for_redo
+     * @covers ::get_always_latest_version_question_ids
+     * @covers ::question_load_random_questions
+     * @covers ::question_array_sort
      */
     public function test_reference_records() {
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -116,8 +127,15 @@ class qbank_helper_test extends \advanced_testcase {
 
     /**
      * Test question structure data.
+     *
+     * @covers ::get_question_structure
+     * @covers ::get_question_structure_data
+     * @covers ::question_array_sort
+     * @covers ::get_always_latest_version_question_ids
+     * @covers ::question_load_random_questions
      */
     public function test_get_question_structure() {
+        $this->resetAfterTest();
         $quiz = $this->create_test_quiz($this->course);
         // Test for questions from a different context.
         $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
@@ -144,4 +162,64 @@ class qbank_helper_test extends \advanced_testcase {
         $this->assertEquals($structuredata->slotid, $slot->id);
         $this->assertEquals($structuredata->id, $question->id);
     }
+
+    /**
+     * Test to get the version information for a question to show in the version selection dropdown.
+     *
+     * @covers ::get_question_version_info
+     */
+    public function test_get_question_version_info() {
+        $this->resetAfterTest();
+        $quiz = $this->create_test_quiz($this->course);
+        // Test for questions from a different context.
+        $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+        $numq = $questiongenerator->create_question('essay', null,
+            ['category' => $cat->id, 'name' => 'This is the first version']);
+        // Create two version.
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the second version']);
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the third version']);
+        quiz_add_quiz_question($numq->id, $quiz);
+        // Create the quiz object.
+        $quizobj = \quiz::create($quiz->id);
+        $quizobj->preload_questions();
+        $quizobj->load_questions();
+        $questions = $quizobj->get_questions();
+        $question = reset($questions);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $slots = $structure->get_slots();
+        $slot = reset($slots);
+        $versiondata = qbank_helper::get_question_version_info($question->id, $slot->id);
+        $this->assertEquals(4, count($versiondata));
+        $this->assertEquals('Always latest', $versiondata[0]->versionvalue);
+        $this->assertEquals('v3 (latest)', $versiondata[1]->versionvalue);
+        $this->assertEquals('v1', $versiondata[3]->versionvalue);
+    }
+
+    /**
+     * Test get the question ids for specific question version.
+     *
+     * @covers ::get_specific_version_question_ids
+     */
+    public function test_get_specific_version_question_ids() {
+        $this->resetAfterTest();
+        $quiz = $this->create_test_quiz($this->course);
+        // Test for questions from a different context.
+        $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $this->course->id)->id);
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+        $numq = $questiongenerator->create_question('essay', null,
+            ['category' => $cat->id, 'name' => 'This is the first version']);
+        // Create two version.
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the second version']);
+        $questiongenerator->update_question($numq, null, ['name' => 'This is the third version']);
+        quiz_add_quiz_question($numq->id, $quiz);
+        $specificversionquestionid = qbank_helper::get_specific_version_question_ids($quiz->id);
+        $specificversionquestionid = reset($specificversionquestionid);
+        $this->assertEquals($numq->id, $specificversionquestionid);
+    }
+
 }

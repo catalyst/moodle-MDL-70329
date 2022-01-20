@@ -17,6 +17,8 @@ This files describes API changes in the quiz code.
   - question_set_reference -> Records where a specific question is used.
   - question_set_reference -> Records where groups of questions are used (e.g.: Random questions).
   The quiz_slots_tags table will be removed entirely.
+* The method get_slot_tags_for_slot_id() from mod/quiz/classes/structure.php has been deprecated and the associated
+  code for this method have been removed to make sure any unnecessary error doesn't happen as a part of any call.
 
 === 3.11 ===
 
