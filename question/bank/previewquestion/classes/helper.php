@@ -57,7 +57,7 @@ class helper {
      * @param int $slot the relevant slot within the usage.
      * @param array $args the remaining bits of the file path.
      * @param bool $forcedownload whether the user must be forced to download the file.
-     * @param array $fileoptions
+     * @param array $fileoptions options for the stored files
      * @return void false if file not found, does not return if found - justsend the file
      */
     public static function question_preview_question_pluginfile($course, $context, $component,
@@ -98,11 +98,11 @@ class helper {
     /**
      * The the URL to use for actions relating to this preview.
      *
-     * @param int $questionid the question being previewed.
-     * @param int $qubaid the id of the question usage for this preview.
-     * @param question_preview_options $options the options in use.
-     * @param context $context
-     * @param moodle_url $returnurl
+     * @param int $questionid the question being previewed
+     * @param int $qubaid the id of the question usage for this preview
+     * @param question_preview_options $options the options in use
+     * @param context $context context for the question preview
+     * @param moodle_url $returnurl url of the page to return to
      * @return moodle_url
      */
     public static function question_preview_action_url($questionid, $qubaid,
@@ -125,10 +125,11 @@ class helper {
 
     /**
      * The the URL to use for actions relating to this preview.
-     * @param int $questionid the question being previewed.
-     * @param context $context the current moodle context.
-     * @param int $previewid optional previewid to sign post saved previewed answers.
-     * @param moodle_url $returnurl
+     *
+     * @param int $questionid the question being previewed
+     * @param context $context the current moodle context
+     * @param int $previewid optional previewid to sign post saved previewed answers
+     * @param moodle_url $returnurl url of the page to return to
      * @return moodle_url
      */
     public static function question_preview_form_url($questionid, $context, $previewid = null, $returnurl = null): moodle_url {
@@ -151,12 +152,13 @@ class helper {
 
     /**
      * Delete the current preview, if any, and redirect to start a new preview.
-     * @param int $previewid
-     * @param int $questionid
-     * @param object $displayoptions
-     * @param object $context
-     * @param moodle_url $returnurl
-     * @param int|null $version
+     *
+     * @param int $previewid id of the preview while restarting it
+     * @param int $questionid id of the question in preview
+     * @param object $displayoptions display options for the question in preview
+     * @param object $context context of the question for preview
+     * @param moodle_url $returnurl url of the page to return to
+     * @param int|null $version version of the question in preview
      */
     public static function restart_preview($previewid, $questionid, $displayoptions, $context,
         $returnurl = null, $version = null): void {
@@ -173,16 +175,17 @@ class helper {
 
     /**
      * Generate the URL for starting a new preview of a given question with the given options.
-     * @param integer $questionid the question to preview.
-     * @param string $preferredbehaviour the behaviour to use for the preview.
-     * @param float $maxmark the maximum to mark the question out of.
-     * @param question_display_options $displayoptions the display options to use.
+     *
+     * @param integer $questionid the question to preview
+     * @param string $preferredbehaviour the behaviour to use for the preview
+     * @param float $maxmark the maximum to mark the question out of
+     * @param question_display_options $displayoptions the display options to use
      * @param int $variant the variant of the question to preview. If null, one will
-     *      be picked randomly.
+     *      be picked randomly
      * @param object $context context to run the preview in (affects things like
-     *      filter settings, theme, lang, etc.) Defaults to $PAGE->context.
-     * @param moodle_url $returnurl
-     * @return moodle_url the URL.
+     *      filter settings, theme, lang, etc.) Defaults to $PAGE->context
+     * @param moodle_url $returnurl url of the page to return to
+     * @return moodle_url the URL
      */
     public static function question_preview_url($questionid, $preferredbehaviour = null,
             $maxmark = null, $displayoptions = null, $variant = null, $context = null, $returnurl = null,
@@ -234,6 +237,7 @@ class helper {
 
     /**
      * Popup params for the question preview.
+     *
      * @return array that can be passed as $params to the {@see popup_action} constructor.
      */
     public static function question_preview_popup_params(): array {
@@ -246,8 +250,8 @@ class helper {
     /**
      * Get the extra elements for preview from qbank plugins.
      *
-     * @param  question_definition $question
-     * @param  int $courseid
+     * @param  question_definition $question question definition object
+     * @param  int $courseid id of the course
      * @return array
      */
     public static function get_preview_extra_elements(question_definition $question, int $courseid): array {
@@ -270,8 +274,8 @@ class helper {
     /**
      * Checks if question is the latest version.
      *
-     * @param string $version Question version to check.
-     * @param string $questionbankentryid Entry to check against.
+     * @param string $version Question version to check
+     * @param string $questionbankentryid Entry to check against
      * @return bool
      */
     public static function is_latest(string $version, string $questionbankentryid) : bool {
@@ -291,8 +295,8 @@ class helper {
     /**
      * Renders question preview cog wheel menu.
      *
-     * @param  object $question Question informations.
-     * @return string $menu Cog wheel menu to render.
+     * @param  object $question Question informations
+     * @return string $menu Cog wheel menu to render
      */
     public static function display_edit_menu(object $question) : string {
         global $OUTPUT, $COURSE, $PAGE;
@@ -325,7 +329,7 @@ class helper {
     /**
      * Loads question version ids for current question.
      *
-     * @param  string $questionbankentryid Question bank entry id.
+     * @param  string $questionbankentryid Question bank entry id
      * @return array  $questionids Array containing question id as key and version as value.
      */
     public static function load_versions(string $questionbankentryid) : array {
