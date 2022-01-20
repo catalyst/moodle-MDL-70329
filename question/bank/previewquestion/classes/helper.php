@@ -293,40 +293,6 @@ class helper {
     }
 
     /**
-     * Renders question preview cog wheel menu.
-     *
-     * @param  object $question Question informations
-     * @return string $menu Cog wheel menu to render
-     */
-    public static function display_edit_menu(object $question) : string {
-        global $OUTPUT, $COURSE, $PAGE;
-
-        $thiscontext = context::instance_by_id($question->contextid);;
-        $questioneditcontexts = new question_edit_contexts($thiscontext);
-        $menu = new action_menu();
-        $qbankview = new view($questioneditcontexts, $PAGE->url, $COURSE, null);
-        $editmenucolumn = new edit_menu_column($qbankview);
-        $editmenucolumn->claim_menuable_columns($qbankview->get_requiredcolumns());
-        $qtype = explode('_', get_class($question->qtype))[1];
-        $questionobject = (object)(array)$question;
-        $questionobject->qtype = $qtype;
-
-        foreach ($editmenucolumn->get_actions() as $actioncolumn) {
-            $action = $actioncolumn->get_action_menu_link($questionobject);
-            if ($action && get_class($actioncolumn) === 'qbank_tagquestion\\tags_action_column') {
-                $action->url = new moodle_url('#');
-                $PAGE->requires->js_call_amd('qbank_tagquestion/edit_tags', 'init', ['#cogwheelmenu']);
-            }
-            if ($action && get_class($actioncolumn) !== 'qbank_previewquestion\\preview_action_column') {
-                $menu->add($action);
-            }
-        }
-
-        $menu = $OUTPUT->render($menu);
-        return $menu;
-    }
-
-    /**
      * Loads question version ids for current question.
      *
      * @param  string $questionbankentryid Question bank entry id

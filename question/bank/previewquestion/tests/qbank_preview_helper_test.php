@@ -167,28 +167,6 @@ class helper_test extends \advanced_testcase {
     }
 
     /**
-     * Test method display_edit_menu().
-     *
-     */
-    public function test_display_edit_menu() {
-        global $DB, $PAGE;
-        $this->resetAfterTest();
-        $PAGE->set_url('/my/index.php');
-        $generator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        $qcat1 = $generator->create_question_category(['name' => 'My category', 'sortorder' => 1, 'idnumber' => 'myqcat']);
-        $question = $generator->create_question('shortanswer', null, ['name' => 'q1', 'category' => $qcat1->id]);
-        $questionobject = question_bank::load_question($question->id);
-        $menu = helper::display_edit_menu($questionobject);
-        $this->assertStringContainsString('title="Actions menu"', $menu);
-        $this->assertStringNotContainsString('Preview', $menu);
-        $this->assertStringContainsString('Edit question', $menu);
-        $this->assertStringContainsString('Duplicate', $menu);
-        $this->assertStringContainsString('Manage tags', $menu);
-        $this->assertStringContainsString('Delete', $menu);
-        $this->assertStringContainsString('Export as Moodle XML', $menu);
-    }
-
-    /**
      * Test method load_versions().
      *
      */
