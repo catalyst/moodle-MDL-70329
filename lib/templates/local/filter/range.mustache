@@ -23,16 +23,18 @@
     {
         "placeholderone": "First range value",
         "placeholdertwo": "Second range value",
-        "type": "date"
+        "type": "date",
+        "initialvalueone": "123",
+        "initialvaluetwo": "456"
     }
 }}
 <div class="row">
     <div class="col">
-        <input class="form-control mb-1" type={{type}} id="rangeValue1" placeholder="{{placeholderone}}">
+        <input class="form-control mb-1" type={{type}} id="rangeValue1" placeholder="{{placeholderone}}" value={{initialvalueone}}>
     </div>
     {{#placeholdertwo}}
     <div class="col">
-        <input class="form-control" type={{type}} id="rangeValue2" placeholder="{{placeholdertwo}}">
+        <input class="form-control" type={{type}} id="rangeValue2" placeholder="{{placeholdertwo}}" value={{initialvaluetwo}}>
     </div>
     {{/placeholdertwo}}
 </div>

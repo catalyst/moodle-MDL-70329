@@ -21,11 +21,14 @@
 
     Example context (json):
     {
+        "optionone": "false",
+        "optiontwo": "false",
+        "optionthree": "true"
     }
 }}
 <select class="custom-select mb-1 mb-md-0 mr-md-2" data-filterfield="range" id="core-filter-rangetype-{{uniqid}}"
         aria-label="{{#str}}filtersetmatchdescription{{/str}}">
-    <option value="0">{{#str}}after, question{{/str}}</option>
-    <option value="1">{{#str}}before, question{{/str}}</option>
-    <option value="2" selected>{{#str}}between, question{{/str}}</option>
+    <option value="0" {{#optionone}}selected{{/optionone}}>{{#str}}after, question{{/str}}</option>
+    <option value="1" {{#optiontwo}}selected{{/optiontwo}}>{{#str}}before, question{{/str}}</option>
+    <option value="2" {{#optionthree}}selected{{/optionthree}}>{{#str}}between, question{{/str}}</option>
 </select>
