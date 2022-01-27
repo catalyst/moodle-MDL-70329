@@ -28,14 +28,16 @@ Feature: A teacher can move questions between categories in the question bank
 
   @javascript
   Scenario: Move a question between categories via the question page
-    When I navigate to "Question bank > Questions" in current page administration
+    When I navigate to "Question bank" in current page administration
     And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Used category"
     And I click on "Apply filters" "button"
     And I should not see "Subcategory (1)" in the ".form-autocomplete-selection" "css_element"
     And I should see "Used category (1)" in the ".form-autocomplete-selection" "css_element"
     And I click on "Test question to be moved" "checkbox" in the "Test question to be moved" "table_row"
+    And I click on "bulkactionsui-selector" "button"
+    And I click on "//input[@name='move']" "xpath_element"
     And I set the field "id_movetocategory" to "Subcategory"
-    And I press "Move to >>"
+    And I press "Move to"
     Then I should see "Test question to be moved"
     And I should see "Subcategory (1)" in the ".form-autocomplete-selection" "css_element"
     And I should not see "Used category (1)" in the ".form-autocomplete-selection" "css_element"
@@ -43,7 +45,8 @@ Feature: A teacher can move questions between categories in the question bank
   @javascript
   Scenario: Move a question between categories via the question settings page
     When I navigate to "Question bank" in current page administration
-    And I set the field "Select a category" to "Used category"
+    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Used category"
+    And I click on "Apply filters" "button"
     And I choose "Edit question" action for "Test question to be moved" in the question bank
     And I click on "Use this category" "checkbox"
     And I set the field "Save in category" to "Subcategory"
