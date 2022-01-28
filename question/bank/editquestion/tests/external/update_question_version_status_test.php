@@ -56,14 +56,10 @@ class update_question_version_status_test extends \advanced_testcase {
         $cat = $questiongenerator->create_question_category();
         $numq = $questiongenerator->create_question('essay', null,
             ['category' => $cat->id, 'name' => 'This is the first version']);
-        $data = ['status' => 2];
-        $mform = \qbank_editquestion\form\question_status_form::mock_generate_submit_keys($data);
-        $this->expectException('moodle_exception');
-        list($result, $statusname) = update_question_version_status::execute($numq->id, http_build_query($mform, '', '&'));
+        $result = update_question_version_status::execute($numq->id, 'draft');
         // Test if the version actually changed.
         $currentstatus = $DB->get_record('question_versions', ['questionid' => $numq->id]);
-        $this->assertEquals($data['status'], $currentstatus->status);
-        $this->assertEquals(editquestion_helper::get_question_status_string($currentstatus->status), $statusname);
+        $this->assertEquals(editquestion_helper::get_question_status_string($currentstatus->status), $result['statusname']);
     }
 
     /**
@@ -81,10 +77,7 @@ class update_question_version_status_test extends \advanced_testcase {
             ['category' => $cat->id, 'name' => 'This is the first version']);
         $countcurrentrecords = $DB->count_records('question_versions');
         $this->assertEquals(1, $countcurrentrecords);
-        $data = ['status' => 2];
-        $mform = \qbank_editquestion\form\question_status_form::mock_generate_submit_keys($data);
-        $this->expectException('moodle_exception');
-        list($result, $statusname) = update_question_version_status::execute($numq->id, http_build_query($mform, '', '&'));
+        $result = update_question_version_status::execute($numq->id, 'draft');
         $countafterupdate = $DB->count_records('question_versions');
         $this->assertEquals($countcurrentrecords, $countafterupdate);
     }
