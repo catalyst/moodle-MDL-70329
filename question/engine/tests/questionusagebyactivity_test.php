@@ -28,7 +28,8 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/helpers.php');
-
+require_once(__DIR__ . '/../../../mod/quiz/report/default.php');
+require_once(__DIR__ . '/../../../mod/quiz/report/overview/report.php');
 
 /**
  * Unit tests for the question_usage_by_activity class.
@@ -190,4 +191,113 @@ class question_usage_by_activity_test extends advanced_testcase {
         $steps = $qa->get_full_step_iterator();
         $this->assertEquals('Admin User', $steps[0]->get_user_fullname());
     }
+
+    /**
+     * Test question regrading taking into account versions.
+     */
+    public function test_regrade_question() {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        // Make a user to do the quiz.
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        // Make a quiz.
+        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $quiz = $quizgenerator->create_instance(['course' => $course->id,
+            'grade' => 100.0, 'sumgrades' => 10.0]);
+        $quizobj = quiz::create($quiz->id, $user->id);
+
+        $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category();
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $question = $questiongenerator->create_question('truefalse', null, ['category' => $cat->id, 'name' => 'Alpha Question']);
+        $originalid = $question->id;
+        $questionbankentryid = $DB->get_record('question_versions', ['questionid' => $question->id], 'questionbankentryid')->questionbankentryid;
+        $questionattempts = $DB->get_records('question_attempts');
+
+        $this->assertEmpty($questionattempts);
+        // Attempt question.
+        $q = question_bank::load_question($question->id);
+        $quba->set_preferred_behaviour('adaptive');
+        $slot = $quba->add_question($q);
+        $quba->start_question($slot);
+        $quba->process_all_actions(null, ['answer' => 'False']);
+        $quba->finish_all_questions();
+        $quba->get_question_attempt($slot)->manual_grade('Comment', 1, FORMAT_HTML);
+        question_engine::save_questions_usage_by_activity($quba, $DB);
+
+        $attempt1 = quiz_create_attempt($quizobj, 1, null, time());
+        quiz_attempt_save_started($quizobj, $quba, $attempt1);
+        $attemptobj1 = quiz_attempt::create($attempt1->id);
+        $questionattemptsupdated = $DB->get_records('question_attempts');
+
+        $this->assertNotEmpty($questionattemptsupdated);
+        $this->assertCount(1, $questionattemptsupdated);
+        $this->assertEquals($originalid, reset($questionattemptsupdated)->questionid);
+
+        $questiongenerator->update_question($question, null, ['name' => 'This is the second version']);
+        $versions = $DB->get_records('question_versions', ['questionbankentryid' => $questionbankentryid]);
+        $nextslot = $quba->next_slot_number();
+        $cm = get_coursemodule_from_id('quiz', $quiz->cmid);
+        $context = context_module::instance($quiz->cmid);
+        $slot1 = (object) [
+            'id' => $slot,
+            'slot' => $slot,
+            'quizid' => $quiz->id,
+            'page' => 1,
+            'requireprevious' => 0,
+            'maxmark' => 1
+        ];
+        // We voluntarly set version in reference to last one in order to regrade - trigger update of question attempt table.
+        $ref1 = (object) [
+            'id' => 1,
+            'usingcontextid' => $context->id,
+            'component' => 'mod_quiz',
+            'questionarea' => 'slot',
+            'questionbankentryid' => reset($versions)->questionbankentryid,
+            'version' => end($versions)->version
+        ];
+
+        $slotid1 = $DB->insert_record('quiz_slots', $slot1, true);
+        $ref1->itemid = $slotid1;
+        $DB->insert_record('question_references', $ref1);
+        $this->assertCount(2, $versions);
+        $quizattempts = $DB->get_records('quiz_attempts');
+
+        $update = new stdClass();
+        $update->id = $attemptobj1->get_attemptid();
+        $update->timemodified = time();
+        $update->sumgrades = $attemptobj1->get_question_usage()->get_total_mark();
+        $DB->update_record('quiz_attempts', $update);
+        $quizattempts = $DB->get_records('quiz_attempts');
+        $quizoverviewreport = new quiz_overview_report();
+        $foo = self::getMethod($quizoverviewreport, 'regrade_attempt', $cm->id);
+        $foo->invokeArgs($quizoverviewreport, [reset($quizattempts)]);
+        $latestquestionattempts = $DB->get_records('question_attempts');
+
+        $this->assertNotEmpty($latestquestionattempts);
+        $this->assertCount(1, $latestquestionattempts);
+
+        $this->assertNotEquals($originalid, reset($latestquestionattempts)->questionid);
+    }
+
+    /**
+     * Gets protected method in quiz_overview_report class for tests.
+     *
+     * @return object $method
+     */
+    protected static function getMethod($instance, $name, $cmid) {
+        $class = new ReflectionClass($instance);
+        $context = $class->getProperty('context');
+        $context->setAccessible(true);
+        $context->setValue($instance, context_module::instance($cmid));
+        $method = $class->getMethod($name);
+        $method->setAccessible(true);
+        return $method;
+      }
 }

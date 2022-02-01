@@ -884,12 +884,25 @@ class question_usage_by_activity {
      * @param number $newmaxmark (optional) if given, will change the max mark while regrading.
      */
     public function regrade_question($slot, $finished = false, $newmaxmark = null) {
+        global $DB;
         $oldqa = $this->get_question_attempt($slot);
+        $questiontoregrade = $oldqa->get_question(false);
+        // Gets selected question id version in quiz slot to rebase against.
+        $sql = 'SELECT questionid
+                  FROM {question_versions} qv
+                  JOIN {question_references} qr ON qr.questionbankentryid = qv.questionbankentryid
+                  JOIN {quiz_slots} qs ON qs.id = qr.itemid
+                 WHERE qs.slot = :slot
+                   AND qv.questionbankentryid = qr.questionbankentryid
+                   AND qr.version = qv.version';
+        $questionid = $DB->get_field_sql($sql, ['slot' => $slot]);
+        if ($questionid) {
+            $questiontoregrade = question_bank::load_question($questionid);
+        }
         if (is_null($newmaxmark)) {
             $newmaxmark = $oldqa->get_max_mark();
         }
-
-        $newqa = new question_attempt($oldqa->get_question(false), $oldqa->get_usage_id(),
+        $newqa = new question_attempt($questiontoregrade, $oldqa->get_usage_id(),
                 $this->observer, $newmaxmark);
         $newqa->set_database_id($oldqa->get_database_id());
         $newqa->set_slot($oldqa->get_slot());
