@@ -19,6 +19,9 @@ This files describes API changes in the quiz code.
   The quiz_slots_tags table will be removed entirely.
 * The method get_slot_tags_for_slot_id() from mod/quiz/classes/structure.php has been deprecated and the associated
   code for this method have been removed to make sure any unnecessary error doesn't happen as a part of any call.
+* A new parameter is added to the method regrade_attempt() in mod/quiz/report/overview/report.php to address the regrade
+  for versioning. This $quiz parameter is the actual quiz object of the passed attempt to avoid any new call or creation
+  of the quiz obeject in this method as its already created before the call.
 
 === 3.11 ===
 

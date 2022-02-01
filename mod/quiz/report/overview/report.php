@@ -321,11 +321,12 @@ class quiz_overview_report extends quiz_attempts_report {
      * However, $attempt->sumgrades is updated, if this is not a dry run.
      *
      * @param object $attempt the quiz attempt to regrade.
+     * @param stdClass $quiz the quiz object of the attempt.
      * @param bool $dryrun if true, do a pretend regrade, otherwise do it for real.
      * @param array $slots if null, regrade all questions, otherwise, just regrade
      *      the quetsions with those slots.
      */
-    protected function regrade_attempt($attempt, $dryrun = false, $slots = null) {
+    protected function regrade_attempt($attempt, $quiz,  $dryrun = false, $slots = null) {
         global $DB;
         // Need more time for a quiz with many questions.
         core_php_time_limit::raise(300);
@@ -337,13 +338,55 @@ class quiz_overview_report extends quiz_attempts_report {
         if (is_null($slots)) {
             $slots = $quba->get_slots();
         }
+        // Slotdata to get information about the slot.
+        $slotdata = $DB->get_records('quiz_slots', ['quizid' => $quiz->id], '', 'slot, id');
 
         $finished = $attempt->state == quiz_attempt::FINISHED;
         foreach ($slots as $slot) {
             $qqr = new stdClass();
             $qqr->oldfraction = $quba->get_question_fraction($slot);
+            $newquestionid = null;
+            $currentquestion = $quba->get_question_attempt($slot)->get_question(false);
+            // Get the version options for the current question.
+            $versionsoptions = \mod_quiz\question\bank\qbank_helper::get_version_options($currentquestion->id);
+            // Get the latest version of the current question.
+            $latestversion = reset($versionsoptions);
+            // If the slot is random, get the latest version of the attempted question.
+            if (\mod_quiz\question\bank\qbank_helper::is_random($slotdata[$slot]->id)) {
+                // Only get a newquestionid if there is a new version for the question.
+                if ((int)$currentquestion->id !== (int)$latestversion->questionid) {
+                    $newquestionid = $latestversion->questionid;
+                }
+            } else {
+                // If the slot is a regular question.
+                $questionbankentry = get_question_bank_entry($currentquestion->id);
+                $params = [
+                    'itemid' => $slotdata[$slot]->id,
+                    'component' => 'mod_quiz',
+                    'questionarea' => 'slot',
+                    'questionbankentryid' => $questionbankentry->id
+                ];
+                $reference = $DB->get_record('question_references', $params, 'version');
+                // If the slot is set as always use latest version.
+                if ($reference->version === null) {
+                    // If the current attempted version doesnt match with the latest version, use the latest one.
+                    if ((int)$currentquestion->id !== (int)$latestversion->questionid) {
+                        $newquestionid = $latestversion->questionid;
+                    }
+                } else {
+                    // If the slot is set to use a specific version, get the questionid for that and check if regrade needed.
+                    $newquestionparam = [
+                        'questionbankentryid' => $questionbankentry->id,
+                        'version' => $reference->version
+                    ];
+                    $selectedquestionid = $DB->get_record('question_versions', $newquestionparam, 'questionid');
+                    if ((int)$currentquestion->id !== (int)$selectedquestionid->questionid) {
+                        $newquestionid = $latestversion->questionid;
+                    }
+                }
+            }
 
-            $quba->regrade_question($slot, $finished);
+            $quba->regrade_question($slot, $finished, null, (int)$newquestionid);
 
             $qqr->newfraction = $quba->get_question_fraction($slot);
 
@@ -511,7 +554,7 @@ class quiz_overview_report extends quiz_attempts_report {
             }
             $progressbar->update($a['done'], $a['count'],
                     get_string('regradingattemptxofywithdetails', 'quiz_overview', $a));
-            $this->regrade_attempt($attempt, $dryrun, $attempt->regradeonlyslots);
+            $this->regrade_attempt($attempt, $quiz, $dryrun, $attempt->regradeonlyslots);
         }
         $progressbar->update($a['done'], $a['count'],
                 get_string('regradedsuccessfullyxofy', 'quiz_overview', $a));
