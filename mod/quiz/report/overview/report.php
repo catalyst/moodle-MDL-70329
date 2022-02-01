@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/mod/quiz/report/overview/overview_options.php');
 require_once($CFG->dirroot . '/mod/quiz/report/overview/overview_form.php');
 require_once($CFG->dirroot . '/mod/quiz/report/overview/overview_table.php');
 
+use mod_quiz\structure;
 
 /**
  * Quiz report subclass for the overview (grades) report.
@@ -43,6 +44,11 @@ class quiz_overview_report extends quiz_attempts_report {
      * @var bool whether there are actually students to show, given the options.
      */
     protected $hasgroupstudents;
+
+    /**
+     * @var structure|null the quiz structure - lazy-loaded by the regrading process.
+     */
+    protected $structureforregrade = null;
 
     public function display($quiz, $cm, $course) {
         global $DB, $OUTPUT, $PAGE;
@@ -324,6 +330,7 @@ class quiz_overview_report extends quiz_attempts_report {
      * @param bool $dryrun if true, do a pretend regrade, otherwise do it for real.
      * @param array $slots if null, regrade all questions, otherwise, just regrade
      *      the quetsions with those slots.
+     * @param stdClass $quiz object of the quiz to get the current question from the slot.
      */
     protected function regrade_attempt($attempt, $dryrun = false, $slots = null) {
         global $DB;
@@ -337,13 +344,18 @@ class quiz_overview_report extends quiz_attempts_report {
         if (is_null($slots)) {
             $slots = $quba->get_slots();
         }
-
         $finished = $attempt->state == quiz_attempt::FINISHED;
         foreach ($slots as $slot) {
             $qqr = new stdClass();
             $qqr->oldfraction = $quba->get_question_fraction($slot);
-
-            $quba->regrade_question($slot, $finished);
+            $oldquestion = $quba->get_question($slot);
+            $newquestion = $this->get_quiz_structure($attempt->quiz)->get_question_in_slot($slot);
+            if ($newquestion->questionbankentryid === $oldquestion->questionbankentryid
+                && $newquestion->version !== $oldquestion->version) {
+                $quba->regrade_question($slot, $finished, null, $newquestion->id);
+            } else {
+                $quba->regrade_question($slot, $finished);
+            }
 
             $qqr->newfraction = $quba->get_question_fraction($slot);
 
@@ -377,6 +389,27 @@ class quiz_overview_report extends quiz_attempts_report {
         $quba = null;
         $transaction = null;
         gc_collect_cycles();
+    }
+
+    /**
+     * Helper method for use by the regrade process, to lazy-load the quiz structure when needed.
+     *
+     * @param int $quizid id of the quiz to load the structure for.
+     * @return structure the quiz structure.
+     */
+    protected function get_quiz_structure(int $quizid): structure {
+        if ($this->structureforregrade) {
+            // Check the cached one is for the right quiz.
+            if ((int)$this->structureforregrade->get_quizid() !== $quizid) {
+                throw new moodle_exception('quizattemptdoesnotbelongtoquiz', 'mod_quiz');
+            }
+        } else {
+            // Load from the database.
+            $this->structureforregrade = structure::create_for_quiz(quiz::create($quizid));
+
+        }
+
+        return $this->structureforregrade;
     }
 
     /**

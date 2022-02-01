@@ -22,21 +22,25 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_quiz\external\submit_question_version;
+use mod_quiz\question\bank\qbank_helper;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once(__DIR__ . '/../lib.php');
 require_once(__DIR__ . '/helpers.php');
-
+require_once($CFG->dirroot . '/mod/quiz/tests/quiz_question_helper_test_trait.php');
 
 /**
  * Unit tests for the question_usage_by_activity class.
  *
  * @copyright  2009 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass question_usage_by_activity
  */
 class question_usage_by_activity_test extends advanced_testcase {
+    use \quiz_question_helper_test_trait;
 
     public function test_set_get_preferred_model() {
         // Set up
@@ -189,5 +193,60 @@ class question_usage_by_activity_test extends advanced_testcase {
         $qa = $quba->get_attempt_iterator()->current();
         $steps = $qa->get_full_step_iterator();
         $this->assertEquals('Admin User', $steps[0]->get_user_fullname());
+    }
+
+    /**
+     * Test question regrade for selected versions.
+     *
+     * @covers ::regrade_question
+     */
+    public function test_regrade_question() {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course);
+        $student = $this->getDataGenerator()->create_user();
+        // Test for questions from a different context.
+        $context = \context_module::instance(get_coursemodule_from_instance("quiz", $quiz->id, $course->id)->id);
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        // Create a couple of questions.
+        $cat = $questiongenerator->create_question_category(['contextid' => $context->id]);
+        $numq = $questiongenerator->create_question('essay', null,
+            ['category' => $cat->id, 'name' => 'This is the first version', 'correctanswer' => false]);
+        // Create two version.
+        $numq2 = $questiongenerator->update_question($numq, null,
+            ['name' => 'This is the second version','correctanswer' => true]);
+        $numq3 = $questiongenerator->update_question($numq, null,
+            ['name' => 'This is the third version', 'correctanswer' => false]);
+        quiz_add_quiz_question($numq->id, $quiz);
+        // Create the quiz object.
+        $quizobj = \quiz::create($quiz->id);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
+        $slots = $structure->get_slots();
+        $slot = reset($slots);
+        // Now change the version using the external service.
+        $versions = qbank_helper::get_version_options($slot->questionid);
+        // We dont want the current version.
+        $selectversions = [];
+        foreach ($versions as $version) {
+            if ($version->version === $slot->version) {
+                continue;
+            }
+            $selectversions [$version->version] = $version;
+        }
+        // Change to version 1, with correct response.
+        $this->expectException('moodle_exception');
+        submit_question_version::execute($slot->id, (int)$selectversions[1]->version);
+        list($quizobj, $quba, $attemptobj) = $this->attempt_quiz($quiz, $student);
+        $this->assertEquals(10, $attemptobj->get_question_usage()->get_total_mark());
+
+        // Change to version 2, with wrong response.
+        submit_question_version::execute($slot->id, (int)$selectversions[2]->version);
+        $quba->regrade_question(1, quiz_attempt::FINISHED, null, $numq2->id);
+        $this->assertEquals(0, $attemptobj->get_question_usage()->get_total_mark());
+
+        // Change to version 3, with correct response.
+        submit_question_version::execute($slot->id, (int)$selectversions[3]->version);
+        $quba->regrade_question(1, quiz_attempt::FINISHED, null, $numq3->id);
+        $this->assertEquals(10, $attemptobj->get_question_usage()->get_total_mark());
     }
 }

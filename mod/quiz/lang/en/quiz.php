@@ -753,6 +753,7 @@ $string['questiontype'] = 'Question type {$a}';
 $string['questiontypesetupoptions'] = 'Setup options for question types:';
 $string['quiz:addinstance'] = 'Add a new quiz';
 $string['quiz:attempt'] = 'Attempt quizzes';
+$string['quizattemptdoesnotbelongtoquiz'] = 'The quiz regrade process can only regrade attempts that all belong to the same quiz.';
 $string['quizavailable'] = 'The quiz is available until: {$a}';
 $string['quizclose'] = 'Close the quiz';
 $string['quizclosed'] = 'This quiz closed on {$a}';
