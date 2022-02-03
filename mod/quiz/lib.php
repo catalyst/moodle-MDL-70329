@@ -2396,11 +2396,14 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
         }
     }
 
+    // This piece of code mimics part of question_build_edit_resources but avoids recall of set_course or require_login.
     $thispageurl = new moodle_url('/mod/quiz/edit.php');
     if ($params['courseid']) {
         $thispageurl->params(['courseid' => $params['courseid']]);
         $thiscontext = context_course::instance($params['courseid']);
-        $quiz = null;
+        $quiz = (object) [
+            'course' => $params['courseid'],
+        ];
         $cm = null;
     }
     if ($params['cmid']) {
@@ -2414,9 +2417,11 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
     } else {
         $contexts = null;
     }
+    $defaultcategory = question_make_default_categories($contexts->all());
+
     $pagevars = [
         'qpage' => 0,
-        'cat' => 0,
+        'cat' => "{$defaultcategory->id},{$defaultcategory->contextid}",
         'qperpage' => 20,
         'recurse' => 1,
         'showhidden' => 0,
