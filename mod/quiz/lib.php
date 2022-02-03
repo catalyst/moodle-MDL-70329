@@ -2396,13 +2396,42 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
         }
     }
 
+    $thispageurl = new moodle_url('/mod/quiz/edit.php');
+    if ($params['courseid']) {
+        $thispageurl->params(['courseid' => $params['courseid']]);
+        $thiscontext = context_course::instance($params['courseid']);
+        $quiz = null;
+        $cm = null;
+    }
+    if ($params['cmid']) {
+        $thispageurl->params(['cmid' => $params['cmid']]);
+        $thiscontext = context_module::instance($params['cmid']);
+        list($quiz, $cm) = get_module_from_cmid($params['cmid']);
+    }
+    if ($thiscontext) {
+        $contexts = new question_edit_contexts($thiscontext);
+        $contexts->require_one_edit_tab_cap('editq');
+    } else {
+        $contexts = null;
+    }
+    $pagevars = [
+        'qpage' => 0,
+        'cat' => 0,
+        'qperpage' => 20,
+        'recurse' => 1,
+        'showhidden' => 0,
+        'qbshowtext' => 0,
+        'cpage' => 1,
+        'tabname' => 'editq'
+    ];
+
     // Build the required resources. The $params are all cleaned as
     // part of this process.
-    list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
-            question_build_edit_resources('editq', '/mod/quiz/edit.php', $params);
+    // list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
+    //         question_build_edit_resources('editq', '/mod/quiz/edit.php', $params);
 
     // Get the course object and related bits.
-    $course = $DB->get_record('course', array('id' => $quiz->course), '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $quiz->course], '*', MUST_EXIST);
     require_capability('mod/quiz:manage', $contexts->lowest());
 
     // Create quiz question bank view.
