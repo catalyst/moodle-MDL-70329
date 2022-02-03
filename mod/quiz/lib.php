@@ -2430,6 +2430,9 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
         'tabname' => 'editq'
     ];
 
+    foreach ($params as $key => $param) {
+        $pagevars[$key] = $param;
+    }
     // Build the required resources. The $params are all cleaned as
     // part of this process.
     // list($thispageurl, $contexts, $cmid, $cm, $quiz, $pagevars) =
@@ -2441,9 +2444,9 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
 
     // Create quiz question bank view.
     $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $pagevars, [$quiz]);
-    //$questionbank->component = 'mod_quiz';
-    //$questionbank->callback = 'quiz_question_bank';
-    $questionbank->set_quiz_has_attempts(quiz_has_attempts($quiz->id));
+    // $questionbank->component = 'mod_quiz';
+    // $questionbank->callback = 'quiz_question_bank';
+    //$questionbank->set_quiz_has_attempts(quiz_has_attempts($quiz->id));
 
     // Output.
     $renderer = $PAGE->get_renderer('mod_quiz', 'edit');
