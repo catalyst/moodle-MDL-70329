@@ -51,7 +51,7 @@ class quiz_overview_report extends quiz_attempts_report {
                 'overview', 'quiz_overview_settings_form', $quiz, $cm, $course);
 
         $options = new quiz_overview_options('overview', $quiz, $cm, $course);
-
+        $PAGE->requires->js_call_amd('core_question/regrade_version', 'init');
         if ($fromform = $this->form->get_data()) {
             $options->process_settings_from_form($fromform);
 

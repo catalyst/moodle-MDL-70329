@@ -1594,6 +1594,13 @@ $functions = array(
         'type'          => 'write',
         'ajax' => true,
     ),
+    'core_question_update_attempt_regrade' => [
+        'classname'     => 'core_question_external',
+        'methodname'    => 'update_attempt_regrade',
+        'description'   => 'Updates question attempt for regrade',
+        'type'          => 'write',
+        'ajax' => true,
+    ],
     'core_question_get_random_question_summaries' => array(
         'classname' => 'core_question_external',
         'methodname' => 'get_random_question_summaries',

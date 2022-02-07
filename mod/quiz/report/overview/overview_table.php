@@ -274,6 +274,7 @@ class quiz_overview_table extends quiz_attempts_report_table {
      * @return string the contents of the cell.
      */
     public function other_cols($colname, $attempt) {
+        global $DB;
         if (!preg_match('/^qsgrade(\d+)$/', $colname, $matches)) {
             return parent::other_cols($colname, $attempt);
         }
@@ -299,7 +300,9 @@ class quiz_overview_table extends quiz_attempts_report_table {
             $grade = quiz_rescale_grade(
                     $stepdata->fraction * $question->maxmark, $this->quiz, 'question');
         }
-
+        // Adds attemppted version to grade for clearer understanding.
+        $versionattempted = $DB->get_field('question_versions', 'version', ['questionid' => $stepdata->questionid]);
+        $grade .= ' v' . $versionattempted;
         if ($this->is_downloading()) {
             return $grade;
         }
@@ -317,7 +320,7 @@ class quiz_overview_table extends quiz_attempts_report_table {
                     html_writer::empty_tag('br') . $newgrade;
         }
 
-        return $this->make_review_link($grade, $attempt, $slot);
+        return $this->make_review_link($grade, $attempt, $slot, $versionattempted, $stepdata->questionattemptid);
     }
 
     public function col_regraded($attempt) {

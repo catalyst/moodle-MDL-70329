@@ -333,4 +333,51 @@ class core_question_external extends external_api {
             )
         ]);
     }
+
+    public static function update_attempt_regrade_parameters() {
+        return new external_function_parameters([
+            'questionid' => new external_value(PARAM_INT, 'Question id.'),
+            'questionversion' => new external_value(PARAM_INT, 'Current question version graded.'),
+            'attemptid' => new external_value(PARAM_INT, 'Attempt id.'),
+            'versiontoregrade' => new external_value(PARAM_INT, 'Version of the question to regrade against.')
+        ]);
+    }
+
+    /**
+     * Updates the question attempt table for further regrade processing.
+     *
+     * @param int $questionid Question id.
+     * @param int $questionversion Current question version graded.
+     * @param int $attemptid Attempt id.
+     * @param int $versiontoregrade Version of the question to regrade against.
+     */
+    public static function update_attempt_regrade($questionid, $questionversion, $attemptid, $versiontoregrade) {
+        global $DB;
+        // Parameter validation.
+        $params = self::validate_parameters(
+            self::update_attempt_regrade_parameters(),
+            [
+                'questionid' => $questionid,
+                'questionversion' => $questionversion,
+                'attemptid' => $attemptid,
+                'versiontoregrade' => $versiontoregrade,
+            ]
+        );
+        $sql = 'SELECT questionid
+                 FROM {question_versions}
+                WHERE questionbankentryid = (SELECT questionbankentryid
+                                               FROM {question_versions}
+                                              WHERE questionid = :questionid) AND version = :version';
+        $newquestionid = $DB->get_record_sql($sql, ['questionid' => $questionid, 'version' => $versiontoregrade]);
+        $questionattempt = $DB->get_record('question_attempts', ['id' => $attemptid]);
+        $questionattempt->questionid = $newquestionid->questionid;
+        $success = $DB->update_record('question_attempts', $questionattempt);
+        return ['success' => $success];
+    }
+
+    public static function update_attempt_regrade_returns() {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'Database query success'),
+        ]);
+    }
 }

@@ -244,9 +244,11 @@ abstract class quiz_attempts_report_table extends table_sql {
      * @param string $data HTML fragment. The text to make into the link.
      * @param object $attempt data for the row of the table being output.
      * @param int $slot the number used to identify this question within this usage.
+     * @param int $versionattempted Attempted version by the student.
+     * @param int Question attempt id.
      */
-    public function make_review_link($data, $attempt, $slot) {
-        global $OUTPUT, $CFG;
+    public function make_review_link($data, $attempt, $slot, $versionattempted, $attemptid) {
+        global $OUTPUT, $CFG, $DB;
 
         $flag = '';
         if ($this->is_flagged($attempt->usageid, $slot)) {
@@ -283,6 +285,21 @@ abstract class quiz_attempts_report_table extends table_sql {
                 'itemid' => $slot,
                 'userid' => $attempt->userid]);
         }
+        $sql = 'SELECT version
+                  FROM {question_versions}
+                 WHERE questionbankentryid =
+               (SELECT questionbankentryid FROM {question_versions} WHERE id = ?)';
+        // Mustache to fix.
+        $versions = $DB->get_records_sql($sql, [$this->questions[$slot]->id]);
+        $context = [];
+        $context['questionid'] = $this->questions[$slot]->id;
+        $context['questionversion'] = $versionattempted;
+        $context['attemptid'] = $attemptid;
+        foreach ($versions as $version) {
+            $selected = ($version->version === $versionattempted) ? true : false; 
+            $context['versions'][] = ['version' => $version->version, 'selected' => $selected];
+        }
+        $output .= $OUTPUT->render_from_template('core_question/version_regrade_selector', $context);
         return $output;
     }
 
