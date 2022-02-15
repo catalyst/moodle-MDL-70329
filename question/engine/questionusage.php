@@ -882,22 +882,14 @@ class question_usage_by_activity {
      * @param bool $finished whether the question attempt should be forced to be finished
      *      after the regrade, or whether it may still be in progress (default false).
      * @param number $newmaxmark (optional) if given, will change the max mark while regrading.
+     * @param int|null $newquestion id of the new question for regrade.
      */
-    public function regrade_question($slot, $finished = false, $newmaxmark = null) {
-        global $DB;
+    public function regrade_question($slot, $finished = false, $newmaxmark = null, $newquestion = null) {
         $oldqa = $this->get_question_attempt($slot);
-        $questiontoregrade = $oldqa->get_question(false);
-        // Gets selected question id version in quiz slot to rebase against.
-        $sql = 'SELECT questionid
-                  FROM {question_versions} qv
-                  JOIN {question_references} qr ON qr.questionbankentryid = qv.questionbankentryid
-                  JOIN {quiz_slots} qs ON qs.id = qr.itemid
-                 WHERE qs.slot = :slot
-                   AND qv.questionbankentryid = qr.questionbankentryid
-                   AND qr.version = qv.version';
-        $questionid = $DB->get_field_sql($sql, ['slot' => $slot]);
-        if ($questionid) {
-            $questiontoregrade = question_bank::load_question($questionid);
+        if ($newquestion) {
+            $questiontoregrade = question_bank::load_question($newquestion);
+        } else {
+            $questiontoregrade = $oldqa->get_question(false);
         }
         if (is_null($newmaxmark)) {
             $newmaxmark = $oldqa->get_max_mark();

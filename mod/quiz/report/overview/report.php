@@ -324,8 +324,9 @@ class quiz_overview_report extends quiz_attempts_report {
      * @param bool $dryrun if true, do a pretend regrade, otherwise do it for real.
      * @param array $slots if null, regrade all questions, otherwise, just regrade
      *      the quetsions with those slots.
+     * @param int $quizid id of the quiz to get the current question from the slot
      */
-    protected function regrade_attempt($attempt, $dryrun = false, $slots = null) {
+    protected function regrade_attempt($attempt, $quizid, $dryrun = false, $slots = null) {
         global $DB;
         // Need more time for a quiz with many questions.
         core_php_time_limit::raise(300);
@@ -333,6 +334,9 @@ class quiz_overview_report extends quiz_attempts_report {
         $transaction = $DB->start_delegated_transaction();
 
         $quba = question_engine::load_questions_usage_by_activity($attempt->uniqueid);
+        // Create the quiz object.
+        $quizobj = \quiz::create($quizid);
+        $structure = \mod_quiz\structure::create_for_quiz($quizobj);
 
         if (is_null($slots)) {
             $slots = $quba->get_slots();
@@ -342,8 +346,9 @@ class quiz_overview_report extends quiz_attempts_report {
         foreach ($slots as $slot) {
             $qqr = new stdClass();
             $qqr->oldfraction = $quba->get_question_fraction($slot);
+            $newquestion = $structure->get_question_in_slot($slot);
 
-            $quba->regrade_question($slot, $finished);
+            $quba->regrade_question($slot, $finished, null, $newquestion->id);
 
             $qqr->newfraction = $quba->get_question_fraction($slot);
 
@@ -511,7 +516,7 @@ class quiz_overview_report extends quiz_attempts_report {
             }
             $progressbar->update($a['done'], $a['count'],
                     get_string('regradingattemptxofywithdetails', 'quiz_overview', $a));
-            $this->regrade_attempt($attempt, $dryrun, $attempt->regradeonlyslots);
+            $this->regrade_attempt($attempt, $quiz->id, $dryrun, $attempt->regradeonlyslots);
         }
         $progressbar->update($a['done'], $a['count'],
                 get_string('regradedsuccessfullyxofy', 'quiz_overview', $a));
