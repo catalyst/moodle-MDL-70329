@@ -30,7 +30,8 @@ require_once($CFG->dirroot . '/question/editlib.php');
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
 $moduleid = optional_param('cmid', 0, PARAM_INT);
-
+$catparam = optional_param('cat', 0, PARAM_SEQUENCE);
+$categoryparam = optional_param('category', 0, PARAM_SEQUENCE);
 // Activity instance id.
 $q = optional_param('q', 0, PARAM_INT);
 
@@ -65,6 +66,13 @@ $event->trigger();
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) =
         question_edit_setup('questions', '/mod/qbank/view.php', $cm->id);
 
+// Set question bank category param by default.
+if (!($catparam || $categoryparam)) {
+    $catid = $DB->get_field_select('question_categories', 'id', 'contextid = :contextid AND parent <> 0',
+        ['contextid' => $modulecontext->id]);
+    $cat = "{$catid},{$modulecontext->id}";
+    $pagevars['cat'] = $cat;
+}
 $PAGE->set_url(new moodle_url($thispageurl));
 
 $url = new moodle_url($thispageurl);
