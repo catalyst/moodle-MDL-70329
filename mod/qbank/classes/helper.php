@@ -217,4 +217,44 @@ class helper {
         // Migrate top categories to preserve the same parent category.
         $DB->set_field('question_categories', 'contextid', $contextid, ['contextid' => $oldcontextid]);
     }
+
+    /**
+     * Gets any extra question bank in the course context (for now).
+     *
+     * @param array $contexts Array of contexts.
+     * @param array $catmenu Array representing question categories selection menu.
+     * @return array $formatedarray Array ready to be prepended in category menu.
+     */
+    public static function get_extra_questionbanks($contexts, $catmenu) {
+        global $DB;
+        foreach ($contexts as $context) {
+            if (get_class($context) === 'context_course') {
+                $courseid = $context->instanceid;
+            }
+        }
+        $sql = "SELECT qc.id, qc.contextid, qc.name
+                  FROM {modules} mo
+                  JOIN {course_modules} cm ON mo.id = cm.module
+                  JOIN {context} ctx ON ctx.instanceid = cm.id
+                  JOIN {question_categories} qc ON qc.contextid = ctx.id
+                 WHERE mo.name = 'qbank'
+                   AND ctx.contextlevel = 70
+                   AND qc.parent <> 0
+                   AND cm.course = :courseid";
+        $coursequestionbanks = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+        $formatedarray = [];
+        $str = get_string('coursequestionbanks', 'mod_qbank');
+        foreach ($coursequestionbanks as $questionbank) {
+            $key = "{$questionbank->id},{$questionbank->contextid}";
+            $formatedarray[$str][$key] = $questionbank->name;
+            // Check that category is not doubled - in case we are in a question bank.
+            foreach ($catmenu as $cat) {
+                $innercatarray = reset($cat);
+                if (array_key_exists($key, $innercatarray)) {
+                    unset($formatedarray[$str][$key]);
+                }
+            }
+        }
+        return $formatedarray;
+    }
 }
