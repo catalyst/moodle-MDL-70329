@@ -44,7 +44,7 @@ class qbank_view extends external_api {
             'callback' => new external_value(PARAM_TEXT, 'The name of the callback'),
             'filtercondition' => new external_value(PARAM_RAW, 'The filter conditions'),
             'contextid' => new external_value(PARAM_INT, 'The context of the api'),
-            'extraparams' => new external_value(PARAM_RAW, 'The extra parameters for extended apis', VALUE_OPTIONAL),
+            'extraparams' => new external_value(PARAM_RAW, 'The extra parameters for extended apis', VALUE_DEFAULT, ''),
         ]);
     }
 
