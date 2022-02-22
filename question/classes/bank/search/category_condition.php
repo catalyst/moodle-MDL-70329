@@ -120,6 +120,8 @@ class category_condition extends condition {
         $displaydata = [];
         $catmenu = helper::question_category_options($this->contexts, true, 0,
                 true, -1, false);
+        // Adds any question banks.
+        array_unshift($catmenu, \mod_qbank\helper::get_extra_questionbanks($this->contexts, $catmenu));
         $displaydata['categoryselect'] = \html_writer::select($catmenu, 'category', $this->cat, [],
                 array('class' => 'searchoptions custom-select', 'id' => 'id_selectacategory'));
         $displaydata['categorydesc'] = '';
