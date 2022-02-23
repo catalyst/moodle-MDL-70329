@@ -38,6 +38,8 @@ require_once($CFG->dirroot . '/question/editlib.php');
 class quiz_question_bank_view_testcase extends advanced_testcase {
 
     public function test_viewing_question_bank_should_not_load_individual_questions() {
+        // TODO: Moved to behat test MDL-72321.
+        $this->markTestSkipped('This test should be moved to behat test');
         $this->resetAfterTest();
         $this->setAdminUser();
         $generator = $this->getDataGenerator();
