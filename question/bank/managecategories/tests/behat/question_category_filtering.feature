@@ -28,14 +28,14 @@ Feature: The questions in the question bank can be filtered by categories
 
   @javascript
   Scenario: The questions can be filtered by category filter
-    And I press "Clear filters" 
+    And I press "Clear filters"
     And I set the field "Match" in the "Filter 1" "fieldset" to "Any"
     And I set the field "type" in the "Filter 1" "fieldset" to "Category"
     And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Test questions"
     And I click on "Apply filters" "button"
     And I should see "question 1 name" in the "categoryquestions" "table"
     And I should not see "question 2 name" in the "categoryquestions" "table"
-    And I press "Clear filters" 
+    And I press "Clear filters"
     And I set the field "Match" in the "Filter 1" "fieldset" to "All"
     And I set the field "type" in the "Filter 1" "fieldset" to "Category"
     And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Some othe category"
