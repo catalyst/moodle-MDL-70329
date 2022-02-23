@@ -121,8 +121,10 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 };
                 wsfilter.filters.push(filter);
             }
+            if (Object.keys(filterdata).length !== 0) {
+                updateUrlParams(filterdata);
+            }
         }
-
         // Load questions for first page.
         requestQuestions(wsfilter)
             .then((response) => {
@@ -178,10 +180,101 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         return ajax.call([request])[0];
     };
 
+    /**
+     * Update URL Param based upon the current filter.
+     *
+     * @param {Object} filters Active filters.
+     */
+    const updateUrlParams = (filters) => {
+        const url = new URL(location.href);
+        const query = objectToQuery(filters);
+        url.searchParams.set('filter', query);
+        history.pushState(filters, '', url);
+    };
+
+    /**
+     * Cleans URL parameters.
+     *
+     */
+    const cleanUrlParams = () => {
+        const queryString = location.search;
+        const urlParams = new URLSearchParams(queryString);
+        if (urlParams.has('cmid')) {
+            const cleanedUrl = new URL(location.href.replace(location.search, ''));
+            cleanedUrl.searchParams.set('cmid', urlParams.get('cmid'));
+            history.pushState({}, '', cleanedUrl);
+        }
+
+        if (urlParams.has('courseid')) {
+            const cleanedUrl = new URL(location.href.replace(location.search, ''));
+            cleanedUrl.searchParams.set('courseid', urlParams.get('courseid'));
+            history.pushState({}, '', cleanedUrl);
+        }
+    };
+
+    /**
+     * Convert a nested object into query parameters.
+     *
+     * @param {Object} filters Active filters.
+     * @return {String}
+     */
+    const objectToQuery = (filters) => {
+        return Object.keys(filters).map(key => {
+            let value = filters[key];
+            if (value !== null && typeof value === 'object') {
+                value = objectToQuery(value);
+            }
+            return `${key}=${encodeURIComponent(`${value}`.replace(/\s/g, '_'))}`;
+        }).join('&');
+    };
+
+    /**
+     * Load URL parameter.
+     *
+     * @return {Object} filters
+     */
+    const loadUrlParams = () => {
+        const queryString = location.search;
+        const urlParams = new URLSearchParams(queryString);
+        if (urlParams.has('filter')) {
+            const filters = queryToObject(urlParams.get('filter'));
+            return filters;
+        }
+        return {};
+    };
+
+    /**
+     * Convert query parameters into object.
+     *
+     * @param {string} query Query representing filter object.
+     * @return {object}
+     */
+    const queryToObject = (query) => {
+        const object = {};
+        const params = new URLSearchParams(query);
+        const entries = params.entries();
+        entries.forEach((value) => {
+            const param = value[0];
+            object[param] = !isNaN(params.get(param)) ? parseInt(params.get(param)) : params.get(param);
+            if (isNaN(object[param]) && object[param].includes('&')) {
+                object[param] = queryToObject(object[param]);
+            }
+            if (param == 'values') {
+                if (typeof object[param] == 'string' && object[param].includes('=')) {
+                    object[param] = [object[param].split('=')[1]];
+                } else {
+                    object[param] = Object.values(object[param]);
+                }
+            }
+        });
+        return object;
+    };
+
     // Add listeners for the sorting actions.
     document.addEventListener('click', e => {
         const sortableLink = e.target.closest(SELECTORS.SORT_LINK);
         const paginationLink = e.target.closest(SELECTORS.PAGINATION_LINK);
+        const clearLink = e.target.closest(Selectors.filterset.actions.resetFilters);
         if (sortableLink) {
             e.preventDefault();
             let oldsort = wsfilter.sortdata;
@@ -208,10 +301,26 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
                 coreFilter.updateTableFromFilter();
             }
         }
+        if (clearLink) {
+            cleanUrlParams();
+        }
     });
 
     // Run apply filter at page load.
+    const urlLoadedFilters = loadUrlParams();
     const filter = filterSet.querySelector(Selectors.filter.region);
-    coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
-    applyFilter();
+    if (Object.entries(urlLoadedFilters).length !== 0) {
+        for (const urlFilter in urlLoadedFilters) {
+            if (urlFilter !== 'courseid') {
+                coreFilter.addFilter(filter,
+                                     urlFilter,
+                                     urlLoadedFilters[urlFilter].values,
+                                     urlLoadedFilters[urlFilter].jointype,
+                                     urlLoadedFilters[urlFilter].rangetype);
+            }
+        }
+    } else {
+        coreFilter.addFilter(filter, 'category', [defaultcategoryid]);
+    }
+    applyFilter(urlLoadedFilters);
 };
