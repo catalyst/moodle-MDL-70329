@@ -94,7 +94,7 @@ Feature: The questions in the question bank can be filtered by discrimination in
 
   @javascript
   Scenario: The questions can be filtered by discrimination index filter
-    And I press "Clear filters" 
+    And I press "Clear filters"
     And I set the field "Match" in the "Filter 1" "fieldset" to "Any"
     And I set the field "type" in the "Filter 1" "fieldset" to "Discrimination index"
     And I click on "discriminationselect" "select"
@@ -168,15 +168,15 @@ Feature: The questions in the question bank can be filtered by discrimination in
   @javascript
   Scenario: URL parameters are sharable and discrimination index filter can be retrieved
     And I add "49" discrimination values and "Course 1" with "Any" join type and "After" range type and parameters to url and visit it
-    And I should see "Index" in the "Filter 1" "fieldset"    
+    And I should see "Index" in the "Filter 1" "fieldset"
     And I should see "After" in the "Filter 1" "fieldset"
     And the field "rangeValue1" matches value "49"
     And I should see "TF2" in the "categoryquestions" "table"
     And I should not see "TF1" in the "categoryquestions" "table"
     And I should not see "TF3" in the "categoryquestions" "table"
     And I should not see "TF4" in the "categoryquestions" "table"
-    And I add "29-50" discrimination values and "Course 1" with "Any" join type and "Between" range type and parameters to url and visit it    
-    And I should see "Index" in the "Filter 1" "fieldset"    
+    And I add "29-50" discrimination values and "Course 1" with "Any" join type and "Between" range type and parameters to url and visit it
+    And I should see "Index" in the "Filter 1" "fieldset"
     And I should see "Between" in the "Filter 1" "fieldset"
     And the field "rangeValue1" matches value "29"
     And the field "rangeValue2" matches value "50"
