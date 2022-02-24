@@ -17,11 +17,11 @@ Feature: The questions in the question bank can be filtered by categories
     And the following "question categories" exist:
       | contextlevel | reference | name               |
       | Course       | C1        | Test questions     |
-      | Course       | C1        | Some othe category |
+      | Course       | C1        | Some other category |
     And the following "questions" exist:
       | questioncategory     | qtype     | name            | user     | questiontext    |
       | Test questions       | essay     | question 1 name | admin    | Question 1 text |
-      | Some othe category   | essay     | question 2 name | teacher1 | Question 2 text |
+      | Some other category   | essay     | question 2 name | teacher1 | Question 2 text |
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I navigate to "Question bank" in current page administration
@@ -38,14 +38,14 @@ Feature: The questions in the question bank can be filtered by categories
     And I press "Clear filters"
     And I set the field "Match" in the "Filter 1" "fieldset" to "All"
     And I set the field "type" in the "Filter 1" "fieldset" to "Category"
-    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Some othe category"
+    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Some other category"
     And I click on "Apply filters" "button"
     And I should see "question 2 name" in the "categoryquestions" "table"
     And I should not see "question 1 name" in the "categoryquestions" "table"
     And I press "Clear filters"
     And I set the field "Match" in the "Filter 1" "fieldset" to "None"
     And I set the field "type" in the "Filter 1" "fieldset" to "Category"
-    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Some othe category"
+    And I set the field "Type or select..." in the "Filter 1" "fieldset" to "Some other category"
     And I click on "Apply filters" "button"
     And I should see "question 1 name" in the "categoryquestions" "table"
     And I should not see "question 2 name" in the "categoryquestions" "table"
@@ -55,6 +55,6 @@ Feature: The questions in the question bank can be filtered by categories
     And I add "Test questions" and "Course 1" with "Any" join type parameters to url and visit it
     And I should see "question 1 name" in the "categoryquestions" "table"
     And I should not see "question 2 name" in the "categoryquestions" "table"
-    And I add "Some othe category" and "Course 1" with "None" join type parameters to url and visit it
+    And I add "Some other category" and "Course 1" with "None" join type parameters to url and visit it
     And I should see "question 1 name" in the "categoryquestions" "table"
     And I should not see "question 2 name" in the "categoryquestions" "table"
