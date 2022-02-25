@@ -3894,6 +3894,10 @@ privatefiles,moodle|/user/files.php';
         $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
         $table->add_key('questionbankentryid', XMLDB_KEY_FOREIGN, ['questionbankentryid'], 'question_bank_entries', ['id']);
 
+        // Adding index to table question_references.
+        $table->add_index('usingcontextid-component-questionarea-itemid', XMLDB_INDEX_UNIQUE,
+            ['usingcontextid', 'component', 'questionarea', 'itemid']);
+
         // Conditionally launch create table for question_references.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
@@ -3915,6 +3919,10 @@ privatefiles,moodle|/user/files.php';
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_key('usingcontextid', XMLDB_KEY_FOREIGN, ['usingcontextid'], 'context', ['id']);
         $table->add_key('questionscontextid', XMLDB_KEY_FOREIGN, ['questionscontextid'], 'context', ['id']);
+
+        // Adding the index to table question_set_references.
+        $table->add_index('usingcontextid-component-questionarea-itemid', XMLDB_INDEX_UNIQUE,
+            ['usingcontextid', 'component', 'questionarea', 'itemid']);
 
         // Conditionally launch create table for question_set_references.
         if (!$dbman->table_exists($table)) {
