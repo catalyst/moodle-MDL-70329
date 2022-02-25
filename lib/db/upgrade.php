@@ -3961,6 +3961,32 @@ privatefiles,moodle|/user/files.php';
         upgrade_main_savepoint(true, 2022020200.03);
     }
 
+    // Unique indexes for question_set_references and question_references.
+    if ($oldversion < 2022020500.00) {
+        // Define index usingcontextid-component-questionarea-itemid (unique) to be added to question_set_references.
+        $tablesetref = new xmldb_table('question_set_references');
+        $questionsetrefindex = new xmldb_index('usingcontextid-component-questionarea-itemid', XMLDB_INDEX_UNIQUE,
+            ['usingcontextid', 'component', 'questionarea', 'itemid']);
+
+        // Conditionally launch add index usingcontextid-component-questionarea-itemid.
+        if (!$dbman->index_exists($tablesetref, $questionsetrefindex)) {
+            $dbman->add_index($tablesetref, $questionsetrefindex);
+        }
+
+        // Define index usingcontextid-component-questionarea-itemid (unique) to be added to question_references.
+        $tableref = new xmldb_table('question_references');
+        $questionrefindex = new xmldb_index('usingcontextid-component-questionarea-itemid', XMLDB_INDEX_UNIQUE,
+            ['usingcontextid', 'component', 'questionarea', 'itemid']);
+
+        // Conditionally launch add index usingcontextid-component-questionarea-itemid.
+        if (!$dbman->index_exists($tableref, $questionrefindex)) {
+            $dbman->add_index($tableref, $questionrefindex);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2022020500.00);
+    }
+
     if ($oldversion < 2022021100.01) {
         // Some settings and plugins have been added/removed to the Starter and Full preset. Add them to the core presets if
         // they haven't been included yet.
