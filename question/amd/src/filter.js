@@ -34,17 +34,13 @@ import Templates from 'core/templates';
  * @param {String} defaultcourseid default course id
  * @param {String} defaultcategoryid default category id
  * @param {int} perpage number of question per page
- * @param {boolean} recurse if loading sub categories
- * @param {boolean} showhidden if loading hidden question
- * @param {boolean} qbshowtext if loading question text
  * @param {int} contextId id of the context
  * @param {string} component name of the component for fragment
  * @param {string} callback name of the callback for the fragment
  * @param {string} extraparams json encoded extra params for the extended apis
  */
 export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
-                     perpage, recurse, showhidden, qbshowtext,
-                     contextId, component, callback, extraparams) => {
+                     perpage, contextId, component, callback, extraparams) => {
 
     const filterSet = document.querySelector(`#${filterRegionId}`);
 
@@ -54,12 +50,9 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
         filters: [],
         filteroptions: {
             filterverb: 2,
-            recurse: recurse,
-            showhidden: showhidden,
         },
         displayoptions: {
             perpage: perpage,
-            showtext: qbshowtext,
         },
         sortdata: [
             {
@@ -262,6 +255,8 @@ export const init = (filterRegionId, defaultcourseid, defaultcategoryid,
             if (param == 'values') {
                 if (typeof object[param] == 'string' && object[param].includes('=')) {
                     object[param] = [object[param].split('=')[1]];
+                } else if (typeof object[param] == 'number') {
+                    object[param] = [object[param]];
                 } else {
                     object[param] = Object.values(object[param]);
                 }

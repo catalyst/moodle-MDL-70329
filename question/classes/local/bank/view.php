@@ -283,11 +283,9 @@ class view {
                 'delete_action_column',
                 'export_xml_action_column',
                 'creator_name_column',
-                'modifier_name_column'
+                'modifier_name_column',
+                'question_text_row',
         ];
-        if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
-            $corequestionbankcolumns[] = 'question_text_row';
-        }
 
         foreach ($corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
@@ -798,13 +796,9 @@ class view {
         // Render the question bank filters.
         $additionalparams = [
             'perpage' => $this->pagevars['qperpage'],
-            'recurse' => $this->pagevars['recurse'],
-            'showhidden' => $this->pagevars['showhidden'],
-            'showquestiontext' => $this->pagevars['qbshowtext']
         ];
         echo $PAGE->get_renderer('core_question', 'bank')->render_questionbank_filter(
             $catcontext, $this->searchconditions, $additionalparams, $this->component, $this->callback, $this->extraparams);
-        $this->display_options_form($this->pagevars['qbshowtext']);
     }
 
     /**
@@ -854,8 +848,12 @@ class view {
      * Display the form with options for which questions are displayed and how they are displayed.
      *
      * @param bool $showquestiontext Display the text of the question within the list.
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     protected function display_options_form($showquestiontext): void {
+        debugging('Function display_options_form() is deprecated, this method has been replaced with mustaches in filters,
+            please use filtering objects', DEBUG_DEVELOPER);
         global $PAGE;
 
         // The html will be refactored in the filter feature implementation.
@@ -883,7 +881,6 @@ class view {
                 $advancedsearch[] = $searchcondition;
             }
         }
-        $this->display_showtext_checkbox($showquestiontext);
         if (!empty($advancedsearch)) {
             $this->display_advanced_search_form($advancedsearch);
         }
@@ -899,8 +896,12 @@ class view {
      * Print the "advanced" UI elements for the form to select which questions. Hidden by default.
      *
      * @param array $advancedsearch
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     protected function display_advanced_search_form($advancedsearch): void {
+        debugging('Function display_advanced_search_form() is deprecated, this method has been replaced with mustaches in filters,
+            please use filtering objects', DEBUG_DEVELOPER);
         print_collapsible_region_start('', 'advancedsearch',
                 get_string('advancedsearchoptions', 'question'),
                 'question_bank_advanced_search');
@@ -913,8 +914,10 @@ class view {
     /**
      * Display the checkbox UI for toggling the display of the question text in the list.
      * @param bool $showquestiontext the current or default value for whether to display the text.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     protected function display_showtext_checkbox($showquestiontext): void {
+        debugging('Function display_showtext_checkbox() is deprecated, please use filtering objects', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = [
                 'checked' => $showquestiontext
