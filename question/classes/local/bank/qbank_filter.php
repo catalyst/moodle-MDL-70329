@@ -95,9 +95,6 @@ class qbank_filter extends \core\output\filter {
             'rownumber' => 1,
             'defaultcategoryid' => $defaultcategory->id,
             'perpage' => $this->additionalparams['perpage'] ?? 0,
-            'recurse' => $this->additionalparams['recurse'] ?? 0,
-            'showhidden' => $this->additionalparams['showhidden'] ?? 0,
-            'showquestiontext' => $this->additionalparams['showquestiontext'] ?? 0,
         ];
     }
 }

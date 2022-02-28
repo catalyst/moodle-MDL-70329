@@ -76,18 +76,6 @@ class qbank_filter extends external_api {
                         VALUE_DEFAULT,
                         condition::JOINTYPE_DEFAULT,
                     ),
-                    'recurse' => new external_value(
-                        PARAM_BOOL,
-                        'Type of join to join all filters together',
-                        VALUE_DEFAULT,
-                        false,
-                    ),
-                    'showhidden' => new external_value(
-                        PARAM_BOOL,
-                        'Flag to show question text',
-                        VALUE_DEFAULT,
-                        false,
-                    ),
                 ]
             ),
             'displayoptions' => new external_single_structure(
@@ -103,12 +91,6 @@ class qbank_filter extends external_api {
                         'The page number',
                         VALUE_DEFAULT,
                         0
-                    ),
-                    'showtext' => new external_value(
-                        PARAM_BOOL,
-                        'Flag to show question text',
-                        VALUE_DEFAULT,
-                        false,
                     ),
                 ]
             ),
@@ -162,9 +144,6 @@ class qbank_filter extends external_api {
             'filterverb' => $filteroptions['filterverb'],
             'qperpage' => $displayoptions['perpage'],
             'qpage' => $displayoptions['page'],
-            'qbshowtext' => $displayoptions['showtext'],
-            'recurse' => $filteroptions['recurse'],
-            'showhidden' => $filteroptions['showhidden'],
             'tabname' => 'questions'
         ];
 
