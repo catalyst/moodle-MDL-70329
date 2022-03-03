@@ -76,12 +76,14 @@ const usageEvent = (questionId, contextId) => {
  */
 export const init = () => {
     let target = document.querySelector('#questionscontainer');
-    target.addEventListener('click', (e) => {
-        if (e.target.dataset.target && e.target.dataset.target.includes('questionusagepreview')) {
-            let questionId = e.target.dataset.questionid;
-            let contextId = e.target.dataset.contextid;
-            // Call for the event listener to listed for clicks in any usage count row.
-            usageEvent(questionId, contextId);
-        }
-    });
+    if (target !== null) {
+        target.addEventListener('click', (e) => {
+            if (e.target.dataset.target && e.target.dataset.target.includes('questionusagepreview')) {
+                let questionId = e.target.dataset.questionid;
+                let contextId = e.target.dataset.contextid;
+                // Call for the event listener to listed for clicks in any usage count row.
+                usageEvent(questionId, contextId);
+            }
+        });
+    }
 };
