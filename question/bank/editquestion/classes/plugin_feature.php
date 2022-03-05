@@ -43,4 +43,9 @@ class plugin_feature extends \core_question\local\bank\plugin_features_base{
         ];
     }
 
+    public function get_question_filters($qbank): array {
+        return [
+            new question_status_condition($qbank),
+        ];
+    }
 }
