@@ -50,14 +50,14 @@ class question_history_view extends view {
      * @param question_edit_contexts $contexts the contexts of api call
      * @param moodle_url $pageurl url of the page
      * @param stdClass $course course settings
-     * @param int $entryid quiz settings
-     * @param string $returnurl url to return to
+     * @param null $cm (optional) activity settings.
+     * @param array $params the parameters required to initialize the api.
      */
-    public function __construct(question_edit_contexts $contexts, moodle_url $pageurl, stdClass $course, int $entryid,
-                                string $returnurl) {
-        parent::__construct($contexts, $pageurl, $course);
-        $this->entryid = $entryid;
-        $this->basereturnurl = new \moodle_url($returnurl);
+    public function __construct(question_edit_contexts $contexts, moodle_url $pageurl, stdClass $course, $cm = null,
+        array $params) {
+        parent::__construct($contexts, $pageurl, $course, null, $params);
+        $this->entryid = $params['entryid'];
+        $this->basereturnurl = new \moodle_url($params['returnurl']);
     }
 
     protected function wanted_columns(): array {
@@ -75,31 +75,6 @@ class question_history_view extends view {
         }
 
         return $this->requiredcolumns;
-    }
-
-    public function wanted_filters($cat, $tagids, $showhidden, $recurse, $editcontexts, $showquestiontext): void {
-        $categorydata = explode(',', $cat);
-        $contextid = $categorydata[1];
-        $catcontext = \context::instance_by_id($contextid);
-        $thiscontext = $this->get_most_specific_context();
-        $this->display_question_bank_header();
-
-        // Display tag filter if usetags setting is enabled/enablefilters is true.
-        if ($this->enablefilters) {
-            if (is_array($this->customfilterobjects)) {
-                foreach ($this->customfilterobjects as $filterobjects) {
-                    $this->searchconditions[] = $filterobjects;
-                }
-            } else {
-                if (get_config('core', 'usetags')) {
-                    array_unshift($this->searchconditions,
-                            new \core_question\bank\search\tag_condition([$catcontext, $thiscontext], $tagids));
-                }
-
-                array_unshift($this->searchconditions, new \core_question\bank\search\hidden_condition(!$showhidden));
-            }
-        }
-        $this->display_options_form($showquestiontext);
     }
 
     protected function display_advanced_search_form($advancedsearch): void {
