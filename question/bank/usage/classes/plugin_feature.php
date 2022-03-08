@@ -31,4 +31,10 @@ class plugin_feature extends \core_question\local\bank\plugin_features_base {
             new question_usage_column($qbank)
         ];
     }
+
+    public function get_question_filters($qbank): array {
+        return [
+            new last_used_condition($qbank),
+        ];
+    }
 }

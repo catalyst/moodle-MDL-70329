@@ -35,3 +35,6 @@ $string['versions'] = 'Version';
 $string['state'] = 'State';
 $string['attempts'] = 'Attempts';
 $string['questionusageversion'] = 'v{$a}';
+// Filtering.
+$string['notused'] = 'Not used';
+$string['lastused'] = 'Last used';
