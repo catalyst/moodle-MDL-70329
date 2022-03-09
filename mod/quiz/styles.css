@@ -914,10 +914,6 @@ table#categoryquestions {
     padding: 0;
 }
 
-#categoryquestions .editmenu {
-    width: 5em;
-}
-
 #categoryquestions .qtype {
     text-align: center;
 }
