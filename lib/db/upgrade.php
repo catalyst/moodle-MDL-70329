@@ -4254,5 +4254,20 @@ privatefiles,moodle|/user/files.php';
         upgrade_main_savepoint(true, 2022030100.00);
     }
 
+    if ($oldversion < 2022030800.01) {
+        $table = new xmldb_table('question_references');
+        $index = new xmldb_index('usingcontextid-component-questionarea-itemid', XMLDB_INDEX_UNIQUE,
+            ['usingcontextid', 'component', 'questionarea', 'itemid']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        $table = new xmldb_table('question_set_references');
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2022030800.01);
+    }
+
     return true;
 }
