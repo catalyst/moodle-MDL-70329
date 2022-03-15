@@ -206,10 +206,6 @@ function question_edit_setup($edittab, $baseurl, $requirecmid = false, $unused =
         }
     }
 
-    // Display options.
-    $params['recurse'] = optional_param('recurse',    null, PARAM_BOOL);
-    $params['showhidden'] = optional_param('showhidden', null, PARAM_BOOL);
-    $params['qbshowtext'] = optional_param('qbshowtext', null, PARAM_BOOL);
     // Category list page.
     $params['cpage'] = optional_param('cpage', null, PARAM_INT);
     $params['qtagids'] = optional_param_array('qtagids', null, PARAM_INT);
@@ -235,13 +231,7 @@ function question_edit_setup($edittab, $baseurl, $requirecmid = false, $unused =
  *      'cat' => PARAM_SEQUENCE,
  *      'category' => PARAM_SEQUENCE,
  *      'qperpage' => PARAM_INT,
- *      'recurse' => PARAM_INT,
- *      'showhidden' => PARAM_INT,
- *      'qbshowtext' => PARAM_INT,
  *      'cpage' => PARAM_INT,
- *      'recurse' => PARAM_BOOL,
- *      'showhidden' => PARAM_BOOL,
- *      'qbshowtext' => PARAM_BOOL,
  *      'qtagids' => [PARAM_INT], (array of integers)
  *      'qbs1' => PARAM_TEXT,
  *      'qbs2' => PARAM_TEXT,
@@ -271,13 +261,7 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
         'cat' => PARAM_SEQUENCE,
         'category' => PARAM_SEQUENCE,
         'qperpage' => PARAM_INT,
-        'recurse' => PARAM_INT,
-        'showhidden' => PARAM_INT,
-        'qbshowtext' => PARAM_INT,
         'cpage' => PARAM_INT,
-        'recurse' => PARAM_BOOL,
-        'showhidden' => PARAM_BOOL,
-        'qbshowtext' => PARAM_BOOL
     ];
 
     foreach ($paramtypes as $name => $type) {
@@ -299,9 +283,6 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
     $category = $cleanparams['category'] ?: 0;
     $qperpage = $cleanparams['qperpage'];
     $cpage = $cleanparams['cpage'] ?: 1;
-    $recurse = $cleanparams['recurse'];
-    $showhidden = $cleanparams['showhidden'];
-    $qbshowtext = $cleanparams['qbshowtext'];
     $qsorts = $cleanparams['qsorts'];
     $qtagids = $cleanparams['qtagids'];
 
@@ -389,11 +370,6 @@ function question_build_edit_resources($edittab, $baseurl, $params) {
         $category = $defaultcategory;
         $pagevars['cat'] = "{$category->id},{$category->contextid}";
     }
-
-    // Display options.
-    $pagevars['recurse']    = question_set_or_get_user_preference('recurse', $recurse, 1, $thispageurl);
-    $pagevars['showhidden'] = question_set_or_get_user_preference('showhidden', $showhidden, 0, $thispageurl);
-    $pagevars['qbshowtext'] = question_set_or_get_user_preference('qbshowtext', $qbshowtext, 0, $thispageurl);
 
     // Category list page.
     $pagevars['cpage'] = $cpage;

@@ -58,7 +58,11 @@ class category_condition extends condition {
      */
     public function __construct($qbank) {
         $this->cat = $qbank->get_pagevars('cat');
-        $this->recurse = $qbank->get_pagevars('recurse');
+        if (isset($qbank->get_pagevars('filters')['subcategories']['values'][0])) {
+            $this->recurse = (int)$qbank->get_pagevars('filters')['subcategories']['values'][0] === 0;
+        } else {
+            $this->recurse = false;
+        }
         $this->contexts = $qbank->contexts->having_one_edit_tab_cap($qbank->get_pagevars('tabname'));
         $this->course = $qbank->course;
         $this->filters = $qbank->get_pagevars('filters');
@@ -130,8 +134,11 @@ class category_condition extends condition {
 
     /**
      * Called by question_bank_view to display the GUI for selecting a category
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     public function display_options() {
+        debugging('Function display_options() is deprecated, please use filtering objects', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = [];
         $catmenu = helper::question_category_options($this->contexts, true, 0,
@@ -148,8 +155,11 @@ class category_condition extends condition {
     /**
      * Displays the recursion checkbox GUI.
      * question_bank_view places this within the section that is hidden by default
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     public function display_options_adv() {
+        debugging('Function display_options_adv() is deprecated, please use filtering objects', DEBUG_DEVELOPER);
         global $PAGE;
         $displaydata = [];
         if ($this->recurse) {

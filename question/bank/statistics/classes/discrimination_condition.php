@@ -72,8 +72,11 @@ class discrimination_condition extends condition {
      *
      * Compare display_options(), which displays always, whether Show More is open or not.
      * @return bool|string HTML form fragment
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     public function display_options_adv() {
+        debugging('Function display_options_adv() is deprecated, please use filtering objects', DEBUG_DEVELOPER);
         return false;
     }
 
@@ -82,8 +85,11 @@ class discrimination_condition extends condition {
      *
      * Compare display_options_adv(), which displays when Show More is open.
      * @return bool|string HTML form fragment
+     * @deprecated since Moodle 4.0 MDL-72321 - please do not use this function any more.
+     * @todo Final deprecation on Moodle 4.1 MDL-72572
      */
     public function display_options() {
+        debugging('Function display_options() is deprecated, please use filtering objects', DEBUG_DEVELOPER);
         return false;
     }
 

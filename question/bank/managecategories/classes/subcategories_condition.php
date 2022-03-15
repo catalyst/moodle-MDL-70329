@@ -14,45 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace qbank_deletequestion;
+namespace qbank_managecategories;
 
 use core_question\local\bank\condition;
 
-use core_question\local\bank\question_version_status;
-
 /**
- * This class controls whether hidden / deleted questions are hidden in the list.
+ * This class controls if subcategories are displayed or not.
  *
- * @package    qbank_deletequestion
- * @copyright  2013 Ray Morris
- * @author     2021 Safat Shahin <safatshahin@catalyst-au.net>
+ * @package    qbank_managecategories
+ * @copyright  2022 Catalyst IT Australia Pty Ltd
+ * @author     Ghaly Marc-Alexandre <marc-alexandreghaly@catalyst-ca.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class hidden_condition extends condition {
-    /** @var bool Whether to include old "deleted" questions. */
-    protected $hide;
-
+class subcategories_condition extends condition {
     /** @var string SQL fragment to add to the where clause. */
     protected $where;
 
+    /** @var array query param used in where. */
+    protected $params;
+
     /**
-     * Constructor to initialize the hidden condition for qbank.
+     * Constructor to initialize the question text filter condition.
      */
     public function __construct($qbank) {
-        $this->where = "qv.status <> '" . question_version_status::QUESTION_STATUS_HIDDEN . "'";
-        $filters = $qbank->get_pagevars('filters');
-        if (isset($filters['hidden']['values'][0])) {
-            $this->hide = (int)$filters['hidden']['values'][0];
-            if ($this->hide === 0) {
-                $this->where = "qv.status = '" . question_version_status::QUESTION_STATUS_READY .
-                    "' OR qv.status = '" . question_version_status::QUESTION_STATUS_HIDDEN .
-                    "' OR qv.status = '" . question_version_status::QUESTION_STATUS_DRAFT . "'";
-            }
-        }
     }
 
     public function get_condition_key() {
-        return 'hidden';
+        return 'subcategories';
     }
 
     /**
@@ -65,17 +53,25 @@ class hidden_condition extends condition {
     }
 
     /**
+     * Return parameters to be bound to the above WHERE clause fragment.
+     * @return array parameter name => value.
+     */
+    public function params() {
+        return $this->params;
+    }
+
+    /**
      * Get options for filter.
      *
      * @return array
      */
     public function get_filter_options(): array {
         return [
-            'name' => 'hidden',
-            'title' => get_string('showhidden', 'core_question'),
+            'name' => 'subcategories',
+            'title' => get_string('includesubcategories', 'core_question'),
             'custom' => true,
             'multiple' => true,
-            'filterclass' => 'core/local/filter/filtertypes/hidden',
+            'filterclass' => 'core/local/filter/filtertypes/subcategories',
             'values' => [],
             'allowempty' => true,
         ];
