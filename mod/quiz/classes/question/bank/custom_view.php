@@ -59,21 +59,22 @@ class custom_view extends \core_question\local\bank\view {
         $this->quiz = $extraparams[0];
     }
 
-    protected function get_question_bank_plugins(): array {
-        $questionbankclasscolumns = [];
-        $corequestionbankcolumns = [
+    /**
+     * Get class for each question bank columns.
+     *
+     * @return array
+     */
+    protected function get_class_for_columns(): array {
+        // override core columns.
+        $this->corequestionbankcolumns = [
             'add_action_column',
             'checkbox_column',
             'question_type_column',
             'question_name_text_column',
             'preview_action_column'
         ];
-
-        if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
-            $corequestionbankcolumns[] = 'question_text_row';
-        }
-
-        foreach ($corequestionbankcolumns as $fullname) {
+        $questionbankclasscolumns = [];
+        foreach ($this->corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
             if (class_exists('mod_quiz\\question\\bank\\' . $fullname)) {
                 $fullname = 'mod_quiz\\question\\bank\\' . $fullname;
@@ -85,40 +86,18 @@ class custom_view extends \core_question\local\bank\view {
                 $questionbankclasscolumns[$shortname] = '';
             }
         }
-        $plugins = \core_component::get_plugin_list_with_class('qbank', 'plugin_feature', 'plugin_feature.php');
-        foreach ($plugins as $componentname => $plugin) {
-            $pluginentrypointobject = new $plugin();
-            $plugincolumnobjects = $pluginentrypointobject->get_question_columns($this);
-            // Don't need the plugins without column objects.
-            if (empty($plugincolumnobjects)) {
-                unset($plugins[$componentname]);
-                continue;
-            }
-            foreach ($plugincolumnobjects as $columnobject) {
-                $columnname = $columnobject->get_column_name();
-                foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
-                    if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
-                        unset($questionbankclasscolumns[$columnname]);
-                        continue;
-                    }
-                    // Check if it has custom preference selector to view/hide.
-                    if ($columnobject->has_preference() && !$columnobject->get_preference()) {
-                        continue;
-                    }
-                    if ($corequestionbankcolumn === $columnname) {
-                        $questionbankclasscolumns[$columnname] = $columnobject;
-                    }
-                }
-            }
-        }
+        return $questionbankclasscolumns;
+    }
 
-        // Mitigate the error in case of any regression.
-        foreach ($questionbankclasscolumns as $shortname => $questionbankclasscolumn) {
-            if (empty($questionbankclasscolumn)) {
-                unset($questionbankclasscolumns[$shortname]);
-            }
-        }
-
+    /**
+     * Get the list of qbank plugins with available objects for features.
+     *
+     * @return array
+     */
+    protected function get_question_bank_plugins(): array {
+        // The view is too crowded, exclude some columns.
+        $questionbankclasscolumns = parent::get_question_bank_plugins();
+        $questionbankclasscolumns = array_intersect_key($questionbankclasscolumns, array_flip($this->corequestionbankcolumns));
         return $questionbankclasscolumns;
     }
 
@@ -149,16 +128,6 @@ class custom_view extends \core_question\local\bank\view {
     }
 
     /**
-     * Question preview url.
-     *
-     * @param \stdClass $question
-     * @return \moodle_url
-     */
-    public function preview_question_url($question) {
-        return quiz_question_preview_url($this->quiz, $question);
-    }
-
-    /**
      * URL of add to quiz.
      *
      * @param $questionid
@@ -168,6 +137,7 @@ class custom_view extends \core_question\local\bank\view {
         $params = $this->baseurl->params();
         $params['addquestion'] = $questionid;
         $params['sesskey'] = sesskey();
+        $params['cmid'] = $this->cm->id;
         return new \moodle_url('/mod/quiz/edit.php', $params);
     }
 
@@ -213,8 +183,12 @@ class custom_view extends \core_question\local\bank\view {
         echo \html_writer::end_tag('div');
     }
 
+    /**
+     * Override the base implementation in \core_question\local\bank\view
+     * because we don't want to print new question form in the fragment
+     * for the modal.
+     */
     protected function create_new_question_form($category, $canadd): void {
-        // Don't display this.
     }
 
     /**
@@ -225,82 +199,4 @@ class custom_view extends \core_question\local\bank\view {
     protected function display_question_bank_header(): void {
     }
 
-    /**
-     * Override the base implementation in \core_question\bank\view
-     * because we don't want it to read from the $_POST global variables
-     * for the sort parameters since they are not present in a fragment.
-     *
-     * Unfortunately the best we can do is to look at the URL for
-     * those parameters (only marginally better really).
-     */
-    protected function init_sort_from_params(): void {
-        $this->sort = [];
-        for ($i = 1; $i <= self::MAX_SORTS; $i++) {
-            if (!$sort = $this->baseurl->param('qbs' . $i)) {
-                break;
-            }
-            // Work out the appropriate order.
-            $order = 1;
-            if ($sort[0] == '-') {
-                $order = -1;
-                $sort = substr($sort, 1);
-                if (!$sort) {
-                    break;
-                }
-            }
-            // Deal with subsorts.
-            list($colname) = $this->parse_subsort($sort);
-            $this->get_column_type($colname);
-            $this->sort[$sort] = $order;
-        }
-    }
-
-    protected function build_query(): void {
-        // Get the required tables and fields.
-        $joins = [];
-        $fields = ['qv.status', 'qc.id as categoryid', 'qv.version', 'qv.id as versionid', 'qbe.id as questionbankentryid'];
-        if (!empty($this->requiredcolumns)) {
-            foreach ($this->requiredcolumns as $column) {
-                $extrajoins = $column->get_extra_joins();
-                foreach ($extrajoins as $prefix => $join) {
-                    if (isset($joins[$prefix]) && $joins[$prefix] != $join) {
-                        throw new \coding_exception('Join ' . $join . ' conflicts with previous join ' . $joins[$prefix]);
-                    }
-                    $joins[$prefix] = $join;
-                }
-                $fields = array_merge($fields, $column->get_required_fields());
-            }
-        }
-        $fields = array_unique($fields);
-
-        // Build the order by clause.
-        $sorts = [];
-        foreach ($this->sort as $sort => $order) {
-            list($colname, $subsort) = $this->parse_subsort($sort);
-            $sorts[] = $this->requiredcolumns[$colname]->sort_expression($order < 0, $subsort);
-        }
-
-        // Build the where clause.
-        $latestversion = 'qv.version = (SELECT MAX(v.version)
-                                          FROM {question_versions} v
-                                          JOIN {question_bank_entries} be
-                                            ON be.id = v.questionbankentryid
-                                         WHERE be.id = qbe.id)';
-        $readyonly = "qv.status = '" . question_version_status::QUESTION_STATUS_READY . "' ";
-        $tests = ['q.parent = 0', $latestversion, $readyonly];
-        $this->sqlparams = [];
-        foreach ($this->searchconditions as $searchcondition) {
-            if ($searchcondition->where()) {
-                $tests[] = '((' . $searchcondition->where() .'))';
-            }
-            if ($searchcondition->params()) {
-                $this->sqlparams = array_merge($this->sqlparams, $searchcondition->params());
-            }
-        }
-        // Build the SQL.
-        $sql = ' FROM {question} q ' . implode(' ', $joins);
-        $sql .= ' WHERE ' . implode(' AND ', $tests);
-        $this->countsql = 'SELECT count(1)' . $sql;
-        $this->loadsql = 'SELECT ' . implode(', ', $fields) . $sql . ' ORDER BY ' . implode(', ', $sorts);
-    }
 }

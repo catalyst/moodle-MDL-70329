@@ -290,10 +290,6 @@ function(
             if (anchorElement.closest(SELECTORS.SEARCH_OPTIONS).length) {
                 return;
             }
-
-            // Anything else means reload the pop-up contents.
-            e.preventDefault();
-            this.reloadBodyContent(anchorElement.prop('search'));
         }.bind(this));
 
         // Disable the form change checker when the body is rendered.
