@@ -102,6 +102,12 @@ class view {
 
     /**
      * @var \core_question\local\bank\column_base[] these are the 'columns' that are
+     * common to the question bank.
+     */
+    protected $corequestionbankcolumns;
+
+    /**
+     * @var \core_question\local\bank\column_base[] these are the 'columns' that are
      * actually displayed as an additional row (e.g. question text), in order.
      * Array keys are the class name.
      */
@@ -269,33 +275,31 @@ class view {
     }
 
     /**
-     * Get the list of qbank plugins with available objects for features.
+     * Get class for each question bank columns.
      *
      * @return array
      */
-    protected function get_question_bank_plugins(): array {
-        $questionbankclasscolumns = [];
-        $newpluginclasscolumns = [];
-        $corequestionbankcolumns = [
-                'checkbox_column',
-                'question_type_column',
-                'question_name_idnumber_tags_column',
-                'edit_menu_column',
-                'edit_action_column',
-                'copy_action_column',
-                'tags_action_column',
-                'preview_action_column',
-                'history_action_column',
-                'delete_action_column',
-                'export_xml_action_column',
-                'question_status_column',
-                'version_number_column',
-                'creator_name_column',
-                'comment_count_column',
-                'question_text_row',
+    protected function get_class_for_columns(): array {
+        $this->corequestionbankcolumns = [
+            'checkbox_column',
+            'question_type_column',
+            'question_name_idnumber_tags_column',
+            'edit_menu_column',
+            'edit_action_column',
+            'copy_action_column',
+            'tags_action_column',
+            'preview_action_column',
+            'history_action_column',
+            'delete_action_column',
+            'export_xml_action_column',
+            'question_status_column',
+            'version_number_column',
+            'creator_name_column',
+            'comment_count_column',
+            'question_text_row',
         ];
-
-        foreach ($corequestionbankcolumns as $fullname) {
+        $questionbankclasscolumns = [];
+        foreach ($this->corequestionbankcolumns as $fullname) {
             $shortname = $fullname;
             if (class_exists('core_question\\local\\bank\\' . $fullname)) {
                 $fullname = 'core_question\\local\\bank\\' . $fullname;
@@ -304,6 +308,18 @@ class view {
                 $questionbankclasscolumns[$shortname] = '';
             }
         }
+        return $questionbankclasscolumns;
+    }
+
+    /**
+     * Get the list of qbank plugins with available objects for features.
+     *
+     * @return array
+     */
+    protected function get_question_bank_plugins(): array {
+        $newpluginclasscolumns = [];
+        $questionbankclasscolumns = $this->get_class_for_columns();
+
         $plugins = $this->plugins;
         foreach ($plugins as $componentname => $plugin) {
             $pluginentrypointobject = new $plugin();
@@ -315,7 +331,7 @@ class view {
             }
             foreach ($plugincolumnobjects as $columnobject) {
                 $columnname = $columnobject->get_column_name();
-                foreach ($corequestionbankcolumns as $key => $corequestionbankcolumn) {
+                foreach ($this->corequestionbankcolumns as $key => $corequestionbankcolumn) {
                     if (!\core\plugininfo\qbank::is_plugin_enabled($componentname)) {
                         unset($questionbankclasscolumns[$columnname]);
                         continue;

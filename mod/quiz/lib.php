@@ -2397,7 +2397,7 @@ function mod_quiz_output_fragment_quiz_question_bank($args) {
 
     // Create quiz question bank view.
     $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $pagevars, [$quiz]);
-    //$questionbank->component = 'mod_quiz';
+    $questionbank->component = 'mod_quiz';
     //$questionbank->callback = 'quiz_question_bank';
     $questionbank->set_quiz_has_attempts(quiz_has_attempts($quiz->id));
 
@@ -2491,4 +2491,45 @@ function quiz_delete_references($quizid): void {
         // Delete any references.
         $DB->delete_records('question_references', $params);
     }
+}
+
+/**
+ * Question data fragment to get the question html via ajax call.
+ *
+ * @param $args
+ * @return array|string
+ */
+function mod_quiz_output_fragment_question_data($args) {
+    global $PAGE;
+    if (empty($args)) {
+        return '';
+    }
+    $param = json_decode($args);
+    $filtercondition = json_decode($param->filtercondition);
+    if (!$filtercondition) {
+        return ['', ''];
+    }
+    $extraparams = json_decode($param->extraparams);
+    $params = \core_question\local\bank\helper::convert_object_array($filtercondition);
+    $extraparamsclean = [];
+    $cm = null;
+    if (!empty($extraparams)) {
+        $extraparamsclean = $extraparams;
+        if (isset($extraparamsclean[0]->cmid)) {
+            $cmid = $extraparamsclean[0]->cmid;
+            list($module, $cm) = get_module_from_cmid($cmid);
+        }
+    }
+    $nodeparent = $PAGE->settingsnav->find('questionbank', \navigation_node::TYPE_CONTAINER);
+    $thispageurl = new \moodle_url($nodeparent->action->get_path());
+    $thispageurl->param('courseid', $params['courseid']);
+    $thiscontext = \context_course::instance($params['courseid']);
+    $contexts = new \question_edit_contexts($thiscontext);
+    $contexts->require_one_edit_tab_cap($params['tabname']);
+    $course = get_course($params['courseid']);
+
+    $questionbank = new mod_quiz\question\bank\custom_view($contexts, $thispageurl, $course, $cm, $params, $extraparamsclean);
+
+    list($questionhtml, $jsfooter) = $questionbank->display_questions_table();
+    return [$questionhtml, $jsfooter];
 }
