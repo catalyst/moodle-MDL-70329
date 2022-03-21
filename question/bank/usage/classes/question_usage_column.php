@@ -58,4 +58,7 @@ class question_usage_column extends column_base {
         echo \html_writer::tag('a', $usagecount, $attributes);
     }
 
+    public function get_extra_joins(): array {
+        return ['qre' => 'LEFT JOIN {question_references} qre ON qre.questionbankentryid = qbe.id'];
+    }
 }
