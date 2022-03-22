@@ -4,6 +4,6 @@
     width: 100%;
 }
 
-.comment-pointer {
+td.comment-pointer {
     cursor: pointer;
 }

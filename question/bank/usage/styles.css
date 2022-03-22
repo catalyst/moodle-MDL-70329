@@ -1,6 +1,3 @@
-.questionusage {
+td.questionusage {
     cursor: pointer;
-}
-#categoryquestions .questionusage {
-    width: 5em;
 }
