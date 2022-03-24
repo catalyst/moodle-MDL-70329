@@ -71,7 +71,7 @@ class comment_count_column extends column_base {
                 'data-target' => $target,
                 'data-questionid' => $question->id,
                 'data-courseid' => $this->qbank->course->id,
-                'class' => 'link-primary comment-pointer'
+                'class' => 'link-primary'
             ];
         }
         echo \html_writer::tag('a', $commentcount, $attributes);
