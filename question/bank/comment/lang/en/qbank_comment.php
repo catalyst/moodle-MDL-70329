@@ -33,6 +33,7 @@ $string['addcomment'] = 'Add comment';
 $string['close'] = 'Close';
 $string['commentheader'] = 'Question comments';
 $string['commentdisabled'] = 'Comments are currently disabled on this site. Please contact your site administrator.';
+$string['version_selection'] = 'Version {$a->version}';
 // Events.
 $string['comment_added'] = 'The user with ID \'{$a->userid}\' added the comment with ID \'{$a->objectid}\'
  to the \'{$a->component}\' for the question with ID \'{$a->itemid}\'.';

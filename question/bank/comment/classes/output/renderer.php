@@ -35,4 +35,15 @@ class renderer extends \plugin_renderer_base {
     public function render_comment_fragment($displaydata): string {
         return $this->render_from_template('qbank_comment/comment_modal', $displaydata);
     }
+
+    /**
+     * Render the versions of a question as a dropdown.
+     *
+     * @param array $versiondata
+     * @return bool|string
+     */
+    public function render_question_version_selection($versiondata) {
+        return $this->render_from_template('qbank_comment/question_version_selection', $versiondata);
+    }
+
 }

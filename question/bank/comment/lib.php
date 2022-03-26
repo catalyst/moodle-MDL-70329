@@ -135,3 +135,34 @@ function qbank_comment_output_fragment_question_comment($args): string {
 
     return $PAGE->get_renderer('qbank_comment')->render_comment_fragment($displaydata);
 }
+
+/**
+ * Version selection fragment for modals in qbank plugins.
+ *
+ * @param array $args
+ */
+function qbank_comment_output_fragment_version_selection($args) {
+    global $PAGE, $CFG;
+    require_once($CFG->libdir . '/questionlib.php');
+    if (!$args['questionid']) {
+        return '';
+    }
+    $displaydata = [];
+    $versionsoptions = get_version_options($args['questionid']);
+    foreach ($versionsoptions as $versionsoption) {
+        $versionsoption->selected = false;
+        $a = new \stdClass();
+        $a->version = $versionsoption->version;
+        $versionsoption->name = get_string('version_selection', 'qbank_comment', $a);
+        if ($versionsoption->questionid === $args['questionid']) {
+            $versionsoption->selected = true;
+        }
+        $displaydata[] = $versionsoption;
+    }
+
+    $displaydatas = [
+        'questionid' => $args['questionid'],
+        'options' => $displaydata
+    ];
+    return $PAGE->get_renderer('qbank_comment')->render_question_version_selection($displaydatas);
+}

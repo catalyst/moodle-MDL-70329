@@ -2088,6 +2088,26 @@ function is_latest(string $version, string $questionbankentryid) : bool {
     return false;
 }
 
+/**
+ * Get the version options for the question.
+ *
+ * @param int $questionid
+ * @return array
+ */
+function get_version_options($questionid): array {
+    global $DB;
+    $sql = "SELECT qv.id AS versionid, qv.version, qv.questionid
+                  FROM {question_versions} qv
+                 WHERE qv.questionbankentryid = (SELECT DISTINCT qbe.id
+                                                   FROM {question_bank_entries} qbe
+                                                   JOIN {question_versions} qv ON qbe.id = qv.questionbankentryid
+                                                   JOIN {question} q ON qv.questionid = q.id
+                                                  WHERE q.id = ?)
+              ORDER BY qv.version DESC";
+
+    return $DB->get_records_sql($sql, [$questionid]);
+}
+
 // Deprecated functions from Moodle 4.0.
 
 /**
