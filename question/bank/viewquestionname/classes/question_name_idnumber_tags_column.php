@@ -44,7 +44,13 @@ class question_name_idnumber_tags_column extends viewquestionname_column_helper 
         }
 
         // Question name.
-        echo \html_writer::span(format_string($question->name), 'questionname flex-grow-1 flex-shrink-1 text-truncate');
+        $a = new \stdClass();
+        $a->name = format_string($question->name);
+        $questionname = new \core\output\inplace_editable('qbank_viewquestionname', 'questionname', $question->id,
+            question_has_capability_on($question, 'edit'), format_string($question->name), $question->name,
+            get_string('edit_question_name_hint', 'qbank_viewquestionname'),
+            get_string('edit_question_name_label', 'qbank_viewquestionname', $a));
+        echo $OUTPUT->render($questionname);
 
         // Question idnumber.
         if ($question->idnumber !== null && $question->idnumber !== '') {
