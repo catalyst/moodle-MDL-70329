@@ -24,6 +24,7 @@ Feature: A teacher can reorder question categories
       | contextlevel | reference | name                   | idnumber     |
       | Course       | C1        | Course category 1      | questioncat1 |
       | Course       | C1        | Course category 2      | questioncat2 |
+      | Course       | C1        | Course category 3      | questioncat3 |
       | Category     | CAT1      | Default for Category 1 |              |
       | System       | S1        | System category        |              |
     And I am on the "C1" "Course" page logged in as "teacher1"
@@ -42,12 +43,12 @@ Feature: A teacher can reorder question categories
 
   Scenario: Teacher can reorder categories
     Given "Course category 1" "text" should appear before "Default for Category 1" "text"
-    And "Course category 2" "text" should appear before "System category" "text"
-    And I drag "Course category 1" and I drop it in "Default for Category 1" in the question category list
-    And I wait "1" seconds
+    Given "Course category 2" "text" should appear before "System category" "text"
+    And I click on "Move" "link" in the "Course category 1" "list_item"
+    And I click on "Default for Category 1" "link" in the "Move category" modal
     Then "Course category 1" "text" should appear after "Default for Category 1" "text"
-    And I drag "Course category 2" and I drop it in "System category" in the question category list
-    And I wait "1" seconds
+    And I click on "Move" "link" in the "Course category 2" "list_item"
+    And I click on "System category" "link" in the "Move category" modal
     Then "Course category 2" "text" should appear after "System category" "text"
 
   Scenario: Teacher can display and hide category descriptions
@@ -78,12 +79,15 @@ Feature: A teacher can reorder question categories
     Then I should see "- The category name cannot be blank."
 
   Scenario: Teacher cannot drag and drop a used idnumber in context
-    When I drag "Course category 1" and I drop it in "System category" in the question category list
+    Given "Course category 1" "text" should appear before "System category" "text"
+    And I click on "Move" "link" in the "Course category 1" "list_item"
+    And I click on "System category" "link" in the "Move category" modal
     Then "Course category 1" "text" should appear after "System category" "text"
     And I click on "Edit" "text" in the "Course category 2" "list_item"
     And I choose "Edit settings" in the open action menu
     And I set the field "ID number" to "questioncat1"
     And I click on "Edit category" "button" in the "Edit category" modal
     And I wait "1" seconds
-    And I drag "Course category 2" and I drop it in "System category" in the question category list
+    And I click on "Move" "link" in the "Course category 2" "list_item"
+    And I click on "System category" "link" in the "Move category" modal
     And I should see "ID number already in use, please change it to move or update category"

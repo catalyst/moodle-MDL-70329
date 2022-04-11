@@ -45,7 +45,7 @@ Feature: A teacher can put questions in categories in the question bank
     And "New Category 1" "list_item" should exist in the "Question categories for 'Course: Course 1'" "fieldset"
 
   Scenario: A question category can be edited
-    And I press "Edit"
+    Then I click on "Edit" "text" in the "Default for C1" "list_item"
     And I choose "Edit settings" in the open action menu
     And I set the field "Name" to "New name"
     And I set the field "Category info" to "I was edited"
@@ -55,8 +55,7 @@ Feature: A teacher can put questions in categories in the question bank
     And I should see "I was edited"
 
   Scenario: An empty question category can be deleted
-    Then I should see "Default for C1"
-    And I press "Edit"
+    Then I click on "Edit" "text" in the "Default for C1" "list_item"
     And I choose "Delete" in the open action menu
     Then I should not see "Default for C1"
 

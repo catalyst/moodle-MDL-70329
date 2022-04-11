@@ -27,11 +27,18 @@ import Ajax from 'core/ajax';
 import Fragment from 'core/fragment';
 import Notification from 'core/notification';
 import Templates from 'core/templates';
-
+import ModalFactory from 'core/modal_factory';
+import {get_string as getString} from 'core/str';
 
 const SELECTORS = {
-    CATEGORY_ITEM: '.category_list .list_item',
-    BUTTON: '[role=button]',
+    CATEGORY_LIST: '.category_list',
+    MODAL_CATEGORY_ITEM: '.modal_category_item[data-categoryid]',
+    CATEGORY_RENDERED: '#categoriesrendered',
+    ACTIONABLE_ELEMENT: 'a, [role="button"], [role="menuitem"]',
+    SHOW_DESCRIPTION_CHECKBOX: '[name="qbshowdescr"]',
+    MOVE_CATEGORY_MENU_ITEM: '[role="menuitem"][data-actiontype="move"]',
+    DRAGGABLE_ITEM: '[draggable="true"]',
+    DROPPABLE_ITEM: '.list_item[data-categoryid]',
 };
 
 /**
@@ -39,12 +46,18 @@ const SELECTORS = {
  * @param {number} pagecontextid Context id for fragment.
  */
 const setupSortableLists = (pagecontextid) => {
-    const listitems = document.querySelectorAll(SELECTORS.CATEGORY_ITEM);
+    const draggableitems = document.querySelectorAll(SELECTORS.DRAGGABLE_ITEM);
+    const droppableitems = document.querySelectorAll(SELECTORS.DROPPABLE_ITEM);
 
-    let sourceid;
+    // Touch events do not have datatranfer property.
+    // This variable is used to store id of first element that started the touch events.
+    let categoryid;
 
     /**
      * Get touch target at touch point.
+     * The target of all touch events is the first element that has been touched at 'touch start'.
+     * So we need to infer the target from touch point for 'touch move' and 'touch end' events.
+     *
      * @param {Object} e event
      * @returns {any | Element}
      */
@@ -53,8 +66,8 @@ const setupSortableLists = (pagecontextid) => {
             e.changedTouches[0].pageX,
             e.changedTouches[0].pageY
         );
-        // Check if the target is the list item.
-        return target.closest(SELECTORS.CATEGORY_ITEM);
+        // Check if the target is droppable.
+        return target.closest(SELECTORS.DROPPABLE_ITEM);
     };
 
     /**
@@ -62,64 +75,47 @@ const setupSortableLists = (pagecontextid) => {
      * @param {Object} e event
      */
     const handleDragStart = (e) => {
-        // Return if it is a button.
-        if (e.target.closest(SELECTORS.BUTTON)) {
-            return;
-        }
-
-        // Identify the event target.
-        let target;
-
-        if (e.type == 'touchstart') {
-            target = getTouchTarget(e);
-        } else {
-            target = e.target.closest(SELECTORS.CATEGORY_ITEM);
-        }
-
-        if (e.cancelable) {
-            e.preventDefault();
-        }
-
-        // Save current category id.
-        sourceid = target.id;
-    };
-
-    /**
-     * Handle Drag move
-     * @param {Object} e event
-     */
-    const handleDrag = (e) => {
-        // Return if it is a button.
-        if (e.target.closest(SELECTORS.BUTTON)) {
-            return;
-        }
-
-        // Identify the event target.
-        let target;
-        if (e.type == 'touchmove') {
-            target = getTouchTarget(e);
-        } else {
-            target = e.target.closest(SELECTORS.CATEGORY_ITEM);
-        }
-
-        // Return if target not category list item.
+        const target = e.target.closest(SELECTORS.DRAGGABLE_ITEM);
+        // Return if target is not a draggable item.
         if (!target) {
             return;
         }
 
-        // Return if sourceid is not set.
-        if (!sourceid) {
+        // Save category ID of current moving item.
+        // The datatransfer is not used as it is not a property of touch events.
+        categoryid = target.dataset?.categoryid;
+
+        // Prevent scrolling when touching on the draggable item.
+        if (e.type == 'touchstart' && e.cancelable) {
+            e.preventDefault();
+        }
+    };
+
+    /**
+     * Handle Drag move
+     * Provide drag effect for touch events.
+     *
+     * @param {Object} e event
+     */
+    const handleDrag = (e) => {
+        // Remove all highlight.
+        droppableitems.forEach(item => {
+            item.classList.remove('border-danger');
+        });
+
+        let target;
+        if (e.type == 'touchmove') {
+            target = getTouchTarget(e);
+        } else {
+            target = e.target.closest(SELECTORS.DROPPABLE_ITEM);
+        }
+
+        // Return if target is not a droppable item or there is no sourceid.
+        if (!target || !categoryid) {
             return;
         }
 
-        if (e.cancelable) {
-            e.preventDefault();
-        }
-
         // Highlight the target.
-        listitems.forEach(item => {
-            item.classList.remove('border-danger');
-        });
         target.classList.add('border-danger');
     };
 
@@ -128,43 +124,31 @@ const setupSortableLists = (pagecontextid) => {
      * @param {Object} e event
      */
     const handleDragEnd = (e) => {
-        // Return if it is a button.
-        if (e.target.closest(SELECTORS.BUTTON)) {
-            return;
-        }
-
-        // Identify the event target.
         let target;
         if (e.type == 'touchend') {
             target = getTouchTarget(e);
         } else {
-            target = e.target.closest(SELECTORS.CATEGORY_ITEM);
+            target = e.target.closest(SELECTORS.DROPPABLE_ITEM);
         }
 
-        if (!target) {
+        // Return if target is not a droppable item or there is no sourceid.
+        if (!target || !categoryid) {
             return;
         }
 
-        if (e.cancelable) {
-            e.preventDefault();
-        }
-
-        // This is not a drag and drop event or drop on the same element.
-        if (!sourceid || sourceid == target.id) {
-            return;
-        }
-
-        // Source item.
-        const source = document.getElementById(sourceid);
+        // Get list item whose id is the same as current moving category id.
+        const source = document.getElementById(`category-${categoryid}`);
         if (!source) {
             return;
         }
 
-        // Reset sourceid.
-        sourceid = null;
+        e.preventDefault();
+
+        // Reset sourceid for touch event.
+        categoryid = null;
 
         // Insert the source item after the "target" item.
-        target.closest('.category_list').insertBefore(source, target.nextSibling);
+        target.closest(SELECTORS.CATEGORY_LIST).insertBefore(source, target.nextSibling);
 
         // Old category.
         const originCategory = source.dataset.categoryid;
@@ -176,17 +160,38 @@ const setupSortableLists = (pagecontextid) => {
         setCatOrder(originCategory, insertaftercategory, pagecontextid);
     };
 
-    // Add event to list item.
-    listitems.forEach(item => {
-        // Touch events.
-        item.addEventListener('touchstart', handleDragStart);
-        item.addEventListener('touchmove', handleDrag);
-        item.addEventListener('touchend', handleDragEnd);
+    /**
+     * Allow drop
+     * This is required to allow drop event to be trigger on an element.
+     *
+     * @param {Object} e event
+     */
+    const allowDrop = (e) => {
+        e.preventDefault();
+    };
 
-        // Mouse events.
-        item.addEventListener('mousedown', handleDragStart);
-        item.addEventListener('mousemove', handleDrag);
-        item.addEventListener('mouseup', handleDragEnd);
+    // Disable scrolling (for touch event) on the draggable item.
+    draggableitems.forEach(item => {
+            item.setAttribute("style", "touch-action: none;");
+        }
+    );
+
+    // Events for droppable items.
+    droppableitems.forEach(item => {
+        item.addEventListener('dragenter', handleDrag);
+        item.addEventListener('dragover', allowDrop);
+        item.addEventListener('drop', handleDragEnd);
+    });
+
+    // Add event to draggable items.
+    draggableitems.forEach(item => {
+        // Touch events.
+        item.addEventListener('touchstart', handleDragStart, false);
+        item.addEventListener('touchmove', handleDrag, false);
+        item.addEventListener('touchend', handleDragEnd, false);
+
+        // Drag events.
+        item.addEventListener('dragstart', handleDragStart);
     });
 };
 
@@ -247,7 +252,7 @@ const categoryParentListener = (pagecontextid) => {
     document.addEventListener('click', e => {
 
         // Ignore if there is no categories containers.
-        if (!e.target.closest('#categoriesrendered')) {
+        if (!e.target.closest(SELECTORS.CATEGORY_RENDERED)) {
             return;
         }
 
@@ -272,7 +277,7 @@ const categoryParentListener = (pagecontextid) => {
         Ajax.call([call])[0]
             .then(() => getCategoriesFragment(pagecontextid))
             .then((html, js) => {
-                Templates.replaceNode('#categoriesrendered', html, js);
+                Templates.replaceNode(SELECTORS.CATEGORY_RENDERED, html, js);
                 return;
             })
             .catch(Notification.exception);
@@ -284,7 +289,7 @@ const categoryParentListener = (pagecontextid) => {
  */
 const setupShowDescriptionCheckbox = () => {
     document.addEventListener('click', e => {
-        const checkbox = e.target.closest('[name="qbshowdescr"]');
+        const checkbox = e.target.closest(SELECTORS.SHOW_DESCRIPTION_CHECKBOX);
         if (!checkbox) {
             return;
         }
@@ -292,8 +297,77 @@ const setupShowDescriptionCheckbox = () => {
     });
 };
 
+/**
+ * Sets events listener for move category using dragdrop icon.
+ * @param {number} pagecontextid Context id to get all relevant categories.
+ */
+const setUpMoveMenuItem = (pagecontextid) => {
+    document.addEventListener('click', e => {
+        // Return if it is not menu item.
+        const item = e.target.closest(SELECTORS.MOVE_CATEGORY_MENU_ITEM);
+        if (!item) {
+            return;
+        }
+        // Return if it is disabled.
+        if (item.getAttribute('aria-disabled')) {
+            return;
+        }
+
+        // Prevent addition click on the item.
+        item.setAttribute('aria-disabled', true);
+
+        // Get categories.
+        const call = {
+            methodname: 'qbank_managecategories_get_categories_in_a_context',
+            args: {
+                contextid: pagecontextid,
+            }
+        };
+
+        Ajax.call([call])[0]
+            .then((data) => {
+                // Exclude the current moving category from the data.
+                data.contexts.forEach(context => {
+                    if (context.contextid == item.dataset.contextid) {
+                        context.categories.forEach(category => {
+                            if (category.id == item.dataset.categoryid) {
+                                category.disabled = true;
+                                return;
+                            }
+                        });
+                    }
+                });
+                // Render template with retrieved data.
+                return Templates.renderForPromise('qbank_managecategories/move_category', data);
+            })
+            .then((template) => {
+                // Create modal.
+                return ModalFactory.create({
+                    title: getString('movecategory', 'question'),
+                    body: template.html
+                });
+            })
+            .then(modal => {
+                // Show modal and add click event for list item.
+                modal.show();
+                document.querySelector('.modal').addEventListener('click', e => {
+                    const target = e.target.closest(SELECTORS.MODAL_CATEGORY_ITEM);
+                    if (!target) {
+                        return;
+                    }
+                    setCatOrder(item.dataset.categoryid, target.dataset.categoryid, pagecontextid);
+                    modal.destroy();
+                });
+                item.setAttribute('aria-disabled', false);
+                return;
+            })
+            .catch(Notification.exception);
+    });
+};
+
 export const init = (pagecontextid) => {
     categoryParentListener(pagecontextid);
     setupSortableLists(pagecontextid);
     setupShowDescriptionCheckbox();
+    setUpMoveMenuItem(pagecontextid);
 };

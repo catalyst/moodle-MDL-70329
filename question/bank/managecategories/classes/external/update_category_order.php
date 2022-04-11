@@ -20,13 +20,11 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . "/externallib.php");
 
-use context_system;
 use external_api;
 use external_function_parameters;
 use external_value;
 use external_single_structure;
 use qbank_managecategories\helper;
-use coding_exception;
 
 /**
  * External qbank_managecategories API handling.

@@ -39,8 +39,8 @@ class behat_qbank_managecategories extends behat_base {
     public function i_drag_and_i_drop_it_in_question_category_list(string $source, string $target) {
         // Finding li element of the drag item.
         // To differentiate between drag event on li, and other mouse click events on other elements in the item.
-        $source = "//li[contains(@class, 'category-list-item') and contains(., '" . $this->escape($source) . "')]";
-        $target = "//li[contains(@class, 'category-list-item') and contains(., '" . $this->escape($target) . "')]";
+        $source = "//li[contains(@class, 'list_item') and contains(., '" . $this->escape($source) . "')]";
+        $target = "//li[contains(@class, 'list_item') and contains(., '" . $this->escape($target) . "')]";
         $sourcetype = 'xpath_element';
         $targettype = 'xpath_element';
 

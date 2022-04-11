@@ -27,6 +27,7 @@ $string['categoryincategory'] = 'Cannot move category in same category.';
 $string['categorymoved'] = 'The category has been moved successfully.';
 $string['descriptionnotdisplayed'] = 'Categories description not displayed';
 $string['displaydescription'] = 'Categories description displayed';
+$string['dragdrop'] = 'Drag and drop';
 $string['idnumberexists'] = 'ID number already in use, please change it to move or update category';
 $string['lastcategoryinthiscontext'] = 'This category is the only present under context,
 please add another category if this one is to be moved';
