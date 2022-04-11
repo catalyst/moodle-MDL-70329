@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 namespace qbank_managecategories;
 
+use core_question\local\bank\question_edit_contexts;
+use moodle_url;
 /**
  * Test base for category tests
  *
@@ -139,4 +141,20 @@ abstract class manage_category_test_base extends \advanced_testcase {
         $parent = $DB->get_field('question_categories', 'parent', ['id' => $questioncategoryid]);
         return $parent ?: 0;
     }
+
+    /**
+     * Get question ids
+     *
+     * @param int $categoryid id of the category.
+     * @param question_edit_contexts $contexts contexts
+     * @return int[] array of question ids.
+     */
+    public function get_real_question_ids_in_category(int $categoryid, question_edit_contexts $contexts): array {
+        $questioncatobj = new question_category_object(null,
+            new moodle_url('/question/bank/managecategories/category.php', ['courseid' => SITEID]),
+            $contexts->having_one_edit_tab_cap('categories'), 0, null, 0,
+            $contexts->having_cap('moodle/question:add'));
+        return $questioncatobj->get_real_question_ids_in_category($categoryid);
+    }
+
 }

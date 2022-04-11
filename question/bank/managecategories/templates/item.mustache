@@ -45,8 +45,11 @@
         "children": ""
     }
 }}
-<li class="list_item list-group-item category-list-item" draggable="true" id="category-{{{categoryid}}}" data-categoryid="{{{categoryid}}}"
+<li class="list_item list-group-item" id="category-{{{categoryid}}}" data-categoryid="{{{categoryid}}}"
     data-contextid="{{{contextid}}}">
+    {{#draghandle}}
+        {{{draghandle}}}
+    {{/draghandle}}
     <b>
         <a title="{{#str}}editquestions, question{{/str}}" href="{{{questionbankurl}}}" role="button" >
             {{categoryname}}
@@ -75,13 +78,6 @@
     <div class="float-right">
         <div class="float-left">
             {{{editactionmenu}}}
-        </div>
-        <div class="float-right">
-            <span class="pl-3" tabindex="0" role="button" aria-haspopup="true" data-drag-type="move" title="">
-                {{#handle}}
-                    {{#pix}} i/move_2d, core {{/pix}}
-                {{/handle}}
-            </span>
         </div>
     </div>
     {{#children}}

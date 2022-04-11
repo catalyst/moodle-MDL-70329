@@ -34,4 +34,12 @@ $functions = [
         'capabilities' => 'moodle/question:managecategory',
         'ajax'         => true,
     ],
+
+    'qbank_managecategories_get_categories_in_a_context' => [
+        'classname'    => 'qbank_managecategories\external\get_categories_in_a_context',
+        'description'  => 'Get categories at a context and its parent contexts',
+        'type'         => 'read',
+        'capabilities' => 'moodle/question:managecategory',
+        'ajax'         => true,
+    ],
 ];
